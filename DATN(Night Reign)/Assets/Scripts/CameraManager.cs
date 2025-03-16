@@ -7,6 +7,7 @@ public class CameraManager : MonoBehaviour
     public float mouseSpeed = 2;
     public float controllerSpeed = 7;
     public Transform target;
+    public Transform lockonTarget;
     [HideInInspector]
     public Transform pivot;
     [HideInInspector]
@@ -25,10 +26,6 @@ public class CameraManager : MonoBehaviour
         target = t;
         camTrans = Camera.main.transform;
         pivot = camTrans.parent;
-    }
-    public void Init()
-    {
-        
     }
     public void Tick(float d)
     {
@@ -65,15 +62,25 @@ public class CameraManager : MonoBehaviour
             smouthX = h;
             smouthY = v;
         }
-        if(lockOn)
-        {
-
-        }
-        lookAngle += smouthX * targetSpeed;
-        transform.rotation = Quaternion.Euler(0, lookAngle, 0);
         tiltAngle -= smouthY * targetSpeed;
         tiltAngle = Mathf.Clamp(tiltAngle, minAngle, maxAngle);
         pivot.localRotation = Quaternion.Euler(tiltAngle, 0, 0);
+
+        if (lockOn && lockonTarget != null)
+        {
+            Vector3 targetDir = lockonTarget.position - transform.position;
+            targetDir.Normalize();
+            //targetDir.y = 0;
+            if(targetDir == Vector3.zero)
+                targetDir = transform.forward;
+            Quaternion targetRot = Quaternion.LookRotation(targetDir);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, d * 9);
+            lookAngle = transform.eulerAngles.y;
+            return;
+        }
+        lookAngle += smouthX * targetSpeed;
+        transform.rotation = Quaternion.Euler(0, lookAngle, 0);
+      
     }
     public static CameraManager singleton;
     void Awake()

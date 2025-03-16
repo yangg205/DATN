@@ -15,6 +15,9 @@ public class PlayerController : MonoBehaviour
     bool lb_input;
     float lt_axis;
     bool lt_input;
+
+    bool leftAxis_down;
+    bool rightAxis_down;
     PlayerState states;
     CameraManager camManager;
     float delta;
@@ -59,6 +62,9 @@ public class PlayerController : MonoBehaviour
         rb_input = Input.GetButton("RB");
         lb_input = Input.GetButton("LB");
 
+        rightAxis_down = Input.GetButtonUp("L");
+
+
     }
     void UpdateStates()
     {
@@ -69,13 +75,14 @@ public class PlayerController : MonoBehaviour
         states.moveDir = (v + h).normalized;
         float m = Mathf.Abs(horizontal) + Mathf.Abs(vertical);
         states.moveAmount = Mathf.Clamp01(m);
+        states.rollInput = b_input;
         if(b_input)
         {
-            states.run = (states.moveAmount > 0);
+            //states.run = (states.moveAmount > 0);
         }
         else
         {
-            states.run = false;
+            //states.run = false;
         }
         states.rt = rt_input;
         states.lt = lt_input;
@@ -85,6 +92,14 @@ public class PlayerController : MonoBehaviour
         {
             states.isTwoHanded = !states.isTwoHanded;
             states.HandleTwoHanded();
+        }
+        if(rightAxis_down)
+        {
+            states.lockOn = !states.lockOn;
+            if (states.lockonTarget == null)
+                states.lockOn = false;
+            camManager.lockonTarget = states.lockonTarget.transform;
+            camManager.lockOn = states.lockOn;
         }
 
     }

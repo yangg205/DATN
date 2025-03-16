@@ -11,12 +11,14 @@ public class PlayerState : MonoBehaviour
     public float moveAmount;
     public Vector3 moveDir;
     public bool rt,rb,lt,lb;
+    public bool rollInput;
 
     //Stats
     public float moveSpeed = 2;
     public float runSpeed = 3.5f;
     public float rotateSpeed = 5;
     public float toGround = 0.5f;
+    public float rollSpeed = 1;
     //States
     public bool run;
     public bool onGround;
@@ -24,6 +26,8 @@ public class PlayerState : MonoBehaviour
     public bool inAction;
     public bool canMove;
     public bool isTwoHanded;
+    //Other(Duyen)
+    public DemoQuaiCuaDuyenDeLockOn lockonTarget;
     [HideInInspector]
     public Animator anim;
     [HideInInspector]
@@ -89,9 +93,9 @@ public class PlayerState : MonoBehaviour
         }
         canMove = anim.GetBool("canMove");
         if(!canMove)
-        {
             return;
-        }
+        a_hook.rm_multi = 1;
+        HandleRolls();
         anim.applyRootMotion = false;
         rigid.linearDamping = (moveAmount > 0 || onGround == false) ? 0 : 4;
         float targetSpeed = moveSpeed;
@@ -101,17 +105,21 @@ public class PlayerState : MonoBehaviour
             rigid.linearVelocity = moveDir * (targetSpeed * moveAmount);
         if(run)
             lockOn = false;
-        if(!lockOn)
-        {
-            Vector3 targetDir = moveDir;
+
+            Vector3 targetDir = (lockOn == false)? moveDir 
+                : lockonTarget.transform.position - transform.position;
             targetDir.y = 0;
             if (targetDir == Vector3.zero)
                 targetDir = transform.forward;
             Quaternion tr = Quaternion.LookRotation(targetDir);
             Quaternion targetRotation = Quaternion.Slerp(transform.rotation, tr, delta * moveAmount * rotateSpeed);
             transform.rotation = targetRotation;
-        }
-        HandleMovementAnimations();
+
+        anim.SetBool("lockon", lockOn);
+        if (lockOn == false)
+            HandleMovementAnimations();
+        else
+            HandleLockOnAnimations(moveDir);
     }
     public void DetectAction()
     {
@@ -141,10 +149,55 @@ public class PlayerState : MonoBehaviour
         onGround = OnGround();
         anim.SetBool("onGround", onGround);
     }
+    void HandleRolls()
+    {
+        if (!rollInput)
+            return;
+        float v = vertical;
+        float h = horizontal;
+        v = (moveAmount > 0.3f) ? 1 : 0;
+        h = 0;
+
+        //if(lockOn == false)
+        //{
+        //    v = (moveAmount > 0.3f) ? 1 : 0;
+        //    h = 0;
+        //}
+        //else
+        //{
+        //    if (Mathf.Abs(v) < 0.3f)
+        //        v = 0;
+        //    if (Mathf.Abs(h) < 0.3f)
+        //        h = 0;
+        //}
+        if(v != 0)
+        {
+            if (moveDir == Vector3.zero)
+                moveDir = transform.forward;
+            Quaternion targetRot = Quaternion.LookRotation(moveDir);
+            transform.rotation = targetRot;
+        }
+        a_hook.rm_multi = rollSpeed;
+        anim.SetFloat("vertical", v);
+        anim.SetFloat("horizontal", h);
+
+        canMove = false;
+        inAction = true;
+        anim.CrossFade("Rolls", 0.2f);
+    }
     void HandleMovementAnimations()
     {
         anim.SetBool("run", run);
         anim.SetFloat("vertical", moveAmount, 0.04f, delta);
+    }
+    void HandleLockOnAnimations(Vector3 moveDir)
+    {
+        Vector3 relativeDir = transform.InverseTransformDirection(moveDir);
+        float h = relativeDir.x;
+        float v = relativeDir.z;
+
+        anim.SetFloat("vertical", v, 0.2f, delta);
+        anim.SetFloat("horizontal", h, 0.2f, delta);
     }
     public bool OnGround()
     {
