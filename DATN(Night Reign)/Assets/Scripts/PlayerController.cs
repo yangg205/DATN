@@ -4,8 +4,17 @@ public class PlayerController : MonoBehaviour
 {
     float horizontal;
     float vertical;
-    bool runInput;
+    bool b_input;
+    bool a_input;
+    bool x_input;
+    bool y_input;
 
+    bool rb_input;
+    float rt_axis;
+    bool rt_input;
+    bool lb_input;
+    float lt_axis;
+    bool lt_input;
     PlayerState states;
     CameraManager camManager;
     float delta;
@@ -34,7 +43,22 @@ public class PlayerController : MonoBehaviour
     {
         vertical = Input.GetAxis("Vertical");
         horizontal = Input.GetAxis("Horizontal");
-        runInput = Input.GetButton("RunInput");
+        b_input = Input.GetButton("B");
+        a_input = Input.GetButton("A");
+        y_input = Input.GetButtonUp("Y");
+        x_input = Input.GetButton("X");
+        rt_input = Input.GetButton("RT");
+        rt_axis = Input.GetAxis("RT");
+        if (rt_axis != 0)
+            rt_input = true;
+
+        lt_input = Input.GetButton("LT");
+        lt_axis = Input.GetAxis("LT");
+        if(lt_axis != 0)
+            lt_input = true;
+        rb_input = Input.GetButton("RB");
+        lb_input = Input.GetButton("LB");
+
     }
     void UpdateStates()
     {
@@ -45,7 +69,7 @@ public class PlayerController : MonoBehaviour
         states.moveDir = (v + h).normalized;
         float m = Mathf.Abs(horizontal) + Mathf.Abs(vertical);
         states.moveAmount = Mathf.Clamp01(m);
-        if(runInput)
+        if(b_input)
         {
             states.run = (states.moveAmount > 0);
         }
@@ -53,5 +77,16 @@ public class PlayerController : MonoBehaviour
         {
             states.run = false;
         }
+        states.rt = rt_input;
+        states.lt = lt_input;
+        states.rb = rb_input;
+        states.lb = lb_input;
+        if(y_input)
+        {
+            states.isTwoHanded = !states.isTwoHanded;
+            states.HandleTwoHanded();
+        }
+
     }
+
 }
