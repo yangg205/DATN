@@ -18,7 +18,11 @@ public class PlayerLocomotion : MonoBehaviour
     [SerializeField]
     float movementSpeed = 5;
     [SerializeField]
-    float rotationSpeed = 5;
+    float sprintSpeed = 7;
+    [SerializeField]
+    float rotationSpeed = 10;
+
+    public bool isSprinting;
 
     void Start()
     {
@@ -28,6 +32,16 @@ public class PlayerLocomotion : MonoBehaviour
         cameraObject = Camera.main.transform;
         myTransform = transform;
         animatorHandler.Initialize();
+    }
+    public void Update()
+    {
+        float delta = Time.deltaTime;
+
+        isSprinting = inputHandler.b_Input;
+        inputHandler.TickInput(delta);
+        HandleMovement(delta);
+        HandleRollingAndSprinting(delta);
+       
     }
 
     Vector3 normalVector;
@@ -55,11 +69,10 @@ public class PlayerLocomotion : MonoBehaviour
         myTransform.rotation = targetRotation;
     }
 
-    public void Update()
+    public void HandleMovement(float delta)
     {
-        float delta = Time.deltaTime;
-
-        inputHandler.TickInput(delta);
+        if (inputHandler.rollFlag)
+            return;
 
         moveDirection = cameraObject.forward * inputHandler.vertical;
         moveDirection += cameraObject.right * inputHandler.horizontal;
@@ -67,16 +80,50 @@ public class PlayerLocomotion : MonoBehaviour
         moveDirection.y = 0;
 
         float speed = movementSpeed;
-        moveDirection *= speed;
+
+        if(inputHandler.sprintFlag)
+        {
+            speed = sprintSpeed;
+            isSprinting = true;
+            moveDirection *= speed;
+        }
+        else
+        {
+            moveDirection *= speed;
+        }
 
         Vector3 projectedVelocity = Vector3.ProjectOnPlane(moveDirection, normalVector);
         rigidbody.linearVelocity = projectedVelocity;
 
-        animatorHandler.UpdateAnimatorValues(inputHandler.moveAmount, 0);
+        animatorHandler.UpdateAnimatorValues(inputHandler.moveAmount, 0, isSprinting);
 
-        if(animatorHandler.canRotate)
+        if (animatorHandler.canRotate)
         {
             HandleRotation(delta);
+        }
+    }
+
+    public void HandleRollingAndSprinting(float delta)
+    {
+        if(animatorHandler.anim.GetBool("isInteracting"))
+            return;
+
+        if(inputHandler.rollFlag)
+        {
+            moveDirection = cameraObject.forward * inputHandler.vertical;
+            moveDirection += cameraObject.right * inputHandler.horizontal;
+
+            if(inputHandler.moveAmount > 0)
+            {
+                animatorHandler.PlayTargetAnimation("Longs_RollFwd", true);
+                moveDirection.y = 0;
+                Quaternion rollRotation = Quaternion.LookRotation(moveDirection);
+                myTransform.rotation = rollRotation;
+            }
+            else
+            {
+                animatorHandler.PlayTargetAnimation("Longs_Dodge_Bwd2", true);
+            }
         }
     }
 }
