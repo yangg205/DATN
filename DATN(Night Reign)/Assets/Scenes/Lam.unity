@@ -544,7 +544,7 @@ RectTransform:
   m_GameObject: {fileID: 120376857}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1.1862, z: 1}
+  m_LocalScale: {x: 1.0104, y: 1.1862, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 459302613}
@@ -553,7 +553,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 23, y: 0}
   m_SizeDelta: {x: 1920, y: 903}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &120376859
@@ -575,6 +575,7 @@ MonoBehaviour:
   characterDescriptionText: {fileID: 334427785}
   characterStatsText: {fileID: 1233828684}
   button: {fileID: 35347135}
+  switchSceneButton: {fileID: 0}
   character:
     name: 
     description: 
@@ -585,6 +586,8 @@ MonoBehaviour:
     criticalDamage: 0
     magic: 0
     defense: 0
+  networkRunner: {fileID: 0}
+  sceneToLoad: Duy1
 --- !u!114 &120376860
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -659,7 +662,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 730, y: 0}
+  m_AnchoredPosition: {x: 618, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &141183624
@@ -681,6 +684,7 @@ MonoBehaviour:
   characterDescriptionText: {fileID: 1814539228}
   characterStatsText: {fileID: 1059429766}
   button: {fileID: 1562284657}
+  switchSceneButton: {fileID: 0}
   character:
     name: MAGIC
     description: "B\u1EADc th\u1EA7y v\u1EC1 ma thu\u1EADt v\xE0 ph\xE9p thu\u1EADt."
@@ -691,6 +695,8 @@ MonoBehaviour:
     criticalDamage: 0
     magic: 0
     defense: 1
+  networkRunner: {fileID: 0}
+  sceneToLoad: Duy1
 --- !u!114 &141183625
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1161,7 +1167,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 350894373}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 351644584}
+        m_TargetAssemblyTypeName: CharacterButtonHover, Assembly-CSharp
+        m_MethodName: OnButtonClick
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &350894373
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1290,12 +1308,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   characterImage: {fileID: 1372331326}
-  hoverSprite: {fileID: 21300000, guid: 41aad79476a04a94b9d421ddf7e67619, type: 3}
-  defaultSprite: {fileID: 21300000, guid: 0f2edc63142ead2499c1fc35e173c1b1, type: 3}
+  hoverSprite: {fileID: 21300000, guid: 7d98db00a649cf44192845e7304c5097, type: 3}
+  defaultSprite: {fileID: 21300000, guid: 7d98db00a649cf44192845e7304c5097, type: 3}
   characterNameText: {fileID: 639378769}
   characterDescriptionText: {fileID: 354092216}
   characterStatsText: {fileID: 1815641352}
   button: {fileID: 350894372}
+  switchSceneButton: {fileID: 350894372}
   character:
     name: TANK
     description: "M\u1ED9t chi\u1EBFn binh m\u1EA1nh m\u1EBD v\xE0 d\u0169ng c\u1EA3m."
@@ -1306,6 +1325,8 @@ MonoBehaviour:
     criticalDamage: 0
     magic: 0
     defense: 1
+  networkRunner: {fileID: 618593556}
+  sceneToLoad: Duy1
 --- !u!1 &354092214
 GameObject:
   m_ObjectHideFlags: 0
@@ -1656,6 +1677,77 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 459302612}
   m_CullTransparentMesh: 1
+--- !u!1 &523195933
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 523195936}
+  - component: {fileID: 523195935}
+  - component: {fileID: 523195934}
+  m_Layer: 0
+  m_Name: Prototype Network Start
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &523195934
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 523195933}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ba5764f4714bd64ab9efab127938e77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  EnableHotkeys: 0
+  BaseSkin: {fileID: 11400000, guid: e59b35dfeb4b6f54e9b2791b2a40a510, type: 2}
+--- !u!114 &523195935
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 523195933}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88230848386761045af440d808ee3efa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  RunnerPrefab: {fileID: 618593556}
+  StartMode: 0
+  AutoStartAs: 2
+  AutoHideGUI: 1
+  AutoClients: 1
+  ClientStartDelay: 0.1
+  ServerPort: 0
+  DefaultRoomName: 
+  InitialScenePath: 
+  _currentStage: 0
+  AutoConnectVirtualInstances: 1
+  VirtualInstanceConnectDelay: 1
+--- !u!4 &523195936
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 523195933}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &541877840
 GameObject:
   m_ObjectHideFlags: 0
@@ -1760,6 +1852,166 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &618593554
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 618593557}
+  - component: {fileID: 618593556}
+  - component: {fileID: 618593555}
+  - component: {fileID: 618593558}
+  - component: {fileID: 618593559}
+  m_Layer: 0
+  m_Name: Prototype Runner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &618593555
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 618593554}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -232609262, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnInput:
+    m_PersistentCalls:
+      m_Calls: []
+  OnInputMissing:
+    m_PersistentCalls:
+      m_Calls: []
+  OnConnectedToServer:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDisconnectedFromServer:
+    m_PersistentCalls:
+      m_Calls: []
+  OnConnectRequest:
+    m_PersistentCalls:
+      m_Calls: []
+  OnConnectFailed:
+    m_PersistentCalls:
+      m_Calls: []
+  PlayerJoined:
+    m_PersistentCalls:
+      m_Calls: []
+  PlayerLeft:
+    m_PersistentCalls:
+      m_Calls: []
+  OnSimulationMessage:
+    m_PersistentCalls:
+      m_Calls: []
+  OnShutdown:
+    m_PersistentCalls:
+      m_Calls: []
+  OnSessionListUpdate:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCustomAuthenticationResponse:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHostMigration:
+    m_PersistentCalls:
+      m_Calls: []
+  OnSceneLoadDone:
+    m_PersistentCalls:
+      m_Calls: []
+  OnSceneLoadStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnReliableData:
+    m_PersistentCalls:
+      m_Calls: []
+  OnReliableProgress:
+    m_PersistentCalls:
+      m_Calls: []
+  OnObjectEnterAOI:
+    m_PersistentCalls:
+      m_Calls: []
+  OnObjectExitAOI:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &618593556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 618593554}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1199893898, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &618593557
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 618593554}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &618593558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 618593554}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 243eade96cc7d6540ab34439f57de53a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &618593559
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 618593554}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a268b72bb029554da09614f972352bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  characterImage: {fileID: 0}
+  hoverSprite: {fileID: 0}
+  defaultSprite: {fileID: 0}
+  characterNameText: {fileID: 0}
+  characterDescriptionText: {fileID: 0}
+  characterStatsText: {fileID: 0}
+  button: {fileID: 350894372}
+  switchSceneButton: {fileID: 350894372}
+  character:
+    name: 
+    description: 
+    health: 0
+    mana: 0
+    attack: 0
+    criticalChance: 0
+    criticalDamage: 0
+    magic: 0
+    defense: 0
+  networkRunner: {fileID: 618593556}
+  sceneToLoad: Duy1
 --- !u!1 &632576660
 GameObject:
   m_ObjectHideFlags: 0
@@ -3664,6 +3916,7 @@ GameObject:
   - component: {fileID: 1263091382}
   - component: {fileID: 1263091381}
   - component: {fileID: 1263091380}
+  - component: {fileID: 1263091383}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -3774,6 +4027,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!114 &1263091383
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1263091379}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73b0a95be81246699cf0d9ecdc01863, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PreferredRunner: 0
+  Components:
+  - {fileID: 1263091381}
+  _guid: d0283eea-023c-4ada-
 --- !u!1 &1372331324
 GameObject:
   m_ObjectHideFlags: 0
@@ -3871,6 +4140,7 @@ MonoBehaviour:
   characterDescriptionText: {fileID: 0}
   characterStatsText: {fileID: 0}
   button: {fileID: 0}
+  switchSceneButton: {fileID: 0}
   character:
     name: 
     description: 
@@ -3881,6 +4151,8 @@ MonoBehaviour:
     criticalDamage: 0
     magic: 0
     defense: 0
+  networkRunner: {fileID: 0}
+  sceneToLoad: Duy1
 --- !u!1 &1478687443
 GameObject:
   m_ObjectHideFlags: 0
@@ -4018,6 +4290,7 @@ MonoBehaviour:
   characterDescriptionText: {fileID: 0}
   characterStatsText: {fileID: 0}
   button: {fileID: 0}
+  switchSceneButton: {fileID: 0}
   character:
     name: MAGIC
     description: 
@@ -4028,6 +4301,8 @@ MonoBehaviour:
     criticalDamage: 0
     magic: 0
     defense: 0
+  networkRunner: {fileID: 0}
+  sceneToLoad: Duy1
 --- !u!114 &1505907490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4430,7 +4705,7 @@ RectTransform:
   m_GameObject: {fileID: 1662143157}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.34847632, y: 1.0057436, z: 0.62686586}
+  m_LocalScale: {x: 0.28602937, y: 1.0057436, z: 0.62686586}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 120376858}
@@ -4438,7 +4713,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 49, y: 0}
+  m_AnchoredPosition: {x: -12, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1662143159
@@ -4460,6 +4735,7 @@ MonoBehaviour:
   characterDescriptionText: {fileID: 334427785}
   characterStatsText: {fileID: 1233828684}
   button: {fileID: 35347135}
+  switchSceneButton: {fileID: 0}
   character:
     name: DAME
     description: "M\u1ED9t cung th\u1EE7 nhanh nh\u1EB9n v\xE0 ch\xEDnh x\xE1c."
@@ -4470,6 +4746,8 @@ MonoBehaviour:
     criticalDamage: 0
     magic: 0
     defense: 1
+  networkRunner: {fileID: 0}
+  sceneToLoad: Duy1
 --- !u!114 &1662143160
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4656,6 +4934,7 @@ GameObject:
   - component: {fileID: 1685652793}
   - component: {fileID: 1685652792}
   - component: {fileID: 1685652791}
+  - component: {fileID: 1685652795}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -4781,6 +5060,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1685652795
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1685652790}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73b0a95be81246699cf0d9ecdc01863, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PreferredRunner: 0
+  Components:
+  - {fileID: 1685652792}
+  _guid: bf3cb3e9-0c65-4b4d-
 --- !u!1 &1814539226
 GameObject:
   m_ObjectHideFlags: 0
@@ -5136,6 +5431,8 @@ SceneRoots:
   m_Roots:
   - {fileID: 1685652794}
   - {fileID: 1263091382}
+  - {fileID: 523195936}
+  - {fileID: 618593557}
   - {fileID: 652091731}
   - {fileID: 1646079806}
   - {fileID: 541877844}
