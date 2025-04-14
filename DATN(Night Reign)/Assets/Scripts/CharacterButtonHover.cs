@@ -77,6 +77,7 @@ public class CharacterButtonHover : MonoBehaviour, IPointerEnterHandler, IPointe
         public int health;         // Chỉ số sức khỏe
         public int mana;           // Chỉ số mana
         public int attack;         // Chỉ số tấn công
+        public int attackspeed;    // chỉ số tốc đánh 
         public float criticalChance; // Tỉ lệ chí mạng (đơn vị phần trăm)
         public float criticalDamage; // Dame chí mạng (đơn vị phần trăm)
         public int magic;          // Chỉ số magic

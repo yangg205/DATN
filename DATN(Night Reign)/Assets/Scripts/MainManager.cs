@@ -118,7 +118,7 @@ public class MainManager : NetworkBehaviour, INetworkRunnerCallbacks
         var position = new Vector3(0, 1, 0);
 
         _runner.Spawn(
-            prefab,
+            prefabRef: prefab,
             position,
             Quaternion.identity,
             player,

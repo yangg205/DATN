@@ -171,20 +171,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff4da7533ecac7447b20e42ce7f2ad68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveDirection: {x: 0, y: 0, z: 0}
-  myTransform: {fileID: 0}
-  animatorHandler: {fileID: 0}
-  rigidbody: {fileID: 0}
-  normalCamera: {fileID: 0}
-  groundDetectionRayStartPoint: 0.5
-  minimumDistanceNeededToBeginToFall: 1
-  groundDirectionRayDistance: 0.2
-  inAirTimer: 0
-  movementSpeed: 5
-  walkingSpeed: 1
-  sprintSpeed: 7
-  rotationSpeed: 5
-  fallingSpeed: 45
 --- !u!114 &313159556
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -197,18 +183,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7135305f9ac96141a13d27472a4d273, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  horizontal: 0
-  vertical: 0
-  moveAmount: 0
-  mouseAmount: 0
-  mouseX: 0
-  mouseY: 0
-  b_Input: 0
-  rb_Input: 0
-  rt_Input: 0
-  rollFlag: 0
-  sprintFlag: 0
-  rollInputTimer: 0
 --- !u!54 &313159557
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -271,10 +245,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b25ee9d4264d6346836d11e4fa6f1d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isInteracting: 0
-  isSprinting: 0
-  isInAir: 0
-  isGrounded: 0
 --- !u!114 &313159560
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -287,8 +257,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63adbce6ec9d0fa4ab2dc02f3a121e25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rightWeapon: {fileID: 11400000, guid: f20a179bf7f8c5c4b823794a73b5af10, type: 2}
-  leftWeapon: {fileID: 11400000, guid: f20a179bf7f8c5c4b823794a73b5af10, type: 2}
 --- !u!114 &313159561
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -313,10 +281,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1783d7ac4bd87a3459b06ce7bcddb8a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  healthLevel: 10
-  maxHealth: 0
-  currentHealth: 0
-  healthBar: {fileID: 1082727936}
 --- !u!1 &453717693
 GameObject:
   m_ObjectHideFlags: 0
@@ -1235,7 +1199,7 @@ PrefabInstance:
   m_SourcePrefab: {fileID: 100100000, guid: 942c144dad4b688498186dbe8e8f0dd4, type: 3}
 --- !u!4 &691582566 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 5816763581944928387, guid: 942c144dad4b688498186dbe8e8f0dd4, type: 3}
+  m_CorrespondingSourceObject: {fileID: 3973238829575838774, guid: 942c144dad4b688498186dbe8e8f0dd4, type: 3}
   m_PrefabInstance: {fileID: 691582565}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1048313702
@@ -1283,17 +1247,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5f0e746078dae147980f3a759aabecf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetTransform: {fileID: 313159554}
-  cameraTransform: {fileID: 2093516116}
-  cameraPivotTransform: {fileID: 1273672989}
-  lookSpeed: 0.1
-  followSpeed: 0.1
-  pivotSpeed: 0.03
-  minimumPivot: -35
-  maximumPivot: 35
-  cameraSphereRadius: 0.2
-  cameraCollisionOffSet: 0.2
-  minimumCollisionOffset: 0.2
 --- !u!1 &1082727933
 GameObject:
   m_ObjectHideFlags: 0
@@ -1396,7 +1349,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b5d833b1b75b71428d42a7d1c7b28ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  slider: {fileID: 1082727935}
 --- !u!1 &1188072119
 GameObject:
   m_ObjectHideFlags: 0
@@ -1429,7 +1381,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8606da11a1a93145aa47f650b06bab0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 50
 --- !u!23 &1188072122
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1568,8 +1519,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67f0b9797b9ff9745820691afaecdd28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  anim: {fileID: 0}
-  canRotate: 1
 --- !u!114 &1336852419
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2086,11 +2035,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 5480666568557710940, guid: 942c144dad4b688498186dbe8e8f0dd4, type: 3}
   m_PrefabInstance: {fileID: 691582565}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &1911197132 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 7227118532737066346, guid: 942c144dad4b688498186dbe8e8f0dd4, type: 3}
-  m_PrefabInstance: {fileID: 691582565}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1911197133
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2103,10 +2047,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0e4b0ca3b1dd41408d58345a9dd6ed6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  parentOverride: {fileID: 1911197132}
-  isLeftHandSlot: 0
-  isRightHandSlot: 1
-  currentWeaponModel: {fileID: 0}
 --- !u!1 &1997614843
 GameObject:
   m_ObjectHideFlags: 0
@@ -2145,7 +2085,6 @@ MonoBehaviour:
     RawGuidValue: 00000000000000000000000000000000
   _runner: {fileID: 0}
   _sceneManager: {fileID: 0}
-  ChickenPrefabRefs: []
 --- !u!4 &1997614845
 Transform:
   m_ObjectHideFlags: 0
@@ -2173,7 +2112,7 @@ MonoBehaviour:
   m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SortKey: 1096654731
+  SortKey: 2851381675
   ObjectInterest: 1
   Flags: 262145
   NestedObjects: []
@@ -2202,10 +2141,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0e4b0ca3b1dd41408d58345a9dd6ed6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  parentOverride: {fileID: 1718562379}
-  isLeftHandSlot: 1
-  isRightHandSlot: 0
-  currentWeaponModel: {fileID: 0}
 --- !u!1 &2093516113
 GameObject:
   m_ObjectHideFlags: 0
