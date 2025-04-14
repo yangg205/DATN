@@ -46,7 +46,7 @@ public class CharacterButtonHover : MonoBehaviour, IPointerEnterHandler, IPointe
                                   "<color=#663300>\nCritical Damage: </color> " + character.criticalDamage + "%";  // Thêm chỉ số chí mạng
 
         // Thêm hiệu ứng cho nút
-        button.transform.localScale = new Vector3(1.2f, 1.2f, 1f);  // Phóng to nút
+        //button.transform.localScale = new Vector3(1.2f, 1.2f, 1f);  // Phóng to nút
         button.GetComponent<Image>().color = new Color(1f, 0.5f, 0f);  // Đổi màu nút thành cam
     }
 
@@ -64,7 +64,7 @@ public class CharacterButtonHover : MonoBehaviour, IPointerEnterHandler, IPointe
         characterStatsText.text = "";
 
         // Khôi phục lại hiệu ứng cho nút
-        button.transform.localScale = new Vector3(1f, 1f, 1f);  // Quay lại kích thước ban đầu
+        //button.transform.localScale = new Vector3(1f, 1f, 1f);  // Quay lại kích thước ban đầu
         button.GetComponent<Image>().color = new Color(1f, 1f, 1f);  // Khôi phục lại màu trắng
     }
 
