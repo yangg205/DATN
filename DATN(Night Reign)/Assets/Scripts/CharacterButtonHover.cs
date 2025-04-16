@@ -423,20 +423,73 @@ public class CharacterButtonHover : MonoBehaviour, IPointerEnterHandler, IPointe
     public Light hoverLight;  // Light khi hover
 
     // Hàm gọi khi chuột di vào nút
+    //public void OnPointerEnter(PointerEventData eventData)    
+    //{
+    //    characterStatsText.color = Color.white;
+
+    //    // Thay đổi hình ảnh khi hover vào
+    //    characterImage.sprite = hoverSprite;
+
+    //    // Ẩn tên nhân vật khi hover
+    //    characterNameText.text = "";
+
+    //    // Cập nhật căn chỉ số qua bên trái
+    //    characterStatsText.alignment = TextAlignmentOptions.Left;
+
+    //    // Hiển thị thông tin chỉ số nhân vật (bao gồm cả chỉ số Magic, Critical Chance và Critical Damage)
+    //    characterDescriptionText.text = character.description;
+    //    characterStatsText.text = "<color=red>Health: </color>" + character.health +
+    //                              "<color=orange> \nAttack: </color> " + character.attack +
+    //                              "<color=blue> \nMana: </color> " + character.mana +
+    //                              "<color=green> \nDefense: </color> " + character.defense +
+    //                              "<color=purple> \nMagic: </color> " + character.magic +
+    //                              "<color=yellow>\nCritical Chance: </color> " + character.criticalChance + "%" +
+    //                              "<color=#663300>\nCritical Damage: </color> " + character.criticalDamage + "%";  // Thêm chỉ số chí mạng
+
+    //    // Thêm hiệu ứng cho nút
+    //    button.transform.localScale = new Vector3(1.2f, 1.2f, 1f);  // Phóng to nút
+    //    button.GetComponent<Image>().color = new Color(1f, 0.5f, 0f);  // Đổi màu nút thành cam
+
+    //    // Thêm hiệu ứng ánh sáng
+    //    if (hoverLight != null)
+    //    {
+    //        hoverLight.enabled = true;  // Bật ánh sáng khi hover
+    //    }
+    //}
+
+    //// Hàm gọi khi chuột rời khỏi nút
+    //public void OnPointerExit(PointerEventData eventData)
+    //{
+    //    // Khôi phục lại hình ảnh mặc định
+    //    characterImage.sprite = defaultSprite;
+
+    //    // Hiển thị lại tên nhân vật khi rời chuột
+    //    characterNameText.text = character.name;
+
+    //    // Xóa mô tả và chỉ số nhân vật khi rời chuột
+    //    characterDescriptionText.text = "";
+    //    characterStatsText.text = "";
+
+    //    // Khôi phục lại hiệu ứng cho nút
+    //    button.transform.localScale = new Vector3(1f, 1f, 1f);  // Quay lại kích thước ban đầu
+    //    button.GetComponent<Image>().color = new Color(1f, 1f, 1f);  // Khôi phục lại màu trắng
+
+    //    // Tắt hiệu ứng ánh sáng
+    //    if (hoverLight != null)
+    //    {
+    //        hoverLight.enabled = false;  // Tắt ánh sáng khi rời chuột
+    //    }
+    //}
+
+
     public void OnPointerEnter(PointerEventData eventData)
     {
         characterStatsText.color = Color.white;
-
-        // Thay đổi hình ảnh khi hover vào
         characterImage.sprite = hoverSprite;
-
-        // Ẩn tên nhân vật khi hover
         characterNameText.text = "";
-
-        // Cập nhật căn chỉ số qua bên trái
         characterStatsText.alignment = TextAlignmentOptions.Left;
 
-        // Hiển thị thông tin chỉ số nhân vật (bao gồm cả chỉ số Magic, Critical Chance và Critical Damage)
+        // Cập nhật mô tả + chỉ số
         characterDescriptionText.text = character.description;
         characterStatsText.text = "<color=red>Health: </color>" + character.health +
                                   "<color=orange> \nAttack: </color> " + character.attack +
@@ -444,41 +497,38 @@ public class CharacterButtonHover : MonoBehaviour, IPointerEnterHandler, IPointe
                                   "<color=green> \nDefense: </color> " + character.defense +
                                   "<color=purple> \nMagic: </color> " + character.magic +
                                   "<color=yellow>\nCritical Chance: </color> " + character.criticalChance + "%" +
-                                  "<color=#663300>\nCritical Damage: </color> " + character.criticalDamage + "%";  // Thêm chỉ số chí mạng
+                                  "<color=#663300>\nCritical Damage: </color> " + character.criticalDamage + "%";
 
-        // Thêm hiệu ứng cho nút
-        button.transform.localScale = new Vector3(1.2f, 1.2f, 1f);  // Phóng to nút
-        button.GetComponent<Image>().color = new Color(1f, 0.5f, 0f);  // Đổi màu nút thành cam
+        button.transform.localScale = new Vector3(1.2f, 1.2f, 1f);
+        button.GetComponent<Image>().color = new Color(1f, 0.5f, 0f);
 
-        // Thêm hiệu ứng ánh sáng
-        if (hoverLight != null)
+        // Làm mờ ảnh khi hover
+        if (characterImage != null)
         {
-            hoverLight.enabled = true;  // Bật ánh sáng khi hover
+            Color imgColor = characterImage.color;
+            imgColor.a = 0.9f; // Mờ (alpha thấp)
+            characterImage.color = imgColor;
         }
+
     }
 
-    // Hàm gọi khi chuột rời khỏi nút
     public void OnPointerExit(PointerEventData eventData)
     {
-        // Khôi phục lại hình ảnh mặc định
         characterImage.sprite = defaultSprite;
-
-        // Hiển thị lại tên nhân vật khi rời chuột
         characterNameText.text = character.name;
-
-        // Xóa mô tả và chỉ số nhân vật khi rời chuột
         characterDescriptionText.text = "";
         characterStatsText.text = "";
+        button.transform.localScale = new Vector3(1f, 1f, 1f);
+        button.GetComponent<Image>().color = new Color(1f, 1f, 1f);
 
-        // Khôi phục lại hiệu ứng cho nút
-        button.transform.localScale = new Vector3(1f, 1f, 1f);  // Quay lại kích thước ban đầu
-        button.GetComponent<Image>().color = new Color(1f, 1f, 1f);  // Khôi phục lại màu trắng
-
-        // Tắt hiệu ứng ánh sáng
-        if (hoverLight != null)
+        // Làm ảnh rõ lại
+        if (characterImage != null)
         {
-            hoverLight.enabled = false;  // Tắt ánh sáng khi rời chuột
+            Color imgColor = characterImage.color;
+            imgColor.a = 1f; // Rõ (alpha đầy đủ)
+            characterImage.color = imgColor;
         }
+
     }
 
     // Lớp Character để lưu trữ thông tin nhân vật
