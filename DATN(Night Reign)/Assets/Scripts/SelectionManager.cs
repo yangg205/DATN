@@ -1,93 +1,32 @@
-﻿using System.Collections;
-using System.Text;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using static AuthManager;
 
 public class SelectionManager : MonoBehaviour
 {
-    //còn thiếu show lỗi
-    private string baseURL = "http://localhost:7102"; // Địa chỉ API 
     public TMP_InputField nameInputField;
-    private CharacterButtonHover characterButtonHover;
+
     public Button ButtonTank;
     public Button ButtonDame;
     public Button ButtonMagic;
-    public int playerid; 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-       
-        ButtonTank.onClick.AddListener(() => OnButtonClick("Tank",5));
-        ButtonDame.onClick.AddListener(() => OnButtonClick("Dame", 1));
-        ButtonMagic.onClick.AddListener(() => OnButtonClick("Magic", 0));
-        
+        ButtonTank.onClick.AddListener(() => OnButtonClick("Tank"));
+        ButtonDame.onClick.AddListener(() => OnButtonClick("Dame"));
+        ButtonMagic.onClick.AddListener(() => OnButtonClick("Magic"));
     }
 
     // Update is called once per frame
-    void OnButtonClick(string playerClass, int characterid)
+    void OnButtonClick(string playerClass)
     {
-        // Đọc tên người chơi từ input field
+        // đọc tên người chơi từ input field
         var playerName = nameInputField.text;
-        int id = PlayerPrefs.GetInt("PlayerId", -1); // Lấy playerid từ PlayerPrefs
-        // Lấy playerid từ PlayerPrefs
-        playerid = PlayerPrefs.GetInt("PlayerId", -1); // Nếu không tìm thấy, mặc định là -1
-
-        if (playerid == -1)
-        {
-            Debug.LogError("Player ID không hợp lệ!");
-            return;
-        }
-
-        // Thực hiện gọi API chọn nhân vật và chuyển sang scene
-        StartCoroutine(SelectCharacter(id, characterid));
-
-        // Chuyển sang scene "Duy"
+        // lưu thông tin người chơi 
+        PlayerPrefs.SetString("PlayerName", playerName);
+        PlayerPrefs.SetString("PlayerClass", playerClass);
         SceneManager.LoadScene("Duy");
-        playerid = id;
-        Debug.Log("Player ID: " + playerid);
-
-    }
-
-    public IEnumerator SelectCharacter(int playerid, int characterid)
-    {
-        var requestData = new PlayerCharacter
-        {
-            player_id = playerid,
-            character_id = characterid
-        };
-        string json = JsonUtility.ToJson(requestData);
-        UnityWebRequest request = new UnityWebRequest($"{baseURL}/SelecteCharacter", "POST");
-        request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.SetRequestHeader("Content-Type", "application/json");
-
-        yield return request.SendWebRequest();
-
-        if (request.result == UnityWebRequest.Result.Success)
-        {
-            Debug.Log($"Login response: {request.downloadHandler.text}");
-            var response = JsonUtility.FromJson<ReturnPlayerResponse>(request.downloadHandler.text);
-
-            if (response.data.status)
-            {
-                Debug.Log("Chọn nhân vật thành công");
-            }
-        }
-        else
-        {
-            Debug.LogError($"Login failed: {request.error}");
-        }
-    }
-
-    [System.Serializable]
-    public class PlayerCharacter
-    {
-        public int player_id;
-        public int character_id;
     }
 }

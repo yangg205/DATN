@@ -39,24 +39,24 @@ public class AuthManager : MonoBehaviour
     // Backend API Base URL
     private string baseUrl = "http://localhost:7102/api/player";
 
-    private string currentEmail; // Lưu email cho việc xác thực OTP
+    private string currentEmail; // To store email for OTP verification
 
     void Start()
     {
-        // Gán sự kiện cho các nút toggle
+        // Assign button listeners for toggle buttons
         showLoginButton.onClick.AddListener(ShowLoginPanel);
         showRegisterButton.onClick.AddListener(ShowRegisterPanel);
 
-        // Gán sự kiện cho các nút hành động
+        // Assign button listeners for actions
         loginButton.onClick.AddListener(OnLoginButtonClicked);
         registerButton.onClick.AddListener(OnRegisterButtonClicked);
         otpSubmitButton.onClick.AddListener(OnOtpSubmitButtonClicked);
 
-        // Ẩn hết các panel lúc bắt đầu
+        // Hide all panels at start
         HideAllPanels();
     }
 
-    // Ẩn hết các panel
+    // Hide all panels
     void HideAllPanels()
     {
         loginPanel.SetActive(false);
@@ -65,7 +65,7 @@ public class AuthManager : MonoBehaviour
         thongBaoPanel.SetActive(false);
     }
 
-    // Hiện/Ẩn các panel
+    // Show/Hide Panels
     void ShowLoginPanel()
     {
         HideAllPanels();
@@ -99,13 +99,13 @@ public class AuthManager : MonoBehaviour
         thongBaoPanel.SetActive(false);
     }
 
-    // Xử lý sự kiện bấm nút
+    // Button Click Handlers
     void OnLoginButtonClicked()
     {
         string email = loginEmailInput.text.Trim();
         string password = loginPasswordInput.text.Trim();
 
-        // Kiểm tra đầu vào
+        // Validate inputs
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
         {
             ShowThongBao("Vui lòng nhập đầy đủ email và mật khẩu!");
@@ -121,7 +121,7 @@ public class AuthManager : MonoBehaviour
         string password = registerPasswordInput.text.Trim();
         string repassword = registerRepasswordInput.text.Trim();
 
-        // Kiểm tra đầu vào
+        // Validate inputs
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(repassword))
         {
             ShowThongBao("Vui lòng nhập đầy đủ email, mật khẩu và xác nhận mật khẩu!");
@@ -134,7 +134,7 @@ public class AuthManager : MonoBehaviour
             return;
         }
 
-        currentEmail = email; // Lưu email cho OTP
+        currentEmail = email; // Store email for OTP verification
         StartCoroutine(Register(email, password, repassword));
     }
 
@@ -142,7 +142,7 @@ public class AuthManager : MonoBehaviour
     {
         string otp = otpInput.text.Trim();
 
-        // Kiểm tra đầu vào
+        // Validate inputs
         if (string.IsNullOrEmpty(currentEmail) || string.IsNullOrEmpty(otp))
         {
             ShowThongBao("Vui lòng nhập mã OTP!");
@@ -152,7 +152,7 @@ public class AuthManager : MonoBehaviour
         StartCoroutine(VerifyOtp(currentEmail, otp));
     }
 
-    // Yêu cầu HTTP
+    // HTTP Requests
     IEnumerator Register(string email, string password, string repassword)
     {
         var requestData = new PlayerRegisterModel
@@ -232,15 +232,8 @@ public class AuthManager : MonoBehaviour
         if (request.result == UnityWebRequest.Result.Success)
         {
             Debug.Log($"Login response: {request.downloadHandler.text}");
-            var response = JsonUtility.FromJson<ReturnPlayerResponse>(request.downloadHandler.text);
-            ShowThongBao(response.data.message);
-
-            if (response.data.status)
-            {
-                // Gọi GetPlayerByEmail để lấy player_id
-                yield return StartCoroutine(GetPlayerByEmail(email));
-                SceneManager.LoadScene("Menu");
-            }
+            HandleResponse(request.downloadHandler.text, null);
+            SceneManager.LoadScene("Menu");
         }
         else
         {
@@ -249,40 +242,7 @@ public class AuthManager : MonoBehaviour
         }
     }
 
-    // Lấy thông tin người chơi theo email
-    IEnumerator GetPlayerByEmail(string email)
-    {
-        string url = $"{baseUrl}/getPlayers{UnityWebRequest.EscapeURL(email)}";
-        UnityWebRequest request = UnityWebRequest.Get(url);
-        request.SetRequestHeader("Content-Type", "application/json");
-
-        yield return request.SendWebRequest();
-
-        if (request.result == UnityWebRequest.Result.Success)
-        {
-            Debug.Log($"GetPlayerByEmail response: {request.downloadHandler.text}");
-            var player = JsonUtility.FromJson<Player>(request.downloadHandler.text);
-
-            if (player != null && player.player_id > 0) // Kiểm tra giá trị player_id hợp lệ
-            {
-                PlayerPrefs.SetInt("PlayerId", player.player_id);
-                PlayerPrefs.Save();
-                Debug.Log($"Lưu player_id: {player.player_id} vào PlayerPrefs");
-            }
-            else
-            {
-                Debug.LogWarning("Không tìm thấy player_id trong phản hồi GetPlayerByEmail");
-                ShowThongBao("Không tìm thấy ID người chơi!");
-            }
-        }
-        else
-        {
-            Debug.LogError($"GetPlayerByEmail thất bại: {request.error}");
-            ShowThongBao("Lỗi khi lấy thông tin người chơi: " + request.error);
-        }
-    }
-
-    // Xử lý JSON phản hồi
+    // Handle response JSON
     void HandleResponse(string responseJson, System.Action onSuccess)
     {
         var response = JsonUtility.FromJson<ReturnPlayerResponse>(responseJson);
@@ -292,53 +252,51 @@ public class AuthManager : MonoBehaviour
             onSuccess();
         }
     }
+}
 
-    // Request Models
-    [System.Serializable]
-    public class PlayerRegisterModel
-    {
-        public string Email;
-        public string Password;
-        public string Repassword;
-    }
+// Request Models
+[System.Serializable]
+public class PlayerRegisterModel
+{
+    public string Email;
+    public string Password;
+    public string Repassword;
+}
 
-    [System.Serializable]
-    public class VerifyOtpModel
-    {
-        public string Email;
-        public string OTP;
-    }
+[System.Serializable]
+public class VerifyOtpModel
+{
+    public string Email;
+    public string OTP;
+}
 
-    [System.Serializable]
-    public class PlayerLoginModel
-    {
-        public string Email;
-        public string Password;
-    }
+[System.Serializable]
+public class PlayerLoginModel
+{
+    public string Email;
+    public string Password;
+}
 
-    // Response Models
-    [System.Serializable]
-    public class ReturnPlayerResponse
-    {
-        public ReturnPlayer data;
-    }
+// Response Models
+[System.Serializable]
+public class ReturnPlayerResponse
+{
+    public ReturnPlayer data;
+}
 
-    [System.Serializable]
-    public class ReturnPlayer
-    {
-        public bool status;
-        public string message;
-        public Player Player;
-    }
+[System.Serializable]
+public class ReturnPlayer
+{
+    public bool status;
+    public string message;
+    public Player Player;
+}
 
-    [System.Serializable]
-    public class Player
-    {
-        public int player_id; // Khớp với JSON backend
-        public string email;     // Khớp với JSON backend
-        public string password;  // Khớp với JSON backend
-        public string name;      // Khớp với JSON backend
-        public decimal total_money; // Khớp với JSON backend
-        public override string ToString() => $"Player ID: {player_id}, Email: {email}, Name: {name}, Total Money: {total_money}"; // Để dễ dàng kiểm tra thông tin`
-    }
+[System.Serializable]
+public class Player
+{
+    public string Email;
+    public string Password;
+    public string Name;
+    public decimal Total_Money;
 }
