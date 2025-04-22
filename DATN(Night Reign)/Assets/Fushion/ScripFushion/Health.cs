@@ -7,7 +7,7 @@ public class Health : NetworkBehaviour
     private int hea;
     private int maxHea;
     private Slider healthSlider;
-    private PlayerMovement player;
+    private DuyPlayerMovement player;
 
     public override void Spawned()
     {
