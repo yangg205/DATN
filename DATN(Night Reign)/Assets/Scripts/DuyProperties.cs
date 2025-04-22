@@ -16,6 +16,18 @@ public class DuyProperties : NetworkBehaviour
     public Slider healthSlider;
     public TextMeshProUGUI healthText;
 
+    // Các biến XP
+    [Networked, OnChangedRender(nameof(OnXPChanged))]
+    private float XP { get; set; }
+    private float MaxXP { get; set; }
+    public Slider xpSlider;
+    public TextMeshProUGUI xpText;
+
+    [Networked, OnChangedRender(nameof(OnLevelChanged))]
+    private int Level { get; set; }
+
+    public TextMeshProUGUI levelText;
+
     public NetworkObject networkObject;
     public NetworkRunner networkRunner;
 
@@ -34,6 +46,25 @@ public class DuyProperties : NetworkBehaviour
         }
     }
 
+    private void OnXPChanged()
+    {
+        float xpRatio = XP / MaxXP;
+        xpSlider.value = xpRatio;
+
+        if (xpText != null)
+        {
+            xpText.text = $"{Mathf.CeilToInt(XP)} / {Mathf.CeilToInt(MaxXP)}";
+        }
+    }
+
+    private void OnLevelChanged()
+    {
+        if (levelText != null)
+        {
+            levelText.text = $"Lv. {Level}";
+        }
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Enemy"))
@@ -44,6 +75,22 @@ public class DuyProperties : NetworkBehaviour
                 StartCoroutine(HandleDeath());
             }
         }
+    }
+
+    public void GainXP(float amount)
+    {
+        XP += amount;
+        if (XP >= MaxXP)
+        {
+            XP = 0;
+            LevelUp();
+        }
+    }
+
+    private void LevelUp()
+    {
+        Level++;
+        MaxXP += 50; // Cứ mỗi cấp, tăng độ khó lên
     }
 
     private IEnumerator HandleDeath()
@@ -69,12 +116,21 @@ public class DuyProperties : NetworkBehaviour
         Health = MaxHealth;
         healthSlider.value = Health / MaxHealth;
 
+        Level = 1;
+        MaxXP = 100;
+        XP = 0;
+
+        xpSlider.value = XP / MaxXP;
+
         gameOverPanel = GameObject.Find("GameOverPanel");
         if (gameOverPanel)
         {
-            gameOverPanel.SetActive(false); // Đảm bảo panel ẩn lúc đầu
-            gameOverText = gameOverPanel.GetComponentInChildren<TextMeshProUGUI>(); // Tìm TextMeshPro bên trong Panel
+            gameOverPanel.SetActive(false);
+            gameOverText = gameOverPanel.GetComponentInChildren<TextMeshProUGUI>();
         }
+
+        OnLevelChanged(); // Khởi tạo hiển thị level
+        OnXPChanged();    // Khởi tạo hiển thị XP
     }
 
     public override void Spawned()

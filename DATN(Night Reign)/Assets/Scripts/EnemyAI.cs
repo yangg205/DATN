@@ -76,13 +76,26 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    void Die()
+    public void Die()
     {
+        if (isDead) return;
+
         isDead = true;
         animator.SetTrigger("Die");
         agent.isStopped = true;
 
-        // Tuỳ chọn: huỷ đối tượng sau 3 giây
+        // Gọi hàm cộng XP cho người chơi khi quái chết
+        var player = GameObject.FindGameObjectWithTag("Player"); // Giả sử bạn có cách tìm người chơi
+        if (player != null)
+        {
+            var playerProperties = player.GetComponent<DuyProperties>();
+            if (playerProperties != null)
+            {
+                playerProperties.GainXP(50); // Cộng XP cho người chơi
+            }
+        }
+
+        // Huỷ đối tượng quái sau khi chết
         Destroy(gameObject, 3f);
     }
 
