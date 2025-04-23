@@ -11,7 +11,7 @@ public class ChatSystemv1 : NetworkBehaviour
     private GameObject Chatbutton;   // Nút gửi tin nhắn
 
     private bool isChatActive = false; // Trạng thái bật/tắt chat
-    private PlayerMovement playerMovement; // Tham chiếu đến script điều khiển di chuyển
+    private DuyPlayerMovement playerMovement; // Tham chiếu đến script điều khiển di chuyển
     private CamFPS camFPS;                 // Tham chiếu đến script camera FPS
 
     public override void Spawned()
@@ -27,7 +27,7 @@ public class ChatSystemv1 : NetworkBehaviour
         Chatbutton.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(ButtonSendClick);
 
         // Tìm script điều khiển di chuyển của người chơi
-        playerMovement = GetComponent<PlayerMovement>();
+        playerMovement = GetComponent<DuyPlayerMovement>();
 
         // Tìm script CamFPS
         camFPS = GetComponent<CamFPS>();

@@ -56,42 +56,37 @@ public class MainManager : NetworkBehaviour, INetworkRunnerCallbacks
             Debug.LogError($"Failed to connect: {result.ShutdownReason}");
 
         }
+        InvokeRepeating(nameof(SpawnEnemy), 5, 5);
     }
 
+    public NetworkPrefabRef[] EnemyPrefabRefs;
+    private NetworkObject _spawnedEnemy;
+    public void SpawnEnemy()
+    {
+        var enemyPrefab = EnemyPrefabRefs[Random.Range(0, EnemyPrefabRefs.Length)];
+        var position = new Vector3(Random.Range(-10, 10), 1, Random.Range(-10, 10));
+        var rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
+        _spawnedEnemy = _runner.Spawn(
+            enemyPrefab,
+            position,
+            rotation,
+            null,
+            (r, o) =>
+            {
+                EnemyAI enemyAI = o.GetComponent<EnemyAI>();
+                enemyAI.networkRunner = r;
+            }
+        );
+        Invoke(nameof(DeSpawnEnemy), 30);
+    }
 
-    //private void Start()
-    //{
-    //    InvokeRepeating(nameof(SpawnChicken), 1, 5);
-    //}
-
-    //public NetworkPrefabRef[] ChickenPrefabRefs;
-    //private NetworkObject _spawnChicken;
-    //public void SpawnChicken()
-    //{
-    //    var chickenPrefab = ChickenPrefabRefs[Random.Range(0, ChickenPrefabRefs.Length)];
-    //    var position = new Vector3(Random.Range(-10, 10), 1, Random.Range(-10, 10));
-    //    var rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
-    //    _spawnChicken = _runner.Spawn(
-    //        chickenPrefab,
-    //        position,
-    //        rotation,
-    //        null,
-    //        (r, o) =>
-    //        {
-    //            Debug.Log("Chicken spawned: " + o);
-    //        }
-    //    );
-    //    // set chicken despawn afrer 5 seconds
-    //    Invoke(nameof(DeSpawnChicken), 5);
-    //}
-
-    //void DeSpawnChicken()
-    //{
-    //    if (_spawnChicken != null)
-    //    {
-    //        _runner.Despawn(_spawnChicken);
-    //    }
-    //}
+    void DeSpawnEnemy()
+    {
+        if(_spawnedEnemy != null)
+        {
+            _runner.Despawn(_spawnedEnemy);
+        }
+    }
     public void OnPlayerJoiner(NetworkRunner runner, PlayerRef player)
     {
     }

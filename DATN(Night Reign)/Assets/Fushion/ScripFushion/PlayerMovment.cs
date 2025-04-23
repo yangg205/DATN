@@ -1,7 +1,7 @@
 ﻿using Fusion;
 using UnityEngine;
 
-public class PlayerMovement : NetworkBehaviour
+public class DuyPlayerMovement : NetworkBehaviour
 {
     public CharacterController controller;
     public float speed = 12f;
