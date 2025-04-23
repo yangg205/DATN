@@ -60,29 +60,41 @@ public class SelectionManager : MonoBehaviour
             player_id = playerid,
             character_id = characterid
         };
+
         string json = JsonUtility.ToJson(requestData);
-        UnityWebRequest request = new UnityWebRequest($"{baseURL}/SelecteCharacter", "POST");
+
+        UnityWebRequest request = new UnityWebRequest("http://yang2005-001-site1.ntempurl.com/SelecteCharacter", "POST");
         request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
+
+        // 👉 Thêm Header Authorization kiểu Basic Auth
+        string auth = "11239336:60-dayfreetrial";
+        string authBase64 = System.Convert.ToBase64String(Encoding.ASCII.GetBytes(auth));
+        request.SetRequestHeader("Authorization", "Basic " + authBase64);
 
         yield return request.SendWebRequest();
 
         if (request.result == UnityWebRequest.Result.Success)
         {
-            Debug.Log($"Login response: {request.downloadHandler.text}");
+            Debug.Log($"Chọn nhân vật response: {request.downloadHandler.text}");
             var response = JsonUtility.FromJson<ReturnPlayerResponse>(request.downloadHandler.text);
 
             if (response.data.status)
             {
-                Debug.Log("Chọn nhân vật thành công");
+                Debug.Log("✅ Chọn nhân vật thành công");
+            }
+            else
+            {
+                Debug.LogWarning("❌ Chọn nhân vật thất bại: " + response.data.message);
             }
         }
         else
         {
-            Debug.LogError($"Login failed: {request.error}");
+            Debug.LogError($"❌ Lỗi kết nối: {request.error}");
         }
     }
+
 
     [System.Serializable]
     public class PlayerCharacter

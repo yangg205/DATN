@@ -37,7 +37,7 @@ public class AuthManager : MonoBehaviour
     public TMP_Text thongBaoText;
 
     // Backend API Base URL
-    private string baseUrl = "http://localhost:7102/api/player";
+    private string baseUrl = "http://yang2005-001-site1.ntempurl.com/api/player";
 
     private string currentEmail; // Lưu email cho việc xác thực OTP
 
@@ -168,6 +168,7 @@ public class AuthManager : MonoBehaviour
         request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
+        request.SetRequestHeader("Authorization", "Basic " + System.Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes("11239336:60-dayfreetrial")));
 
         yield return request.SendWebRequest();
 
@@ -197,6 +198,7 @@ public class AuthManager : MonoBehaviour
         request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
+        request.SetRequestHeader("Authorization", "Basic " + System.Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes("11239336:60-dayfreetrial")));
 
         yield return request.SendWebRequest();
 
@@ -226,6 +228,7 @@ public class AuthManager : MonoBehaviour
         request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
+        request.SetRequestHeader("Authorization", "Basic " + System.Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes("11239336:60-dayfreetrial")));
 
         yield return request.SendWebRequest();
 
@@ -255,6 +258,7 @@ public class AuthManager : MonoBehaviour
         string url = $"{baseUrl}/getPlayers{UnityWebRequest.EscapeURL(email)}";
         UnityWebRequest request = UnityWebRequest.Get(url);
         request.SetRequestHeader("Content-Type", "application/json");
+        request.SetRequestHeader("Authorization", "Basic " + System.Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes("11239336:60-dayfreetrial")));
 
         yield return request.SendWebRequest();
 
@@ -339,6 +343,6 @@ public class AuthManager : MonoBehaviour
         public string password;  // Khớp với JSON backend
         public string name;      // Khớp với JSON backend
         public decimal total_money; // Khớp với JSON backend
-        public override string ToString() => $"Player ID: {player_id}, Email: {email}, Name: {name}, Total Money: {total_money}"; // Để dễ dàng kiểm tra thông tin`
+        public override string ToString() => $"Player ID: {player_id}, Email: {email}, Name: {name}, Total Money: {total_money}"; // Để dễ dàng kiểm tra thông tin
     }
 }
