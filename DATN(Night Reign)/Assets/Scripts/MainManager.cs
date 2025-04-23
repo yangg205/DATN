@@ -110,7 +110,7 @@ public class MainManager : NetworkBehaviour, INetworkRunnerCallbacks
 
         var prefab = playerClass.Equals("Tank") ? _tankPlayerPrefab : _magicPlayerPrefab;
         //(playerClass.Equals("Dame") ? _damePlayerPrefab : 
-        var position = new Vector3(0, 1, 0);
+        var position = new Vector3(567.19751f, 23.1399994f, 734.330017f);
 
         _runner.Spawn(
             prefabRef: prefab,

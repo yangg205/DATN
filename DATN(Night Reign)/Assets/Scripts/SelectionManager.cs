@@ -10,7 +10,6 @@ using static AuthManager;
 public class SelectionManager : MonoBehaviour
 {
     //còn thiếu show lỗi
-    private string baseURL = "http://localhost:7102"; // Địa chỉ API 
     public TMP_InputField nameInputField;
     private CharacterButtonHover characterButtonHover;
     public Button ButtonTank;
