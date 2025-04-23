@@ -112,25 +112,36 @@ public class DuyProperties : NetworkBehaviour
 
     private void Start()
     {
+        // Khởi tạo máu và thanh máu
         MaxHealth = 100;
         Health = MaxHealth;
         healthSlider.value = Health / MaxHealth;
+        OnHealthChanged();
 
+        // Khởi tạo XP và cấp độ
         Level = 1;
         MaxXP = 100;
         XP = 0;
-
         xpSlider.value = XP / MaxXP;
 
-        gameOverPanel = GameObject.Find("GameOverPanel");
-        if (gameOverPanel)
+        OnLevelChanged();
+        OnXPChanged();
+
+        // Tắt GameOver Panel nếu có
+        if (gameOverPanel == null)
         {
-            gameOverPanel.SetActive(false);
-            gameOverText = gameOverPanel.GetComponentInChildren<TextMeshProUGUI>();
+            gameOverPanel = GameObject.Find("GameOverPanel");
         }
 
-        OnLevelChanged(); // Khởi tạo hiển thị level
-        OnXPChanged();    // Khởi tạo hiển thị XP
+        if (gameOverPanel)
+        {
+            gameOverPanel.SetActive(false); // đảm bảo ẩn ngay khi scene load
+            gameOverText = gameOverPanel.GetComponentInChildren<TextMeshProUGUI>();
+            if (gameOverText)
+            {
+                gameOverText.text = ""; // clear text cũ nếu có
+            }
+        }
     }
 
     public override void Spawned()

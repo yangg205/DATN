@@ -27,6 +27,7 @@ public class SelectionManager : MonoBehaviour
         // lưu thông tin người chơi 
         PlayerPrefs.SetString("PlayerName", playerName);
         PlayerPrefs.SetString("PlayerClass", playerClass);
-        SceneManager.LoadScene("Duy");
+        PlayerPrefs.SetString("NextScene", "Duy");
+        SceneManager.LoadScene("Loading");
     }
 }
