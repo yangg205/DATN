@@ -13,7 +13,7 @@ public class LoadingManager : MonoBehaviour
 
     void Start()
     {
-        targetScene = PlayerPrefs.GetString("NextScene", "Duy");
+        targetScene = PlayerPrefs.GetString("NextScene", "Prototype Map");
         StartCoroutine(LoadSceneAsync());
     }
 
