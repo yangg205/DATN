@@ -47,7 +47,7 @@ public class SelectionManager : MonoBehaviour
         StartCoroutine(SelectCharacter(id, characterid));
 
         // Chuyển sang scene "Duy"
-        SceneManager.LoadScene("Duy");
+        SceneManager.LoadScene("Loading");
         playerid = id;
         Debug.Log("Player ID: " + playerid);
 
