@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
 using UnityEngine.SceneManagement;
-
+using System.Collections;
 
 public class CharacterButtonHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
@@ -21,10 +21,13 @@ public class CharacterButtonHover : MonoBehaviour, IPointerEnterHandler, IPointe
     // Đối tượng Character để lưu trữ thông tin nhân vật
     public Character character;
 
+    private Coroutine alphaCoroutine;
+
     // Hàm gọi khi chuột di vào nút
     public void OnPointerEnter(PointerEventData eventData)
     {
-        characterStatsText.color = Color.white;
+        // Tăng alpha ảnh
+        SetImageAlphaSmooth(characterImage, 1f); // 1f là alpha tối đa
 
         // Thay đổi hình ảnh khi hover vào
         characterImage.sprite = hoverSprite;
@@ -34,8 +37,9 @@ public class CharacterButtonHover : MonoBehaviour, IPointerEnterHandler, IPointe
 
         // Cập nhật căn chỉ số qua bên trái
         characterStatsText.alignment = TextAlignmentOptions.Left;
+        characterStatsText.color = new Color(1f, 1f, 1f, 1f); // Alpha đầy đủ
 
-        // Hiển thị thông tin chỉ số nhân vật (bao gồm cả chỉ số Magic, Critical Chance và Critical Damage)
+        // Hiển thị thông tin chỉ số nhân vật
         characterDescriptionText.text = character.description;
         characterStatsText.text = "<color=red>Health: </color>" + character.health +
                                   "<color=orange> \nAttack: </color> " + character.attack +
@@ -43,20 +47,23 @@ public class CharacterButtonHover : MonoBehaviour, IPointerEnterHandler, IPointe
                                   "<color=green> \nDefense: </color> " + character.defense +
                                   "<color=purple> \nMagic: </color> " + character.magic +
                                   "<color=yellow>\nCritical Chance: </color> " + character.criticalChance + "%" +
-                                  "<color=#663300>\nCritical Damage: </color> " + character.criticalDamage + "%";  // Thêm chỉ số chí mạng
+                                  "<color=#663300>\nCritical Damage: </color> " + character.criticalDamage + "%" +
+                                  "<color=cyan>\nAttack Speed: </color>" + character.attackspeed;
 
-        // Thêm hiệu ứng cho nút
-        //button.transform.localScale = new Vector3(1.2f, 1.2f, 1f);  // Phóng to nút
-        button.GetComponent<Image>().color = new Color(1f, 0.5f, 0f);  // Đổi màu nút thành cam
+        // Đổi màu nút thành cam
+        button.GetComponent<Image>().color = new Color(1f, 0.5f, 0f);
     }
 
     // Hàm gọi khi chuột rời khỏi nút
     public void OnPointerExit(PointerEventData eventData)
     {
+        // Giảm alpha ảnh về mờ nhẹ
+        SetImageAlphaSmooth(characterImage, 0.6f); // Hoặc giá trị mặc định của bạn
+
         // Khôi phục lại hình ảnh mặc định
         characterImage.sprite = defaultSprite;
 
-        // Hiển thị lại tên nhân vật khi rời chuột
+        // Hiển thị lại tên nhân vật
         characterNameText.text = character.name;
 
         // Xóa mô tả và chỉ số nhân vật khi rời chuột
@@ -64,27 +71,51 @@ public class CharacterButtonHover : MonoBehaviour, IPointerEnterHandler, IPointe
         characterStatsText.text = "";
 
         // Khôi phục lại hiệu ứng cho nút
-        //button.transform.localScale = new Vector3(1f, 1f, 1f);  // Quay lại kích thước ban đầu
-        button.GetComponent<Image>().color = new Color(1f, 1f, 1f);  // Khôi phục lại màu trắng
+        button.GetComponent<Image>().color = new Color(1f, 1f, 1f);
+    }
+
+    // Coroutine fade alpha ảnh mượt mà
+    private void SetImageAlphaSmooth(Image img, float targetAlpha, float duration = 0.2f)
+    {
+        if (alphaCoroutine != null)
+            StopCoroutine(alphaCoroutine);
+        alphaCoroutine = StartCoroutine(FadeAlpha(img, targetAlpha, duration));
+    }
+
+    private IEnumerator FadeAlpha(Image img, float targetAlpha, float duration)
+    {
+        Color startColor = img.color;
+        float startAlpha = startColor.a;
+        float time = 0;
+
+        while (time < duration)
+        {
+            float newAlpha = Mathf.Lerp(startAlpha, targetAlpha, time / duration);
+            img.color = new Color(startColor.r, startColor.g, startColor.b, newAlpha);
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        img.color = new Color(startColor.r, startColor.g, startColor.b, targetAlpha);
     }
 
     // Lớp Character để lưu trữ thông tin nhân vật
     [System.Serializable]
     public class Character
     {
-        public string name;        // Tên nhân vật
-        public string description; // Mô tả nhân vật
-        public int health;         // Chỉ số sức khỏe
-        public int mana;           // Chỉ số mana
-        public int attack;         // Chỉ số tấn công
-        public int attackspeed;    // chỉ số tốc đánh 
-        public float criticalChance; // Tỉ lệ chí mạng (đơn vị phần trăm)
-        public float criticalDamage; // Dame chí mạng (đơn vị phần trăm)
-        public int magic;          // Chỉ số magic
-        public int defense;        // Chỉ số thủ (defense)
-
+        public string name;           // Tên nhân vật
+        public string description;    // Mô tả nhân vật
+        public int health;            // Chỉ số sức khỏe
+        public int mana;              // Chỉ số mana
+        public int attack;            // Chỉ số tấn công
+        public int attackspeed;       // Chỉ số tốc đánh 
+        public float criticalChance;  // Tỉ lệ chí mạng (%)
+        public float criticalDamage;  // Dame chí mạng (%)
+        public int magic;             // Chỉ số magic
+        public int defense;           // Chỉ số thủ
     }
 }
+
 
 
 
