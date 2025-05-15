@@ -1,11 +1,12 @@
-﻿using System.Collections;
+﻿using Pathfinding;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class ChaseState : StateMachineBehaviour
 {
-    NavMeshAgent agent;
+    /*NavMeshAgent agent;
     Transform player;
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -61,5 +62,73 @@ public class ChaseState : StateMachineBehaviour
     //override public void OnStateIK(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     //{
     //    // Implement code that sets up animation IK (inverse kinematics)
-    //}
+    //}*/
+
+    Seeker seeker;
+    Rigidbody rb;
+    Transform player;
+    Path path;
+    int currentWaypoint = 0;
+    float speed = 4f;
+    float chaseRange = 15f;
+    float attackRange = 2f;
+    float nextWaypointDistance = 0.5f;
+    float pathUpdateInterval = 0.5f;
+    float pathTimer;
+
+    override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    {
+        seeker = animator.GetComponent<Seeker>();
+        rb = animator.GetComponent<Rigidbody>();
+        player = GameObject.FindGameObjectWithTag("Player")?.transform;
+
+        pathTimer = 0;
+    }
+
+    override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    {
+        if (player == null)
+        {
+            animator.SetBool("isChasing", false);
+            return;
+        }
+
+        float distance = Vector3.Distance(animator.transform.position, player.position);
+        if (distance > chaseRange)
+        {
+            animator.SetBool("isChasing", false);
+            animator.SetBool("isPatrolling", true);
+            return;
+        }
+        if (distance < attackRange)
+        {
+            animator.SetBool("isAttacking", true);
+            return;
+        }
+
+        pathTimer += Time.deltaTime;
+        if (pathTimer >= pathUpdateInterval)
+        {
+            seeker.StartPath(animator.transform.position, player.position, OnPathComplete);
+            pathTimer = 0;
+        }
+
+        if (path == null) return;
+        if (currentWaypoint >= path.vectorPath.Count) return;
+
+        Vector3 dir = (path.vectorPath[currentWaypoint] - animator.transform.position).normalized;
+        rb.MovePosition(animator.transform.position + dir * speed * Time.deltaTime);
+
+        if (Vector3.Distance(animator.transform.position, path.vectorPath[currentWaypoint]) < nextWaypointDistance)
+            currentWaypoint++;
+    }
+
+    void OnPathComplete(Path p)
+    {
+        if (!p.error)
+        {
+            path = p;
+            currentWaypoint = 0;
+        }
+    }
 }
