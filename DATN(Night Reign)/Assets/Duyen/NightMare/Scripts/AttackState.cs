@@ -5,26 +5,28 @@ using UnityEngine;
 public class AttackState : StateMachineBehaviour
 {
     Transform player;
+
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
+
+
         if (player == null)
             return;
-        
-
     }
 
     // OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
+
         if (player == null)
         {
             animator.SetBool("isAttacking", false);
             animator.SetBool("isPatrolling", true);
             return;
         }
-        animator.transform.LookAt(player);
+     
 
         float distance = Vector3.Distance(player.position, animator.transform.position);
         if (distance > 3.5f)
@@ -34,6 +36,7 @@ public class AttackState : StateMachineBehaviour
     // OnStateExit is called when a transition ends and the state machine finishes evaluating this state
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
+        animator.SetBool("isAttacking", false);
 
     }
 

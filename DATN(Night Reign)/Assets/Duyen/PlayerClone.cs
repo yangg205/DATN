@@ -22,7 +22,10 @@ public class PlayerClone : MonoBehaviour
     }
     void Update()
     {
-        
+        if(Input.GetKeyDown(KeyCode.E))
+        {
+            hitEnemy(20);
+        }
         // Kiểm tra xem có đứng trên mặt đất không
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
 
@@ -52,6 +55,16 @@ public class PlayerClone : MonoBehaviour
         controller.Move(velocity * Time.deltaTime);
     }
 
+    public void hitEnemy(float damage)
+    {
+        // Example: Deal 20 damage to the NightMare
+        NightMare nightMare = GetComponent<NightMare>();
+        if (nightMare != null)
+        {
+            nightMare.TakeDamage(20); // 20 is the damage amount
+        }
+
+    }
     public void TakeDamage(float damage)
     {
         Debug.Log("takedame Player");

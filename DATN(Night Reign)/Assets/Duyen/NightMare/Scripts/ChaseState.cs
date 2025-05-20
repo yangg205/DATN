@@ -78,6 +78,8 @@ public class ChaseState : StateMachineBehaviour
 
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
+        //if (nightMare == null || nightMare.isDead || nightMare.isTakingDamage)
+            //return;
         seeker = animator.GetComponent<Seeker>();
         rb = animator.GetComponent<Rigidbody>();
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
@@ -87,6 +89,7 @@ public class ChaseState : StateMachineBehaviour
 
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
+
         if (player == null)
         {
             animator.SetBool("isChasing", false);
@@ -115,6 +118,7 @@ public class ChaseState : StateMachineBehaviour
 
         if (path == null) return;
         if (currentWaypoint >= path.vectorPath.Count) return;
+
 
         Vector3 dir = (path.vectorPath[currentWaypoint] - animator.transform.position).normalized;
         rb.MovePosition(animator.transform.position + dir * speed * Time.deltaTime);
