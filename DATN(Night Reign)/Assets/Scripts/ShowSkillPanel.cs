@@ -1,10 +1,9 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections;
 
-public class Hoverselectioncharacter : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
+public class ShowSkillPanel : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     private Vector3 targetScale;
     private Vector3 originalScale;
@@ -28,9 +27,6 @@ public class Hoverselectioncharacter : MonoBehaviour, IPointerEnterHandler, IPoi
     [Header("2 panel sẽ hiện khi bấm button")]
     public GameObject panel1;
     public GameObject panel2;
-
-    public Button panel1CloseButton;
-    public Button panel2CloseButton;
 
     private void Start()
     {
@@ -64,12 +60,6 @@ public class Hoverselectioncharacter : MonoBehaviour, IPointerEnterHandler, IPoi
 
         if (panel1 != null) panel1.SetActive(false);
         if (panel2 != null) panel2.SetActive(false);
-        // Ngoài phần gán button1 và button2 như trước, thêm:
-        if (panel1CloseButton != null)
-            panel1CloseButton.onClick.AddListener(() => panel1.SetActive(false));
-
-        if (panel2CloseButton != null)
-            panel2CloseButton.onClick.AddListener(() => panel2.SetActive(false));
     }
 
     private void Update()
