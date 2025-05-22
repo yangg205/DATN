@@ -16,6 +16,7 @@ public class PlayerManager : MonoBehaviour
     public bool isSprinting;
     public bool isInAir;
     public bool isGrounded;
+    public bool canDoCombo;
 
     private void Awake()
     {
@@ -33,6 +34,7 @@ public class PlayerManager : MonoBehaviour
     {
         float delta = Time.deltaTime;
         isInteracting = anim.GetBool("isInteracting");
+        canDoCombo = anim.GetBool("canDoCombo");
 
         inputHandler.TickInput(delta);
         playerLocomotion.HandleMovement(delta);
@@ -57,8 +59,12 @@ public class PlayerManager : MonoBehaviour
         inputHandler.sprintFlag = false;
         inputHandler.rb_input = false;
         inputHandler.rt_input = false;
+        inputHandler.d_Pad_Up = false;
+        inputHandler.d_Pad_Down = false;
+        inputHandler.d_Pad_Left = false;
+        inputHandler.d_Pad_Right = false;
 
-        if(isInAir)
+        if (isInAir)
         {
             playerLocomotion.inAirTimer = playerLocomotion.inAirTimer + Time.deltaTime;
         }
