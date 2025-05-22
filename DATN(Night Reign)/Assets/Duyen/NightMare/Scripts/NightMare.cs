@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,25 +17,22 @@ public class NightMare : MonoBehaviour
     public float attackRange = 1.5f;
     public LayerMask playerLayer;
 
-    public GameObject healthBarPrefab;
-    public float healthBarShowDistance = 10f;
     private Transform player;
-
+    [Header("UI")]
     public Image healthFill;
-    private Canvas healthCanvas;
+
+    [Header("Damage Popup")]
+    public GameObject damagePopupPrefab;
+
 
     public bool isDead = false;
     public bool isTakingDamage = false;
 
+
+
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
-
-        GameObject hb = Instantiate(healthBarPrefab, transform);
-        hb.transform.localPosition = new Vector3(0, 2.5f, 0); // chỉnh tùy chiều cao
-        healthCanvas = hb.GetComponent<Canvas>();
-        //healthFill = hb.transform.Find("Background/Fill").GetComponent<Image>();
-        healthCanvas.enabled = false; // ẩn ban đầu
     }
 
     void Update()
@@ -46,21 +44,13 @@ public class NightMare : MonoBehaviour
         //===test 
         if (Input.GetKeyDown(KeyCode.E))
         {
-            TakeDamage(50);
+            TakeDamage(20);
         }
         //==
 
         if (isDead) return;
 
         if (player == null) return;
-
-        float distance = Vector3.Distance(transform.position, player.position);
-        healthCanvas.enabled = distance <= healthBarShowDistance;
-
-      
-
-        // Xoay UI theo camera
-        healthCanvas.transform.rotation = Quaternion.LookRotation(Camera.main.transform.forward);
     }
 
     public void TakeDamage(int damageAmount)
@@ -70,6 +60,13 @@ public class NightMare : MonoBehaviour
         HP = Mathf.Clamp(HP, 0, maxHP);
 
         AIPath aiPath = GetComponent<AIPath>();
+
+        // Hiện damage popup
+        if (damagePopupPrefab != null)
+        {
+            GameObject popup = Instantiate(damagePopupPrefab, transform.position + Vector3.up * 2f, Quaternion.identity);
+            popup.GetComponent<DamagePopup>().Setup(damageAmount);
+        }
 
 
         if (HP <= 0)

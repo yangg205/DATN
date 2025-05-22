@@ -240,7 +240,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5477946809514400563, guid: 66a51aef54d27b94d8d07662cbccaa68, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1076350276}
   m_SourcePrefab: {fileID: 100100000, guid: 66a51aef54d27b94d8d07662cbccaa68, type: 3}
 --- !u!1 &1024939806
 GameObject:
@@ -380,6 +383,23 @@ CharacterController:
   m_SkinWidth: 0.0001
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &1076350271 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5477946809514400563, guid: 66a51aef54d27b94d8d07662cbccaa68, type: 3}
+  m_PrefabInstance: {fileID: 814478833}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1076350276
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1076350271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b8ec973004147640b3e2096b5fb6497, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1089797384
 GameObject:
   m_ObjectHideFlags: 0
@@ -1141,7 +1161,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 1024939810}
   smoothSpeed: 0.125
-  offset: {x: 0, y: 12, z: -12}
+  offset: {x: 0, y: 2.29, z: -4.76}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
