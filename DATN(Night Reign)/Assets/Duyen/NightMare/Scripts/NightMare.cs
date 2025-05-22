@@ -82,7 +82,11 @@ public class NightMare : MonoBehaviour
             AudioManager_Enemy.instance.Play("DragonDeath");
             animator.SetTrigger("die");
             GetComponent<Collider>().enabled = false;
+            GetComponent<Rigidbody>().isKinematic = true;
             Destroy(gameObject, 7f);
+
+            //hồi sinh sau 5 giây
+            //StartCoroutine(RespawnCoroutine());
         }
         else
         {
@@ -114,7 +118,7 @@ public class NightMare : MonoBehaviour
     IEnumerator DamageStunCoroutine()
     {
         isTakingDamage = true;
-        yield return new WaitForSeconds(1f); 
+        yield return new WaitForSeconds(1f);
         isTakingDamage = false;
 
         AIPath aiPath = GetComponent<AIPath>();
@@ -125,4 +129,18 @@ public class NightMare : MonoBehaviour
         }
     }
 
+    IEnumerator RespawnCoroutine()
+    {
+        yield return new WaitForSeconds(5f);
+        HP = maxHP;
+        isDead = false;
+        GetComponent<Collider>().enabled = true;
+        GetComponent<Rigidbody>().isKinematic = false;
+        AIPath aiPath = GetComponent<AIPath>();
+        if (aiPath != null)
+        {
+            aiPath.canMove = true;
+            aiPath.canSearch = true;
+        }
+    }
 }

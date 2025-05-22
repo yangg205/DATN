@@ -71,7 +71,7 @@ public class ChaseState : StateMachineBehaviour
     int currentWaypoint = 0;
     float speed = 4f;
     float chaseRange = 15f;
-    float attackRange = 2f;
+    float attackRange = 3f;
     float nextWaypointDistance = 0.5f;
     float pathUpdateInterval = 0.5f;
     float pathTimer;
