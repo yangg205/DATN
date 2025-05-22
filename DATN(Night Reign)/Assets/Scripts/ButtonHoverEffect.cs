@@ -1,12 +1,15 @@
-﻿using UnityEngine;
+﻿using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
+using UnityEngine;
 
 public class ButtonHoverEffect : MonoBehaviour
 {
     private Image buttonImage;
     private Outline outline;
     private static ButtonHoverEffect lastClickedButton;
+    public int videoIndex; // Gán index video cho mỗi nút
+    public int SkillIndex;
+    public VideoDisplayManager videoManager;
 
     void Awake()
     {
@@ -21,7 +24,6 @@ public class ButtonHoverEffect : MonoBehaviour
         outline.enabled = false;
     }
 
-    // Được gán từ EventTrigger
     public void OnPointerEnterEvent(BaseEventData data)
     {
         outline.enabled = true;
@@ -41,7 +43,15 @@ public class ButtonHoverEffect : MonoBehaviour
         {
             lastClickedButton.outline.enabled = false;
         }
+
         outline.enabled = true;
         lastClickedButton = this;
+
+        // Gọi video tương ứng
+        if (videoManager != null)
+        {
+            videoManager.PlayVideo(videoIndex);
+            videoManager.ShowText(SkillIndex);
+        }
     }
 }
