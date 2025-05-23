@@ -11,6 +11,7 @@ public class ButtonHoverEffect : MonoBehaviour
     public int SkillIndex;
     public VideoDisplayManager videoManager;
 
+
     void Awake()
     {
         buttonImage = GetComponent<Image>();
@@ -54,4 +55,5 @@ public class ButtonHoverEffect : MonoBehaviour
             videoManager.ShowText(SkillIndex);
         }
     }
+
 }
