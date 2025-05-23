@@ -70,16 +70,14 @@ public class ChaseState : StateMachineBehaviour
     Path path;
     int currentWaypoint = 0;
     float speed = 4f;
-    float chaseRange = 15f;
-    float attackRange = 3f;
-    float nextWaypointDistance = 0.5f;
+    float chaseRange = 13f;
+    float attackRange = 3.3f;
+    float nextWaypointDistance = 1f;
     float pathUpdateInterval = 0.5f;
     float pathTimer;
 
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        //if (nightMare == null || nightMare.isDead || nightMare.isTakingDamage)
-            //return;
         seeker = animator.GetComponent<Seeker>();
         rb = animator.GetComponent<Rigidbody>();
         player = GameObject.FindGameObjectWithTag("Player")?.transform;

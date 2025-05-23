@@ -94,7 +94,7 @@ public class PatrollState : StateMachineBehaviour
     Path path;
     int currentWaypoint = 0;
     float speed = 2f;
-    float waypointDistance = 2f;//0.15f ;
+    float waypointDistance = 2f;
     float timer;
     float chaseRange = 10f;
 

@@ -994,8 +994,8 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
-  m_IsKinematic: 1
-  m_Interpolate: 1
+  m_IsKinematic: 0
+  m_Interpolate: 2
   m_Constraints: 0
   m_CollisionDetection: 0
 --- !u!114 &4582639075186881726
@@ -1042,7 +1042,7 @@ MonoBehaviour:
   radius: 2.94
   height: 2.84
   canMove: 1
-  maxSpeed: 2.5
+  maxSpeed: 1.2
   gravity: {x: NaN, y: NaN, z: NaN}
   groundMask:
     serializedVersion: 2
@@ -1059,11 +1059,11 @@ MonoBehaviour:
     maximumInterval: 2
     visualizeSensitivity: 0
   targetCompatibility: {fileID: 0}
-  maxAcceleration: -2.5
-  rotationSpeed: 630
+  maxAcceleration: 2
+  rotationSpeed: 500
   slowdownDistance: 0.6
   pickNextWaypointDist: 1
-  endReachedDistance: 0.05
+  endReachedDistance: 1.5
   alwaysDrawGizmos: 0
   slowWhenNotFacingTarget: 1
   whenCloseToDestination: 0
@@ -2846,7 +2846,13 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 9040776435189850690, guid: 44d03cd38c8943e468fa01a275931a35, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7752518389240339050}
+    - targetCorrespondingSourceObject: {fileID: 9040776435189850690, guid: 44d03cd38c8943e468fa01a275931a35, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5874643254562546567}
   m_SourcePrefab: {fileID: 100100000, guid: 44d03cd38c8943e468fa01a275931a35, type: 3}
 --- !u!114 &2632355833472916111 stripped
 MonoBehaviour:
@@ -2864,3 +2870,32 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 1711279951863332911, guid: 44d03cd38c8943e468fa01a275931a35, type: 3}
   m_PrefabInstance: {fileID: 3563149798525745521}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &5477946809514400563 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9040776435189850690, guid: 44d03cd38c8943e468fa01a275931a35, type: 3}
+  m_PrefabInstance: {fileID: 3563149798525745521}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7752518389240339050
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5477946809514400563}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b8ec973004147640b3e2096b5fb6497, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &5874643254562546567
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5477946809514400563}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b8ec973004147640b3e2096b5fb6497, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
