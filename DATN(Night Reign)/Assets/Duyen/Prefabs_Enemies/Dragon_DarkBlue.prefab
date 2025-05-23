@@ -979,11 +979,11 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2749465251524075490}
   serializedVersion: 4
-  m_Mass: 900
+  m_Mass: 4
   m_Drag: 0
-  m_AngularDrag: 0.05
+  m_AngularDrag: 50
   m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaTensor: {x: 9999, y: 9999, z: 9999}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
   m_IncludeLayers:
     serializedVersion: 2
@@ -992,11 +992,11 @@ Rigidbody:
     serializedVersion: 2
     m_Bits: 0
   m_ImplicitCom: 1
-  m_ImplicitTensor: 1
+  m_ImplicitTensor: 0
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 2
-  m_Constraints: 0
+  m_Constraints: 64
   m_CollisionDetection: 0
 --- !u!114 &4582639075186881726
 MonoBehaviour:
@@ -1040,9 +1040,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   version: 5
   radius: 2.94
-  height: 2.84
+  height: 3.69
   canMove: 1
-  maxSpeed: 1.2
+  maxSpeed: 1
   gravity: {x: NaN, y: NaN, z: NaN}
   groundMask:
     serializedVersion: 2
@@ -1061,9 +1061,9 @@ MonoBehaviour:
   targetCompatibility: {fileID: 0}
   maxAcceleration: 2
   rotationSpeed: 500
-  slowdownDistance: 0.6
+  slowdownDistance: 0.14
   pickNextWaypointDist: 1
-  endReachedDistance: 1.5
+  endReachedDistance: 2.5
   alwaysDrawGizmos: 0
   slowWhenNotFacingTarget: 1
   whenCloseToDestination: 0
@@ -1083,7 +1083,6 @@ MonoBehaviour:
   HP: 100
   maxHP: 100
   animator: {fileID: 5290440288207539689}
-  attackDamage: 10
   attackPoint: {fileID: 7339505967267502050}
   attackRange: 1.07
   playerLayer:
@@ -1093,6 +1092,8 @@ MonoBehaviour:
   damagePopupPrefab: {fileID: 247968149220129898, guid: 04f99676d4ee40d44b375f9d7ef86f4d, type: 3}
   isDead: 0
   isTakingDamage: 0
+  minAttackDamage: 5
+  maxAttackDamage: 15
 --- !u!1 &2927963147426530350
 GameObject:
   m_ObjectHideFlags: 0
