@@ -2,7 +2,7 @@
 using UnityEngine.EventSystems;
 using TMPro;
 
-public class MenuHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
+public class PauseHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     public TextMeshProUGUI text;
     public Color normalColor = Color.gray;
@@ -11,6 +11,7 @@ public class MenuHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExit
     public float transitionSpeed = 5f;
 
     private Vector3 originalScale;
+    private bool isHovered = false;
 
     void Start()
     {
@@ -20,12 +21,14 @@ public class MenuHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        isHovered = true;
         StopAllCoroutines();
         StartCoroutine(HoverEffect(hoverColor, originalScale * scaleAmount));
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
+        isHovered = false;
         StopAllCoroutines();
         StartCoroutine(HoverEffect(normalColor, originalScale));
     }
@@ -33,8 +36,16 @@ public class MenuHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExit
     public void OnPointerClick(PointerEventData eventData)
     {
         StopAllCoroutines();
+
+        // Reset về mặc định
         transform.localScale = originalScale;
         text.color = normalColor;
+
+        // Sau khi reset, nếu chuột vẫn đang hover, khởi động lại hiệu ứng hover
+        if (isHovered && gameObject.activeInHierarchy)
+        {
+            StartCoroutine(HoverEffect(hoverColor, originalScale * scaleAmount));
+        }
     }
 
     System.Collections.IEnumerator HoverEffect(Color targetColor, Vector3 targetScale)
@@ -46,5 +57,9 @@ public class MenuHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExit
             text.color = Color.Lerp(text.color, targetColor, Time.deltaTime * transitionSpeed);
             yield return null;
         }
+
+        // Đảm bảo chính xác giá trị cuối cùng
+        transform.localScale = targetScale;
+        text.color = targetColor;
     }
 }
