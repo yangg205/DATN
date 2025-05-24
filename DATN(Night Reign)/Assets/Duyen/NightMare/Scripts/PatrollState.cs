@@ -117,6 +117,10 @@ public class PatrollState : StateMachineBehaviour
 
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
+        NightMare nightMare = animator.GetComponent<NightMare>();
+        if (nightMare != null && nightMare.isTakingDamage)
+            return;
+
         timer += Time.deltaTime;
 
         if (player && Vector3.Distance(animator.transform.position, player.position) < chaseRange)
