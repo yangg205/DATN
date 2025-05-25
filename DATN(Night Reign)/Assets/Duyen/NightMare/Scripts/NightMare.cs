@@ -64,7 +64,7 @@ public class NightMare : MonoBehaviour
         if (player == null) return;
     }
 
-    public void TakeDamage(int damageAmount, string damageType = "")
+    public void TakeDamage(int damageAmount)
     {
         if (isDead) return;
         HP -= damageAmount;

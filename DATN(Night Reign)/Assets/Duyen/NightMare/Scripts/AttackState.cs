@@ -20,8 +20,11 @@ public class AttackState : StateMachineBehaviour
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         NightMare nightMare = animator.GetComponent<NightMare>();
-        if (nightMare != null && nightMare.isTakingDamage)
-            return;
+        DragonSoulEater soulEater = animator.GetComponent<DragonSoulEater>();
+
+        if (nightMare != null && nightMare.isTakingDamage) return;
+
+        if (soulEater != null && soulEater.isTakingDamage) return;
 
 
         if (player == null)
