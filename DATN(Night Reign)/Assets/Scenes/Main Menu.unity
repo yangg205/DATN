@@ -2696,6 +2696,8 @@ GameObject:
   - component: {fileID: 1001879384}
   - component: {fileID: 1001879385}
   - component: {fileID: 1001879386}
+  - component: {fileID: 1001879388}
+  - component: {fileID: 1001879387}
   m_Layer: 0
   m_Name: Main Menu
   m_TagString: Untagged
@@ -2846,6 +2848,32 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!225 &1001879387
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001879382}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &1001879388
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001879382}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: afd7edc41e468cc4780e15cfa478d056, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  menuPanel: {fileID: 1286140510}
+  canvasGroup: {fileID: 1001879387}
 --- !u!1 &1081249084
 GameObject:
   m_ObjectHideFlags: 0
@@ -3182,7 +3210,7 @@ GameObject:
   - component: {fileID: 1286140512}
   - component: {fileID: 1286140511}
   m_Layer: 0
-  m_Name: MainMenu Canvas
+  m_Name: MainMenuCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
