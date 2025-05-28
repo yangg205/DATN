@@ -1,3 +1,5 @@
+using NUnit.Framework;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerInventory : MonoBehaviour
@@ -14,6 +16,8 @@ public class PlayerInventory : MonoBehaviour
 
     public int currentRightWeaponIndex = -1;
     public int currentLeftWeaponIndex = -1;
+
+    public List<WeaponItem> weaponsInventory;
 
     private void Awake()
     {
