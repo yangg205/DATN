@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
 public class DragonUsurper : MonoBehaviour
@@ -8,6 +8,10 @@ public class DragonUsurper : MonoBehaviour
     [SerializeField] private WaypointHolder waypointHolder;
     [SerializeField] private GameObject projectilePrefab;
     [SerializeField] private Transform projectileSpawnPoint;
+
+    [Header("VFX")]
+    [SerializeField] private ParticleSystem fireBreathVFX;
+
 
     [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 20f;
@@ -34,6 +38,10 @@ public class DragonUsurper : MonoBehaviour
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
 
+        fireBreathVFX = projectileSpawnPoint.GetComponentInChildren<ParticleSystem>();
+
+        StopFireBreath();
+
         if (waypointHolder != null)
         {
             waypointHolder.RefreshWaypoints();
@@ -43,6 +51,17 @@ public class DragonUsurper : MonoBehaviour
         if (waypoints == null || waypoints.Length == 0) return;
 
         StartCoroutine(StateMachine());
+    }
+    private void StartFireBreath()
+    {
+        if (fireBreathVFX && !fireBreathVFX.isPlaying)
+            fireBreathVFX.Play();
+    }
+
+    private void StopFireBreath()
+    {
+        if (fireBreathVFX && fireBreathVFX.isPlaying)
+            fireBreathVFX.Stop();
     }
 
     private void FaceTarget(Vector3 targetPos)
@@ -172,17 +191,15 @@ public class DragonUsurper : MonoBehaviour
         animator.SetBool("isChasing", true);
 
         yield return StartCoroutine(RotateUntilFacingPlayer(angleToShootAtPlayer));
-        animator.SetTrigger("isAttacking"); // trigger once when entering
+        animator.SetTrigger("isAttacking");
 
-        FireProjectile();
+        StartFireBreath(); // 🔥 Bắt đầu phun lửa
 
         float timer = 0f;
-        float shootTimer = 0f;
 
         while (timer < duration)
         {
             timer += Time.deltaTime;
-            shootTimer += Time.deltaTime;
 
             FaceTarget(player.position);
 
@@ -191,15 +208,10 @@ public class DragonUsurper : MonoBehaviour
                 MoveTowardsTarget(player.position);
             }
 
-            if (shootTimer >= shootInterval)
-            {
-                shootTimer = 0f;
-                animator.SetTrigger("isAttacking");
-                FireProjectile();
-            }
             yield return null;
         }
 
+        StopFireBreath(); // ❌ Dừng phun lửa
         animator.SetBool("isChasing", false);
     }
 
