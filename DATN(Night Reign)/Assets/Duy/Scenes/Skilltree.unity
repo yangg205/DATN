@@ -3547,6 +3547,64 @@ MonoBehaviour:
   - {fileID: 2104522475}
   - {fileID: 271574890}
   - {fileID: 1700719493}
+--- !u!1 &1317381986
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1317381988}
+  - component: {fileID: 1317381987}
+  - component: {fileID: 1317381989}
+  m_Layer: 0
+  m_Name: player
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1317381987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1317381986}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d23271fc12b357d408b05099635c3943, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  skillTreePanel: {fileID: 1424105130}
+--- !u!4 &1317381988
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1317381986}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 7.6399994, z: 9.8}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1317381989
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1317381986}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fe5b2b6bb422654c9f4f29b26496e26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1378253179
 GameObject:
   m_ObjectHideFlags: 0
@@ -3895,6 +3953,38 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1413039500}
   m_CullTransparentMesh: 1
+--- !u!1 &1424105130
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1424105131}
+  m_Layer: 0
+  m_Name: SkillTreeObj
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1424105131
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1424105130}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 7.6399994, z: 9.8}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2006362786}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1451154685
 GameObject:
   m_ObjectHideFlags: 0
@@ -4477,7 +4567,6 @@ GameObject:
   - component: {fileID: 1629582745}
   - component: {fileID: 1629582744}
   - component: {fileID: 1629582746}
-  - component: {fileID: 1629582747}
   m_Layer: 0
   m_Name: DetailManager
   m_TagString: Untagged
@@ -4578,18 +4667,6 @@ VideoPlayer:
   m_WaitForFirstFrame: 1
   m_FrameReadyEventEnabled: 0
   m_VideoShaders: []
---- !u!114 &1629582747
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1629582743}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9fe5b2b6bb422654c9f4f29b26496e26, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1638553786
 GameObject:
   m_ObjectHideFlags: 0
@@ -6183,7 +6260,7 @@ RectTransform:
   - {fileID: 1384189158}
   - {fileID: 1182056189}
   - {fileID: 1629582745}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1424105131}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -6444,5 +6521,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 329610135}
   - {fileID: 458804221}
-  - {fileID: 2006362786}
   - {fileID: 1465507286}
+  - {fileID: 1424105131}
+  - {fileID: 1317381988}
