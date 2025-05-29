@@ -24,7 +24,8 @@ public class PlayerClone : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.E))
         {
-            hitEnemy(20);
+            hitEnemy(10);
+            Debug.Log("hit usurper");
         }
         // Kiểm tra xem có đứng trên mặt đất không
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
@@ -57,12 +58,7 @@ public class PlayerClone : MonoBehaviour
 
     public void hitEnemy(float damage)
     {
-        // Example: Deal 20 damage to the NightMare
-        NightMare nightMare = GetComponent<NightMare>();
-        if (nightMare != null)
-        {
-            nightMare.TakeDamage(20); // 20 is the damage amount
-        }
+       
 
     }
     public void TakeDamage(float damage)
