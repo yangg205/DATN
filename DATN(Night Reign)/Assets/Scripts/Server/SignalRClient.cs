@@ -1,31 +1,36 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
 using System;
-using System.Text.Json; // Để serialize JSON
+using System.Text.Json;
 using System.Threading.Tasks;
 using UnityEngine;
 
-// Class giống như ReturnPlayerCharacterSkill bên backend
-public class ReturnPlayerCharacterSkill
-{
-    public bool status { get; set; }
-    public string message { get; set; }
-    public object Player_Character_Skill { get; set; }
-}
-
 public class SignalRClient : MonoBehaviour
 {
+    private static SignalRClient instance; // Đảm bảo chỉ có 1 SignalRClient duy nhất
     private HubConnection _connection;
+    private const string HubUrl = "http://localhost:7102/gamehub";
 
     private async void Start()
     {
+        // Kiểm tra nếu đã có một instance tồn tại
+        if (instance != null && instance != this)
+        {
+            Destroy(gameObject); // Hủy đối tượng thừa
+            return;
+        }
+
+        // Đặt instance và giữ nó không bị phá hủy
+        instance = this;
+        DontDestroyOnLoad(gameObject);
+
         // Khởi tạo kết nối SignalR
         _connection = new HubConnectionBuilder()
-            .WithUrl("http://localhost:7102/gamehub", options =>
+            .WithUrl($"{HubUrl}", options =>
             {
-                options.SkipNegotiation = true; // Bỏ qua negotiation cho HTTP
+                options.SkipNegotiation = true;
                 options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets;
             })
-            .WithAutomaticReconnect() // Tự động kết nối lại nếu mất kết nối
+            .WithAutomaticReconnect()
             .Build();
 
         // Đăng ký sự kiện nhận tin nhắn từ server
@@ -50,11 +55,8 @@ public class SignalRClient : MonoBehaviour
     {
         try
         {
-            // Gọi phương thức UpdateSkill và nhận kết quả kiểu ReturnPlayerCharacterSkill
             var result = await _connection.InvokeAsync<ReturnPlayerCharacterSkill>(
                 "UpdateSkill", playerCharacterId, skillTreeId);
-
-            // Serialize kết quả thành JSON để dễ đọc
             string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
             Debug.Log($"Phản hồi từ server:\n{jsonResult}");
         }
@@ -63,8 +65,20 @@ public class SignalRClient : MonoBehaviour
             Debug.LogError($"❌ Gửi yêu cầu thất bại: {ex.Message}");
         }
     }
-
-    private async void OnDestroy()
+    public async Task SendLogin(string email, string password)
+    {
+        try
+        {
+            var result = await _connection.InvokeAsync<ReturnPlayer>("Login", email, password);
+            string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+            Debug.Log($"Phản hồi từ server:\n{jsonResult}");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"❌ Gửi yêu cầu đăng nhập thất bại: {ex.Message}");
+        }
+    }
+        private async void OnDestroy()
     {
         if (_connection != null)
         {
