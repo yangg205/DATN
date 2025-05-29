@@ -9,20 +9,18 @@ public class SignalRClient : MonoBehaviour
     private static SignalRClient instance; // Đảm bảo chỉ có 1 SignalRClient duy nhất
     private HubConnection _connection;
     private const string HubUrl = "http://localhost:7102/gamehub";
-
-    private async void Start()
+    private void Awake()
     {
-        // Kiểm tra nếu đã có một instance tồn tại
         if (instance != null && instance != this)
         {
-            Destroy(gameObject); // Hủy đối tượng thừa
+            Destroy(gameObject);
             return;
         }
-
-        // Đặt instance và giữ nó không bị phá hủy
         instance = this;
         DontDestroyOnLoad(gameObject);
-
+    }
+    private async void Start()
+    {
         // Khởi tạo kết nối SignalR
         _connection = new HubConnectionBuilder()
             .WithUrl($"{HubUrl}", options =>
@@ -65,20 +63,52 @@ public class SignalRClient : MonoBehaviour
             Debug.LogError($"❌ Gửi yêu cầu thất bại: {ex.Message}");
         }
     }
-    public async Task SendLogin(string email, string password)
+    public async Task<ReturnPlayer> SendLogin(string email, string password)
     {
         try
         {
+            //gui ket qua tu server
             var result = await _connection.InvokeAsync<ReturnPlayer>("Login", email, password);
             string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
-            Debug.Log($"Phản hồi từ server:\n{jsonResult}");
+            return result; // Trả về kết quả đăng nhập
         }
         catch (Exception ex)
         {
             Debug.LogError($"❌ Gửi yêu cầu đăng nhập thất bại: {ex.Message}");
+            throw;
         }
     }
-        private async void OnDestroy()
+    public async Task<ReturnPlayer> SendRegister(string email, string password, string repassword)
+    {
+        try
+        {
+            //gui ket qua tu server
+            var result = await _connection.InvokeAsync<ReturnPlayer>("RegisterPendingPlayer", email, password, repassword);
+            string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+            return result; // Trả về kết quả đăng ký
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"❌ Gửi yêu cầu đăng nhập thất bại: {ex.Message}");
+            throw;
+        }
+    }
+    public async Task<ReturnPlayer> SendOTP(string email, string otp)
+    {
+        try
+        {
+            //gui ket qua tu server
+            var result = await _connection.InvokeAsync<ReturnPlayer>("VerifyOtpAndRegister", email, otp);
+            string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+            return result; // Trả về kết quả otp
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"❌ Gửi yêu cầu đăng nhập thất bại: {ex.Message}");
+            throw;
+        }
+    }
+    private async void OnDestroy()
     {
         if (_connection != null)
         {
