@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class WeaponPickUp : Interactable
 {
@@ -26,6 +27,7 @@ public class WeaponPickUp : Interactable
         playerInventory.weaponsInventory.Add(weapons);
 
         playerManager.itemInteractableGameObject.GetComponentInChildren<TextMeshProUGUI>().text = weapons.itemName;
+        playerManager.itemInteractableGameObject.GetComponentInChildren<RawImage>().texture = weapons.itemIcon.texture;
         playerManager.itemInteractableGameObject.SetActive(true);
         Destroy(gameObject);
     }    

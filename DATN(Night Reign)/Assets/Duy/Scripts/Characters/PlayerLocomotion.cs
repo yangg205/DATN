@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerLocomotion : MonoBehaviour
 {
@@ -236,6 +236,25 @@ public class PlayerLocomotion : MonoBehaviour
         else
         {
             myTransform.position = targetPosition;
+        }
+    }
+
+    public void HandleJumping()
+    {
+        if (playerManager.isInteracting)
+            return;
+
+        if(inputHandler.jump_input)
+        {
+            if(inputHandler.moveAmount > 0)
+            {
+                moveDirection = cameraObject.forward * inputHandler.vertical;
+                moveDirection += cameraObject.right * inputHandler.horizontal;
+                animatorHandler.PlayTargetAnimation("Jump", false);
+                moveDirection.y = 0;
+                Quaternion jumpRotation = Quaternion.LookRotation(moveDirection);
+                myTransform.rotation = jumpRotation;
+            }
         }
     }
     #endregion
