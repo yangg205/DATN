@@ -1,56 +1,44 @@
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
-public class ResolutionDropdown : MonoBehaviour
+public class ResolutionDropdownManager : MonoBehaviour
 {
-    public TMP_Dropdown fpsDropdown;
     public TMP_Dropdown resolutionDropdown;
+
+    private Resolution[] filteredResolutions = new Resolution[]
+    {
+        new Resolution { width = 1280, height = 720 },
+        new Resolution { width = 1920, height = 1080 }
+    };
 
     void Start()
     {
-        // FPS setup
-        int savedFPSIndex = PlayerPrefs.GetInt("FPSIndex", 0);
-        fpsDropdown.value = savedFPSIndex;
-        ApplyFPSSetting(savedFPSIndex);
-        fpsDropdown.onValueChanged.AddListener(OnFPSDropdownChanged);
+        resolutionDropdown.ClearOptions();
 
-        // Resolution setup
-        int savedResolutionIndex = PlayerPrefs.GetInt("ResolutionIndex", 1);
-        resolutionDropdown.value = savedResolutionIndex;
-        ApplyResolutionSetting(savedResolutionIndex);
-        resolutionDropdown.onValueChanged.AddListener(OnResolutionDropdownChanged);
-    }
+        var options = new System.Collections.Generic.List<string>();
+        int currentResolutionIndex = 0;
 
-    public void OnFPSDropdownChanged(int index)
-    {
-        ApplyFPSSetting(index);
-        PlayerPrefs.SetInt("FPSIndex", index);
-    }
-
-    public void OnResolutionDropdownChanged(int index)
-    {
-        ApplyResolutionSetting(index);
-        PlayerPrefs.SetInt("ResolutionIndex", index);
-    }
-
-    void ApplyFPSSetting(int index)
-    {
-        switch (index)
+        for (int i = 0; i < filteredResolutions.Length; i++)
         {
-            case 0: Application.targetFrameRate = 60; break;
-            case 1: Application.targetFrameRate = 90; break;
-            case 2: Application.targetFrameRate = 120; break;
-            default: Application.targetFrameRate = 60; break;
+            string option = $"{filteredResolutions[i].width} x {filteredResolutions[i].height}";
+            options.Add(option);
+
+            if (Screen.currentResolution.width == filteredResolutions[i].width &&
+                Screen.currentResolution.height == filteredResolutions[i].height)
+            {
+                currentResolutionIndex = i;
+            }
         }
+
+        resolutionDropdown.AddOptions(options);
+        resolutionDropdown.value = currentResolutionIndex;
+        resolutionDropdown.RefreshShownValue();
     }
 
-    void ApplyResolutionSetting(int index)
+    public void SetResolution(int index)
     {
-        switch (index)
-        {
-            case 0: Screen.SetResolution(1280, 720, FullScreenMode.FullScreenWindow); break;
-            case 1: Screen.SetResolution(1920, 1080, FullScreenMode.FullScreenWindow); break;
-            default: Screen.SetResolution(1920, 1080, FullScreenMode.FullScreenWindow); break;
-        }
+        Resolution res = filteredResolutions[index];
+        Screen.SetResolution(res.width, res.height, Screen.fullScreen);
     }
 }
