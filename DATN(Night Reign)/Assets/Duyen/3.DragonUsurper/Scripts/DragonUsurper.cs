@@ -253,6 +253,11 @@ using UnityEngine;
 
 public class DragonUsurper : MonoBehaviour
 {
+    [Header("Health Settings")]
+    [SerializeField] private float maxHealth = 100f;
+    public float currentHealth;
+    private bool isDead = false;
+
 
     [Header("References")]
     [SerializeField] private Transform player;
@@ -261,6 +266,8 @@ public class DragonUsurper : MonoBehaviour
 
     [Header("VFX")]
     [SerializeField] private ParticleSystem fireBreathVFX;
+    [SerializeField] private ParticleSystem deathVFX;
+
 
     [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 20f;
@@ -283,6 +290,11 @@ public class DragonUsurper : MonoBehaviour
 
     private void Start()
     {
+        if (deathVFX && deathVFX.isPlaying)
+            deathVFX.Stop();
+
+        currentHealth = maxHealth;
+
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
 
         waypointHolder = FindObjectOfType<WaypointHolder>();
@@ -302,9 +314,9 @@ public class DragonUsurper : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKey(KeyCode.P))
+        if (Input.GetKeyDown(KeyCode.P))
         {
-            
+            TakeDamage(10);
         }
         
     }
@@ -443,5 +455,42 @@ public class DragonUsurper : MonoBehaviour
             }
         }
     }
- 
+    public void TakeDamage(float damage)
+    {
+        if (isDead) return;
+
+        currentHealth -= damage;
+
+        if (currentHealth <= 0f)
+        {
+            currentHealth = 0f;
+            Die();
+        }
+    }
+
+    private void Die()
+    {
+        isDead = true;
+
+        StopAllCoroutines(); 
+
+
+        StopFireBreath(); 
+
+        animator.SetTrigger("dead");
+
+
+        StartCoroutine(PlayDeathVFXAfterDelay(1f));
+
+        Destroy(gameObject, 3f);
+    }
+
+    private IEnumerator PlayDeathVFXAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        if (deathVFX)
+            deathVFX.Play();
+    }
+
 }

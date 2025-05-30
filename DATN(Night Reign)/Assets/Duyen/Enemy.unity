@@ -119,6 +119,11 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!4 &378338305 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4956352781460986219, guid: 59d482e8e5961c1499cd1a7403f66e86, type: 3}
+  m_PrefabInstance: {fileID: 610192157}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &424646654
 GameObject:
   m_ObjectHideFlags: 0
@@ -150,7 +155,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 740402979}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &592256886
+--- !u!1001 &610192157
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -200,7 +205,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9222280699316938951, guid: 59d482e8e5961c1499cd1a7403f66e86, type: 3}
       propertyPath: m_Name
-      value: DragonUsurper_Red
+      value: DragonUsurper_Red (1)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1112,7 +1117,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 288a4947b378f344c9899757b60f7d8e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {fileID: 0}
+  target: {fileID: 378338305}
   smoothSpeed: 0.125
   offset: {x: 0, y: 10, z: -21.2}
 --- !u!1 &2046598842
@@ -1307,4 +1312,4 @@ SceneRoots:
   - {fileID: 2046598847}
   - {fileID: 1089797385}
   - {fileID: 3705126096115111060}
-  - {fileID: 592256886}
+  - {fileID: 610192157}
