@@ -250,14 +250,17 @@ public class DragonUsurper : MonoBehaviour
 using Pathfinding;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class DragonUsurper : MonoBehaviour
 {
     [Header("Health Settings")]
-    [SerializeField] private float maxHealth = 100f;
-    public float currentHealth;
+    [SerializeField] private float maxHP = 150f;
+    public float HP;
     private bool isDead = false;
 
+    [Header("UI")]
+    public Image healthFill;
 
     [Header("References")]
     [SerializeField] private Transform player;
@@ -293,7 +296,7 @@ public class DragonUsurper : MonoBehaviour
         if (deathVFX && deathVFX.isPlaying)
             deathVFX.Stop();
 
-        currentHealth = maxHealth;
+        HP = maxHP;
 
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
 
@@ -314,6 +317,10 @@ public class DragonUsurper : MonoBehaviour
 
     private void Update()
     {
+        if (healthFill != null)
+        {
+            healthFill.fillAmount = HP / maxHP;
+        }
         if (Input.GetKeyDown(KeyCode.P))
         {
             TakeDamage(10);
@@ -459,11 +466,13 @@ public class DragonUsurper : MonoBehaviour
     {
         if (isDead) return;
 
-        currentHealth -= damage;
+        HP -= damage;
 
-        if (currentHealth <= 0f)
+        HP = Mathf.Clamp(HP, 0, maxHP);
+
+        if (HP <= 0f)
         {
-            currentHealth = 0f;
+            HP = 0f;
             Die();
         }
     }
