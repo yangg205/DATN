@@ -48,19 +48,22 @@ public class SignalRClient : MonoBehaviour
             Debug.LogError($"❌ Kết nối thất bại: {ex.Message}");
         }
     }
+    public async 
 
-    public async Task SendUpdateSkill(int playerCharacterId, int skillTreeId)
+    public async Task<ReturnPlayerCharacterSkill> SendUpdateSkill(int playerCharacterId, int skillTreeId)
     {
         try
         {
             var result = await _connection.InvokeAsync<ReturnPlayerCharacterSkill>(
                 "UpdateSkill", playerCharacterId, skillTreeId);
             string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
-            Debug.Log($"Phản hồi từ server:\n{jsonResult}");
+
+            return result; // Trả về kết quả cập nhật kỹ năng
         }
         catch (Exception ex)
         {
             Debug.LogError($"❌ Gửi yêu cầu thất bại: {ex.Message}");
+            throw; // Ném lại ngoại lệ để xử lý ở nơi gọi
         }
     }
     public async Task<ReturnPlayer> SendLogin(string email, string password)
