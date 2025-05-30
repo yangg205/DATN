@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -48,7 +49,34 @@ public class SignalRClient : MonoBehaviour
             Debug.LogError($"❌ Kết nối thất bại: {ex.Message}");
         }
     }
-    public async 
+    public async Task<ReturnPlayerCharacter> SelectCharacter(int playerId, int characterId)
+    {
+        try
+        {
+            var result = await _connection.InvokeAsync<ReturnPlayerCharacter>("SelectCharacter", playerId, characterId);
+            string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+            return result; // Trả về kết quả chọn nhân vật
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Gui yeu cau chon nhan vat that bai"+ex.Message);
+            throw;
+        }
+    }
+    public async Task<ReturnPlayerCharacter> SaveGame(Player_Characters playerCharacters)
+    {
+        try
+        {
+            var result = await _connection.InvokeAsync<ReturnPlayerCharacter>("SaveGame", playerCharacters);
+            string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+            return result; // Trả về kết quả chọn nhân vật
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine("Gui yeu cau that bai" + ex.Message);
+            throw;
+        }
+    }
 
     public async Task<ReturnPlayerCharacterSkill> SendUpdateSkill(int playerCharacterId, int skillTreeId)
     {
@@ -108,6 +136,48 @@ public class SignalRClient : MonoBehaviour
         catch (Exception ex)
         {
             Debug.LogError($"❌ Gửi yêu cầu đăng nhập thất bại: {ex.Message}");
+            throw;
+        }
+    }
+    public async Task<ReturnPlayerCharacter> ContinueGame(int playerId, int characterId)
+    {
+        try
+        {
+            var result = await _connection.InvokeAsync<ReturnPlayerCharacter>("ContinueGame", playerId, characterId);
+            string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+            return result; // Trả về kết quả tiếp tục trò chơi
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine("gui yeu cau continue that bai "+ex.Message);
+            throw;
+        }
+    }
+    public async Task<List<Ranking>> RankingPlayerCharacter(int characterId)
+    {
+        try
+        {
+            var result = await _connection.InvokeAsync<List<Ranking>>("RankingPlayerCharacter", characterId);
+            string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+            return result; // Trả về danh sách xếp hạng nhân vật
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine("gui yeu cau ranking that bai" + ex.Message);
+            throw;
+        }
+    }
+    public async Task<PlayerCharacterSkillPoint> GetSkillPoint(int playerCharacterId)
+    {
+        try
+        {
+            var result = await _connection.InvokeAsync<PlayerCharacterSkillPoint>("GetSkillPoint", playerCharacterId);
+            string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+            return result; // Trả về điểm kỹ năng của nhân vật
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine("gui yeu cau lay diem ky nang that bai"+ex.Message);
             throw;
         }
     }

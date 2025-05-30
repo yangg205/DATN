@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
-public class VideoDisplayManager : MonoBehaviour
+public class SkillTreeManager : MonoBehaviour
 {
     public RawImage videoDisplay;               // UI hiển thị video
     public VideoPlayer videoPlayer;             // VideoPlayer
@@ -17,7 +17,7 @@ public class VideoDisplayManager : MonoBehaviour
     private void Awake()
     {
         // Tìm instance của SignalRClient trong scene
-        signalRClient = FindObjectOfType<SignalRClient>();
+        signalRClient = FindAnyObjectByType<SignalRClient>();
         if (signalRClient == null)
         {
             Debug.LogError("Không tìm thấy SignalRClient trong scene! Hãy thêm component SignalRClient vào một GameObject.");
@@ -71,16 +71,13 @@ public class VideoDisplayManager : MonoBehaviour
         }
     }
 
-    public void OnClickUpdateSkill()
+    public void UpdateSkill(int Player_Characters_id, int skill_tree_id)
     {
-        if (signalRClient != null)
+        if (signalRClient == null)
         {
-            _ = signalRClient.SendUpdateSkill(1, 11);
-            Debug.Log("Gọi SendUpdateSkill thành công.");
+            Debug.LogError("SignalRClient is not initialized.");
+            return;
         }
-        else
-        {
-            Debug.LogError("signalRClient chưa được gán! Hãy kiểm tra lại scene hoặc gán thủ công.");
-        }
+        var result = signalRClient.SendUpdateSkill(Player_Characters_id, skill_tree_id);
     }
 }

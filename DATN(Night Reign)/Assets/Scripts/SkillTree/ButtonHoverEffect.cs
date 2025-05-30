@@ -1,15 +1,17 @@
 ﻿using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine;
+using System;
 
 public class ButtonHoverEffect : MonoBehaviour
 {
     private Image buttonImage;
     private Outline outline;
     private static ButtonHoverEffect lastClickedButton;
-    public int videoIndex; // Gán index video cho mỗi nút
-    public int SkillIndex;
-    public VideoDisplayManager videoManager;
+    [SerializeField] int videoIndex; // Gán index video cho mỗi nút
+    [SerializeField] int SkillIndex;
+    [SerializeField] int skillId;
+    [SerializeField] SkillTreeManager Manager;
 
 
     void Awake()
@@ -49,11 +51,19 @@ public class ButtonHoverEffect : MonoBehaviour
         lastClickedButton = this;
 
         // Gọi video tương ứng
-        if (videoManager != null)
+        if (Manager != null)
         {
-            videoManager.PlayVideo(videoIndex);
-            videoManager.ShowText(SkillIndex);
+            Manager.PlayVideo(videoIndex);
+            Manager.ShowText(SkillIndex);
         }
+    }
+    public void OnClickUpdateSkill1_1(BaseEventData data)
+    {
+        if(Manager == null)
+        {
+            Console.WriteLine("Manager khong ton tai");
+        }
+        Manager.UpdateSkill(1,skillId);
     }
 
 }
