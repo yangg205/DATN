@@ -11,13 +11,13 @@ public class ReturnPlayer
 {
     public bool status { get; set; }
     public string message { get; set; }
-    public object Player { get; set; }
+    public Player Player { get; set; }
 }
 public class ReturnPlayerCharacter
 {
     public bool status { get; set; }
     public string message { get; set; }
-    public object player_Characters { get; set; }
+    public Player_Characters player_Characters { get; set; }
 }
 
 public class Player_Characters
@@ -47,5 +47,16 @@ public class PlayerCharacterSkillPoint
 {
     public int PlayerCharacterId { get; set; }
     public int SkillPoint { get; set; }
+}
+public class Player
+{
+    public int Player_id { get; set; }
+    public string Email { get; set; }
+    public string Password { get; set; }
+    public string Password_Salt { get; set; }
+    public string Name { get; set; }
+    public decimal Total_Money { get; set; } = 0.00M;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
 }
 

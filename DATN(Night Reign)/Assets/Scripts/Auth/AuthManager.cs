@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class AuthManager : MonoBehaviour
 {
@@ -81,23 +82,15 @@ public class AuthManager : MonoBehaviour
             StartCoroutine(ShowNotification("Vui lòng nhập đầy đủ email và mật khẩu!",4));
             return;
         }
-        try
+        var result = await signalRClient.SendLogin(email, password);
+        if (result.status)
         {
-            var result = await signalRClient.SendLogin(email, password);
-            if (result.status)
-            {
-                StartCoroutine(ShowNotification("Đăng nhập thành công!", 4));
-            }
-            else
-            {
-                StartCoroutine(ShowNotification(result.message, 4));
-            }
+            PlayerPrefs.SetInt("PlayerId", result.Player.Player_id);
+            SceneManager.LoadScene("MainMenu");
         }
-        catch (System.Exception ex)
+        else
         {
-            Debug.LogError($"Loi khi gui yeu cau dang nhap: {ex.Message}");
-            StartCoroutine(ShowNotification("Lỗi khi gửi yêu cầu đăng nhập!", 4));
-            return;
+            StartCoroutine(ShowNotification(result.message, 4));
         }
     }
     public async void OnClickSubmiRegister()
@@ -110,54 +103,43 @@ public class AuthManager : MonoBehaviour
             StartCoroutine(ShowNotification("Vui lòng nhập đầy đủ email và mật khẩu!", 4));
             return;
         }
-        try
+        var result = await signalRClient.SendRegister(email, password, confirmPassword);
+        if (result.status)
         {
-            var result = await signalRClient.SendRegister(email, password, confirmPassword);
-            if (result.status)
-            {
-                StartCoroutine(ShowNotification("Kiểm tra email để lấy OTP", 4));
-                PlayerPrefs.SetString("email", email);
-            }
-            else
-            {
-                StartCoroutine(ShowNotification(result.message, 2));
-            }
+            StartCoroutine(ShowNotification("Kiểm tra email để lấy OTP", 4));
+            PlayerPrefs.SetString("email", email);
         }
-        catch (System.Exception ex)
+        else
         {
-            Debug.LogError($"Loi khi gui yeu cau dang nhap: {ex.Message}");
-            StartCoroutine(ShowNotification("Lỗi khi gửi yêu cầu đăng nhập!", 4));
-            return;
+            StartCoroutine(ShowNotification(result.message, 2));
         }
         otpPanel.SetActive(true);
         registerPanel.SetActive(false);
     }
     public async void OnClickSubmitOtp()
     {
-        string email = PlayerPrefs.GetString("email").Trim();
+        string email = PlayerPrefs.GetString("email");
         string otp = otpCode.text.Trim();
+        if (string.IsNullOrEmpty(email))
+        {
+            StartCoroutine(ShowNotification("Vui lòng đăng ký trước!", 4));
+            return;
+        }
         if (string.IsNullOrEmpty(otp))
         {
             StartCoroutine(ShowNotification("Vui lòng nhập đầy đủ OTP!", 4));
             return;
         }
-        try
+        var result = await signalRClient.SendOTP(email, otp);
+        if (result.status)
         {
-            var result = await signalRClient.SendOTP(email, otp);
-            if (result.status)
-            {
-                StartCoroutine(ShowNotification("Đăng ký thành công!", 4));
-            }
-            else
-            {
-                StartCoroutine(ShowNotification(result.message, 2));
-            }
+            StartCoroutine(ShowNotification("Đăng ký thành công!", 4));
+            otpPanel.SetActive(false);
+            loginPanel.SetActive(true);
         }
-        catch (System.Exception ex)
+        else
         {
-            Debug.LogError($"Loi khi gui yeu cau dang nhap: {ex.Message}");
-            StartCoroutine(ShowNotification("Lỗi khi gửi yêu cầu đăng nhập!", 4));
-            return;
+            StartCoroutine(ShowNotification(result.message, 2));
         }
     }
 }

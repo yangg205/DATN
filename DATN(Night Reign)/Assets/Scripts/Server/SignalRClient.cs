@@ -59,7 +59,7 @@ public class SignalRClient : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Gui yeu cau chon nhan vat that bai"+ex.Message);
+            Debug.Log("Gui yeu cau chon nhan vat that bai"+ex.Message);
             throw;
         }
     }
@@ -73,7 +73,7 @@ public class SignalRClient : MonoBehaviour
         }
         catch(Exception ex)
         {
-            Console.WriteLine("Gui yeu cau that bai" + ex.Message);
+            Debug.Log("Gui yeu cau that bai" + ex.Message);
             throw;
         }
     }
@@ -90,7 +90,7 @@ public class SignalRClient : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Debug.LogError($"❌ Gửi yêu cầu thất bại: {ex.Message}");
+            Debug.Log($"❌ Gửi yêu cầu thất bại: {ex.Message}");
             throw; // Ném lại ngoại lệ để xử lý ở nơi gọi
         }
     }
@@ -149,7 +149,7 @@ public class SignalRClient : MonoBehaviour
         }
         catch(Exception ex)
         {
-            Console.WriteLine("gui yeu cau continue that bai "+ex.Message);
+            Debug.Log("gui yeu cau continue that bai "+ex.Message);
             throw;
         }
     }
@@ -163,7 +163,7 @@ public class SignalRClient : MonoBehaviour
         }
         catch(Exception ex)
         {
-            Console.WriteLine("gui yeu cau ranking that bai" + ex.Message);
+            Debug.Log("gui yeu cau ranking that bai" + ex.Message);
             throw;
         }
     }
@@ -177,7 +177,21 @@ public class SignalRClient : MonoBehaviour
         }
         catch(Exception ex)
         {
-            Console.WriteLine("gui yeu cau lay diem ky nang that bai"+ex.Message);
+            Debug.Log("gui yeu cau lay diem ky nang that bai"+ex.Message);
+            throw;
+        }
+    }
+    public async Task<bool> DeleteSkill(int playerCharacter, int skilltreeid)
+    {
+        try
+        {
+            var result = await _connection.InvokeAsync<bool>("DeleteSkill", playerCharacter, skilltreeid);
+            string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+            return result; // Trả về kết quả xóa kỹ năng
+        }
+        catch(Exception ex)
+        {
+            Debug.Log("Gui yeu cau hoan tac that bai"+ex.Message);
             throw;
         }
     }

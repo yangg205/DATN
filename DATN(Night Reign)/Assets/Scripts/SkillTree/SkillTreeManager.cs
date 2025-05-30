@@ -18,7 +18,7 @@ public class SkillTreeManager : MonoBehaviour
     private void Awake()
     {
         // Tìm SignalRClient trong scene
-        signalRClient = FindObjectOfType<SignalRClient>();
+        signalRClient = FindAnyObjectByType<SignalRClient>();
         if (signalRClient == null)
         {
             Debug.LogError("Không tìm thấy SignalRClient trong scene! Hãy thêm component SignalRClient vào một GameObject.");
@@ -76,6 +76,7 @@ public class SkillTreeManager : MonoBehaviour
 
     public async void UpgradeCurrentSkill()
     {
+        var playerCharacterId = PlayerPrefs.GetInt("PlayerCharacterId", 0);
         if (currentSkillId == -1)
         {
             Debug.LogError("Chưa có kỹ năng nào được chọn!");
@@ -84,7 +85,7 @@ public class SkillTreeManager : MonoBehaviour
 
         if (signalRClient != null)
         {
-            var result = await signalRClient.SendUpdateSkill(1, currentSkillId);
+            var result = await signalRClient.SendUpdateSkill(playerCharacterId, currentSkillId);
             if (result.status)
             {
                 Debug.Log($"Kỹ năng {currentSkillId} đã được nâng cấp thành công!");
