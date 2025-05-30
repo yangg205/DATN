@@ -5,26 +5,23 @@ using UnityEngine.Video;
 
 public class SkillTreeManager : MonoBehaviour
 {
-    public RawImage videoDisplay;               // UI hiển thị video
-    public VideoPlayer videoPlayer;             // VideoPlayer
-    public VideoClip[] videoClips;              // Danh sách video
-    public string[] skillNames;                 // Danh sách tên kỹ năng
-    public string[] skillDescriptions;
-    public TextMeshProUGUI skillNameText;       // Text UI để hiện tên kỹ năng
+    public RawImage videoDisplay;                 // UI hiển thị video
+    public VideoPlayer videoPlayer;              // VideoPlayer
+    public VideoClip[] videoClips;               // Danh sách video
+    public string[] skillNames;                  // Danh sách tên kỹ năng
+    public string[] skillDescriptions;           // Danh sách mô tả kỹ năng
+    public TextMeshProUGUI skillNameText;        // Text UI để hiện tên kỹ năng
     public TextMeshProUGUI skillDescriptionText; // Text UI để hiện mô tả kỹ năng
     private SignalRClient signalRClient;
+    private int currentSkillId = -1;             // ID kỹ năng hiện tại được chọn
 
     private void Awake()
     {
-        // Tìm instance của SignalRClient trong scene
-        signalRClient = FindAnyObjectByType<SignalRClient>();
+        // Tìm SignalRClient trong scene
+        signalRClient = FindObjectOfType<SignalRClient>();
         if (signalRClient == null)
         {
             Debug.LogError("Không tìm thấy SignalRClient trong scene! Hãy thêm component SignalRClient vào một GameObject.");
-        }
-        else
-        {
-            Debug.Log("Đã tìm thấy SignalRClient: " + signalRClient.name);
         }
     }
 
@@ -47,11 +44,11 @@ public class SkillTreeManager : MonoBehaviour
     {
         if (index < 0 || index >= skillNames.Length) return;
 
-        if (skillNameText != null && index < skillNames.Length)
+        if (skillNameText != null)
         {
             skillNameText.text = skillNames[index];
         }
-        if (skillDescriptionText != null && index < skillDescriptions.Length)
+        if (skillDescriptionText != null)
         {
             skillDescriptionText.text = skillDescriptions[index];
         }
@@ -71,13 +68,35 @@ public class SkillTreeManager : MonoBehaviour
         }
     }
 
-    public void UpdateSkill(int Player_Characters_id, int skill_tree_id)
+    public void SelectSkill(int skillId)
     {
-        if (signalRClient == null)
+        currentSkillId = skillId; // Lưu lại skillId hiện tại
+        Debug.Log($"Kỹ năng được chọn: {skillId}");
+    }
+
+    public async void UpgradeCurrentSkill()
+    {
+        if (currentSkillId == -1)
         {
-            Debug.LogError("SignalRClient is not initialized.");
+            Debug.LogError("Chưa có kỹ năng nào được chọn!");
             return;
         }
-        var result = signalRClient.SendUpdateSkill(Player_Characters_id, skill_tree_id);
+
+        if (signalRClient != null)
+        {
+            var result = await signalRClient.SendUpdateSkill(1, currentSkillId);
+            if (result.status)
+            {
+                Debug.Log($"Kỹ năng {currentSkillId} đã được nâng cấp thành công!");
+            }
+            else
+            {
+                Debug.LogError($"Không thể nâng cấp kỹ năng {currentSkillId}!");
+            }
+        }
+        else
+        {
+            Debug.LogError("SignalRClient is not initialized!");
+        }
     }
 }

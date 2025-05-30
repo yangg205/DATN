@@ -1,7 +1,6 @@
-﻿using UnityEngine.EventSystems;
+﻿using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityEngine;
-using System;
 
 public class ButtonHoverEffect : MonoBehaviour
 {
@@ -9,10 +8,9 @@ public class ButtonHoverEffect : MonoBehaviour
     private Outline outline;
     private static ButtonHoverEffect lastClickedButton;
     [SerializeField] int videoIndex; // Gán index video cho mỗi nút
-    [SerializeField] int SkillIndex;
-    [SerializeField] int skillId;
-    [SerializeField] SkillTreeManager Manager;
-
+    [SerializeField] int skillIndex; // Gán index kỹ năng cho mỗi nút
+    [SerializeField] int skillId;    // ID của kỹ năng
+    [SerializeField] SkillTreeManager manager;
 
     void Awake()
     {
@@ -27,12 +25,12 @@ public class ButtonHoverEffect : MonoBehaviour
         outline.enabled = false;
     }
 
-    public void OnPointerEnterEvent(BaseEventData data)
+    public void OnPointerEnter(BaseEventData data)
     {
         outline.enabled = true;
     }
 
-    public void OnPointerExitEvent(BaseEventData data)
+    public void OnPointerExit(BaseEventData data)
     {
         if (this != lastClickedButton)
         {
@@ -40,7 +38,7 @@ public class ButtonHoverEffect : MonoBehaviour
         }
     }
 
-    public void OnPointerClickEvent(BaseEventData data)
+    public void OnPointerClick(BaseEventData data)
     {
         if (lastClickedButton != null && lastClickedButton != this)
         {
@@ -50,20 +48,23 @@ public class ButtonHoverEffect : MonoBehaviour
         outline.enabled = true;
         lastClickedButton = this;
 
-        // Gọi video tương ứng
-        if (Manager != null)
+        // Gọi video và hiển thị thông tin kỹ năng
+        if (manager != null)
         {
-            Manager.PlayVideo(videoIndex);
-            Manager.ShowText(SkillIndex);
+            manager.PlayVideo(videoIndex);
+            manager.ShowText(skillIndex);
         }
-    }
-    public void OnClickUpdateSkill1_1(BaseEventData data)
-    {
-        if(Manager == null)
-        {
-            Console.WriteLine("Manager khong ton tai");
-        }
-        Manager.UpdateSkill(1,skillId);
     }
 
+    public void OnClickSendSkillId()
+    {
+        if (manager != null)
+        {
+            manager.SelectSkill(skillId);
+        }
+        else
+        {
+            Debug.LogError("SkillTreeManager is not assigned!");
+        }
+    }
 }
