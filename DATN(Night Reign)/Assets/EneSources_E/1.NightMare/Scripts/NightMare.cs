@@ -12,7 +12,6 @@ public class NightMare : MonoBehaviour
     public float maxHP = 100f;
     public Animator animator;
 
-
     public Transform attackPoint;
     public float attackRange = 1.5f;
     public LayerMask playerLayer;
@@ -38,7 +37,6 @@ public class NightMare : MonoBehaviour
     public float minAttackDamage = 5f;
     public float maxAttackDamage = 15f;
 
-
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
@@ -52,7 +50,7 @@ public class NightMare : MonoBehaviour
             healthFill.fillAmount = HP / maxHP;
         }
         //===test 
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.T))
         {
             //TakeDamage(20);
             TakeIceDamage(1);

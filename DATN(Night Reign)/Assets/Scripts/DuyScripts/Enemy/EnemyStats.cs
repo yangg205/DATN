@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class EnemyStats : MonoBehaviour
 {
@@ -9,6 +10,8 @@ public class EnemyStats : MonoBehaviour
     public int expReward = 25;
     public PlayerStats playerStats;
 
+    [Header("UI")]
+    public Image healthFill;
     Animator animator;
 
     private void Awake()
@@ -37,12 +40,12 @@ public class EnemyStats : MonoBehaviour
     {
         currentHealth = currentHealth - damage;
 
-        animator.Play("DamageHit");
+        animator.Play("damage");
 
         if (currentHealth <= 0)
         {
             currentHealth = 0;
-            animator.Play("Dead");
+            animator.Play("die");
             //handle dead 
             if (playerStats != null)
             {

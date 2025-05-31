@@ -21,6 +21,7 @@ public class PlayerStats : MonoBehaviour
     public TextMeshProUGUI levelText;
 
     AnimatorHandler animatorHandler;
+    SignalRClient signalRClient;
 
     private void Awake()
     {
@@ -98,6 +99,7 @@ public class PlayerStats : MonoBehaviour
         expBar.SetMaxEXP(expToNextLevel);
         expBar.SetCurrentEXP(currentEXP);
         UpdateLevelText();
+
     }
 
     private void UpdateLevelText()
