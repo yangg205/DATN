@@ -53,7 +53,7 @@ public class NightMare : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.T))
         {
             //TakeDamage(20);
-            TakeIceDamage(1);
+            TakeIceDamageNightMare(1);
         }
 
 
@@ -106,7 +106,7 @@ public class NightMare : MonoBehaviour
             animator.SetTrigger("damage");
         }
     }
-    public void TakeIceDamage(int damageAmount)       //dành cho char có skill đóng băng
+    public void TakeIceDamageNightMare(int damageAmount)       //dành cho char có skill đóng băng
     { 
         if (isDead) return;
         HP -= damageAmount;
