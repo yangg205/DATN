@@ -57,7 +57,7 @@ public class DragonSoulEater : MonoBehaviour
             TakeDamage(20);
         }if (Input.GetKeyDown(KeyCode.I))
             {
-                TakeIceDamage(1);
+                TakeIceDamageSoulEater(1);
              }
 
 
@@ -110,7 +110,7 @@ public class DragonSoulEater : MonoBehaviour
             animator.SetTrigger("damage");
         }
     }
-    public void TakeIceDamage(int damageAmount)       //dành cho char có skill đóng băng
+    public void TakeIceDamageSoulEater(int damageAmount)       //dành cho char có skill đóng băng
     { 
         if (isDead) return;
         HP -= damageAmount;
