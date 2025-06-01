@@ -1,8 +1,8 @@
 using UnityEngine;
-
-public class Item : ScriptableObject
+public class ItemD : ScriptableObject
 {
     [Header("Item Information")]
     public Sprite itemIcon;
     public string itemName;
 }
+
