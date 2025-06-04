@@ -1,104 +1,41 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PauseManager : MonoBehaviour
 {
-    public static bool IsPaused = false;
-    [SerializeField] private GameObject pauseMenuUI;
+    public GameObject pauseMenuUI;
+    public GameObject settingsPanel;
+    public GameObject saveConfirmPanel;
+
+    private bool isPaused = false;
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (IsPaused)
-                Resume();
-            else
+            if (!isPaused)
                 Pause();
+            else
+                Resume();
         }
-    }
-
-    public void Resume()
-    {
-        pauseMenuUI.SetActive(false);
-        Time.timeScale = 1f;
-        IsPaused = false;
     }
 
     public void Pause()
     {
-        pauseMenuUI.SetActive(true);
         Time.timeScale = 0f;
-        IsPaused = true;
+        isPaused = true;
+
+        // Hiện pause menu chính
+        pauseMenuUI.SetActive(true);
+
+        // Ẩn các panel phụ nếu có
+        if (settingsPanel != null) settingsPanel.SetActive(false);
+        if (saveConfirmPanel != null) saveConfirmPanel.SetActive(false);
     }
 
-    public void QuitGame()
+    public void Resume()
     {
-        Debug.Log("Quitting game...");
-        Application.Quit();
+        Time.timeScale = 1f;
+        isPaused = false;
+        pauseMenuUI.SetActive(false);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-//using UnityEngine;
-//using UnityEngine.InputSystem;
-
-//public class PauseManager : MonoBehaviour
-//{
-//    public static bool IsPaused = false;
-
-//    [SerializeField] private GameObject pauseMenuUI;
-
-//    private PlayerInputActions inputActions;
-
-//    private void Awake()
-//    {
-//        inputActions = new PlayerInputActions();
-//        inputActions.UI.Pause.performed += ctx => TogglePause();
-//    }
-
-//    private void OnEnable()
-//    {
-//        inputActions.UI.Enable();
-//    }
-
-//    private void OnDisable()
-//    {
-//        inputActions.UI.Disable();
-//    }
-
-//    private void TogglePause()
-//    {
-//        if (IsPaused)
-//            Resume();
-//        else
-//            Pause();
-//    }
-
-//    public void Resume()
-//    {
-//        pauseMenuUI.SetActive(false);
-//        Time.timeScale = 1f;
-//        IsPaused = false;
-//    }
-
-//    public void Pause()
-//    {
-//        pauseMenuUI.SetActive(true);
-//        Time.timeScale = 0f;
-//        IsPaused = true;
-//    }
-
-//    public void QuitGame()
-//    {
-//        Debug.Log("Quit game");
-//        Application.Quit();
-//    }
-//}
