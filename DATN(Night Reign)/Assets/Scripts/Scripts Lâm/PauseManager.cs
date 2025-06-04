@@ -38,4 +38,15 @@ public class PauseManager : MonoBehaviour
         isPaused = false;
         pauseMenuUI.SetActive(false);
     }
+    // ✅ Quit Game (gọi từ nút Quit)
+    public void QuitGame()
+    {
+        Debug.Log("Quitting game...");
+
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
 }
