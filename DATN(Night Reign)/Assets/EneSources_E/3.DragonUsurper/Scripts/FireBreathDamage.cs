@@ -16,7 +16,7 @@ public class FireBreathDamage : MonoBehaviour
         if (other.CompareTag("Player"))
         {
 
-            player.GetComponent<PlayerClone>().TakeDamage(0.330f);
+            player.GetComponent<PlayerStats>()?.TakeDamage(15);
         }
     }
 }

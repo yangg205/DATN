@@ -161,7 +161,7 @@ public class DragonSoulEater : MonoBehaviour
         Collider[] hitPlayers = Physics.OverlapSphere(attackPoint.position, attackRange, playerLayer);
         foreach (Collider player in hitPlayers)
         {
-            player.GetComponent<PlayerClone>().TakeDamage(damage);
+            player.GetComponent<PlayerStats>()?.TakeDamage(15);
             //============== thay bằng code HP player=============================***************************
         }
     }

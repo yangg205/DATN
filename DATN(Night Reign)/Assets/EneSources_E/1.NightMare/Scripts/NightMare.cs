@@ -157,8 +157,7 @@ public class NightMare : MonoBehaviour
         Collider[] hitPlayers = Physics.OverlapSphere(attackPoint.position, attackRange, playerLayer);
         foreach (Collider player in hitPlayers)
         {
-            player.GetComponent<PlayerClone>().TakeDamage(damage);
-            //============== thay bằng code HP player=============================***************************
+            player.GetComponent<PlayerStats>()?.TakeDamage(15);            //============== thay bằng code HP player=============================***************************
         }
     }
     private void OnDrawGizmosSelected()
