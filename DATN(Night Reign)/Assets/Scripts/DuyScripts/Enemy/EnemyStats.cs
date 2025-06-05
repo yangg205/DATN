@@ -40,12 +40,12 @@ public class EnemyStats : MonoBehaviour
     {
         currentHealth = currentHealth - damage;
 
-        animator.Play("damage");
+        animator.Play("DamageHit");
 
         if (currentHealth <= 0)
         {
             currentHealth = 0;
-            animator.Play("die");
+            animator.Play("Dead");
             //handle dead 
             if (playerStats != null)
             {
