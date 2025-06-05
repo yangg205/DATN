@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using UnityEngine.EventSystems;
+
 
 public class PauseManager : MonoBehaviour
 {
@@ -23,13 +25,13 @@ public class PauseManager : MonoBehaviour
     {
         Time.timeScale = 0f;
         isPaused = true;
-
-        // Hiện pause menu chính
         pauseMenuUI.SetActive(true);
 
-        // Ẩn các panel phụ nếu có
         if (settingsPanel != null) settingsPanel.SetActive(false);
         if (saveConfirmPanel != null) saveConfirmPanel.SetActive(false);
+
+        // Reset selected UI element (fix hover bug)
+        EventSystem.current.SetSelectedGameObject(null);
     }
 
     public void Resume()
