@@ -1,6 +1,7 @@
 ﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 using UnityEngine.Video;
 
 public class SkillTreeManager : MonoBehaviour
@@ -14,6 +15,7 @@ public class SkillTreeManager : MonoBehaviour
     public TextMeshProUGUI skillDescriptionText; // Text UI để hiện mô tả kỹ năng
     private SignalRClient signalRClient;
     private int currentSkillId = -1;             // ID kỹ năng hiện tại được chọn
+    private ButtonHoverEffect ButtonHoverEffect;
 
     private void Awake()
     {
@@ -88,7 +90,16 @@ public class SkillTreeManager : MonoBehaviour
             var result = await signalRClient.SendUpdateSkill(playerCharacterId, currentSkillId);
             if (result.status)
             {
-                Debug.Log($"Kỹ năng {currentSkillId} đã được nâng cấp thành công!");
+                var buttons = FindObjectsOfType<ButtonHoverEffect>();
+                foreach (var button in buttons)
+                {
+                    if (button.skillId == currentSkillId)
+                    {
+                        button.SetOwned(true); // Đặt trạng thái sở hữu
+                        break;
+                    }
+                }
+
             }
             else
             {
