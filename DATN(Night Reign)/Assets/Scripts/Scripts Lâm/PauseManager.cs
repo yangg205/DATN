@@ -1,104 +1,54 @@
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.EventSystems;
+
 
 public class PauseManager : MonoBehaviour
 {
-    public static bool IsPaused = false;
-    [SerializeField] private GameObject pauseMenuUI;
+    public GameObject pauseMenuUI;
+    public GameObject settingsPanel;
+    public GameObject saveConfirmPanel;
+
+    private bool isPaused = false;
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (IsPaused)
-                Resume();
-            else
+            if (!isPaused)
                 Pause();
+            else
+                Resume();
         }
-    }
-
-    public void Resume()
-    {
-        pauseMenuUI.SetActive(false);
-        Time.timeScale = 1f;
-        IsPaused = false;
     }
 
     public void Pause()
     {
-        pauseMenuUI.SetActive(true);
         Time.timeScale = 0f;
-        IsPaused = true;
+        isPaused = true;
+        pauseMenuUI.SetActive(true);
+
+        if (settingsPanel != null) settingsPanel.SetActive(false);
+        if (saveConfirmPanel != null) saveConfirmPanel.SetActive(false);
+
+        // Reset selected UI element (fix hover bug)
+        EventSystem.current.SetSelectedGameObject(null);
     }
 
+    public void Resume()
+    {
+        Time.timeScale = 1f;
+        isPaused = false;
+        pauseMenuUI.SetActive(false);
+    }
+    // ✅ Quit Game (gọi từ nút Quit)
     public void QuitGame()
     {
         Debug.Log("Quitting game...");
+
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
         Application.Quit();
+#endif
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-//using UnityEngine;
-//using UnityEngine.InputSystem;
-
-//public class PauseManager : MonoBehaviour
-//{
-//    public static bool IsPaused = false;
-
-//    [SerializeField] private GameObject pauseMenuUI;
-
-//    private PlayerInputActions inputActions;
-
-//    private void Awake()
-//    {
-//        inputActions = new PlayerInputActions();
-//        inputActions.UI.Pause.performed += ctx => TogglePause();
-//    }
-
-//    private void OnEnable()
-//    {
-//        inputActions.UI.Enable();
-//    }
-
-//    private void OnDisable()
-//    {
-//        inputActions.UI.Disable();
-//    }
-
-//    private void TogglePause()
-//    {
-//        if (IsPaused)
-//            Resume();
-//        else
-//            Pause();
-//    }
-
-//    public void Resume()
-//    {
-//        pauseMenuUI.SetActive(false);
-//        Time.timeScale = 1f;
-//        IsPaused = false;
-//    }
-
-//    public void Pause()
-//    {
-//        pauseMenuUI.SetActive(true);
-//        Time.timeScale = 0f;
-//        IsPaused = true;
-//    }
-
-//    public void QuitGame()
-//    {
-//        Debug.Log("Quit game");
-//        Application.Quit();
-//    }
-//}
