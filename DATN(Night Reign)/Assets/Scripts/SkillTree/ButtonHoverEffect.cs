@@ -9,8 +9,9 @@ public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerEx
     private static ButtonHoverEffect lastClickedButton;
     [SerializeField] private int videoIndex; // Gán index video cho mỗi nút
     [SerializeField] private int skillIndex; // Gán index kỹ năng cho mỗi nút
-    [SerializeField] private int skillId;    // ID của kỹ năng
+    [SerializeField] public int skillId;    // ID của kỹ năng
     [SerializeField] private SkillTreeManager manager;
+    private bool isOwned = false;            // Trạng thái sở hữu kỹ năng
 
     void Awake()
     {
@@ -47,7 +48,7 @@ public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerEx
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (outline != null)
+        if (!isOwned && outline != null)
         {
             outline.enabled = true;
         }
@@ -55,7 +56,7 @@ public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerEx
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        if (this != lastClickedButton && outline != null)
+        if (!isOwned && this != lastClickedButton && outline != null)
         {
             outline.enabled = false;
         }
@@ -63,7 +64,7 @@ public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerEx
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (lastClickedButton != null && lastClickedButton != this)
+        if (lastClickedButton != null && lastClickedButton != this && !lastClickedButton.isOwned)
         {
             lastClickedButton.outline.enabled = false;
         }
@@ -96,5 +97,19 @@ public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerEx
         {
             Debug.LogError("SkillTreeManager is not assigned on " + gameObject.name);
         }
+    }
+
+    public void SetOutline(bool enable)
+    {
+        if (outline != null)
+        {
+            outline.enabled = enable;
+        }
+    }
+
+    public void SetOwned(bool owned)
+    {
+        isOwned = owned;
+        SetOutline(owned); // Đảm bảo bật/tắt outline dựa trên trạng thái sở hữu
     }
 }
