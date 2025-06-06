@@ -2,49 +2,51 @@
 using UnityEngine.EventSystems;
 using TMPro;
 
-public class MenuHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
+public class MenuHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    public TextMeshProUGUI text;
-    public Color normalColor = Color.gray;
-    public Color hoverColor = new Color(0f, 1f, 1f); // Neon cyan
+    public TMP_Text text;
+    public Color normalColor = Color.white;
+    public Color hoverColor = Color.yellow;
     public float scaleAmount = 1.05f;
     public float transitionSpeed = 5f;
 
     private Vector3 originalScale;
+    private bool isHovered = false;
 
     void Start()
     {
         originalScale = transform.localScale;
-        text.color = normalColor;
+        if (text != null)
+            text.color = normalColor;
+    }
+
+    void Update()
+    {
+        // Smooth scale animation
+        Vector3 targetScale = isHovered ? originalScale * scaleAmount : originalScale;
+        transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.unscaledDeltaTime * transitionSpeed);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        StopAllCoroutines();
-        StartCoroutine(HoverEffect(hoverColor, originalScale * scaleAmount));
+        isHovered = true;
+        if (text != null)
+            text.color = hoverColor;
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        StopAllCoroutines();
-        StartCoroutine(HoverEffect(normalColor, originalScale));
+        isHovered = false;
+        if (text != null)
+            text.color = normalColor;
     }
 
-    public void OnPointerClick(PointerEventData eventData)
+    void OnDisable()
     {
-        StopAllCoroutines();
+        // Reset khi menu bị tắt
+        isHovered = false;
         transform.localScale = originalScale;
-        text.color = normalColor;
-    }
-
-    System.Collections.IEnumerator HoverEffect(Color targetColor, Vector3 targetScale)
-    {
-        while (Vector3.Distance(transform.localScale, targetScale) > 0.001f ||
-               text.color != targetColor)
-        {
-            transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.deltaTime * transitionSpeed);
-            text.color = Color.Lerp(text.color, targetColor, Time.deltaTime * transitionSpeed);
-            yield return null;
-        }
+        if (text != null)
+            text.color = normalColor;
     }
 }
