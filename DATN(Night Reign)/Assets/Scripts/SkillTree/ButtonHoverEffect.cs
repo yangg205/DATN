@@ -2,20 +2,27 @@
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ButtonHoverEffect : MonoBehaviour
+public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     private Image buttonImage;
     private Outline outline;
     private static ButtonHoverEffect lastClickedButton;
-    [SerializeField] int videoIndex; // Gán index video cho mỗi nút
-    [SerializeField] int skillIndex; // Gán index kỹ năng cho mỗi nút
-    [SerializeField] int skillId;    // ID của kỹ năng
-    [SerializeField] SkillTreeManager manager;
+    [SerializeField] private int videoIndex; // Gán index video cho mỗi nút
+    [SerializeField] private int skillIndex; // Gán index kỹ năng cho mỗi nút
+    [SerializeField] private int skillId;    // ID của kỹ năng
+    [SerializeField] private SkillTreeManager manager;
 
     void Awake()
     {
+        // Lấy hoặc thêm Image component
         buttonImage = GetComponent<Image>();
-        outline = gameObject.GetComponent<Outline>();
+        if (buttonImage == null)
+        {
+            Debug.LogError("Image component is missing on " + gameObject.name);
+        }
+
+        // Lấy hoặc thêm Outline component
+        outline = GetComponent<Outline>();
         if (outline == null)
         {
             outline = gameObject.AddComponent<Outline>();
@@ -23,29 +30,48 @@ public class ButtonHoverEffect : MonoBehaviour
         outline.effectColor = Color.yellow;
         outline.effectDistance = new Vector2(3, 3);
         outline.enabled = false;
+
+        // Đảm bảo có Button component
+        if (GetComponent<Button>() == null)
+        {
+            Debug.LogWarning("Button component is missing on " + gameObject.name + ". Adding one...");
+            gameObject.AddComponent<Button>();
+        }
+
+        // Đảm bảo Raycast Target được bật
+        if (buttonImage != null)
+        {
+            buttonImage.raycastTarget = true;
+        }
     }
 
-    public void OnPointerEnter(BaseEventData data)
+    public void OnPointerEnter(PointerEventData eventData)
     {
-        outline.enabled = true;
+        if (outline != null)
+        {
+            outline.enabled = true;
+        }
     }
 
-    public void OnPointerExit(BaseEventData data)
+    public void OnPointerExit(PointerEventData eventData)
     {
-        if (this != lastClickedButton)
+        if (this != lastClickedButton && outline != null)
         {
             outline.enabled = false;
         }
     }
 
-    public void OnPointerClick(BaseEventData data)
+    public void OnPointerClick(PointerEventData eventData)
     {
         if (lastClickedButton != null && lastClickedButton != this)
         {
             lastClickedButton.outline.enabled = false;
         }
 
-        outline.enabled = true;
+        if (outline != null)
+        {
+            outline.enabled = true;
+        }
         lastClickedButton = this;
 
         // Gọi video và hiển thị thông tin kỹ năng
@@ -53,6 +79,10 @@ public class ButtonHoverEffect : MonoBehaviour
         {
             manager.PlayVideo(videoIndex);
             manager.ShowText(skillIndex);
+        }
+        else
+        {
+            Debug.LogError("SkillTreeManager is not assigned on " + gameObject.name);
         }
     }
 
@@ -64,7 +94,7 @@ public class ButtonHoverEffect : MonoBehaviour
         }
         else
         {
-            Debug.LogError("SkillTreeManager is not assigned!");
+            Debug.LogError("SkillTreeManager is not assigned on " + gameObject.name);
         }
     }
 }
