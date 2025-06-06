@@ -10,11 +10,11 @@ public class TestIceBullet : MonoBehaviour
             NightMare enemy = other.GetComponent<NightMare>();
             if (enemy != null)
             {
-                enemy.TakeIceDamage(1);
+                enemy.TakeIceDamageNightMare(1);
             }
             DragonSoulEater enemy1 = other.GetComponent<DragonSoulEater>();
             if (enemy1 != null)
-                enemy1.TakeIceDamage(1);
+                enemy1.TakeIceDamageSoulEater(1);
         }
     }
 }
