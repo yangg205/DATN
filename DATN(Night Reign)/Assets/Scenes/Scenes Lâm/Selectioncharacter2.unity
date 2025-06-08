@@ -2483,6 +2483,7 @@ GameObject:
   - component: {fileID: 488835181}
   - component: {fileID: 488835180}
   - component: {fileID: 488835179}
+  - component: {fileID: 488835184}
   m_Layer: 5
   m_Name: ButtonMagic
   m_TagString: Untagged
@@ -2534,7 +2535,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 488835177}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 762dbf81943c8054f853909b46717c15, type: 3}
   m_Name: 
@@ -2640,6 +2641,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 488835177}
   m_CullTransparentMesh: 1
+--- !u!114 &488835184
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 488835177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a1b31fff994a3442917d0f5488fef31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  status: 0
 --- !u!1 &493242352
 GameObject:
   m_ObjectHideFlags: 0
@@ -4264,6 +4278,7 @@ GameObject:
   - component: {fileID: 708796605}
   - component: {fileID: 708796606}
   - component: {fileID: 708796607}
+  - component: {fileID: 708796608}
   m_Layer: 5
   m_Name: ButtonTank
   m_TagString: Untagged
@@ -4394,7 +4409,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 708796600}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 762dbf81943c8054f853909b46717c15, type: 3}
   m_Name: 
@@ -4433,6 +4448,19 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &708796608
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 708796600}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a1b31fff994a3442917d0f5488fef31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  status: 0
 --- !u!1 &710022851
 GameObject:
   m_ObjectHideFlags: 0
@@ -12022,14 +12050,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a1b31fff994a3442917d0f5488fef31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverPanel: {fileID: 1264601200}
-  button1: {fileID: 1141889240}
-  button2: {fileID: 1426011338}
-  panel1: {fileID: 1731086199}
-  panel2: {fileID: 1622484534}
-  panel1CloseButton: {fileID: 0}
-  panel2CloseButton: {fileID: 0}
-  uiStatus: 0
+  status: 0
 --- !u!1 &1329065403 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3858921334554451083, guid: 08c08da653b2a994ab9a45782055cb9c, type: 3}
@@ -16759,6 +16780,7 @@ GameObject:
   - component: {fileID: 1750279722}
   - component: {fileID: 1750279721}
   - component: {fileID: 1750279726}
+  - component: {fileID: 1750279727}
   m_Layer: 5
   m_Name: ButtonDame
   m_TagString: Untagged
@@ -16810,7 +16832,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1750279719}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 762dbf81943c8054f853909b46717c15, type: 3}
   m_Name: 
@@ -16928,6 +16950,19 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &1750279727
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1750279719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a1b31fff994a3442917d0f5488fef31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  status: 0
 --- !u!1 &1754306013 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6524900497328089025, guid: 701fea26b98170847ac53fb33dbce797, type: 3}
