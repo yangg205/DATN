@@ -1364,7 +1364,7 @@ MonoBehaviour:
     - m_Text: English
       m_Image: {fileID: 0}
       m_Color: {r: 1, g: 1, b: 1, a: 1}
-    - m_Text: Vietnames
+    - m_Text: Vietnamese
       m_Image: {fileID: 0}
       m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_OnValueChanged:
@@ -2790,6 +2790,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1220325081}
   - component: {fileID: 1220325082}
+  - component: {fileID: 1220325083}
   m_Layer: 0
   m_Name: LocalizationManager
   m_TagString: Untagged
@@ -2823,7 +2824,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1220325080}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 599199132edb63d48b5d765abf0c041d, type: 3}
   m_Name: 
@@ -2841,6 +2842,19 @@ MonoBehaviour:
   - 
   - 
   - 
+--- !u!114 &1220325083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1220325080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5647db7f5ea4da54aae8f0430c55f6f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  languageDropdown: {fileID: 453060907}
 --- !u!1 &1271188348 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5609249185027791238, guid: 701fea26b98170847ac53fb33dbce797, type: 3}

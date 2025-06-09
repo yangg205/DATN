@@ -8,8 +8,7 @@ public class AuthManager : MonoBehaviour
     [SerializeField] GameObject loginPanel;
     [SerializeField] GameObject registerPanel;
     [SerializeField] GameObject otpPanel;
-    [SerializeField] GameObject notificationPanel;
-    [SerializeField] TextMeshProUGUI notificationText;
+    NotificationManager notificationManager;
 
     //input fields login
     [SerializeField] TMP_InputField emailLogin;
@@ -29,19 +28,12 @@ public class AuthManager : MonoBehaviour
         loginPanel.SetActive(false);
         registerPanel.SetActive(false);
         otpPanel.SetActive(false);
-        notificationPanel.SetActive(false);
         signalRClient = FindAnyObjectByType<SignalRClient>();
         if (signalRClient == null)
         {
             Debug.LogError("SignalRClient khong co trong scene.");
         }
-    }
-    IEnumerator ShowNotification(string mess, float time)
-    {
-        notificationText.text = mess;
-        notificationPanel.SetActive(true);
-        yield return new WaitForSeconds(time);
-        notificationPanel.SetActive(false);
+        notificationManager = FindAnyObjectByType<NotificationManager>();
     }
     // Update is called once per frame
     void Update()
@@ -79,7 +71,8 @@ public class AuthManager : MonoBehaviour
         string password = passwordLogin.text.Trim();
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
         {
-            StartCoroutine(ShowNotification("Vui lòng nhập đầy đủ email và mật khẩu!",4));
+            
+            notificationManager.ShowNotification("Vui lòng nhập đầy đủ email và mật khẩu!", 4);
             return;
         }
         var result = await signalRClient.SendLogin(email, password);
@@ -90,7 +83,7 @@ public class AuthManager : MonoBehaviour
         }
         else
         {
-            StartCoroutine(ShowNotification(result.message, 4));
+            notificationManager.ShowNotification(result.message, 4);
         }
     }
     public async void OnClickSubmiRegister()
@@ -100,18 +93,18 @@ public class AuthManager : MonoBehaviour
         string confirmPassword = confirmPasswordRegister.text.Trim();
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(confirmPassword))
         {
-            StartCoroutine(ShowNotification("Vui lòng nhập đầy đủ email và mật khẩu!", 4));
+            notificationManager.ShowNotification("Vui lòng nhập đầy đủ email và mật khẩu!", 4);
             return;
         }
         var result = await signalRClient.SendRegister(email, password, confirmPassword);
         if (result.status)
         {
-            StartCoroutine(ShowNotification("Kiểm tra email để lấy OTP", 4));
+            notificationManager.ShowNotification("Kiểm tra email để lấy OTP", 4);
             PlayerPrefs.SetString("email", email);
         }
         else
         {
-            StartCoroutine(ShowNotification(result.message, 2));
+            notificationManager.ShowNotification(result.message, 2);
         }
         otpPanel.SetActive(true);
         registerPanel.SetActive(false);
@@ -122,24 +115,24 @@ public class AuthManager : MonoBehaviour
         string otp = otpCode.text.Trim();
         if (string.IsNullOrEmpty(email))
         {
-            StartCoroutine(ShowNotification("Vui lòng đăng ký trước!", 4));
+            notificationManager.ShowNotification("Vui lòng đăng ký trước!", 4);
             return;
         }
         if (string.IsNullOrEmpty(otp))
         {
-            StartCoroutine(ShowNotification("Vui lòng nhập đầy đủ OTP!", 4));
+            notificationManager.ShowNotification("Vui lòng nhập đầy đủ OTP!", 4);
             return;
         }
         var result = await signalRClient.SendOTP(email, otp);
         if (result.status)
         {
-            StartCoroutine(ShowNotification("Đăng ký thành công!", 4));
+            notificationManager.ShowNotification("Đăng ký thành công!", 4);
             otpPanel.SetActive(false);
             loginPanel.SetActive(true);
         }
         else
         {
-            StartCoroutine(ShowNotification(result.message, 2));
+            notificationManager.ShowNotification(result.message, 2);
         }
     }
 }
