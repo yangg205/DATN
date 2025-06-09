@@ -30,6 +30,7 @@ public class PlayerStats : MonoBehaviour
         expBar = FindFirstObjectByType<ExpBar>();
         animatorHandler = GetComponentInChildren<AnimatorHandler>();
 
+
     }
     void Start()
     {
