@@ -13,21 +13,19 @@ public class InventoryUIController : MonoBehaviour
     void Start()
     {
         inventoryPanel.SetActive(false); // Tắt Inventory lúc đầu
-        UpdateButtonText();
-    }
 
-    public void ToggleInventory()
+    }
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+            ToggleInventory();
+        }
+    }
+    private void ToggleInventory()
     {
         isInventoryOpen = !isInventoryOpen;
         inventoryPanel.SetActive(isInventoryOpen);
-        UpdateButtonText();
     }
 
-    void UpdateButtonText()
-    {
-        if (isInventoryOpen)
-            buttonText.text = "Đóng túi đồ";
-        else
-            buttonText.text = "Mở túi đồ";
-    }
 }
