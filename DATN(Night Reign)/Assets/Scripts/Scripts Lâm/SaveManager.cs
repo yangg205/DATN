@@ -1,65 +1,8 @@
-﻿//using UnityEngine;
-//using System.IO;
-
-//public class SaveManager : MonoBehaviour
-//{
-//    private string savePath;
-//    public SaveManager saveManager;
-
-//    public void SaveGameFromPause()
-//    {
-//        if (saveManager != null)
-//            saveManager.SaveGame();
-//    }
-//    private void Awake()
-//    {
-//        savePath = Path.Combine(Application.persistentDataPath, "savegame.json");
-//    }
-
-//    public void SaveGame()
-//    {
-//        // Dữ liệu giả để demo. Bạn có thể thay bằng dữ liệu thật như vị trí nhân vật, chỉ số,...
-//        GameData data = new GameData
-//        {
-//            playerName = "Hero",
-//            level = 3,
-//            health = 100
-//        };
-
-//        string json = JsonUtility.ToJson(data, true);
-//        File.WriteAllText(savePath, json);
-//        Debug.Log("Game Saved to: " + savePath);
-//    }
-//}
-
-//[System.Serializable]
-//public class GameData
-//{
-//    public string playerName;
-
-//    public int level;
-//    public int health;
-//    public int hp;
-//    public int mp;
-//    public int stamina;
-//    public float staminaRegenRate;
-
-//    public int damage;
-//    public float attackSpeed;
-
-//    public float critChance;
-//    public float critDamage;
-
-//    public int magic;
-//    public int defense;
-//}
-
-
-
-
+﻿
 using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
+using System;
 
 public class SaveManager : MonoBehaviour
 {
@@ -69,11 +12,45 @@ public class SaveManager : MonoBehaviour
     public GameObject saveConfirmPanel; // Gán panel từ Canvas
     public Button yesButton;
     public Button noButton;
-
+    SignalRClient SignalRClient;
+    NotificationManager NotificationManager;
+    PlayerStats playerStats;
+    //GameObject ButtonYes;
+    //SkillTreeManager SkillTreeManager;
+    GameObject player;
     private void Awake()
     {
         savePath = Path.Combine(Application.persistentDataPath, "savegame.json");
-
+        //ButtonYes = GameObject.Find("ButtonYes");
+        SignalRClient = FindAnyObjectByType<SignalRClient>();
+        NotificationManager = FindAnyObjectByType<NotificationManager>();
+        playerStats = FindAnyObjectByType<PlayerStats>();
+        //var skilltreeManager = FindAnyObjectByType<SkillTreeManager>();
+        //var player = GameObject.FindGameObjectWithTag("Player").GetComponent<GameObject>();
+        if (player == null)
+        {
+            player = GameObject.FindGameObjectWithTag("Player");
+            if (player == null)
+            {
+                Debug.LogError("Cannot find GameObject with tag 'Player' in the scene!");
+            }
+        }
+        if (SignalRClient is null)
+        {
+            Debug.Log("server null");
+        }
+        if (NotificationManager is null)
+        {
+            Debug.Log("notificate null");
+        }
+        if (playerStats is null)
+        {
+            Debug.Log("player state null");
+        }
+        //if (skilltreeManager is null)
+        //{
+        //    Debug.Log("skill tree null");
+        //}
         // Gán sự kiện khi nút được bấm
         if (yesButton != null)
             yesButton.onClick.AddListener(OnYesClicked);
@@ -110,22 +87,57 @@ public class SaveManager : MonoBehaviour
     private void OnNoClicked()
     {
         Debug.Log("Không Save Game");
-
         if (saveConfirmPanel != null)
             saveConfirmPanel.SetActive(false);
     }
 
-    public void SaveGame()
+    public async void SaveGame()
     {
-        //GameData data = new GameData
-        //{
-        //    playerName = "Hero",
-        //    level = 3,
-        //    health = 100
-        //};
+        if (player == null)
+        {
+            Debug.LogError("Cannot save game: player");
+            return;
+        }
+        if (playerStats == null)
+        {
+            Debug.LogError("Cannot save game: playerStats");
+            return;
+        }
+        if (SignalRClient == null)
+        {
+            Debug.LogError("Cannot save game: SignalRClient is missing!");
+            return;
+        }
+        Vector3 playerPosition = player.transform.localPosition;
+        Debug.Log($"Saving player position: ({playerPosition.x}, {playerPosition.y}, {playerPosition.z})");
 
-        //string json = JsonUtility.ToJson(data, true);
-        //File.WriteAllText(savePath, json);
-        //Debug.Log("Game Saved to: " + savePath);
+        var playerCharacters = new Player_Characters
+        {
+            Player_Character_id = PlayerPrefs.GetInt("PlayerCharacterId", 0),
+            Player_id = PlayerPrefs.GetInt("PlayerId", 0),
+            Characters_id = PlayerPrefs.GetInt("Character", 0),
+            Ownershipdate = DateTime.Now,
+            Current_hp = playerStats.currentHealth,
+            Current_exp = playerStats.currentEXP,
+            level = playerStats.playerLevel,
+            Total_point = 0,
+            Total_coin = 0,
+            Skill_Point = 0,
+            Position_x = playerPosition.x,
+            Position_y = playerPosition.y,
+            Position_z = playerPosition.z,
+            Datesave = DateTime.Now,
+        };
+
+        var result = await SignalRClient.SaveGame(playerCharacters);
+        if (result.status)
+        {
+            NotificationManager.ShowNotification(result.message, 1);
+        }
+        else
+        {
+            Debug.LogError($"Failed to save game: {result.message}");
+            NotificationManager.ShowNotification($"Failed to save game: {result.message}", 1);
+        }
     }
 }

@@ -38,7 +38,11 @@ public class AuthManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        string playerMail = PlayerPrefs.GetString("email");
+        if (playerMail.Contains("@"))
+        {
+            emailLogin.text = $"{playerMail}";
+        }
     }
     public void OnClickShowLoginInner()
     {
@@ -67,7 +71,7 @@ public class AuthManager : MonoBehaviour
     }
     public async void OnClickSubmitLogin()
     {
-        string email = emailLogin.text.Trim();
+        string email = emailLogin.text.Trim(); 
         string password = passwordLogin.text.Trim();
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
         {
@@ -88,6 +92,7 @@ public class AuthManager : MonoBehaviour
     }
     public async void OnClickSubmiRegister()
     {
+
         string email = emailRegister.text.Trim();
         string password = passwordRegister.text.Trim();
         string confirmPassword = confirmPasswordRegister.text.Trim();
@@ -101,13 +106,13 @@ public class AuthManager : MonoBehaviour
         {
             notificationManager.ShowNotification("Kiểm tra email để lấy OTP", 4);
             PlayerPrefs.SetString("email", email);
+            otpPanel.SetActive(true);
+            registerPanel.SetActive(false);
         }
         else
         {
             notificationManager.ShowNotification(result.message, 2);
         }
-        otpPanel.SetActive(true);
-        registerPanel.SetActive(false);
     }
     public async void OnClickSubmitOtp()
     {

@@ -28,6 +28,7 @@ public class SelectCServer : MonoBehaviour
         if (result.status)
         {
             PlayerPrefs.SetInt("PlayerCharacterId", result.player_Characters.Player_Character_id);
+            PlayerPrefs.SetInt("Character", Titanos);
             SceneManager.LoadScene("VucLavareach");
         }
         else
@@ -43,11 +44,12 @@ public class SelectCServer : MonoBehaviour
             Debug.LogError("❌ SignalRClient không được khởi tạo!");
             return;
         }
-        var result = await SignalRClient.SelectCharacter(playerId, Titanos);
+        var result = await SignalRClient.SelectCharacter(playerId, Sylas);
         Debug.Log($"✅ Chọn nhân vật thành công: {result}");
         if (result.status)
         {
             PlayerPrefs.SetInt("PlayerCharacterId", result.player_Characters.Player_Character_id);
+            PlayerPrefs.SetInt("Character", Sylas);
             SceneManager.LoadScene("VucLavareach");
         }
         else
@@ -58,16 +60,18 @@ public class SelectCServer : MonoBehaviour
     public async void SelectCharacter3()
     {
         var playerId = PlayerPrefs.GetInt("PlayerId", 0);
+        
         if (SignalRClient == null)
         {
             Debug.LogError("❌ SignalRClient không được khởi tạo!");
             return;
         }
-        var result = await SignalRClient.SelectCharacter(playerId, Titanos);
+        var result = await SignalRClient.SelectCharacter(playerId, Zarathos);
         Debug.Log($"✅ Chọn nhân vật thành công: {result}");
         if (result.status)
         {
             PlayerPrefs.SetInt("PlayerCharacterId", result.player_Characters.Player_Character_id);
+            PlayerPrefs.SetInt("Character", Zarathos);
             SceneManager.LoadScene("VucLavareach");
         }
         else
