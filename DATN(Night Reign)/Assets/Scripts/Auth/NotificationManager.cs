@@ -9,7 +9,7 @@ public class NotificationManager : MonoBehaviour
 
     [SerializeField] GameObject notificationPanel;
     [SerializeField] TextMeshProUGUI notificationText;
-    [SerializeField] Canvas canvas; // Gán Canvas chứa notificationPanel trong Inspector
+    [SerializeField] Canvas canvas;
 
     private bool isShowingNotification = false;
     private Queue<(string message, float duration)> notificationQueue = new Queue<(string, float)>();
@@ -19,13 +19,11 @@ public class NotificationManager : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            Debug.LogWarning($"Another NotificationManager instance found on {gameObject.name}! Destroying this one.");
             Destroy(gameObject);
             return;
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        Debug.Log($"NotificationManager Singleton initialized: {gameObject.name}");
     }
 
     private void Start()

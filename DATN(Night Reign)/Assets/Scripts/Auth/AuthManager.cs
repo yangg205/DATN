@@ -20,6 +20,7 @@ public class AuthManager : MonoBehaviour
     //input fields otp
     [SerializeField] TMP_InputField otpCode;
 
+    private bool isEmailLoaded = false;
     //server
     private SignalRClient signalRClient;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -34,15 +35,22 @@ public class AuthManager : MonoBehaviour
             Debug.LogError("SignalRClient khong co trong scene.");
         }
         notificationManager = FindAnyObjectByType<NotificationManager>();
+
+
+        string playerMail = PlayerPrefs.GetString("email", ""); // Lấy email từ PlayerPrefs
+        if (!string.IsNullOrEmpty(playerMail))
+        {
+            emailLogin.text = playerMail;
+            isEmailLoaded = true;
+        }
     }
     // Update is called once per frame
     void Update()
     {
-        string playerMail = PlayerPrefs.GetString("email");
-        if (playerMail.Contains("@"))
-        {
-            emailLogin.text = $"{playerMail}";
-        }
+
+
+        // Gán sự kiện khi bắt đầu chỉnh sửa
+        emailLogin.onValueChanged.AddListener(OnEmailChanged);
     }
     public void OnClickShowLoginInner()
     {
@@ -138,6 +146,19 @@ public class AuthManager : MonoBehaviour
         else
         {
             notificationManager.ShowNotification(result.message, 2);
+        }
+        string playerMail = PlayerPrefs.GetString("email", ""); 
+        if (!string.IsNullOrEmpty(playerMail))
+        {
+            emailLogin.text = playerMail;
+            isEmailLoaded = true;
+        }
+    }
+    void OnEmailChanged(string input)
+    {
+        if (isEmailLoaded && string.IsNullOrEmpty(input))
+        {
+            isEmailLoaded = false;
         }
     }
 }
