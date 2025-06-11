@@ -4,7 +4,7 @@
 Gói dữ liệu (NPC) này quá lớn để lưu trực tiếp trong repository. Vì vậy, chúng tôi lưu trữ gói này trên Google Drive.
 
 ## Liên kết tải xuống
-- **Link tải:** [27_NPC](https://drive.google.com/file/d/1ieptn9BPIPDJ-bfKYKZMUTdQvF8F4VuC/view?usp=sharing)
+- **Link tải:** [27_NPC](https://drive.google.com/file/d/1N3yyfYKIuJpLPXlmXgixg9fLlghzb9Fz/view?usp=sharing)
 
 ## Hướng dẫn sử dụng
 1. Nhấp vào liên kết phía trên để mở thư mục trên Google Drive.
