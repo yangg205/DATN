@@ -1,16 +1,15 @@
-using UnityEngine;
+﻿using UnityEngine;
 
-public class AnimationSandau : MonoBehaviour
+public class TriggerSandau : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    public Animator sandauAnimator; // Kéo Sandau vào trong Inspector
+    public string animationTriggerName = "SandauAnimation"; // Tên trigger đặt trong Animator
 
-    // Update is called once per frame
-    void Update()
+    private void OnTriggerEnter(Collider other)
     {
-        
+        if (other.CompareTag("Player")) 
+        {
+            sandauAnimator.SetTrigger(animationTriggerName);
+        }
     }
 }
