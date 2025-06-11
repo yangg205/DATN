@@ -4,7 +4,7 @@
 Gói dữ liệu (fantasy animal) này quá lớn để lưu trực tiếp trong repository. Vì vậy, chúng tôi lưu trữ gói này trên Google Drive.
 
 ## Liên kết tải xuống
-- **Link tải:** [Truy cập thư mục zip GameAssets](https://drive.google.com/file/d/1m3xMKl_usorQk2EaOYRSaGfVvhIMgv7D/view?usp=sharing)
+- **Link tải:** [fantasy animal](https://drive.google.com/drive/folders/196PqHkIID7l-epffhaIiykWat1Orl_2Y?usp=sharing)
 
 ## Hướng dẫn sử dụng
 1. Nhấp vào liên kết phía trên để mở thư mục trên Google Drive.
