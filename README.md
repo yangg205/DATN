@@ -17,7 +17,7 @@ Gói dữ liệu (fantasy animal) này quá lớn để lưu trực tiếp trong
      ```
      Project/
      ├── Assets/
-     ├── Packets/
+     ├── Package/
      │   ├── ...../  <-- Đặt thư mục này ở đây
      └── README.md
      ```
