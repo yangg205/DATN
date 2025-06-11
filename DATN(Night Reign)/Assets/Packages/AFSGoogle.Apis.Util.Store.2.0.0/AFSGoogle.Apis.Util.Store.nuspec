@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>AFSGoogle.Apis.Util.Store</id>
+    <version>2.0.0</version>
+    <title>AFSGoogle.Apis.Util.Store Extension UWP</title>
+    <authors>AF Solutions</authors>
+    <owners>AF Solutions</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <iconUrl>https://drive.google.com/file/d/1ClPJJRdBxge-Tj2Zn1EKKTUk27dtAZj7/view?usp=sharing</iconUrl>
+    <description>Extends The Apis.Util.Store to use for UWP.</description>
+    <summary>The StorageDataStore is added for saving in GoogleWebAuthentificationBroker Usage:
+folder = your uwp folder you want the file be saved
+
+Dim cred = Await GoogleWebAuthorizationBroker.AuthorizeAsync(str</summary>
+    <releaseNotes>V1.0.0.0 works for Windows 10 Fall Creators Update</releaseNotes>
+    <dependencies>
+      <group>
+        <dependency id="Google.Apis.Core" version="1.32.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>
