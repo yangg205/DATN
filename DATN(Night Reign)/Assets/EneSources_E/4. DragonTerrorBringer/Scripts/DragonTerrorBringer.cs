@@ -109,7 +109,7 @@ public class DragonTerrorBringer : MonoBehaviour
 
         if (damagePopupPrefab != null)
         {
-            GameObject popup = Instantiate(damagePopupPrefab, transform.position + Vector3.up * 2f, Quaternion.identity);
+            GameObject popup = Instantiate(damagePopupPrefab, transform.position + Vector3.up * 2.5f + Vector3.forward * 2f, Quaternion.identity);
             popup.GetComponent<DamagePopup>().Setup(damageAmount);
         }
 
