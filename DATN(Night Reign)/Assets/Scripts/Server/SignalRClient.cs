@@ -195,6 +195,47 @@ public class SignalRClient : MonoBehaviour
             throw;
         }
     }
+    public async Task<ReturnPlayer> UpdateName(string email, string newName)
+    {
+        try
+        {
+            var result = await _connection.InvokeAsync<ReturnPlayer>("ResetPass", email, newName);
+            string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+            return result;
+        }
+        catch (Exception ex) {
+            Debug.Log("gui yeu cau doi ten that bai"+ex.Message);
+            throw;
+        }
+    }
+    public async Task<ReturnPlayer> ResetPass(string email, string passsword, string newpassword, string renewpassword)
+    {
+        try
+        {
+            var result = await _connection.InvokeAsync<ReturnPlayer>("ResetPass", email, passsword,newpassword,renewpassword);
+            string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Debug.Log("gui yeu cau doi mat khau that bai" + ex.Message);
+            throw;
+        }
+    }
+    public async Task<ReturnPlayerCharacter> SelectedCharacter(int playerId, int characterId)
+    {
+        try
+        {
+            var result = await _connection.InvokeAsync<ReturnPlayerCharacter>("SelectedCharacter", playerId, characterId);
+            string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Debug.Log("gui yeu cau tra cuu nguoi choi chon nhan vat that bai" + ex.Message);
+            throw;
+        }
+    }
     private async void OnDestroy()
     {
         if (_connection != null)

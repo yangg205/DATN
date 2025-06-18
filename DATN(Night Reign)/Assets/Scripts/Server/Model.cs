@@ -23,9 +23,9 @@ public class ReturnPlayerCharacter
 public class Player_Characters
 {
     public int Player_Character_id { get; set; }
-    public int Player_id { get; set; }
-    public int Characters_id { get; set; }
-    public DateTime Ownershipdate { get; set; } = DateTime.Now;
+    public int? Player_id { get; set; }
+    public int? Characters_id { get; set; }
+    public DateTime? Ownershipdate { get; set; } = DateTime.Now;
     public int Current_hp { get; set; }
     public int Current_exp { get; set; }
     public int level { get; set; }
@@ -35,7 +35,7 @@ public class Player_Characters
     public double Position_x { get; set; }
     public double Position_y { get; set; }
     public double Position_z { get; set; }
-    public DateTime Datesave { get; set; } = DateTime.Now;
+    public DateTime? Datesave { get; set; } = DateTime.Now;
 }
 public class Ranking
 {
@@ -59,4 +59,3 @@ public class Player
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime UpdatedAt { get; set; } = DateTime.Now;
 }
-
