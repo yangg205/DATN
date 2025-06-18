@@ -2,75 +2,73 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Pathfinding; // Quan trọng: Thêm namespace này để sử dụng AIPath và Seeker
+using Pathfinding; // Đảm bảo bạn đã import A* Pathfinding
 
 public class EnemyAI : MonoBehaviour
 {
     [Header("Target & Detection")]
-    public Transform targetPlayer; // Đối tượng người chơi mà Boss nhắm tới
-    public float detectionRange = 15f; // Phạm vi Boss có thể phát hiện người chơi
-    public float engageRange = 5f; // Khoảng cách Boss sẽ dừng di chuyển để bắt đầu tấn công
-    public float meleeAttackRange = 2f; // Phạm vi tấn công cận chiến (vẫn dùng cho logic BT, nhưng đòn đánh thường sẽ dùng collider)
-    public float rangedAttackRange = 10f; // Phạm vi tấn công tầm xa
+    public Transform targetPlayer;
+    public float detectionRange = 15f;
+    public float engageRange = 10f; // Khoảng cách Boss sẽ dừng di chuyển để bắt đầu tấn công (Đã tăng lên 10f)
+    public float approachDistance = 10f; // Khoảng cách mà Boss sẽ áp sát người chơi để tấn công (Giữ bằng engageRange để có vùng stop rõ ràng)
+    public float meleeAttackRange = 6f; // Phạm vi tấn công cận chiến
 
     [Header("Health & Phases")]
-    public float currentHealth = 1000f; // Máu hiện tại của Boss
-    public float maxHealth = 1000f; // Máu tối đa của Boss
-    public float phase2HealthThreshold = 500f; // Ngưỡng HP để chuyển sang Phase 2 (ví dụ: 50% HP)
-    public float phase3HealthThreshold = 300f; // Ngưỡng HP để chuyển sang Phase 3 (30% HP cho "Nổi loạn")
+    public float currentHealth = 1000f;
+    public float maxHealth = 1000f;
+    public float phase2HealthThreshold = 500f;
+    public float phase3HealthThreshold = 300f;
 
     [Header("Movement")]
-    public float movementSpeed = 3f; // Tốc độ di chuyển bình thường
-    public float enragedMovementSpeedMultiplier = 1.5f; // Tốc độ di chuyển khi nổi loạn
-    public float dodgeSpeed = 8f; // Tốc độ né tránh
-    public float rotationSpeed = 10f; // Tốc độ xoay của Boss để nhìn Player (chúng ta sẽ tự xoay, không dùng AIPath mặc định)
+    public float movementSpeed = 4f;
+    public float enragedMovementSpeedMultiplier = 1.5f;
+    public float dodgeSpeed = 8f;
+    public float rotationSpeed = 10f;
+    public float _fleeRange = 8f;
 
     [Header("Attack & Cooldowns")]
-    public float recoveryTimeAfterAttack = 1.0f; // Thời gian hồi phục sau một đòn tấn công
-    public float dodgeCooldown = 2f; // Cooldown cho kỹ năng né tránh
-    private float _lastDodgeTime; // Thời điểm cuối cùng thực hiện né tránh
-    public float specialAbilityCooldown = 5f; // Cooldown cho kỹ năng đặc biệt
-    private float _lastSpecialAbilityTime; // Thời điểm cuối cùng sử dụng kỹ năng đặc biệt
-    public float parryWindowDuration = 0.5f; // Thời gian cửa sổ parry
+    public float attackCooldown = 1.5f;
+    private float _lastAttackTime;
+    public float dodgeCooldown = 3f;
+    private float _lastDodgeTime;
+
+    [Header("Damage & Hitboxes")]
+    public GameObject meleeAttackHitbox;
+    public float meleeDamage = 50f;
 
     // Tham chiếu đến các Component cần thiết
-    private Node _rootNode; // Cây hành vi gốc của Boss
-    private Animator _animator; // Animator để điều khiển hoạt ảnh của Boss
-    private AIPath _aiPath; // Tham chiếu đến AIPath component từ A* Pathfinding Project
-    private Seeker _seeker; // Tham chiếu đến Seeker component từ A* Pathfinding Project (dùng bởi AIPath)
-    private CharacterController _characterController; // Tham chiếu đến CharacterController (hoặc Rigidbody nếu dùng)
+    private Node _rootNode;
+    private Animator _animator;
+    private AIPath _aiPath;
+    private Seeker _seeker;
+    private CharacterController _characterController;
 
-    // Enum định nghĩa các giai đoạn của Boss trong trận chiến
     public enum BossPhase
     {
         Phase1,
         Phase2,
-        Phase3 // Đây sẽ là trạng thái "Nổi loạn"
+        Phase3
     }
-    public BossPhase currentPhase = BossPhase.Phase1; // Giai đoạn hiện tại của Boss, mặc định là Phase 1
+    public BossPhase currentPhase = BossPhase.Phase1;
 
-    // Biến trạng thái nội bộ của Boss (để Behavior Tree biết Boss đang làm gì)
     private bool _isAttacking = false;
     private bool _isDodging = false;
-    private bool _isPerformingSpecialAbility = false;
-    private bool _isStaggered = false; // Trạng thái choáng (Boss không thể hành động)
-    private bool _isParrying = false; // Trạng thái Boss đang cố gắng đỡ đòn/parry
-    private bool _isEnraged = false; // Trạng thái nổi loạn
+    private bool _isStaggered = false;
+    private bool _isParrying = false;
+    private bool _isEnraged = false;
+    private bool _isCurrentlyFleeing = false;
+    private bool _playerDodgedBossSkill = false;
 
-    // Biến cho logic mới
-    private int _playerNormalAttackComboCount = 0; // Đếm số đòn đánh thường liên tiếp của người chơi
-    private bool _playerDodgedBossSkill = false; // Cờ hiệu khi người chơi né được skill của Boss
-    private bool _canCastSkill1 = false; // Cờ hiệu để biết có thể dùng Skill 1 không (khi player đánh thường đòn 2)
 
     void Awake()
     {
-        // Cố gắng tìm GameObject của người chơi nếu chưa được gán trong Inspector
         if (targetPlayer == null)
         {
-            GameObject playerObj = GameObject.FindWithTag("Player"); // Đảm bảo GameObject Player có tag "Player"
+            GameObject playerObj = GameObject.FindWithTag("Player");
             if (playerObj != null)
             {
                 targetPlayer = playerObj.transform;
+                Debug.Log("Found Player with tag 'Player'.");
             }
             else
             {
@@ -81,67 +79,63 @@ public class EnemyAI : MonoBehaviour
 
     void Start()
     {
-        // Lấy các component từ GameObject này
         _animator = GetComponent<Animator>();
         _aiPath = GetComponent<AIPath>();
         _seeker = GetComponent<Seeker>();
-        _characterController = GetComponent<CharacterController>(); // Lấy CharacterController
+        _characterController = GetComponent<CharacterController>();
 
-        // Kiểm tra xem các component cần thiết có tồn tại không
-        if (_aiPath == null)
+        if (_animator == null) { Debug.LogError("Animator component not found."); enabled = false; return; }
+        if (_aiPath == null) { Debug.LogError("AIPath component not found."); enabled = false; return; }
+        if (_seeker == null) { Debug.LogError("Seeker component not found."); enabled = false; return; }
+        if (_characterController == null) { Debug.LogError("CharacterController component not found."); enabled = false; return; }
+
+        _aiPath.maxSpeed = movementSpeed;
+        _aiPath.enableRotation = false;
+
+        // Điều chỉnh endReachedDistance và slowdownDistance để phù hợp với engageRange và meleeAttackRange
+        // Boss sẽ dừng lại khi cách player một khoảng bằng engageRange để bắt đầu hành động.
+        _aiPath.endReachedDistance = engageRange * 0.5f; // Dừng lại ở giữa engageRange và meleeAttackRange
+        _aiPath.slowdownDistance = engageRange; // Bắt đầu giảm tốc khi cách engageRange
+
+        if (meleeAttackHitbox != null)
         {
-            Debug.LogError("AIPath component not found on Boss object. Please add one in the Unity Editor.");
-            enabled = false; // Vô hiệu hóa script nếu thiếu component quan trọng
-            return;
-        }
-        if (_seeker == null)
-        {
-            Debug.LogError("Seeker component not found on Boss object. Please add one in the Unity Editor.");
-            enabled = false;
-            return;
-        }
-        if (_characterController == null)
-        {
-            Debug.LogError("CharacterController component not found on Boss object. Please add one in the Unity Editor.");
-            enabled = false;
-            return;
+            meleeAttackHitbox.SetActive(false);
         }
 
-        // Cấu hình các thuộc tính ban đầu của AIPath
-        _aiPath.maxSpeed = movementSpeed; // Đặt tốc độ di chuyển tối đa cho AIPath
-        _aiPath.enableRotation = false; // Tắt tính năng xoay tự động của AIPath vì chúng ta sẽ tự xoay Boss
-        _aiPath.endReachedDistance = engageRange * 0.8f; // Khoảng cách Boss được coi là đã đến đích (gần Player)
-        _aiPath.slowdownDistance = engageRange; // Khoảng cách mà AIPath bắt đầu giảm tốc độ
-
-        // Khởi tạo cây hành vi của Boss
         SetupBehaviorTree();
 
-        // Đăng ký Boss vào EnemyAIManager để được quản lý và tick
         if (EnemyAIManager.Instance != null)
         {
             EnemyAIManager.Instance.RegisterEnemy(this);
+            Debug.Log("Boss registered with EnemyAIManager.");
         }
         else
         {
-            Debug.LogWarning("EnemyAIManager instance not found. Please ensure it is present in the scene.");
+            Debug.LogWarning("EnemyAIManager instance not found.");
         }
+
+        _lastAttackTime = -attackCooldown; // Đảm bảo Boss có thể tấn công ngay từ đầu
+        _lastDodgeTime = -dodgeCooldown; // Đảm bảo Boss có thể né ngay từ đầu
     }
 
-    // Hàm Tick này được gọi bởi EnemyAIManager mỗi khi đến lượt Boss được cập nhật
     public void Tick()
     {
+        // Debugging cho các điều kiện tấn công và bận rộn
+        float distToPlayer = targetPlayer != null ? Vector3.Distance(transform.position, targetPlayer.position) : -1f;
+        Debug.Log($"[Tick] Dist: {distToPlayer:F2}f, MeleeRange: {meleeAttackRange}f, EngageRange: {engageRange}f, IsPlayerInMeleeAttackRange: {IsPlayerInMeleeAttackRange()}, CanAttack: {CanAttack()}, IsBossBusy: {IsBossBusy()} (Attacking:{_isAttacking}, Dodging:{_isDodging}, Staggered:{_isStaggered}, Fleeing:{_isCurrentlyFleeing})");
+
+
         if (_rootNode != null)
         {
-            _rootNode.Evaluate(); // Đánh giá cây hành vi để quyết định hành động tiếp theo
+            _rootNode.Evaluate();
         }
 
-        // Luôn xoay Boss nhìn về phía người chơi khi Boss không đang thực hiện các hành động khác
-        if (targetPlayer != null && !_isDodging && !_isPerformingSpecialAbility && !_isStaggered && !_isAttacking && !_isParrying)
+        // Chỉ xoay khi Boss không bận và có mục tiêu
+        if (targetPlayer != null && !IsBossBusy())
         {
             LookAtTarget(targetPlayer.position);
         }
 
-        // Cập nhật tốc độ di chuyển nếu Boss đang ở trạng thái nổi loạn
         if (_isEnraged)
         {
             _aiPath.maxSpeed = movementSpeed * enragedMovementSpeedMultiplier;
@@ -150,332 +144,314 @@ public class EnemyAI : MonoBehaviour
         {
             _aiPath.maxSpeed = movementSpeed;
         }
+
+        // Cập nhật animation di chuyển
+        if (_aiPath.desiredVelocity.magnitude > 0.1f && !_isAttacking && !_isDodging && !_isStaggered && !_isCurrentlyFleeing)
+        {
+            _animator?.SetBool("isMoving", true);
+            _animator?.SetFloat("Speed", _aiPath.desiredVelocity.magnitude);
+        }
+        else
+        {
+            _animator?.SetBool("isMoving", false);
+            _animator?.SetFloat("Speed", 0f);
+        }
     }
 
-    // Hàm xử lý khi Boss nhận sát thương
     public void TakeDamage(float damage)
     {
         currentHealth -= damage;
         Debug.Log($"Boss took {damage} damage. Current health: {currentHealth}");
 
-        // Kiểm tra chuyển đổi giai đoạn dựa trên lượng máu hiện tại
         if (currentHealth <= 0)
         {
-            Die(); // Boss chết
+            Die();
         }
         else if (currentHealth <= phase3HealthThreshold && currentPhase != BossPhase.Phase3)
         {
-            TransitionToPhase(BossPhase.Phase3); // Chuyển sang Phase 3 (Nổi loạn)
+            TransitionToPhase(BossPhase.Phase3);
         }
         else if (currentHealth <= phase2HealthThreshold && currentPhase == BossPhase.Phase1)
         {
-            TransitionToPhase(BossPhase.Phase2); // Chuyển sang Phase 2
+            TransitionToPhase(BossPhase.Phase2);
         }
     }
 
-    // Hàm xử lý cái chết của Boss
     private void Die()
     {
         Debug.Log("Boss has been defeated!");
-        _animator?.SetTrigger("Die"); // Kích hoạt animation chết
-        _aiPath.isStopped = true; // Dừng mọi di chuyển của AIPath
-        enabled = false; // Vô hiệu hóa script này để Boss ngừng mọi hoạt động
-        // TODO: Thêm logic thả vật phẩm, hiệu ứng, kết thúc màn chơi, v.v.
+        _animator?.SetTrigger("Die");
+        _aiPath.isStopped = true;
+        enabled = false; // Tắt script EnemyAI
+
         if (EnemyAIManager.Instance != null)
         {
-            EnemyAIManager.Instance.UnregisterEnemy(this); // Hủy đăng ký Boss khi chết
+            EnemyAIManager.Instance.UnregisterEnemy(this);
         }
     }
 
-    // Hàm chuyển đổi giữa các giai đoạn chiến đấu của Boss
     private void TransitionToPhase(BossPhase newPhase)
     {
         currentPhase = newPhase;
         Debug.Log($"Boss transitioning to {newPhase} at {currentHealth} HP.");
-        _animator?.SetTrigger("ChangePhase"); // Kích hoạt animation chuyển pha
+        _animator?.SetTrigger("ChangePhase");
 
         if (newPhase == BossPhase.Phase3)
         {
             _isEnraged = true;
             Debug.Log("Boss is ENRAGED!");
-            // TODO: Thêm hiệu ứng nổi loạn đặc biệt (ví dụ: đổi màu, aura)
         }
-        SetupBehaviorTree(); // Gọi lại SetupBehaviorTree để cập nhật logic AI cho giai đoạn mới
+        SetupBehaviorTree(); // Cập nhật cây hành vi cho pha mới
     }
 
-    // Hàm xoay Boss nhìn về phía mục tiêu một cách mượt mà
     private void LookAtTarget(Vector3 targetPosition)
     {
         Vector3 direction = (targetPosition - transform.position).normalized;
-        direction.y = 0; // Giữ Boss không nghiêng theo trục Y, chỉ xoay trên mặt phẳng ngang
+        direction.y = 0; // Giữ Boss không bị nghiêng
 
-        if (direction != Vector3.zero) // Chỉ xoay nếu có hướng xác định
+        if (direction != Vector3.zero)
         {
-            Quaternion lookRotation = Quaternion.LookRotation(direction); // Tạo Quaternion quay đến hướng mục tiêu
-            // Slerp (Spherical Linear Interpolation) để xoay mượt mà theo thời gian
+            Quaternion lookRotation = Quaternion.LookRotation(direction);
             transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * rotationSpeed);
         }
     }
 
-    // --- CÁC HÀM ĐIỀU KIỆN (ConditionNodes) ---
-    // Kiểm tra xem người chơi có trong phạm vi phát hiện của Boss không
+    // --- CÁC HÀM ĐIỀU KIỆN ---
     private bool IsPlayerInDetectionRange()
     {
         if (targetPlayer == null) return false;
         return Vector3.Distance(transform.position, targetPlayer.position) <= detectionRange;
     }
 
-    // Kiểm tra xem người chơi có trong phạm vi tấn công cận chiến của Boss không (dùng cho logic BT)
     private bool IsPlayerInMeleeAttackRange()
     {
         if (targetPlayer == null) return false;
-        return Vector3.Distance(transform.position, targetPlayer.position) <= meleeAttackRange;
+        float distance = Vector3.Distance(transform.position, targetPlayer.position);
+        return distance <= meleeAttackRange;
     }
 
-    // Kiểm tra xem người chơi có trong phạm vi tấn công tầm xa của Boss không
-    private bool IsPlayerInRangedAttackRange()
+    // Điều kiện này sẽ kiểm tra xem player có nằm trong khoảng từ meleeAttackRange đến engageRange không
+    private bool IsPlayerAtEngageDistance()
     {
         if (targetPlayer == null) return false;
         float distance = Vector3.Distance(transform.position, targetPlayer.position);
-        return distance > meleeAttackRange && distance <= rangedAttackRange; // Ở xa hơn cận chiến nhưng trong tầm xa
+        return distance > meleeAttackRange && distance <= engageRange;
     }
 
-    // Kiểm tra xem HP của Boss có thấp hơn ngưỡng quy định không (dùng cho hành vi "HP thấp")
     private bool IsLowHP()
     {
         return currentHealth <= phase3HealthThreshold;
     }
 
-    // Kiểm tra xem Boss có thể né tránh không (dựa trên cooldown)
     private bool CanDodge()
     {
         return Time.time >= _lastDodgeTime + dodgeCooldown;
     }
 
-    // Kiểm tra xem Boss có thể sử dụng kỹ năng đặc biệt không (dựa trên cooldown)
-    private bool CanUseSpecialAbility()
+    private bool CanAttack()
     {
-        // Khi nổi loạn, cooldown kỹ năng sẽ ngắn hơn (hoặc bỏ qua cooldown)
-        float currentSpecialCooldown = _isEnraged ? specialAbilityCooldown * 0.5f : specialAbilityCooldown; // Giảm cooldown khi nổi loạn
-        return Time.time >= _lastSpecialAbilityTime + currentSpecialCooldown;
+        bool canAttack = Time.time >= _lastAttackTime + attackCooldown;
+        return canAttack;
     }
 
-    // Kiểm tra xem Boss có đang thực hiện một hành động ưu tiên cao nào đó không (tấn công, né tránh, choáng, v..v.)
-    private bool IsBossBusy()
+    public bool IsBossBusy()
     {
-        return _isAttacking || _isDodging || _isPerformingSpecialAbility || _isStaggered || _isParrying;
+        bool busy = _isAttacking || _isDodging || _isStaggered || _isParrying || _isCurrentlyFleeing;
+        return busy;
     }
 
-    // Hàm nhận tín hiệu từ Player khi Player thực hiện đòn đánh thường.
-    // Cần gọi hàm này từ script PlayerCombat khi Player đánh trúng Boss.
-    public void PlayerPerformedNormalAttack(int comboIndex) // comboIndex: 1 cho đòn 1, 2 cho đòn 2
-    {
-        if (comboIndex == 1)
-        {
-            _playerNormalAttackComboCount = 1;
-            Debug.Log("Player hit Boss with normal attack 1.");
-        }
-        else if (comboIndex == 2)
-        {
-            _playerNormalAttackComboCount = 2;
-            _canCastSkill1 = true; // Đặt cờ cho phép Boss dùng Skill 1
-            Debug.Log("Player hit Boss with normal attack 2. Boss can now use Skill 1.");
-        }
-        else
-        {
-            _playerNormalAttackComboCount = 0; // Reset combo nếu không phải 1 hoặc 2 (ví dụ: đòn 3 trở lên)
-        }
-    }
-
-    // Kiểm tra xem người chơi có đang tấn công hay không (ví dụ: cho Parry)
     private bool IsPlayerCurrentlyAttacking()
     {
-        // TODO: Hàm này cần liên kết với PlayerCombat/PlayerState để biết Player có đang ở trạng thái tấn công không
-        // Ví dụ: return targetPlayer.GetComponent<PlayerState>().IsAttackingState();
-        return false; // Mặc định là false cho đến khi bạn triển khai nó
+        // TODO: Triển khai logic này dựa trên trạng thái của Player (ví dụ: Player có đang animation tấn công không?)
+        // Hiện tại luôn trả về false để không chặn Boss.
+        return false;
     }
 
-    // Kiểm tra xem Boss có thể cast Skill 1 không (sau đòn đánh thứ 2 của Player)
-    private bool CanCastSkill1()
-    {
-        return _canCastSkill1 && CanUseSpecialAbility(); // Đảm bảo có thể cast và không cooldown
-    }
-
-    // Đặt cờ khi người chơi né được skill của Boss
     public void PlayerDodgedBossSkill()
     {
         _playerDodgedBossSkill = true;
-        Debug.Log("Player successfully dodged Boss's skill! Boss will react.");
+        Debug.Log("Player successfully dodged Boss's skill!");
     }
 
-    // Kiểm tra xem người chơi có vừa né được skill của Boss không
     private bool HasPlayerDodgedBossSkill()
     {
-        return _playerDodgedBossSkill;
+        bool dodged = _playerDodgedBossSkill;
+        if (dodged) _playerDodgedBossSkill = false; // Reset cờ sau khi kiểm tra
+        return dodged;
     }
 
+    private bool IsPlayerTooCloseToFlee()
+    {
+        if (targetPlayer == null) return false;
+        return Vector3.Distance(transform.position, targetPlayer.position) <= _fleeRange;
+    }
 
-    // --- CÁC HÀM HÀNH ĐỘNG (ActionNodes) ---
-    // Hành động di chuyển Boss về phía người chơi sử dụng AIPath
+    private bool IsFleeing()
+    {
+        return _isCurrentlyFleeing;
+    }
+
+    // --- CÁC HÀM HÀNH ĐỘNG ---
     private NodeState MoveTowardsPlayer()
     {
-        if (targetPlayer == null) return NodeState.FAILURE;
-        if (IsBossBusy()) // Nếu Boss đang bận, không di chuyển
+        if (targetPlayer == null)
         {
-            _aiPath.isStopped = true; // Dừng di chuyển của AIPath
+            _aiPath.isStopped = true;
             _animator?.SetBool("isMoving", false);
+            _animator?.SetFloat("Speed", 0f);
             return NodeState.FAILURE;
         }
 
-        // Cập nhật đích đến của AIPath mỗi khi hành động này được thực thi
-        _aiPath.destination = targetPlayer.position;
-        _aiPath.isStopped = false; // Đảm bảo AIPath đang di chuyển
-        // Tốc độ di chuyển đã được cập nhật trong Tick() dựa trên trạng thái nổi loạn
-
-        Debug.Log("Boss: Moving towards Player (using AIPath)");
-        _animator?.SetBool("isMoving", true);
-
-        // Kiểm tra nếu Boss đã đến gần đích đủ để dừng lại
-        if (_aiPath.reachedDestination || Vector3.Distance(transform.position, targetPlayer.position) <= engageRange)
+        // Nếu Boss bận (trừ khi đang bỏ chạy), không di chuyển
+        if (IsBossBusy() && !_isCurrentlyFleeing)
         {
-            _aiPath.isStopped = true; // Dừng AIPath lại khi đã đến gần đích
+            _aiPath.isStopped = true;
             _animator?.SetBool("isMoving", false);
-            Debug.Log("Boss: Reached engage range, stopping movement.");
+            _animator?.SetFloat("Speed", 0f);
+            return NodeState.FAILURE;
+        }
+
+        float currentDistance = Vector3.Distance(transform.position, targetPlayer.position);
+
+        // Nếu đã đủ gần để tấn công hoặc dừng, dừng di chuyển và báo thành công
+        // Boss sẽ dừng di chuyển nếu trong khoảng cách engageRange.
+        if (currentDistance <= engageRange)
+        {
+            _aiPath.isStopped = true;
+            _animator?.SetBool("isMoving", false);
+            _animator?.SetFloat("Speed", 0f);
+            Debug.Log("[MoveTowardsPlayer] Reached engage range or closer. Stopping movement. SUCCESS.");
             return NodeState.SUCCESS;
         }
 
-        // Nếu AIPath đang tìm đường hoặc đang di chuyển, coi như hành động này đang chạy
-        if (_aiPath.pathPending || !_aiPath.isStopped)
+        // Nếu chưa đủ gần, đặt đích và cho phép di chuyển
+        _aiPath.destination = targetPlayer.position;
+        _aiPath.isStopped = false; // Bật lại AIPath để di chuyển
+        _aiPath.maxSpeed = movementSpeed; // Đảm bảo tốc độ đúng
+
+        // Kích hoạt animation di chuyển
+        _animator?.SetBool("isMoving", true);
+        // AIPath.desiredVelocity.magnitude sẽ cho biết tốc độ mong muốn của AIPath
+        _animator?.SetFloat("Speed", _aiPath.desiredVelocity.magnitude);
+
+        if (_aiPath.pathPending)
         {
+            Debug.Log("[MoveTowardsPlayer] Path pending... RUNNING.");
             return NodeState.RUNNING;
         }
 
-        // Nếu không tìm được đường hoặc có lỗi, coi như thất bại
+        if (_aiPath.hasPath && !_aiPath.isStopped)
+        {
+            // Vẫn đang di chuyển hoặc đã đến gần engageRange
+            Debug.Log("[MoveTowardsPlayer] Moving towards player... RUNNING.");
+            return NodeState.RUNNING;
+        }
+
+        // Nếu không có đường đi hoặc bị chặn, thất bại
+        _aiPath.isStopped = true;
+        _animator?.SetBool("isMoving", false);
+        _animator?.SetFloat("Speed", 0f);
+        Debug.LogWarning("[MoveTowardsPlayer] Failed to find path or is stopped unexpectedly. FAILURE.");
         return NodeState.FAILURE;
     }
 
-    // Hành động tấn công cận chiến (đòn đánh thường)
-    // Hành động này sẽ được kích hoạt khi Boss chạm vào collider của Player
-    private NodeState PerformNormalMeleeAttack()
+    private NodeState PerformMeleeAttack()
     {
-        // Logic này sẽ chủ yếu kích hoạt animation và reset cờ.
-        // Việc gây sát thương sẽ được xử lý trong OnControllerColliderHit hoặc Trigger.
+        // Điều kiện để bắt đầu tấn công
         if (targetPlayer == null) return NodeState.FAILURE;
-        // Giả sử chỉ cần Boss không bận là có thể thử đánh
-        if (IsBossBusy()) return NodeState.FAILURE;
+        if (!IsPlayerInMeleeAttackRange()) return NodeState.FAILURE; // Phải trong tầm cận chiến
+        if (IsBossBusy()) return NodeState.FAILURE; // Quan trọng: Đảm bảo Boss không bận!
+        if (!CanAttack()) return NodeState.FAILURE; // Cooldown đã hết chưa
 
-        Debug.Log("Boss: Performing Normal Melee Attack!");
-        _isAttacking = true; // Đặt cờ Boss đang tấn công
-        _aiPath.isStopped = true; // Dừng di chuyển của AIPath khi tấn công
-        _animator?.SetTrigger("MeleeAttack"); // Kích hoạt animation tấn công cận chiến (có thể đổi tên trigger)
-
-        // Bắt đầu Coroutine để chờ animation và thời gian hồi phục
-        StartCoroutine(AttackCoroutine(recoveryTimeAfterAttack, () => _isAttacking = false));
-        return NodeState.RUNNING;
-    }
-
-    // Hành động tấn công tầm xa (nếu có, nhưng yêu cầu của bạn tập trung vào cận chiến và skill)
-    private NodeState PerformRangedAttack()
-    {
-        if (targetPlayer == null) return NodeState.FAILURE;
-        if (!IsPlayerInRangedAttackRange()) return NodeState.FAILURE;
-        if (IsBossBusy()) return NodeState.FAILURE;
-
-        Debug.Log("Boss: Performing Ranged Attack!");
+        Debug.Log("Boss: Performing Melee Attack!");
         _isAttacking = true;
-        _aiPath.isStopped = true;
-        _animator?.SetTrigger("RangedAttack");
+        _lastAttackTime = Time.time;
+        _aiPath.isStopped = true; // Dừng di chuyển ngay lập tức
+        _animator?.SetBool("isMoving", false); // Dừng animation di chuyển khi tấn công
+        _animator?.SetFloat("Speed", 0f);
 
-        StartCoroutine(AttackCoroutine(recoveryTimeAfterAttack, () => _isAttacking = false));
+        // Chọn ngẫu nhiên animation tấn công
+        int attackChoice = UnityEngine.Random.Range(1, 4); // Chọn giữa 1, 2, 3 (vì Range(minInclusive, maxExclusive))
+        switch (attackChoice)
+        {
+            case 1:
+                _animator?.SetTrigger("MeleeAttack1");
+                break;
+            case 2:
+                _animator?.SetTrigger("MeleeAttack3");
+                break;
+            case 3:
+                _animator?.SetTrigger("MeleeAttack4");
+                break;
+        }
+
+        // Vì đây là hành động không đồng bộ (animation event sẽ reset cờ), chúng ta trả về RUNNING
         return NodeState.RUNNING;
     }
 
-    // Hành động sử dụng Kỹ năng 1
-    private NodeState UseSkill1()
-    {
-        if (targetPlayer == null) return NodeState.FAILURE;
-        if (IsBossBusy()) return NodeState.FAILURE;
-
-        // Đặt lại cờ cho phép cast Skill 1
-        _canCastSkill1 = false;
-        _playerNormalAttackComboCount = 0; // Reset combo count của Player
-
-        Debug.Log("Boss: Using Skill 1!");
-        _isPerformingSpecialAbility = true; // Đặt cờ Boss đang thực hiện kỹ năng đặc biệt
-        _lastSpecialAbilityTime = Time.time; // Cập nhật thời điểm sử dụng kỹ năng cuối cùng
-        _aiPath.isStopped = true; // Dừng di chuyển của AIPath khi thực hiện kỹ năng đặc biệt
-        _animator?.SetTrigger("Skill1"); // Kích hoạt animation Skill 1
-
-        // TODO: Triển khai logic của Skill 1 ở đây (ví dụ: tạo hiệu ứng, gây sát thương, triệu hồi)
-        // Khi Skill 1 được hoàn thành hoặc bị né, Boss cần thông báo lại cho PlayerDodgedBossSkill()
-        // để có thể reset cờ _playerDodgedBossSkill nếu Skill 1 không bị né.
-        // Hoặc bạn có thể gọi PlayerDodgedBossSkill() từ script Player khi nó né thành công.
-
-        StartCoroutine(AttackCoroutine(2.0f, () => {
-            _isPerformingSpecialAbility = false;
-            // Nếu skill này không bị né, reset _playerDodgedBossSkill
-            _playerDodgedBossSkill = false; // Reset cờ sau khi skill được cast
-        }));
-        return NodeState.RUNNING;
-    }
-
-    // Hành động né tránh
     private NodeState Dodge()
     {
         if (targetPlayer == null) return NodeState.FAILURE;
-        if (!CanDodge() || IsBossBusy()) return NodeState.FAILURE; // Kiểm tra cooldown và trạng thái bận
+        if (!CanDodge() || IsBossBusy()) return NodeState.FAILURE;
 
         Debug.Log("Boss: Dodging!");
-        _isDodging = true; // Đặt cờ Boss đang né tránh
-        _lastDodgeTime = Time.time; // Cập nhật thời điểm né tránh cuối cùng
-        _aiPath.isStopped = true; // Dừng di chuyển của AIPath khi né tránh
-        _animator?.SetTrigger("Dodge"); // Kích hoạt animation né tránh
-
-        // Tính toán hướng né tránh: ra xa người chơi và ngẫu nhiên sang trái/phải
-        Vector3 playerToBoss = (transform.position - targetPlayer.position).normalized;
-        // Xoay hướng 90 độ sang trái hoặc phải so với hướng từ Player đến Boss
-        Vector3 dodgeDirection = Quaternion.Euler(0, UnityEngine.Random.Range(-90f, 90f), 0) * playerToBoss;
-        dodgeDirection.y = 0; // Đảm bảo chỉ né tránh trên mặt phẳng ngang
-
-        // Bắt đầu Coroutine để xử lý di chuyển né tránh trong một khoảng thời gian ngắn
-        StartCoroutine(DodgeMovementCoroutine(dodgeDirection, dodgeSpeed, 0.5f, () => _isDodging = false));
-
-        return NodeState.RUNNING;
-    }
-
-    // Hành động sử dụng kỹ năng đặc biệt (tổng quát hơn Skill 1)
-    private NodeState UseSpecialAbility()
-    {
-        if (targetPlayer == null) return NodeState.FAILURE;
-        if (!CanUseSpecialAbility() || IsBossBusy()) return NodeState.FAILURE;
-
-        Debug.Log("Boss: Using Generic Special Ability!");
-        _isPerformingSpecialAbility = true;
-        _lastSpecialAbilityTime = Time.time;
+        _isDodging = true;
+        _lastDodgeTime = Time.time;
         _aiPath.isStopped = true;
-        _animator?.SetTrigger("SpecialAbility");
+        _animator?.SetBool("isMoving", false);
+        _animator?.SetFloat("Speed", 0f);
+        _animator.applyRootMotion = true; // Kích hoạt Root Motion nếu animation né tránh sử dụng nó
 
-        StartCoroutine(AttackCoroutine(2.0f, () => {
-            _isPerformingSpecialAbility = false;
-            _playerDodgedBossSkill = false; // Reset cờ nếu skill này không bị né
-        }));
+        // Chọn ngẫu nhiên animation né tránh theo hướng
+        int dodgeChoice = UnityEngine.Random.Range(0, 4); // 0:Left, 1:Right, 2:LeftBack, 3:RightBack
+        switch (dodgeChoice)
+        {
+            case 0:
+                _animator?.SetTrigger("Rotate90Left");
+                break;
+            case 1:
+                _animator?.SetTrigger("Rotate90Right");
+                break;
+            case 2:
+                _animator?.SetTrigger("Rotate90LeftBack");
+                break;
+            case 3:
+                _animator?.SetTrigger("Rotate90RightBack");
+                break;
+        }
+
         return NodeState.RUNNING;
     }
 
-    // Hành động hồi phục từ trạng thái choáng (Stagger)
     private NodeState RecoverFromStagger()
     {
         if (!_isStaggered) return NodeState.FAILURE;
 
         Debug.Log("Boss: Recovering from Stagger.");
-        _aiPath.isStopped = true;
-        _animator?.SetTrigger("RecoverStagger");
-
-        StartCoroutine(StaggerRecoveryCoroutine(1.0f, () => _isStaggered = false));
+        _aiPath.isStopped = true; // Đảm bảo Boss dừng khi đang choáng
+        // StartCoroutine(StaggerRecoveryCoroutine(1.0f)); // Nếu bạn muốn dùng Coroutine để phục hồi
+        // Thay vì Coroutine, Animation Event OnStaggerAnimationEnd() hoặc OnRecoverStaggerAnimationEnd() sẽ được gọi
+        // để thực sự chuyển trạng thái. Behavior Tree sẽ tiếp tục trả về RUNNING cho đến khi _isStaggered = false.
         return NodeState.RUNNING;
     }
 
-    // Hành động đỡ đòn hoặc parry
+    private IEnumerator StaggerRecoveryCoroutine(float duration)
+    {
+        yield return new WaitForSeconds(duration);
+        OnRecoverStaggerAnimationEnd();
+    }
+
+    public void StaggerBoss(float duration)
+    {
+        if (_isStaggered) return; // Tránh choáng lặp lại nếu đã choáng
+        _isStaggered = true;
+        _aiPath.isStopped = true;
+        _animator?.SetBool("isMoving", false); // Dừng di chuyển khi choáng
+        _animator?.SetFloat("Speed", 0f);
+        Debug.Log($"Boss STAGGERED for {duration} seconds!");
+        _animator?.SetTrigger("GetHit"); // Kích hoạt animation trúng đòn
+    }
+
     private NodeState BlockOrParry()
     {
         if (targetPlayer == null) return NodeState.FAILURE;
@@ -484,233 +460,217 @@ public class EnemyAI : MonoBehaviour
         Debug.Log("Boss: Attempting Block/Parry!");
         _isParrying = true;
         _aiPath.isStopped = true;
-        _animator?.SetTrigger("Parry");
+        _animator?.SetBool("isMoving", false);
+        _animator?.SetFloat("Speed", 0f);
+        // Kích hoạt animation Parry nếu có
+        // _animator?.SetTrigger("Parry"); 
 
-        StartCoroutine(ParryWindowCoroutine(parryWindowDuration, () => _isParrying = false));
         return NodeState.RUNNING;
     }
 
-    // --- CÁC COROUTINE HỖ TRỢ ---
-    private IEnumerator AttackCoroutine(float duration, Action onComplete)
+    private NodeState PerformFlee()
     {
-        yield return new WaitForSeconds(duration);
-        onComplete?.Invoke();
-        if (!IsBossBusy()) _aiPath.isStopped = false;
-    }
+        if (targetPlayer == null) return NodeState.FAILURE;
 
-    private IEnumerator DodgeMovementCoroutine(Vector3 direction, float speed, float duration, Action onComplete)
-    {
-        float startTime = Time.time;
-        while (Time.time < startTime + duration)
+        // Điều kiện để thoát khỏi trạng thái bỏ chạy:
+        // Đang bỏ chạy VÀ đã đến đích VÀ khoảng cách với Player ĐÃ LỚN HƠN tầm bỏ chạy
+        if (_isCurrentlyFleeing && _aiPath.reachedDestination && Vector3.Distance(transform.position, targetPlayer.position) > _fleeRange)
         {
-            if (_characterController != null)
-            {
-                _characterController.Move(direction * speed * Time.deltaTime);
-            }
-            else
-            {
-                transform.position += direction * speed * Time.deltaTime;
-            }
-            yield return null;
+            _isCurrentlyFleeing = false;
+            _aiPath.isStopped = true;
+            _animator?.SetBool("isMoving", false);
+            _animator?.SetFloat("Speed", 0f);
+            Debug.Log("Boss: Successfully fled to safe distance. SUCCESS.");
+            return NodeState.SUCCESS;
         }
-        onComplete?.Invoke();
-        if (!IsBossBusy()) _aiPath.isStopped = false;
-    }
 
-    private IEnumerator StaggerRecoveryCoroutine(float duration, Action onComplete)
-    {
-        yield return new WaitForSeconds(duration);
-        onComplete?.Invoke();
-        if (!IsBossBusy()) _aiPath.isStopped = false;
-    }
-
-    private IEnumerator ParryWindowCoroutine(float duration, Action onComplete)
-    {
-        yield return new WaitForSeconds(duration);
-        onComplete?.Invoke();
-        if (!IsBossBusy()) _aiPath.isStopped = false;
-    }
-
-    // --- XỬ LÝ VA CHẠM (CHO ĐÒN ĐÁNH THƯỜNG) ---
-    // Sử dụng OnTriggerStay hoặc OnControllerColliderHit để phát hiện va chạm liên tục
-    private void OnControllerColliderHit(ControllerColliderHit hit)
-    {
-        // Khi Boss chạm vào Player và Boss không bận, thực hiện đòn đánh thường
-        if (hit.gameObject.CompareTag("Player") && !IsBossBusy())
+        // Điều kiện để bắt đầu hoặc tiếp tục bỏ chạy:
+        // Đang quá gần để bỏ chạy HOẶC đang trong quá trình bỏ chạy
+        if (!IsPlayerTooCloseToFlee() && !_isCurrentlyFleeing)
         {
-            // Trigger hành động tấn công thường
-            // (Bạn có thể bỏ qua việc gọi trực tiếp PerformNormalMeleeAttack ở đây,
-            // thay vào đó, để BT quyết định. Nhưng nếu muốn phản ứng tức thì khi va chạm,
-            // thì đây là nơi để làm.)
-            // Tuy nhiên, để tích hợp tốt với BT, tốt hơn là BT quyết định tấn công khi ở gần
-            // và logic gây sát thương được kích hoạt qua animation event hoặc một collider/trigger riêng của đòn đánh.
-            // Dòng này chỉ mang tính tham khảo nếu bạn muốn trigger hành động từ va chạm.
-            // NodeState result = PerformNormalMeleeAttack();
-            // if (result == NodeState.RUNNING) Debug.Log("Boss: Initiated Normal Melee Attack on collision.");
+            // Nếu không quá gần và không đang bỏ chạy, thì không cần bỏ chạy nữa
+            return NodeState.FAILURE;
+        }
+
+
+        // Nếu chưa bỏ chạy hoặc chưa đến đích an toàn, bắt đầu/tiếp tục bỏ chạy
+        _isCurrentlyFleeing = true;
+        _aiPath.isStopped = false;
+        _aiPath.maxSpeed = movementSpeed * 1.2f; // Chạy nhanh hơn khi bỏ chạy
+        _animator?.SetBool("isMoving", true);
+        _animator?.SetFloat("Speed", _aiPath.desiredVelocity.magnitude);
+
+        Vector3 fleeDirection = (transform.position - targetPlayer.position).normalized;
+        // Đặt đích cách xa người chơi một khoảng _fleeRange + 5f
+        _aiPath.destination = transform.position + fleeDirection * (_fleeRange + 5f);
+
+        if (_aiPath.pathPending || (_aiPath.hasPath && !_aiPath.isStopped))
+        {
+            Debug.Log("Boss: Fleeing. RUNNING.");
+            return NodeState.RUNNING;
+        }
+        // Nếu không có đường đi hoặc bị dừng, coi như thất bại
+        _isCurrentlyFleeing = false;
+        _aiPath.isStopped = true;
+        _animator?.SetBool("isMoving", false);
+        _animator?.SetFloat("Speed", 0f);
+        Debug.LogWarning("Boss: Fleeing failed or path not found. FAILURE.");
+        return NodeState.FAILURE;
+    }
+
+    // --- CÁC HÀM GỌI TỪ ANIMATION EVENTS (QUAN TRỌNG!) ---
+    public void OnMeleeAttackAnimationEnd()
+    {
+        _isAttacking = false;
+        _aiPath.isStopped = false; // <<< THAY ĐỔI QUAN TRỌNG: CHO PHÉP BOSS DI CHUYỂN LẠI SAU KHI TẤN CÔNG
+        Debug.Log("Animation Event: Melee Attack animation ended. _isAttacking = false. AIPath resumed. Boss should now move/attack.");
+    }
+
+    public void OnDodgeAnimationEnd()
+    {
+        _isDodging = false;
+        _aiPath.isStopped = false; // Cho phép Boss di chuyển lại
+        _animator.applyRootMotion = false; // Tắt Root Motion sau khi né tránh
+        Debug.Log("Animation Event: Dodge animation ended. _isDodging = false.");
+    }
+
+    public void OnStaggerAnimationEnd()
+    {
+        Debug.Log("Animation Event: Stagger animation ended. Boss now ready to recover.");
+        // Bạn có thể không cần _isStaggered = false ở đây nếu RecoverFromStaggerCoroutine xử lý.
+        // Hoặc nếu animation RecoverStagger là riêng biệt, hàm này chỉ thông báo kết thúc stagger animation.
+    }
+
+    public void OnRecoverStaggerAnimationEnd()
+    {
+        _isStaggered = false;
+        _aiPath.isStopped = false; // Cho phép Boss di chuyển lại
+        Debug.Log("Animation Event: Recover Stagger animation ended. _isStaggered = false.");
+    }
+
+    public void OnParryAnimationEnd()
+    {
+        _isParrying = false;
+        _aiPath.isStopped = false; // Cho phép Boss di chuyển lại
+        Debug.Log("Animation Event: Parry animation ended. _isParrying = false.");
+    }
+
+    public void OnDieAnimationEnd()
+    {
+        Debug.Log("Animation Event: Die animation ended. Boss fully dead.");
+    }
+
+    public void ActivateMeleeAttackHitbox()
+    {
+        if (meleeAttackHitbox != null)
+        {
+            meleeAttackHitbox.SetActive(true);
+            Debug.Log("Animation Event: Melee Attack Hitbox Activated!");
         }
     }
 
-    // Nếu bạn sử dụng Trigger cho vùng tấn công của Boss thay vì va chạm trực tiếp với CharacterController
-    /*
-    private void OnTriggerStay(Collider other)
+    public void DeactivateMeleeAttackHitbox()
     {
-        if (other.CompareTag("Player") && !IsBossBusy())
+        if (meleeAttackHitbox != null)
         {
-            // Tương tự như OnControllerColliderHit, cân nhắc việc kích hoạt hành động từ BT.
-            // Nếu bạn có một collider riêng cho vùng tấn công của Boss, hãy dùng nó để gây sát thương.
+            meleeAttackHitbox.SetActive(false);
+            Debug.Log("Animation Event: Melee Attack Hitbox Deactivated!");
         }
     }
-    */
 
     // --- KHỞI TẠO CÂY HÀNH VI ---
-    // Hàm này thiết lập cấu trúc của Behavior Tree cho Boss
     private void SetupBehaviorTree()
     {
-        // Các Node điều kiện chung
+        // Các Node điều kiện
         var isPlayerDetected = new ConditionNode(IsPlayerInDetectionRange);
         var isPlayerMeleeRange = new ConditionNode(IsPlayerInMeleeAttackRange);
-        var isPlayerRangedRange = new ConditionNode(IsPlayerInRangedAttackRange);
-        var isBossBusy = new ConditionNode(IsBossBusy);
+        var isPlayerAtEngageDistance = new ConditionNode(IsPlayerAtEngageDistance); // Sử dụng engageDistance mới
+        var isBossBusyCondition = new ConditionNode(IsBossBusy);
         var canDodge = new ConditionNode(CanDodge);
-        var canUseSpecial = new ConditionNode(CanUseSpecialAbility); // Cooldown được điều chỉnh theo nổi loạn
+        var canAttack = new ConditionNode(CanAttack);
         var isPlayerAttacking = new ConditionNode(IsPlayerCurrentlyAttacking);
-        var canCastSkill1 = new ConditionNode(CanCastSkill1); // Điều kiện mới: có thể dùng Skill 1
-        var hasPlayerDodgedBossSkill = new ConditionNode(HasPlayerDodgedBossSkill); // Điều kiện mới: người chơi né skill
+        var isLowHP = new ConditionNode(IsLowHP);
+        var isFleeing = new ConditionNode(IsFleeing);
+        var isPlayerTooCloseToFlee = new ConditionNode(IsPlayerTooCloseToFlee);
 
-        // Các Node hành động cụ thể
-        var moveTowardsPlayer = new ActionNode(MoveTowardsPlayer);
-        var normalMeleeAttack = new ActionNode(PerformNormalMeleeAttack); // Đổi tên thành Normal Melee
-        var rangedAttack = new ActionNode(PerformRangedAttack); // Vẫn giữ nếu có ranged attack
-        var dodge = new ActionNode(Dodge);
-        var useSkill1 = new ActionNode(UseSkill1); // Hành động Skill 1
-        var useGenericSpecialAbility = new ActionNode(UseSpecialAbility); // Hành động skill đặc biệt chung
-        var recoverStagger = new ActionNode(RecoverFromStagger);
-        var blockOrParry = new ActionNode(BlockOrParry);
+        // Các Node hành động
+        var moveAction = new ActionNode(MoveTowardsPlayer);
+        var meleeAttackAction = new ActionNode(PerformMeleeAttack);
+        var dodgeAction = new ActionNode(Dodge);
+        var recoverStaggerAction = new ActionNode(RecoverFromStagger);
+        var blockOrParryAction = new ActionNode(BlockOrParry);
+        var fleeAction = new ActionNode(PerformFlee);
 
-        // Nhánh ưu tiên cao nhất: Xử lý choáng (Stagger)
-        var staggerBranch = new SequenceNode(new List<Node>
-        {
-            new ConditionNode(() => _isStaggered),
-            recoverStagger
-        });
+        // Sub-tree cho các trạng thái Boss đang bận (không thể làm gì khác)
+        var busyBehavior = new SelectorNode(
+            new SequenceNode(new ConditionNode(() => _isStaggered), recoverStaggerAction), // Hồi phục choáng
+            new SequenceNode(new ConditionNode(() => _isParrying), blockOrParryAction),   // Đang parry
+            new SequenceNode(new ConditionNode(() => _isDodging), dodgeAction),         // Đang né tránh
+            new SequenceNode(isFleeing, fleeAction),                                     // Đang bỏ chạy
+            new ActionNode(() => NodeState.RUNNING) // Nếu Boss bận nhưng không rơi vào các trường hợp trên, vẫn coi là bận.
+        );
 
-        // Nhánh ưu tiên cao thứ hai: Phản ứng với đòn tấn công của người chơi (né tránh/đỡ đòn)
-        var reactToPlayerAttackBranch = new SequenceNode(new List<Node>
-        {
-            new ConditionNode(() => !isBossBusy.Evaluate().Equals(NodeState.SUCCESS)),
-            isPlayerAttacking,
-            new SelectorNode(new List<Node>
-            {
-                new SequenceNode(new List<Node> { canDodge, dodge }),
-                blockOrParry
-            })
-        });
+        // Sub-tree cho các hành vi chiến đấu cốt lõi (né tránh, block/parry)
+        var coreCombatBehavior = new SelectorNode(
+            // Ưu tiên Né tránh nếu có thể và điều kiện phù hợp
+            new SequenceNode(
+                canDodge,
+                new SelectorNode( // Điều kiện để né tránh
+                    isLowHP,
+                    isPlayerAttacking,
+                    new ConditionNode(HasPlayerDodgedBossSkill)
+                ),
+                dodgeAction
+            ),
+            // Ưu tiên Block/Parry nếu Player đang tấn công
+            new SequenceNode(
+                isPlayerAttacking,
+                new Inverter(isBossBusyCondition), // Đảm bảo Boss không bận khi Block/Parry
+                blockOrParryAction
+            )
+        );
 
-        // Nhánh ưu tiên cao thứ ba: Kích hoạt Skill 1 khi Player đánh thường đòn 2
-        var triggerSkill1Branch = new SequenceNode(new List<Node>
-        {
-            new ConditionNode(() => !isBossBusy.Evaluate().Equals(NodeState.SUCCESS)),
-            canCastSkill1, // Nếu Player đã đánh đòn 2 và skill không cooldown
-            useSkill1
-        });
+        // Sub-tree cho hành vi áp sát và tấn công
+        var approachAndAttackBehavior = new SelectorNode(
+            // 1. Ưu tiên: Tấn công cận chiến nếu trong tầm và có thể tấn công
+            new SequenceNode(
+                isPlayerMeleeRange,         // Kiểm tra khoảng cách
+                canAttack,                  // Kiểm tra cooldown
+                new Inverter(isBossBusyCondition), // Kiểm tra trạng thái bận
+                meleeAttackAction           // Thực hiện tấn công
+            ),
+            // 2. Nếu không trong tầm cận chiến nhưng trong tầm engage, dừng di chuyển và chờ hoặc tấn công
+            new SequenceNode(
+                isPlayerAtEngageDistance,   // Player đang ở khoảng cách engage (giữa melee và engage range)
+                new Inverter(isBossBusyCondition), // Boss không bận
+                new ActionNode(() => { // Hành động dừng lại và chờ. Nếu cooldown tấn công xong, có thể tấn công ngay.
+                    _aiPath.isStopped = true;
+                    _animator?.SetBool("isMoving", false);
+                    _animator?.SetFloat("Speed", 0f);
+                    Debug.Log("Boss: Within engage range, stopping to prepare.");
+                    return NodeState.SUCCESS; // Trả về SUCCESS để selector tiếp tục kiểm tra các hành vi khác (ví dụ: tấn công)
+                })
+            ),
+            // 3. Nếu ngoài tầm engage, di chuyển tới người chơi (chase)
+            new SequenceNode(
+                new Inverter(isPlayerMeleeRange),       // Player KHÔNG trong tầm cận chiến
+                new Inverter(isPlayerAtEngageDistance), // Player KHÔNG trong tầm engage (tức là ngoài 10f)
+                new Inverter(isBossBusyCondition),       // Boss không bận
+                moveAction                               // Di chuyển tới Player
+            )
+        );
 
-        // Nhánh ưu tiên cao thứ tư: Phản ứng khi người chơi né skill của Boss
-        var reactToDodgeBranch = new SequenceNode(new List<Node>
-        {
-            new ConditionNode(() => !isBossBusy.Evaluate().Equals(NodeState.SUCCESS)),
-            hasPlayerDodgedBossSkill, // Nếu người chơi vừa né được skill của Boss
-            new SelectorNode(new List<Node> // Boss sẽ tìm người chơi để tấn công hoặc tung skill bất kỳ
-            {
-                new SequenceNode(new List<Node> { // Ưu tiên tấn công thường nếu ở gần
-                    isPlayerMeleeRange,
-                    normalMeleeAttack
-                }),
-                new SequenceNode(new List<Node> { // Hoặc tung skill ngẫu nhiên nếu có thể
-                    canUseSpecial,
-                    useGenericSpecialAbility
-                }),
-                moveTowardsPlayer // Nếu không, tiếp tục đuổi theo
-            })
-        });
-
-        // Định nghĩa hành vi cụ thể theo từng giai đoạn của Boss
-        Node phaseSpecificBehavior;
-        switch (currentPhase)
-        {
-            case BossPhase.Phase1:
-                Debug.Log("Boss Phase 1 Behavior Activated.");
-                phaseSpecificBehavior = new SelectorNode(new List<Node>
-                {
-                    // Ưu tiên tấn công gần nếu chạm collider (di chuyển về để chạm)
-                    new SequenceNode(new List<Node> { isPlayerMeleeRange, normalMeleeAttack }),
-                    new SequenceNode(new List<Node> { isPlayerRangedRange, rangedAttack }), // Vẫn có ranged nếu muốn
-                    new SequenceNode(new List<Node> { canDodge, dodge }),
-                    new SequenceNode(new List<Node> { canUseSpecial, useGenericSpecialAbility }),
-                    moveTowardsPlayer
-                });
-                break;
-            case BossPhase.Phase2:
-                Debug.Log("Boss Phase 2 Behavior Activated.");
-                phaseSpecificBehavior = new SelectorNode(new List<Node>
-                {
-                    new SequenceNode(new List<Node> { canUseSpecial, useGenericSpecialAbility }), // Ưu tiên skill
-                    new SequenceNode(new List<Node> { canDodge, dodge }), // Né tránh thường xuyên hơn
-                    new SequenceNode(new List<Node> { isPlayerMeleeRange, normalMeleeAttack }),
-                    new SequenceNode(new List<Node> { isPlayerRangedRange, rangedAttack }),
-                    moveTowardsPlayer
-                });
-                break;
-            case BossPhase.Phase3: // Trạng thái "Nổi loạn"
-                Debug.Log("Boss Phase 3 (Enraged) Behavior Activated.");
-                // Tốc độ di chuyển đã được cập nhật ở Tick()
-                // Cooldown kỹ năng đã được điều chỉnh trong CanUseSpecialAbility()
-                phaseSpecificBehavior = new SelectorNode(new List<Node>
-                {
-                    // Spam kỹ năng đặc biệt
-                    new SequenceNode(new List<Node> { canUseSpecial, useGenericSpecialAbility }),
-                    // Tấn công cận chiến mạnh hơn/thường xuyên hơn
-                    new SequenceNode(new List<Node> { isPlayerMeleeRange, normalMeleeAttack }),
-                    // Vẫn có thể né tránh nhưng ít ưu tiên hơn
-                    new SequenceNode(new List<Node> { canDodge, dodge }),
-                    // Luôn đuổi theo
-                    moveTowardsPlayer
-                });
-                break;
-            default:
-                Debug.LogWarning("Unknown Boss Phase. Defaulting to Phase 1 Behavior.");
-                goto case BossPhase.Phase1;
-        }
-
-        // Cây hành vi gốc (_rootNode) của Boss
-        _rootNode = new SelectorNode(new List<Node>
-        {
-            staggerBranch,                  // 1. Ưu tiên cao nhất: Xử lý choáng
-            triggerSkill1Branch,            // 2. Kích hoạt Skill 1 khi Player đánh thường đòn 2
-            reactToDodgeBranch,             // 3. Phản ứng khi Player né được skill của Boss
-            reactToPlayerAttackBranch,      // 4. Phản ứng với đòn tấn công của người chơi (Parry/Block)
-            new SequenceNode(new List<Node>
-            {
-                new ConditionNode(() => !isBossBusy.Evaluate().Equals(NodeState.SUCCESS)), // Điều kiện: Chỉ thực hiện nhánh này nếu Boss không bận
-                isPlayerDetected, // Điều kiện: Phát hiện người chơi
-                phaseSpecificBehavior // Thực hiện hành vi cụ thể của Phase hiện tại
-            }),
-            new ActionNode(() => { // Hành động mặc định: Idle
-                Debug.Log("Boss: Idling...");
-                _animator?.SetBool("isMoving", false);
-                _aiPath.isStopped = true;
-                return NodeState.RUNNING;
-            })
-        });
-
-        Debug.Log("Behavior Tree setup complete for current phase: " + currentPhase);
-    }
-
-    // Hàm này được gọi khi GameObject bị hủy (ví dụ: Boss chết hoặc chuyển cảnh)
-    private void OnDestroy()
-    {
-        if (EnemyAIManager.Instance != null)
-        {
-            EnemyAIManager.Instance.UnregisterEnemy(this);
-        }
+        // Cây hành vi gốc: Ưu tiên các trạng thái bận, sau đó là các hành vi chiến đấu theo pha, và cuối cùng là di chuyển/tấn công
+        _rootNode = new SelectorNode(
+            new SequenceNode(isBossBusyCondition, busyBehavior), // 1. Ưu tiên xử lý các trạng thái bận của Boss (stagger, dodge, parry, flee)
+            new SequenceNode(isLowHP, // 2. Nếu HP thấp, ưu tiên các hành vi phòng thủ/bỏ chạy
+                new SelectorNode(
+                    new SequenceNode(isPlayerTooCloseToFlee, fleeAction), // Bỏ chạy nếu quá gần và HP thấp
+                    coreCombatBehavior // Hoặc tiếp tục chiến đấu cốt lõi
+                )
+            ),
+            coreCombatBehavior, // 3. Hành vi chiến đấu cốt lõi (né tránh, block/parry) - nếu không bận và không HP thấp cần bỏ chạy
+            approachAndAttackBehavior // 4. Hành vi áp sát và tấn công - ưu tiên cuối cùng nếu không có gì đặc biệt xảy ra
+        );
     }
 }

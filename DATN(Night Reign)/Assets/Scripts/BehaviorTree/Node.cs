@@ -1,7 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
+using UnityEngine; // Đảm bảo có namespace này nếu bạn dùng Mathf.Clamp trong ParallelNode
 
 // Enum để định nghĩa trạng thái của Node trong Behavior Tree
 public enum NodeState
@@ -59,9 +58,10 @@ public class SequenceNode : Node
 {
     protected List<Node> _nodes = new List<Node>();
 
-    public SequenceNode(List<Node> nodes)
+    // Thay đổi constructor để chấp nhận params Node[]
+    public SequenceNode(params Node[] nodes)
     {
-        _nodes = nodes;
+        _nodes.AddRange(nodes);
     }
 
     public override NodeState Evaluate()
@@ -80,7 +80,8 @@ public class SequenceNode : Node
                     anyChildRunning = true;
                     break;
                 default:
-                    _nodeState = NodeState.SUCCESS;
+                    // Nên có một giá trị mặc định, nhưng trong Behavior Tree, thường chỉ có 3 trạng thái
+                    _nodeState = NodeState.SUCCESS; // Fallback, có thể thay đổi tùy ý
                     return _nodeState;
             }
         }
@@ -95,9 +96,10 @@ public class SelectorNode : Node
 {
     protected List<Node> _nodes = new List<Node>();
 
-    public SelectorNode(List<Node> nodes)
+    // Thay đổi constructor để chấp nhận params Node[]
+    public SelectorNode(params Node[] nodes)
     {
-        _nodes = nodes;
+        _nodes.AddRange(nodes);
     }
 
     public override NodeState Evaluate()
@@ -171,5 +173,36 @@ public class ParallelNode : Node
         }
 
         return _nodeState;
+    }
+}
+
+// Node Inverter: Đảo ngược kết quả của node con (Decorator Node)
+public class Inverter : Node
+{
+    private Node _child;
+
+    public Inverter(Node child)
+    {
+        _child = child;
+    }
+
+    public override NodeState Evaluate()
+    {
+        switch (_child.Evaluate())
+        {
+            case NodeState.FAILURE:
+                _nodeState = NodeState.SUCCESS;
+                return _nodeState;
+            case NodeState.SUCCESS:
+                _nodeState = NodeState.FAILURE;
+                return _nodeState;
+            case NodeState.RUNNING:
+                _nodeState = NodeState.RUNNING;
+                return _nodeState;
+            default:
+                // Should not happen, but good to have a default
+                _nodeState = NodeState.FAILURE;
+                return _nodeState;
+        }
     }
 }
