@@ -2,8 +2,12 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class InteractableUI : MonoBehaviour
+namespace ND
 {
-    public TextMeshProUGUI interactableText;
-    public TextMeshProUGUI itemText;
+    public class InteractableUI : MonoBehaviour
+    {
+        public TextMeshProUGUI interactableText;
+        public TextMeshProUGUI itemText;
+    }
 }
+

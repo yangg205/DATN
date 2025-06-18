@@ -96,8 +96,8 @@ public class DragonTerrorBringer : MonoBehaviour
         foreach (Collider player in hitPlayers)
         {
             //player.GetComponent<PlayerClone>()?.TakeDamage(damage);
-            player.GetComponent<PlayerStats>()?.TakeDamage(15);
-        }
+/*            player.GetComponent<PlayerStats>()?.TakeDamage(15);
+*/        }
     }
 
     public void TakeDamage(int damageAmount)

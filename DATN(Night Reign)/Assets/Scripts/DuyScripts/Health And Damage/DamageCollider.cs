@@ -1,49 +1,52 @@
 using UnityEngine;
 
-public class DamageCollider : MonoBehaviour
+namespace ND
 {
-    Collider damageCollider;
-
-    public int currentWeaponDamage = 25;
-
-    private void Awake()
+    public class DamageCollider : MonoBehaviour
     {
-        damageCollider = GetComponent<Collider>();
-        damageCollider.gameObject.SetActive(true);
-        damageCollider.isTrigger = true;
-        damageCollider.enabled = false;
-    }
+        Collider damageCollider;
 
-    public void EnableDamageCollider()
-    {
-        damageCollider.enabled = true;
-    }
+        public int currentWeaponDamage = 25;
 
-    public void DisableDamageCollider()
-    {
-        damageCollider.enabled = false;
-    }
-
-    private void OnTriggerEnter(Collider collision)
-    {
-        if(collision.tag == "Hittable")
+        private void Awake()
         {
-            PlayerStats playerStats= collision.GetComponent<PlayerStats>();
-
-            if(playerStats != null )
-            {
-                playerStats.TakeDamage(currentWeaponDamage);
-            }
+            damageCollider = GetComponent<Collider>();
+            damageCollider.gameObject.SetActive(true);
+            damageCollider.isTrigger = true;
+            damageCollider.enabled = false;
         }
 
-        //Duyen
-        if(collision.tag == "Enemy")
+        public void EnableDamageCollider()
         {
-            EnemyStats enemyStats = collision.GetComponent<EnemyStats>();
+            damageCollider.enabled = true;
+        }
 
-            if(enemyStats != null )
+        public void DisableDamageCollider()
+        {
+            damageCollider.enabled = false;
+        }
+
+        private void OnTriggerEnter(Collider collision)
+        {
+            if (collision.tag == "Hittable")
             {
-                enemyStats.TakeDamage(currentWeaponDamage);
+                PlayerStats playerStats = collision.GetComponent<PlayerStats>();
+
+                if (playerStats != null)
+                {
+                    playerStats.TakeDamage(currentWeaponDamage);
+                }
+            }
+
+            //Duyen
+            if (collision.tag == "Enemy")
+            {
+                EnemyStats enemyStats = collision.GetComponent<EnemyStats>();
+
+                if (enemyStats != null)
+                {
+                    enemyStats.TakeDamage(currentWeaponDamage);
+                }
             }
         }
     }

@@ -1,8 +1,13 @@
 using UnityEngine;
-public class ItemD : ScriptableObject
+
+namespace ND
 {
-    [Header("Item Information")]
-    public Sprite itemIcon;
-    public string itemName;
+    public class Item : ScriptableObject
+    {
+        [Header("Item Information")]
+        public Sprite itemIcon;
+        public string itemName;
+    }
 }
+
 

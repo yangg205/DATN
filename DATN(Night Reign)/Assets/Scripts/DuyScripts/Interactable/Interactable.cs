@@ -1,18 +1,21 @@
 using UnityEngine;
 
-public class Interactable : MonoBehaviour
+namespace ND
 {
-    public float radius = 0.6f;
-    public string interactableText;
-
-    private void OnDrawGizmosSelected()
+    public class Interactable : MonoBehaviour
     {
-        Gizmos.color = Color.blue;
-        Gizmos.DrawWireSphere(transform.position, radius);
+        public float radius = 0.6f;
+        public string interactableText;
+
+        private void OnDrawGizmosSelected()
+        {
+            Gizmos.color = Color.blue;
+            Gizmos.DrawWireSphere(transform.position, radius);
+        }
+
+        public virtual void Interact(PlayerManager playerManager)
+        {
+            Debug.Log("Interact with weapon");
+        }
     }
-
-    public virtual void Interact(PlayerManager playerManager)
-    {
-        Debug.Log("Interact with weapon");
-    }    
 }
