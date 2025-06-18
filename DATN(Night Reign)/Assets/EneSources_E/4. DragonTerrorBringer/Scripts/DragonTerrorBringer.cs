@@ -69,7 +69,7 @@ public class DragonTerrorBringer : MonoBehaviour
             Transform targetPlayer = detectedPlayers[0].transform;
             transform.LookAt(targetPlayer);
 
-            if (HP <= maxHP * 0.3f)
+            if (HP <= 50f)
             {
                 if (!isDefending)
                     StartCoroutine(DefendRoutine());
@@ -204,7 +204,6 @@ public class DragonTerrorBringer : MonoBehaviour
         AudioManager_Enemy.instance?.Play("DragonDefend");
 
         yield return new WaitForSeconds(3f);
-
         isDefending = false;
     }
 
