@@ -11,12 +11,13 @@ public class AutoOutline : MonoBehaviour
     private bool isSelected = false;
     [SerializeField] bool status= false;
     SignalRClient signalRClient;
-    int playerId = PlayerPrefs.GetInt("PlayerId", 0);
+    int playerId;
     
     PlayerStats playerStats;
 
     private void Start()
     {
+        playerId = PlayerPrefs.GetInt("PlayerId", 0);
         signalRClient = FindAnyObjectByType<SignalRClient>();
         outline = GetComponent<Outline>();    
     }
