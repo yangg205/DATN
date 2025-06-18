@@ -66,14 +66,15 @@ namespace ND
         {
             inputHandler.rollFlag = false;
             inputHandler.sprintFlag = false;
-            inputHandler.rb_input = false;
-            inputHandler.rt_input = false;
+            inputHandler.lightAttack_input = false;
+            inputHandler.heavyAttack_input = false;
             inputHandler.d_Pad_Up = false;
             inputHandler.d_Pad_Down = false;
             inputHandler.d_Pad_Left = false;
             inputHandler.d_Pad_Right = false;
-            inputHandler.a_input = false;
+            inputHandler.interact_input = false;
             inputHandler.jump_input = false;
+            inputHandler.inventory_input = false;
 
             if (isInAir)
             {
@@ -97,7 +98,7 @@ namespace ND
                         interactableUI.interactableText.text = interactableText;
                         interactableUIGameObject.SetActive(true);
 
-                        if (inputHandler.a_input)
+                        if (inputHandler.interact_input)
                         {
                             hit.collider.GetComponent<Interactable>().Interact(this);
                         }
@@ -111,7 +112,7 @@ namespace ND
                     interactableUIGameObject.SetActive(false);
                 }
 
-                if (itemInteractableGameObject != null && inputHandler.a_input)
+                if (itemInteractableGameObject != null && inputHandler.interact_input)
                 {
                     itemInteractableGameObject.SetActive(false);
                 }

@@ -12,11 +12,12 @@ namespace ND
         public float mouseX;
         public float mouseY;
 
-        public bool b_input;
-        public bool a_input;
-        public bool rb_input;
-        public bool rt_input;
+        public bool roll_input;
+        public bool interact_input;
+        public bool lightAttack_input;
+        public bool heavyAttack_input;
         public bool jump_input;
+        public bool inventory_input;
 
         public bool d_Pad_Up;
         public bool d_Pad_Down;
@@ -26,12 +27,14 @@ namespace ND
         public bool rollFlag;
         public bool sprintFlag;
         public bool comboFlag;
+        public bool inventoryFlag;
         public float rollInputTimer;
 
         PlayerControls inputActions;
         PlayerAttacker playerAttacker;
         PlayerInventory playerInventory;
         PlayerManager playerManager;
+        UIManager uiManager;
 
         Vector2 movementInput;
         Vector2 cameraInput;
@@ -41,6 +44,7 @@ namespace ND
             playerAttacker = GetComponent<PlayerAttacker>();
             playerInventory = GetComponent<PlayerInventory>();
             playerManager = GetComponent<PlayerManager>();
+            uiManager = FindFirstObjectByType<UIManager>();
         }
 
         public void OnEnable()
@@ -68,6 +72,7 @@ namespace ND
             HandleQuickSlotsInput();
             HandleInteractingButtonInput();
             HandleJumpInput();
+            HandleInventoryInput();
         }
 
         private void MoveInput(float delta)
@@ -81,8 +86,8 @@ namespace ND
 
         private void HandleRollInput(float delta)
         {
-            b_input = inputActions.PlayerActions.Roll.phase == UnityEngine.InputSystem.InputActionPhase.Performed;
-            if (b_input)
+            roll_input = inputActions.PlayerActions.Roll.phase == UnityEngine.InputSystem.InputActionPhase.Performed;
+            if (roll_input)
             {
                 rollInputTimer += delta;
                 sprintFlag = true;
@@ -101,10 +106,10 @@ namespace ND
 
         private void HandleAttackInput(float delta)
         {
-            inputActions.PlayerActions.RB.performed += i => rb_input = true;
-            inputActions.PlayerActions.RT.performed += i => rt_input = true;
+            inputActions.PlayerActions.LightAttack.performed += i => lightAttack_input = true;
+            inputActions.PlayerActions.HeavyAttack.performed += i => heavyAttack_input = true;
 
-            if (rb_input)
+            if (lightAttack_input)
             {
                 if (playerManager.canDoCombo)
                 {
@@ -124,7 +129,7 @@ namespace ND
                 }
             }
 
-            if (rt_input)
+            if (heavyAttack_input)
             {
                 playerAttacker.HandleHeavyAttack(playerInventory.rightWeapon);
 
@@ -148,12 +153,27 @@ namespace ND
 
         private void HandleInteractingButtonInput()
         {
-            inputActions.PlayerActions.A.performed += i => a_input = true;
+            inputActions.PlayerActions.Interact.performed += i => interact_input = true;
         }
 
         private void HandleJumpInput()
         {
             inputActions.PlayerActions.Jump.performed += i => jump_input = true;
+        }
+
+        private void HandleInventoryInput()
+        {
+            inputActions.PlayerActions.Inventory.started += i =>
+            {
+                inventoryFlag = true;
+                uiManager.OpenSelectWindow();
+            };
+
+            inputActions.PlayerActions.Inventory.canceled += i =>
+            {
+                inventoryFlag = false;
+                uiManager.CloseSelectWindow();
+            };
         }
     }
 }
