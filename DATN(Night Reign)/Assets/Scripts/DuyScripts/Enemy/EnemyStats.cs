@@ -1,58 +1,61 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class EnemyStats : MonoBehaviour
+namespace ND
 {
-    public int healthLevel = 10;
-    public int maxHealth;
-    public int currentHealth;
-
-    public int expReward = 25;
-    public PlayerStats playerStats;
-
-    [Header("UI")]
-    public Image healthFill;
-    Animator animator;
-
-    private void Awake()
+    public class EnemyStats : MonoBehaviour
     {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
+        public int healthLevel = 10;
+        public int maxHealth;
+        public int currentHealth;
+
+        public int expReward = 25;
+        public PlayerStats playerStats;
+
+        [Header("UI")]
+        public Image healthFill;
+        Animator animator;
+
+        private void Awake()
         {
-            playerStats = player.GetComponent<PlayerStats>();
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+            {
+                playerStats = player.GetComponent<PlayerStats>();
+            }
+
+            animator = GetComponent<Animator>();
+        }
+        void Start()
+        {
+            maxHealth = SetMaxHealthFromHealthLevel();
+            currentHealth = maxHealth;
         }
 
-        animator = GetComponent<Animator>();
-    }
-    void Start()
-    {
-        maxHealth = SetMaxHealthFromHealthLevel();
-        currentHealth = maxHealth;
-    }
-
-    private int SetMaxHealthFromHealthLevel()
-    {
-        maxHealth = healthLevel * 10;
-        return maxHealth;
-    }
-
-    public void TakeDamage(int damage)
-    {
-        currentHealth = currentHealth - damage;
-
-        animator.Play("DamageHit");
-
-        if (currentHealth <= 0)
+        private int SetMaxHealthFromHealthLevel()
         {
-            currentHealth = 0;
-            animator.Play("Dead");
-            //handle dead 
-            if (playerStats != null)
-            {
-                playerStats.GainEXP(expReward);
-            }
-            Destroy(gameObject, 2f); // Xoá quái sau 2 giây
+            maxHealth = healthLevel * 10;
+            return maxHealth;
+        }
 
+        public void TakeDamage(int damage)
+        {
+            currentHealth = currentHealth - damage;
+
+            animator.Play("DamageHit");
+
+            if (currentHealth <= 0)
+            {
+                currentHealth = 0;
+                animator.Play("Dead");
+                //handle dead 
+                if (playerStats != null)
+                {
+                    playerStats.GainEXP(expReward);
+                }
+                Destroy(gameObject, 2f); // Xoá quái sau 2 giây
+
+            }
         }
     }
 }
