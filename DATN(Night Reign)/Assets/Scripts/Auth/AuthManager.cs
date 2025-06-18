@@ -8,8 +8,7 @@ public class AuthManager : MonoBehaviour
     [SerializeField] GameObject loginPanel;
     [SerializeField] GameObject registerPanel;
     [SerializeField] GameObject otpPanel;
-    [SerializeField] GameObject notificationPanel;
-    [SerializeField] TextMeshProUGUI notificationText;
+    NotificationManager notificationManager;
 
     //input fields login
     [SerializeField] TMP_InputField emailLogin;
@@ -21,6 +20,7 @@ public class AuthManager : MonoBehaviour
     //input fields otp
     [SerializeField] TMP_InputField otpCode;
 
+    private bool isEmailLoaded = false;
     //server
     private SignalRClient signalRClient;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -29,24 +29,28 @@ public class AuthManager : MonoBehaviour
         loginPanel.SetActive(false);
         registerPanel.SetActive(false);
         otpPanel.SetActive(false);
-        notificationPanel.SetActive(false);
         signalRClient = FindAnyObjectByType<SignalRClient>();
         if (signalRClient == null)
         {
             Debug.LogError("SignalRClient khong co trong scene.");
         }
-    }
-    IEnumerator ShowNotification(string mess, float time)
-    {
-        notificationText.text = mess;
-        notificationPanel.SetActive(true);
-        yield return new WaitForSeconds(time);
-        notificationPanel.SetActive(false);
+        notificationManager = FindAnyObjectByType<NotificationManager>();
+
+
+        string playerMail = PlayerPrefs.GetString("email", ""); // Lấy email từ PlayerPrefs
+        if (!string.IsNullOrEmpty(playerMail))
+        {
+            emailLogin.text = playerMail;
+            isEmailLoaded = true;
+        }
     }
     // Update is called once per frame
     void Update()
     {
 
+
+        // Gán sự kiện khi bắt đầu chỉnh sửa
+        emailLogin.onValueChanged.AddListener(OnEmailChanged);
     }
     public void OnClickShowLoginInner()
     {
@@ -75,11 +79,12 @@ public class AuthManager : MonoBehaviour
     }
     public async void OnClickSubmitLogin()
     {
-        string email = emailLogin.text.Trim();
+        string email = emailLogin.text.Trim(); 
         string password = passwordLogin.text.Trim();
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
         {
-            StartCoroutine(ShowNotification("Vui lòng nhập đầy đủ email và mật khẩu!",4));
+            
+            notificationManager.ShowNotification("Vui lòng nhập đầy đủ email và mật khẩu!", 4);
             return;
         }
         var result = await signalRClient.SendLogin(email, password);
@@ -90,31 +95,32 @@ public class AuthManager : MonoBehaviour
         }
         else
         {
-            StartCoroutine(ShowNotification(result.message, 4));
+            notificationManager.ShowNotification(result.message, 4);
         }
     }
     public async void OnClickSubmiRegister()
     {
+
         string email = emailRegister.text.Trim();
         string password = passwordRegister.text.Trim();
         string confirmPassword = confirmPasswordRegister.text.Trim();
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(confirmPassword))
         {
-            StartCoroutine(ShowNotification("Vui lòng nhập đầy đủ email và mật khẩu!", 4));
+            notificationManager.ShowNotification("Vui lòng nhập đầy đủ email và mật khẩu!", 4);
             return;
         }
         var result = await signalRClient.SendRegister(email, password, confirmPassword);
         if (result.status)
         {
-            StartCoroutine(ShowNotification("Kiểm tra email để lấy OTP", 4));
+            notificationManager.ShowNotification("Kiểm tra email để lấy OTP", 4);
             PlayerPrefs.SetString("email", email);
+            otpPanel.SetActive(true);
+            registerPanel.SetActive(false);
         }
         else
         {
-            StartCoroutine(ShowNotification(result.message, 2));
+            notificationManager.ShowNotification(result.message, 2);
         }
-        otpPanel.SetActive(true);
-        registerPanel.SetActive(false);
     }
     public async void OnClickSubmitOtp()
     {
@@ -122,24 +128,37 @@ public class AuthManager : MonoBehaviour
         string otp = otpCode.text.Trim();
         if (string.IsNullOrEmpty(email))
         {
-            StartCoroutine(ShowNotification("Vui lòng đăng ký trước!", 4));
+            notificationManager.ShowNotification("Vui lòng đăng ký trước!", 4);
             return;
         }
         if (string.IsNullOrEmpty(otp))
         {
-            StartCoroutine(ShowNotification("Vui lòng nhập đầy đủ OTP!", 4));
+            notificationManager.ShowNotification("Vui lòng nhập đầy đủ OTP!", 4);
             return;
         }
         var result = await signalRClient.SendOTP(email, otp);
         if (result.status)
         {
-            StartCoroutine(ShowNotification("Đăng ký thành công!", 4));
+            notificationManager.ShowNotification("Đăng ký thành công!", 4);
             otpPanel.SetActive(false);
             loginPanel.SetActive(true);
         }
         else
         {
-            StartCoroutine(ShowNotification(result.message, 2));
+            notificationManager.ShowNotification(result.message, 2);
+        }
+        string playerMail = PlayerPrefs.GetString("email", ""); 
+        if (!string.IsNullOrEmpty(playerMail))
+        {
+            emailLogin.text = playerMail;
+            isEmailLoaded = true;
+        }
+    }
+    void OnEmailChanged(string input)
+    {
+        if (isEmailLoaded && string.IsNullOrEmpty(input))
+        {
+            isEmailLoaded = false;
         }
     }
 }

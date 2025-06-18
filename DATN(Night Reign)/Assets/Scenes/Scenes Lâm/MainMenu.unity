@@ -948,7 +948,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Play
+  m_text: New Game
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: b0d58e5b1ba314f45bd650ac9b45223b, type: 2}
   m_sharedMaterial: {fileID: 5350000462873330320, guid: b0d58e5b1ba314f45bd650ac9b45223b, type: 2}
@@ -1364,7 +1364,7 @@ MonoBehaviour:
     - m_Text: English
       m_Image: {fileID: 0}
       m_Color: {r: 1, g: 1, b: 1, a: 1}
-    - m_Text: Vietnames
+    - m_Text: Vietnamese
       m_Image: {fileID: 0}
       m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_OnValueChanged:
@@ -2570,7 +2570,7 @@ GameObject:
   - component: {fileID: 1202363051}
   - component: {fileID: 1202363052}
   m_Layer: 0
-  m_Name: Play
+  m_Name: New Game
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2790,6 +2790,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1220325081}
   - component: {fileID: 1220325082}
+  - component: {fileID: 1220325083}
   m_Layer: 0
   m_Name: LocalizationManager
   m_TagString: Untagged
@@ -2823,7 +2824,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1220325080}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 599199132edb63d48b5d765abf0c041d, type: 3}
   m_Name: 
@@ -2841,6 +2842,19 @@ MonoBehaviour:
   - 
   - 
   - 
+--- !u!114 &1220325083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1220325080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5647db7f5ea4da54aae8f0430c55f6f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  languageDropdown: {fileID: 453060907}
 --- !u!1 &1271188348 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5609249185027791238, guid: 701fea26b98170847ac53fb33dbce797, type: 3}
@@ -4401,7 +4415,19 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: Selectioncharacter
+          m_StringArgument: Selectioncharacter2
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: SceneTransition, Assembly-CSharp
+        m_MethodName: 
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &1991990607
@@ -4713,11 +4739,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5659366446568319660, guid: 701fea26b98170847ac53fb33dbce797, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 0.272
       objectReference: {fileID: 0}
     - target: {fileID: 5659366446568319660, guid: 701fea26b98170847ac53fb33dbce797, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5659366446568319660, guid: 701fea26b98170847ac53fb33dbce797, type: 3}
       propertyPath: m_LocalPosition.x
@@ -4729,19 +4755,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6524900497328089025, guid: 701fea26b98170847ac53fb33dbce797, type: 3}
       propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7876332492175022088, guid: 701fea26b98170847ac53fb33dbce797, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.592
+      objectReference: {fileID: 0}
+    - target: {fileID: 7876332492175022088, guid: 701fea26b98170847ac53fb33dbce797, type: 3}
+      propertyPath: m_AnchorMax.y
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7876332492175022088, guid: 701fea26b98170847ac53fb33dbce797, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7876332492175022088, guid: 701fea26b98170847ac53fb33dbce797, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7876332492175022088, guid: 701fea26b98170847ac53fb33dbce797, type: 3}
       propertyPath: m_AnchorMin.x
-      value: 0
+      value: 0.592
       objectReference: {fileID: 0}
     - target: {fileID: 7876332492175022088, guid: 701fea26b98170847ac53fb33dbce797, type: 3}
       propertyPath: m_LocalPosition.x
@@ -4749,11 +4775,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8918892771918601813, guid: 701fea26b98170847ac53fb33dbce797, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 0.592
       objectReference: {fileID: 0}
     - target: {fileID: 8918892771918601813, guid: 701fea26b98170847ac53fb33dbce797, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8918892771918601813, guid: 701fea26b98170847ac53fb33dbce797, type: 3}
       propertyPath: m_LocalPosition.x
@@ -4761,15 +4787,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9112071186805502469, guid: 701fea26b98170847ac53fb33dbce797, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 0.272
       objectReference: {fileID: 0}
     - target: {fileID: 9112071186805502469, guid: 701fea26b98170847ac53fb33dbce797, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9112071186805502469, guid: 701fea26b98170847ac53fb33dbce797, type: 3}
       propertyPath: m_AnchorMin.x
-      value: 0
+      value: 0.272
       objectReference: {fileID: 0}
     - target: {fileID: 9112071186805502469, guid: 701fea26b98170847ac53fb33dbce797, type: 3}
       propertyPath: m_LocalPosition.x

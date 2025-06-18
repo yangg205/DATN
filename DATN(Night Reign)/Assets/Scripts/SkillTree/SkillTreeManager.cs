@@ -16,6 +16,7 @@ public class SkillTreeManager : MonoBehaviour
     private SignalRClient signalRClient;
     private int currentSkillId = -1;             // ID kỹ năng hiện tại được chọn
     private ButtonHoverEffect ButtonHoverEffect;
+    int skillpoint;
 
     private void Awake()
     {
