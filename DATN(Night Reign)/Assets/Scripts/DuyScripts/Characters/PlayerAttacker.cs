@@ -1,41 +1,44 @@
 using UnityEngine;
 
-public class PlayerAttacker : MonoBehaviour
+namespace ND
 {
-    AnimatorHandler animatorHandler;
-    InputHandler inputHandler;
-    WeaponSlotManager weaponSlotManager;
-    public string lastAttack;
-
-    private void Awake()
+    public class PlayerAttacker : MonoBehaviour
     {
-        animatorHandler = GetComponentInChildren<AnimatorHandler>();
-        weaponSlotManager = GetComponentInChildren<WeaponSlotManager>();
-        inputHandler = GetComponent<InputHandler>();
-    }
+        AnimatorHandler animatorHandler;
+        InputHandler inputHandler;
+        WeaponSlotManager weaponSlotManager;
+        public string lastAttack;
 
-    public void HandleWeaponCombo(WeaponItem weapon)
-    {
-        if(inputHandler.comboFlag)
+        private void Awake()
         {
-            animatorHandler.anim.SetBool("canDoCombo", false);
+            animatorHandler = GetComponentInChildren<AnimatorHandler>();
+            weaponSlotManager = GetComponentInChildren<WeaponSlotManager>();
+            inputHandler = GetComponent<InputHandler>();
+        }
 
-            if (lastAttack == weapon.Oh_Light_Attack_1)
+        public void HandleWeaponCombo(WeaponItem weapon)
+        {
+            if (inputHandler.comboFlag)
             {
-                animatorHandler.PlayTargetAnimation(weapon.Oh_Light_Attack_2, true);
+                animatorHandler.anim.SetBool("canDoCombo", false);
+
+                if (lastAttack == weapon.Oh_Light_Attack_1)
+                {
+                    animatorHandler.PlayTargetAnimation(weapon.Oh_Light_Attack_2, true);
+                }
             }
-        }    
-    }
-    public void HandleLightAttack(WeaponItem weapon)
-    {
-        weaponSlotManager.attackingWeapon = weapon;
-        animatorHandler.PlayTargetAnimation(weapon.Oh_Light_Attack_1, true);
-        lastAttack = weapon.Oh_Light_Attack_1;
-    }
-    public void HandleHeavyAttack(WeaponItem weapon)
-    {
-        weaponSlotManager.attackingWeapon = weapon;
-        animatorHandler.PlayTargetAnimation(weapon.Oh_Heavy_Attack_1, true);
-        lastAttack = weapon.Oh_Light_Attack_1;
+        }
+        public void HandleLightAttack(WeaponItem weapon)
+        {
+            weaponSlotManager.attackingWeapon = weapon;
+            animatorHandler.PlayTargetAnimation(weapon.Oh_Light_Attack_1, true);
+            lastAttack = weapon.Oh_Light_Attack_1;
+        }
+        public void HandleHeavyAttack(WeaponItem weapon)
+        {
+            weaponSlotManager.attackingWeapon = weapon;
+            animatorHandler.PlayTargetAnimation(weapon.Oh_Heavy_Attack_1, true);
+            lastAttack = weapon.Oh_Light_Attack_1;
+        }
     }
 }
