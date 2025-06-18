@@ -1,23 +1,26 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ExpBar : MonoBehaviour
+namespace ND
 {
-    public Slider slider;
-
-    private void Start()
+    public class ExpBar : MonoBehaviour
     {
-        slider = GetComponent<Slider>();
-    }
+        public Slider slider;
 
-    public void SetMaxEXP(int maxEXP)
-    {
-        slider.maxValue = maxEXP;
-        slider.value = 0;
-    }
+        private void Start()
+        {
+            slider = GetComponent<Slider>();
+        }
 
-    public void SetCurrentEXP(int currentEXP)
-    {
-        slider.value = currentEXP;
+        public void SetMaxEXP(int maxEXP)
+        {
+            slider.maxValue = maxEXP;
+            slider.value = 0;
+        }
+
+        public void SetCurrentEXP(int currentEXP)
+        {
+            slider.value = currentEXP;
+        }
     }
 }

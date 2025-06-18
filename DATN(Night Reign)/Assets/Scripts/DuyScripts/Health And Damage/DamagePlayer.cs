@@ -1,15 +1,18 @@
 using UnityEngine;
 
-public class DamagePlayer : MonoBehaviour
+namespace ND
 {
-    public int damage = 25; 
-    private void OnTriggerEnter(Collider other)
+    public class DamagePlayer : MonoBehaviour
     {
-        PlayerStats playerStats = other.GetComponent<PlayerStats>();
-
-        if(playerStats != null )
+        public int damage = 25;
+        private void OnTriggerEnter(Collider other)
         {
-            playerStats.TakeDamage(damage);
+            PlayerStats playerStats = other.GetComponent<PlayerStats>();
+
+            if (playerStats != null)
+            {
+                playerStats.TakeDamage(damage);
+            }
         }
     }
 }

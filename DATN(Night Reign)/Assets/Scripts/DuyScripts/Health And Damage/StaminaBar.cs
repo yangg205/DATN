@@ -1,22 +1,25 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class StaminaBar : MonoBehaviour
+namespace ND
 {
-    public Slider slider;
+    public class StaminaBar : MonoBehaviour
+    {
+        public Slider slider;
 
-    private void Start()
-    {
-        slider = GetComponent<Slider>();
-    }
-    public void SetMaxStamina(int maxStamina)
-    {
-        slider.maxValue = maxStamina;
-        slider.value = maxStamina;
-    }
+        private void Start()
+        {
+            slider = GetComponent<Slider>();
+        }
+        public void SetMaxStamina(int maxStamina)
+        {
+            slider.maxValue = maxStamina;
+            slider.value = maxStamina;
+        }
 
-    public void SetCurrenStamina(int currentStamina)
-    {
-        slider.value = currentStamina;
+        public void SetCurrenStamina(int currentStamina)
+        {
+            slider.value = currentStamina;
+        }
     }
 }
