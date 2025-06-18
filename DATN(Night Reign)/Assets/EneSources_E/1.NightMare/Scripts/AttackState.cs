@@ -33,15 +33,14 @@ public class AttackState : StateMachineBehaviour
             animator.SetBool("isPatrolling", true);
             return;
         }
-     
+
 
         float distance = Vector3.Distance(player.position, animator.transform.position);
         if (distance > 3.5f)
             animator.SetBool("isAttacking", false);
 
-        // Quay về phía player chỉ theo trục Y
         Vector3 direction = player.position - animator.transform.position;
-        direction.y = 0; // Giữ nguyên trục Y, không nghiêng lên/xuống
+        direction.y = 0; 
 
         if (direction != Vector3.zero)
         {
