@@ -7510,6 +7510,17 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &537822509 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 285101719828203247, guid: dd6a20ecb5f483c4bad002dffb9733c3, type: 3}
+  m_PrefabInstance: {fileID: 699760460}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &541745294
 GameObject:
   m_ObjectHideFlags: 0
@@ -15567,6 +15578,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SkillTreeC1
       objectReference: {fileID: 0}
+    - target: {fileID: 1034826788002347444, guid: dd6a20ecb5f483c4bad002dffb9733c3, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5114878094161140243, guid: dd6a20ecb5f483c4bad002dffb9733c3, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -15607,6 +15622,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6710860086244101877, guid: dd6a20ecb5f483c4bad002dffb9733c3, type: 3}
+      propertyPath: skillPointText
+      value: 
+      objectReference: {fileID: 537822509}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -28991,6 +29010,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5916402974268935904, guid: 14ccd174c8be6884c9e4d6fbec4852cb, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1388756671}
+    - targetCorrespondingSourceObject: {fileID: 5916402974268935904, guid: 14ccd174c8be6884c9e4d6fbec4852cb, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1388756687}
   m_SourcePrefab: {fileID: 100100000, guid: 14ccd174c8be6884c9e4d6fbec4852cb, type: 3}
 --- !u!1 &1258701213
 GameObject:
@@ -36061,6 +36083,19 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5627880604242711438, guid: 14ccd174c8be6884c9e4d6fbec4852cb, type: 3}
   m_PrefabInstance: {fileID: 1258139040}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1388756687
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 695464679}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb1e215c254582340914ae403e838b0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerObject: {fileID: 695464679}
 --- !u!64 &1389531943
 MeshCollider:
   m_ObjectHideFlags: 0

@@ -17,6 +17,7 @@ public class SkillTreeManager : MonoBehaviour
     private int currentSkillId = -1;             // ID kỹ năng hiện tại được chọn
     private ButtonHoverEffect ButtonHoverEffect;
     int skillpoint;
+    [SerializeField]TextMeshProUGUI skillPointText;
 
     private void Awake()
     {
@@ -25,6 +26,37 @@ public class SkillTreeManager : MonoBehaviour
         if (signalRClient == null)
         {
             Debug.LogError("Không tìm thấy SignalRClient trong scene! Hãy thêm component SignalRClient vào một GameObject.");
+        }
+
+    }
+    private async void Start() // Make Start async if GetSkillPoint is async
+    {
+        if (signalRClient == null)
+        {
+            Debug.LogError("SignalRClient is not found or not initialized!");
+            return;
+        }
+
+        try
+        {
+            // Assuming GetSkillPoint is an async operation that returns Task<SkillPointResult>
+            // If it's truly synchronous, then this might be the bottleneck.
+            // If it returns a Task, you should await it.
+            var result = await signalRClient.GetSkillPoint(PlayerPrefs.GetInt("PlayerCharacterId", 0)); // Add default value
+
+            if (result != null)
+            {
+                skillpoint = result.SkillPoint; // Access directly if awaited
+                skillPointText.text = $"Skill Point: {skillpoint}";
+            }
+            else
+            {
+                Debug.LogError("Không thể lấy điểm kỹ năng từ SignalRClient: Kết quả null!");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"Lỗi khi lấy điểm kỹ năng: {ex.Message}");
         }
     }
 

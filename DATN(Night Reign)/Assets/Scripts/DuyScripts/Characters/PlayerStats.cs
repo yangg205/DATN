@@ -35,7 +35,7 @@ namespace ND
 
         }
         void Start()
-        {
+        {   
             maxHealth = SetMaxHealthFromHealthLevel();
             currentHealth = maxHealth;
             healthBar.SetMaxHealth(maxHealth);
