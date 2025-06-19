@@ -54,6 +54,12 @@ namespace ND
                 inputActions = new PlayerControls();
                 inputActions.PlayerMovement.Movement.performed += inputActions => movementInput = inputActions.ReadValue<Vector2>();
                 inputActions.PlayerMovement.Camera.performed += i => cameraInput = i.ReadValue<Vector2>();
+                inputActions.PlayerActions.LightAttack.performed += i => lightAttack_input = true;
+                inputActions.PlayerActions.HeavyAttack.performed += i => heavyAttack_input = true;
+                inputActions.PlayerQuickSlots.DPadRight.performed += i => d_Pad_Right = true;
+                inputActions.PlayerQuickSlots.DPadLeft.performed += i => d_Pad_Left = true;
+                inputActions.PlayerActions.Interact.performed += i => interact_input = true;
+                inputActions.PlayerActions.Jump.performed += i => jump_input = true;
             }
 
             inputActions.Enable();
@@ -70,8 +76,6 @@ namespace ND
             HandleRollInput(delta);
             HandleAttackInput(delta);
             HandleQuickSlotsInput();
-            HandleInteractingButtonInput();
-            HandleJumpInput();
             HandleInventoryInput();
         }
 
@@ -87,10 +91,11 @@ namespace ND
         private void HandleRollInput(float delta)
         {
             roll_input = inputActions.PlayerActions.Roll.phase == UnityEngine.InputSystem.InputActionPhase.Performed;
+            sprintFlag = roll_input;
+
             if (roll_input)
             {
                 rollInputTimer += delta;
-                sprintFlag = true;
             }
             else
             {
@@ -106,9 +111,6 @@ namespace ND
 
         private void HandleAttackInput(float delta)
         {
-            inputActions.PlayerActions.LightAttack.performed += i => lightAttack_input = true;
-            inputActions.PlayerActions.HeavyAttack.performed += i => heavyAttack_input = true;
-
             if (lightAttack_input)
             {
                 if (playerManager.canDoCombo)
@@ -138,9 +140,6 @@ namespace ND
 
         private void HandleQuickSlotsInput()
         {
-            inputActions.PlayerQuickSlots.DPadRight.performed += i => d_Pad_Right = true;
-            inputActions.PlayerQuickSlots.DPadLeft.performed += i => d_Pad_Left = true;
-
             if (d_Pad_Right)
             {
                 playerInventory.ChangeRightWeapon();
@@ -151,28 +150,22 @@ namespace ND
             }
         }
 
-        private void HandleInteractingButtonInput()
-        {
-            inputActions.PlayerActions.Interact.performed += i => interact_input = true;
-        }
-
-        private void HandleJumpInput()
-        {
-            inputActions.PlayerActions.Jump.performed += i => jump_input = true;
-        }
-
         private void HandleInventoryInput()
         {
             inputActions.PlayerActions.Inventory.started += i =>
             {
                 inventoryFlag = true;
                 uiManager.OpenSelectWindow();
+                uiManager.UpdateUI();
+                uiManager.hudWindow.SetActive(false);
             };
 
             inputActions.PlayerActions.Inventory.canceled += i =>
             {
                 inventoryFlag = false;
                 uiManager.CloseSelectWindow();
+                uiManager.CloseAllInventoryWindows();
+                uiManager.hudWindow.SetActive(true);
             };
         }
     }

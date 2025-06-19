@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace ND
 {
@@ -28,6 +29,7 @@ namespace ND
             playerInventory.weaponsInventory.Add(weapons);
 
             playerManager.itemInteractableGameObject.GetComponentInChildren<TextMeshProUGUI>().text = weapons.itemName;
+            playerManager.itemInteractableGameObject.GetComponentInChildren<RawImage>().texture = weapons.itemIcon.texture;
             playerManager.itemInteractableGameObject.SetActive(true);
             Destroy(gameObject);
         }

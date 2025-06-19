@@ -43,9 +43,7 @@ namespace ND
             anim.SetBool("isInAir", isInAir);
 
             inputHandler.TickInput(delta);
-            playerLocomotion.HandleMovement(delta);
             playerLocomotion.HandleRollingAndSprinting(delta);
-            playerLocomotion.HandleFalling(delta, playerLocomotion.moveDirection);
             playerLocomotion.HandleJumping();
 
             CheckForInteractableObject();
@@ -54,18 +52,13 @@ namespace ND
         private void FixedUpdate()
         {
             float delta = Time.fixedDeltaTime;
-
-            if (cameraHandler != null)
-            {
-                cameraHandler.FollowTarget(delta);
-                cameraHandler.HandleCameraRotation(delta, inputHandler.mouseX, inputHandler.mouseY);
-            }
+            playerLocomotion.HandleMovement(delta);
+            playerLocomotion.HandleFalling(delta, playerLocomotion.moveDirection);
         }
 
         private void LateUpdate()
         {
             inputHandler.rollFlag = false;
-            inputHandler.sprintFlag = false;
             inputHandler.lightAttack_input = false;
             inputHandler.heavyAttack_input = false;
             inputHandler.d_Pad_Up = false;
@@ -75,6 +68,14 @@ namespace ND
             inputHandler.interact_input = false;
             inputHandler.jump_input = false;
             inputHandler.inventory_input = false;
+
+            float delta = Time.deltaTime;
+
+            if (cameraHandler != null)
+            {
+                cameraHandler.FollowTarget(delta);
+                cameraHandler.HandleCameraRotation(delta, inputHandler.mouseX, inputHandler.mouseY);
+            }
 
             if (isInAir)
             {
