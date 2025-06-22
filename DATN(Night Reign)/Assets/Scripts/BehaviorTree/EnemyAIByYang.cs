@@ -2,7 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Pathfinding; // Đảm bảo bạn đã import A* Pathfinding
+using Pathfinding;
+using UnityEngine.UI; // Đảm bảo bạn đã import A* Pathfinding
 
 public class EnemyAI : MonoBehaviour
 {
@@ -18,6 +19,12 @@ public class EnemyAI : MonoBehaviour
     public float maxHealth = 1000f;
     public float phase2HealthThreshold = 500f;
     public float phase3HealthThreshold = 300f;
+
+    [Header("UI - Health Bar")]
+    //public GameObject healthBarCanvas; // Gán GameObject chứa canvas
+    public Image healthFillImage; // Gán Image dùng để fill (HealthFill)
+
+
 
     [Header("Movement")]
     public float movementSpeed = 4f;
@@ -42,6 +49,11 @@ public class EnemyAI : MonoBehaviour
     private AIPath _aiPath;
     private Seeker _seeker;
     private CharacterController _characterController;
+
+    private float delayBeforeStart = 10f; 
+    private float spawnTime;
+    private bool isAIActivated = false;
+
 
     public enum BossPhase
     {
@@ -79,6 +91,11 @@ public class EnemyAI : MonoBehaviour
 
     void Start()
     {
+        if (healthFillImage != null)
+        {
+            healthFillImage.fillAmount = currentHealth / maxHealth;
+        }
+
         _animator = GetComponent<Animator>();
         _aiPath = GetComponent<AIPath>();
         _seeker = GetComponent<Seeker>();
@@ -91,6 +108,8 @@ public class EnemyAI : MonoBehaviour
 
         _aiPath.maxSpeed = movementSpeed;
         _aiPath.enableRotation = false;
+
+        spawnTime = Time.time;
 
         // Điều chỉnh endReachedDistance và slowdownDistance để phù hợp với engageRange và meleeAttackRange
         // Boss sẽ dừng lại khi cách player một khoảng bằng engageRange để bắt đầu hành động.
@@ -118,11 +137,39 @@ public class EnemyAI : MonoBehaviour
         _lastDodgeTime = -dodgeCooldown; // Đảm bảo Boss có thể né ngay từ đầu
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            TakeDamage(40);
+        }
+    }
+
     public void Tick()
     {
+        // Nếu chưa đủ thời gian delay thì không làm gì cả
+        if (!isAIActivated)
+        {
+            if (Time.time - spawnTime >= delayBeforeStart)
+            {
+                isAIActivated = true;
+                Debug.Log("Boss AI Activated after delay!");
+            }
+            else
+            {
+                // Optional: đứng yên, idle animation
+                _aiPath.isStopped = true;
+                _animator?.SetBool("isMoving", false);
+                _animator?.SetFloat("Speed", 0f);
+                return;
+            }
+        }
+
+
+
         // Debugging cho các điều kiện tấn công và bận rộn
         float distToPlayer = targetPlayer != null ? Vector3.Distance(transform.position, targetPlayer.position) : -1f;
-        Debug.Log($"[Tick] Dist: {distToPlayer:F2}f, MeleeRange: {meleeAttackRange}f, EngageRange: {engageRange}f, IsPlayerInMeleeAttackRange: {IsPlayerInMeleeAttackRange()}, CanAttack: {CanAttack()}, IsBossBusy: {IsBossBusy()} (Attacking:{_isAttacking}, Dodging:{_isDodging}, Staggered:{_isStaggered}, Fleeing:{_isCurrentlyFleeing})");
+        //Debug.Log($"[Tick] Dist: {distToPlayer:F2}f, MeleeRange: {meleeAttackRange}f, EngageRange: {engageRange}f, IsPlayerInMeleeAttackRange: {IsPlayerInMeleeAttackRange()}, CanAttack: {CanAttack()}, IsBossBusy: {IsBossBusy()} (Attacking:{_isAttacking}, Dodging:{_isDodging}, Staggered:{_isStaggered}, Fleeing:{_isCurrentlyFleeing})");
 
 
         if (_rootNode != null)
@@ -150,6 +197,7 @@ public class EnemyAI : MonoBehaviour
         {
             _animator?.SetBool("isMoving", true);
             _animator?.SetFloat("Speed", _aiPath.desiredVelocity.magnitude);
+
         }
         else
         {
@@ -161,7 +209,13 @@ public class EnemyAI : MonoBehaviour
     public void TakeDamage(float damage)
     {
         currentHealth -= damage;
-        Debug.Log($"Boss took {damage} damage. Current health: {currentHealth}");
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+
+        if (healthFillImage != null)
+        {
+            healthFillImage.fillAmount = currentHealth / maxHealth;
+        }
+        //Debug.Log($"Boss took {damage} damage. Current health: {currentHealth}");
 
         if (currentHealth <= 0)
         {
@@ -369,6 +423,8 @@ public class EnemyAI : MonoBehaviour
         _aiPath.isStopped = true; // Dừng di chuyển ngay lập tức
         _animator?.SetBool("isMoving", false); // Dừng animation di chuyển khi tấn công
         _animator?.SetFloat("Speed", 0f);
+
+
 
         // Chọn ngẫu nhiên animation tấn công
         int attackChoice = UnityEngine.Random.Range(1, 4); // Chọn giữa 1, 2, 3 (vì Range(minInclusive, maxExclusive))
@@ -673,4 +729,6 @@ public class EnemyAI : MonoBehaviour
             approachAndAttackBehavior // 4. Hành vi áp sát và tấn công - ưu tiên cuối cùng nếu không có gì đặc biệt xảy ra
         );
     }
+
+
 }
