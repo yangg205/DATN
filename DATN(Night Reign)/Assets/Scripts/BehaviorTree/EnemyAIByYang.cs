@@ -24,7 +24,11 @@ public class EnemyAI : MonoBehaviour
     //public GameObject healthBarCanvas; // Gán GameObject chứa canvas
     public Image healthFillImage; // Gán Image dùng để fill (HealthFill)
 
-
+    [Header("SFX")]
+    public AudioSource sfxCrawl;
+    public AudioSource sfxGrowl;
+    public AudioSource sfxAttack;
+    //public AudioSource sfxDie;
 
     [Header("Movement")]
     public float movementSpeed = 4f;
@@ -87,6 +91,8 @@ public class EnemyAI : MonoBehaviour
                 Debug.LogWarning("Player object with 'Player' tag not found. Please assign targetPlayer manually or ensure Player has the correct tag.");
             }
         }
+
+
     }
 
     void Start()
@@ -166,7 +172,6 @@ public class EnemyAI : MonoBehaviour
         }
 
 
-
         // Debugging cho các điều kiện tấn công và bận rộn
         float distToPlayer = targetPlayer != null ? Vector3.Distance(transform.position, targetPlayer.position) : -1f;
         //Debug.Log($"[Tick] Dist: {distToPlayer:F2}f, MeleeRange: {meleeAttackRange}f, EngageRange: {engageRange}f, IsPlayerInMeleeAttackRange: {IsPlayerInMeleeAttackRange()}, CanAttack: {CanAttack()}, IsBossBusy: {IsBossBusy()} (Attacking:{_isAttacking}, Dodging:{_isDodging}, Staggered:{_isStaggered}, Fleeing:{_isCurrentlyFleeing})");
@@ -198,12 +203,28 @@ public class EnemyAI : MonoBehaviour
             _animator?.SetBool("isMoving", true);
             _animator?.SetFloat("Speed", _aiPath.desiredVelocity.magnitude);
 
+
         }
         else
         {
             _animator?.SetBool("isMoving", false);
             _animator?.SetFloat("Speed", 0f);
         }
+
+        if (_aiPath.desiredVelocity.magnitude > 0.1f && !_isAttacking && !_isDodging)
+        {
+            _animator?.SetBool("isMoving", true);
+            _animator?.SetFloat("Speed", _aiPath.desiredVelocity.magnitude);
+
+            if (!sfxCrawl.isPlaying)
+                sfxCrawl.Play();
+        }
+        else
+        {
+            if (sfxCrawl.isPlaying)
+                sfxCrawl.Stop();
+        }
+
     }
 
     public void TakeDamage(float damage)
@@ -730,5 +751,20 @@ public class EnemyAI : MonoBehaviour
         );
     }
 
+    //======sfx
+    public void PlayGrowlSFX()
+    {
+        if (sfxGrowl != null && !sfxGrowl.isPlaying)
+        {
+            sfxGrowl.PlayOneShot(sfxGrowl.clip);
+        }
+    }
+    public void PlayAttacklSFX()
+    {
+        if (sfxAttack != null && !sfxAttack.isPlaying)
+        {
+            sfxAttack.PlayOneShot(sfxAttack.clip);
+        }
+    }
 
 }
