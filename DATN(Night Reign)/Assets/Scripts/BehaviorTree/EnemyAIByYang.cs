@@ -5,7 +5,7 @@ using UnityEngine;
 using Pathfinding;
 using UnityEngine.UI; // Đảm bảo bạn đã import A* Pathfinding
 
-public class EnemyAI : MonoBehaviour
+public class EnemyAIByYang : MonoBehaviour
 {
     [Header("Target & Detection")]
     public Transform targetPlayer;
@@ -15,20 +15,17 @@ public class EnemyAI : MonoBehaviour
     public float meleeAttackRange = 6f; // Phạm vi tấn công cận chiến
 
     [Header("Health & Phases")]
-    public float currentHealth = 1000f;
     public float maxHealth = 1000f;
+    public float currentHealth = 1000f;
     public float phase2HealthThreshold = 500f;
     public float phase3HealthThreshold = 300f;
-
-    [Header("UI - Health Bar")]
-    //public GameObject healthBarCanvas; // Gán GameObject chứa canvas
-    public Image healthFillImage; // Gán Image dùng để fill (HealthFill)
 
     [Header("SFX")]
     public AudioSource sfxCrawl;
     public AudioSource sfxGrowl;
     public AudioSource sfxAttack;
-    //public AudioSource sfxDie;
+    public AudioSource sfx2Attack;
+    public AudioSource sfxDead;
 
     [Header("Movement")]
     public float movementSpeed = 4f;
@@ -97,10 +94,6 @@ public class EnemyAI : MonoBehaviour
 
     void Start()
     {
-        if (healthFillImage != null)
-        {
-            healthFillImage.fillAmount = currentHealth / maxHealth;
-        }
 
         _animator = GetComponent<Animator>();
         _aiPath = GetComponent<AIPath>();
@@ -147,7 +140,7 @@ public class EnemyAI : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.T))
         {
-            TakeDamage(40);
+            TakeDamage(100);
         }
     }
 
@@ -232,10 +225,6 @@ public class EnemyAI : MonoBehaviour
         currentHealth -= damage;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
-        if (healthFillImage != null)
-        {
-            healthFillImage.fillAmount = currentHealth / maxHealth;
-        }
         //Debug.Log($"Boss took {damage} damage. Current health: {currentHealth}");
 
         if (currentHealth <= 0)
@@ -767,4 +756,20 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
+
+    public void Play2AttacklSFX()
+    {
+        if (sfx2Attack != null && !sfx2Attack.isPlaying)
+        {
+            sfx2Attack.PlayOneShot(sfx2Attack.clip);
+        }
+    }
+
+    public void PlayDeadSFX()
+    {
+        if (sfxDead != null && !sfxDead.isPlaying)
+        {
+            sfxDead.PlayOneShot(sfxDead.clip);
+        }
+    }
 }
