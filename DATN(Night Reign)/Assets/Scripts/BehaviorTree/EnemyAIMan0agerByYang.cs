@@ -8,7 +8,7 @@ public class EnemyAIManager : MonoBehaviour
     public static EnemyAIManager Instance { get; private set; }
 
     // Danh sách các enemy đang hoạt động
-    private List<EnemyAI> _activeEnemies = new List<EnemyAI>();
+    private List<EnemyAIByYang> _activeEnemies = new List<EnemyAIByYang>();
 
     // Biến để phân phối việc Tick qua các frame (Round-robin)
     private int _currentEnemyIndexToTick = 0;
@@ -33,7 +33,7 @@ public class EnemyAIManager : MonoBehaviour
     }
 
     // Hàm để EnemyAI tự động đăng ký khi được tạo
-    public void RegisterEnemy(EnemyAI enemy)
+    public void RegisterEnemy(EnemyAIByYang enemy)
     {
         if (enemy != null && !_activeEnemies.Contains(enemy))
         {
@@ -43,7 +43,7 @@ public class EnemyAIManager : MonoBehaviour
     }
 
     // Hàm để EnemyAI tự động hủy đăng ký khi enemy bị hủy (die)
-    public void UnregisterEnemy(EnemyAI enemy)
+    public void UnregisterEnemy(EnemyAIByYang enemy)
     {
         if (enemy != null && _activeEnemies.Contains(enemy))
         {
