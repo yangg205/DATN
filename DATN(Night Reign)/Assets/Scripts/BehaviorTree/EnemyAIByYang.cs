@@ -72,7 +72,8 @@ public class EnemyAIByYang : MonoBehaviour
     private bool _isCurrentlyFleeing = false;
     private bool _playerDodgedBossSkill = false;
 
-
+    private float _fleeStartTime;
+    private float maxFleeDuration = 6f; 
     void Awake()
     {
         if (targetPlayer == null)
@@ -138,6 +139,8 @@ public class EnemyAIByYang : MonoBehaviour
 
     private void Update()
     {
+        Tick();
+
         if (Input.GetKeyDown(KeyCode.T))
         {
             TakeDamage(100);
@@ -538,6 +541,7 @@ public class EnemyAIByYang : MonoBehaviour
     {
         if (targetPlayer == null) return NodeState.FAILURE;
 
+
         // Điều kiện để thoát khỏi trạng thái bỏ chạy:
         // Đang bỏ chạy VÀ đã đến đích VÀ khoảng cách với Player ĐÃ LỚN HƠN tầm bỏ chạy
         if (_isCurrentlyFleeing && _aiPath.reachedDestination && Vector3.Distance(transform.position, targetPlayer.position) > _fleeRange)
@@ -557,6 +561,7 @@ public class EnemyAIByYang : MonoBehaviour
             // Nếu không quá gần và không đang bỏ chạy, thì không cần bỏ chạy nữa
             return NodeState.FAILURE;
         }
+
 
 
         // Nếu chưa bỏ chạy hoặc chưa đến đích an toàn, bắt đầu/tiếp tục bỏ chạy
