@@ -119,6 +119,17 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!114 &98420105 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1363060029956668879, guid: 12e9730a31eb68d49b56d02f4951414e, type: 3}
+  m_PrefabInstance: {fileID: 1572497431}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8290138db9e695408e248e3fee30b0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &806844958
 GameObject:
   m_ObjectHideFlags: 0
@@ -562,6 +573,34 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 806844962}
     m_Modifications:
+    - target: {fileID: 1461251972144737176, guid: 12e9730a31eb68d49b56d02f4951414e, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1461251972144737176, guid: 12e9730a31eb68d49b56d02f4951414e, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1461251972144737176, guid: 12e9730a31eb68d49b56d02f4951414e, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 98420105}
+    - target: {fileID: 1461251972144737176, guid: 12e9730a31eb68d49b56d02f4951414e, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1461251972144737176, guid: 12e9730a31eb68d49b56d02f4951414e, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnClickName
+      objectReference: {fileID: 0}
+    - target: {fileID: 1461251972144737176, guid: 12e9730a31eb68d49b56d02f4951414e, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: Hover, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 1461251972144737176, guid: 12e9730a31eb68d49b56d02f4951414e, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 3963853460358193715, guid: 12e9730a31eb68d49b56d02f4951414e, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

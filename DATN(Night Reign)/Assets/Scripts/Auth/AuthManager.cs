@@ -81,6 +81,7 @@ public class AuthManager : MonoBehaviour
     {
         string email = emailLogin.text.Trim(); 
         string password = passwordLogin.text.Trim();
+        PlayerPrefs.SetString("email", email); 
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
         {
             

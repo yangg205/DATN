@@ -199,7 +199,7 @@ public class SignalRClient : MonoBehaviour
     {
         try
         {
-            var result = await _connection.InvokeAsync<ReturnPlayer>("ResetPass", email, newName);
+            var result = await _connection.InvokeAsync<ReturnPlayer>("UpdateName", email, newName);
             string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
             return result;
         }
@@ -236,6 +236,36 @@ public class SignalRClient : MonoBehaviour
             throw;
         }
     }
+    public async Task<List<PlayerAchievementDto>> GetAllAchievements(int playerCharacterId)
+    {
+        try
+        {
+            var result = await _connection.InvokeAsync<List<PlayerAchievementDto>>("GetAllAchievements", playerCharacterId);
+            string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+            return result; // Trả về danh sách thành tích của nhân vật
+        }
+        catch (Exception ex)
+        {
+            Debug.Log("gui yeu cau lay danh sach thanh tich that bai" + ex.Message);
+            throw;
+        }
+    }
+    public async Task<PlayerAchievementDto> UpdateAchievement(int playerCharacterId, int achievementId)
+    {
+        try
+        {
+            var result = await _connection.InvokeAsync<PlayerAchievementDto>("UpdateAchievement", playerCharacterId, achievementId);
+            string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+            return result; // Trả về kết quả cập nhật thành tích
+        }
+        catch (Exception ex)
+        {
+            Debug.Log("gui yeu cau cap nhat thanh tich that bai" + ex.Message);
+            throw;
+        }
+    }
+
+
     private async void OnDestroy()
     {
         if (_connection != null)

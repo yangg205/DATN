@@ -1,20 +1,21 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class ToggleSkillTree : MonoBehaviour
+public class ToggleNR : MonoBehaviour
 {
-    public GameObject skillTreeUI;
+    [SerializeField] GameObject GO;
+    [SerializeField] KeyCode key;
 
     void Start()
     {
         // Đảm bảo UI được tắt khi bắt đầu
-        if (skillTreeUI != null)
+        if (GO != null)
         {
-            skillTreeUI.SetActive(false);
+            GO.SetActive(false);
         }
         else
         {
-            Debug.LogError("skillTreeUI is not assigned in ToggleSkillTree!");
+            Debug.LogError($"{GO} is not assigned in Toggle");
         }
 
         // Kiểm tra xem có EventSystem trong scene không
@@ -30,21 +31,21 @@ public class ToggleSkillTree : MonoBehaviour
     void Update()
     {
         // Kiểm tra phím P để bật/tắt UI
-        if (Input.GetKeyDown(KeyCode.O))
+        if (Input.GetKeyDown(key))
         {
-            ToggleSkill();
+            ToggleGame();
         }
     }
 
-    private void ToggleSkill()
+    private void ToggleGame()
     {
-        if (skillTreeUI != null)
+        if (GO != null)
         {
-            skillTreeUI.SetActive(!skillTreeUI.activeSelf);
+            GO.SetActive(!GO.activeSelf);
             // Đảm bảo Canvas được cập nhật khi bật
-            if (skillTreeUI.activeSelf)
+            if (GO.activeSelf)
             {
-                Canvas canvas = skillTreeUI.GetComponent<Canvas>();
+                Canvas canvas = GO.GetComponent<Canvas>();
                 if (canvas != null)
                 {
                     canvas.enabled = true;
