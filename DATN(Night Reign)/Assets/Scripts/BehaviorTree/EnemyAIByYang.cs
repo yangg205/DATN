@@ -55,6 +55,9 @@ public class EnemyAIByYang : MonoBehaviour
     private float spawnTime;
     private bool isAIActivated = false;
 
+    [Header("VFX")]
+    public ParticleSystem vfxHitEffect;
+
 
     public enum BossPhase
     {
@@ -226,6 +229,12 @@ public class EnemyAIByYang : MonoBehaviour
     public void TakeDamage(float damage)
     {
         currentHealth -= damage;
+
+        if (vfxHitEffect != null)
+        {
+            vfxHitEffect.Play();
+        }
+
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
         //Debug.Log($"Boss took {damage} damage. Current health: {currentHealth}");
@@ -777,4 +786,5 @@ public class EnemyAIByYang : MonoBehaviour
             sfxDead.PlayOneShot(sfxDead.clip);
         }
     }
+
 }
