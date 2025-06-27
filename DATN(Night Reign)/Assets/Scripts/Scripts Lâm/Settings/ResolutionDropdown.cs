@@ -1,11 +1,13 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+[RequireComponent(typeof(RectTransform))]
 public class ResolutionDropdownManager : MonoBehaviour
 {
     public TMP_Dropdown resolutionDropdown;
 
+    // Chỉ giữ 2 độ phân giải mong muốn
     private Resolution[] filteredResolutions = new Resolution[]
     {
         new Resolution { width = 1280, height = 720 },
@@ -13,6 +15,12 @@ public class ResolutionDropdownManager : MonoBehaviour
     };
 
     void Start()
+    {
+        SetupResolutionDropdown();
+        AdjustDropdownLayout();
+    }
+
+    private void SetupResolutionDropdown()
     {
         resolutionDropdown.ClearOptions();
 
@@ -24,6 +32,7 @@ public class ResolutionDropdownManager : MonoBehaviour
             string option = $"{filteredResolutions[i].width} x {filteredResolutions[i].height}";
             options.Add(option);
 
+            // Nếu khớp độ phân giải hiện tại của máy
             if (Screen.currentResolution.width == filteredResolutions[i].width &&
                 Screen.currentResolution.height == filteredResolutions[i].height)
             {
@@ -34,6 +43,17 @@ public class ResolutionDropdownManager : MonoBehaviour
         resolutionDropdown.AddOptions(options);
         resolutionDropdown.value = currentResolutionIndex;
         resolutionDropdown.RefreshShownValue();
+    }
+
+    // Tự động canh giữa và chỉnh layout hiển thị dropdown
+    private void AdjustDropdownLayout()
+    {
+        RectTransform rect = resolutionDropdown.GetComponent<RectTransform>();
+        //rect.sizeDelta = new Vector2(220, 30); // chiều rộng, chiều cao dropdown
+        //rect.anchoredPosition = new Vector2(0, rect.anchoredPosition.y); // canh giữa theo chiều ngang
+        rect.anchorMin = new Vector2(0.5f, rect.anchorMin.y);
+        rect.anchorMax = new Vector2(0.5f, rect.anchorMax.y);
+        rect.pivot = new Vector2(0.5f, 0.5f);
     }
 
     public void SetResolution(int index)
