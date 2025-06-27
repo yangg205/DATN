@@ -29,7 +29,7 @@ public class SelectCServer : MonoBehaviour
         {
             PlayerPrefs.SetInt("PlayerCharacterId", result.player_Characters.Player_Character_id);
             PlayerPrefs.SetInt("Character", Titanos);
-            SceneManager.LoadScene("VucLavareach");
+            SceneManager.LoadScene("Name Scene");
         }
         else
         {
@@ -50,7 +50,7 @@ public class SelectCServer : MonoBehaviour
         {
             PlayerPrefs.SetInt("PlayerCharacterId", result.player_Characters.Player_Character_id);
             PlayerPrefs.SetInt("Character", Sylas);
-            SceneManager.LoadScene("VucLavareach");
+            SceneManager.LoadScene("Name Scene");
         }
         else
         {
@@ -72,7 +72,7 @@ public class SelectCServer : MonoBehaviour
         {
             PlayerPrefs.SetInt("PlayerCharacterId", result.player_Characters.Player_Character_id);
             PlayerPrefs.SetInt("Character", Zarathos);
-            SceneManager.LoadScene("VucLavareach");
+            SceneManager.LoadScene("Name Scene");
         }
         else
         {
