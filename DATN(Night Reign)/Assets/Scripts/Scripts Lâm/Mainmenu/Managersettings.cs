@@ -11,6 +11,14 @@ public class SettingsManager : MonoBehaviour
     public TMP_Dropdown resolutionDropdown;
     public TMP_Dropdown fpsDropdown;
 
+    [Header("Mouse Sensitivity")]
+    public Slider mouseSlider;
+    public TextMeshProUGUI mouseValueText;
+
+    [Header("Language")]
+    public TMP_Dropdown languageDropdown;
+    public LocalizationManager localizationManager;
+
     private Resolution[] resolutions;
 
     // Biến tạm
@@ -19,6 +27,10 @@ public class SettingsManager : MonoBehaviour
     private bool tempFullscreen;
     private int tempResolutionIndex;
     private int tempFPS;
+    private float tempMouseSensitivity;
+    private int tempLanguageIndex;
+
+    private float defaultMouseSensitivity = 5.0f;
 
     void Start()
     {
@@ -45,14 +57,16 @@ public class SettingsManager : MonoBehaviour
 
     public void LoadSettings(int defaultResIndex = 0)
     {
-        // Đọc từ PlayerPrefs và lưu vào biến tạm
+        // Đọc từ PlayerPrefs
         tempMusicVolume = PlayerPrefs.GetFloat("MusicVolume", 1f);
         tempEffectsVolume = PlayerPrefs.GetFloat("EffectsVolume", 1f);
         tempFullscreen = PlayerPrefs.GetInt("Fullscreen", 1) == 1;
         tempResolutionIndex = PlayerPrefs.GetInt("ResolutionIndex", defaultResIndex);
         tempFPS = PlayerPrefs.GetInt("TargetFPS", 60);
+        tempMouseSensitivity = PlayerPrefs.GetFloat("MouseSensitivity", defaultMouseSensitivity);
+        tempLanguageIndex = PlayerPrefs.GetInt("LanguageIndex", 0);
 
-        // Update UI
+        // Gán vào UI
         musicSlider.value = tempMusicVolume;
         effectsSlider.value = tempEffectsVolume;
         fullscreenToggle.isOn = tempFullscreen;
@@ -68,16 +82,40 @@ public class SettingsManager : MonoBehaviour
                 break;
             }
         }
+
+        // Mouse sensitivity
+        mouseSlider.minValue = 0.1f;
+        mouseSlider.maxValue = 10f;
+        mouseSlider.value = tempMouseSensitivity;
+        UpdateMouseValueText(tempMouseSensitivity);
+
+        mouseSlider.onValueChanged.RemoveAllListeners();
+        mouseSlider.onValueChanged.AddListener((value) =>
+        {
+            tempMouseSensitivity = value;
+            UpdateMouseValueText(value);
+        });
+
+        // Language
+        languageDropdown.value = tempLanguageIndex;
+        languageDropdown.RefreshShownValue();
+        languageDropdown.onValueChanged.RemoveAllListeners();
+        languageDropdown.onValueChanged.AddListener((index) =>
+        {
+            tempLanguageIndex = index;
+        });
     }
 
     public void ApplySettings()
     {
-        // Lấy giá trị mới từ UI
+        // Lấy dữ liệu mới
         tempMusicVolume = musicSlider.value;
         tempEffectsVolume = effectsSlider.value;
         tempFullscreen = fullscreenToggle.isOn;
         tempResolutionIndex = resolutionDropdown.value;
         tempFPS = int.Parse(fpsDropdown.options[fpsDropdown.value].text.Replace(" FPS", ""));
+        tempMouseSensitivity = mouseSlider.value;
+        tempLanguageIndex = languageDropdown.value;
 
         // Áp dụng vào hệ thống
         Screen.fullScreen = tempFullscreen;
@@ -91,14 +129,28 @@ public class SettingsManager : MonoBehaviour
         PlayerPrefs.SetInt("Fullscreen", tempFullscreen ? 1 : 0);
         PlayerPrefs.SetInt("ResolutionIndex", tempResolutionIndex);
         PlayerPrefs.SetInt("TargetFPS", tempFPS);
+        PlayerPrefs.SetFloat("MouseSensitivity", tempMouseSensitivity);
+        PlayerPrefs.SetInt("LanguageIndex", tempLanguageIndex);
         PlayerPrefs.Save();
+
+        // Gọi đổi ngôn ngữ nếu có
+        if (localizationManager != null)
+        {
+            localizationManager.SetLanguage(tempLanguageIndex);
+        }
 
         Debug.Log("Settings Applied");
     }
 
     public void CancelSettings()
     {
-        // Quay về các giá trị đã lưu (không lưu gì hết)
-        LoadSettings();
+        LoadSettings(); // Khôi phục lại giá trị đã lưu
+        Debug.Log("Settings Cancelled");
+    }
+
+    private void UpdateMouseValueText(float value)
+    {
+        if (mouseValueText != null)
+            mouseValueText.text = value.ToString("F2");
     }
 }

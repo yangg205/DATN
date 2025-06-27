@@ -1,15 +1,17 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using TMPro;
-using System;
+using UnityEngine.UI;
 
-public class MenuHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class Choicehover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     public TMP_Text text;
     public Color normalColor = Color.white;
     public Color hoverColor = Color.yellow;
     public float scaleAmount = 1.05f;
     public float transitionSpeed = 5f;
+
+    [SerializeField] private Outline outline;
 
     private Vector3 originalScale;
     private bool isHovered = false;
@@ -19,11 +21,19 @@ public class MenuHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExit
         originalScale = transform.localScale;
         if (text != null)
             text.color = normalColor;
+
+        if (outline == null)
+            outline = GetComponent<Outline>() ?? GetComponentInChildren<Outline>();
+
+        if (outline != null)
+            outline.enabled = false;
+
+        if (outline is null)
+            Debug.LogWarning($"Outline is missing on {gameObject.name}");
     }
 
     void Update()
     {
-        // Smooth scale animation
         Vector3 targetScale = isHovered ? originalScale * scaleAmount : originalScale;
         transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.unscaledDeltaTime * transitionSpeed);
     }
@@ -42,22 +52,24 @@ public class MenuHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExit
             text.color = normalColor;
     }
 
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        ChoiceManager.Instance.Select(this);
+    }
+
+    public void SetSelected(bool isSelected)
+    {
+        if (outline != null)
+            outline.enabled = isSelected;
+    }
+
     void OnDisable()
     {
-        // Reset khi menu bị tắt
         isHovered = false;
         transform.localScale = originalScale;
         if (text != null)
             text.color = normalColor;
-    }
-
-    internal void Select(bool v)
-    {
-        throw new NotImplementedException();
-    }
-
-    internal void SetSelected(bool v)
-    {
-        throw new NotImplementedException();
+        if (outline != null)
+            outline.enabled = false;
     }
 }

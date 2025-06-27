@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
+using System;
 
 public class LocalizationManager : MonoBehaviour
 {
@@ -33,5 +34,10 @@ public class LocalizationManager : MonoBehaviour
             else
                 textsToLocalize[i].text = englishTexts[i];
         }
+    }
+
+    internal void SetLanguage(int tempLanguageIndex)
+    {
+        throw new NotImplementedException();
     }
 }
