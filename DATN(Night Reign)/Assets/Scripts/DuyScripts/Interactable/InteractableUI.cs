@@ -8,6 +8,7 @@ namespace ND
     {
         public TextMeshProUGUI interactableText;
         public TextMeshProUGUI itemText;
+        public RawImage itemImage;
     }
 }
 
