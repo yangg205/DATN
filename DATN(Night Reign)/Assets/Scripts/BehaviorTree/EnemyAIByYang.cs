@@ -28,6 +28,7 @@ public class EnemyAIByYang : MonoBehaviour
 
     [Header("Movement")]
     public float movementSpeed = 4f; // Tốc độ di chuyển giữ nguyên
+    private float baseMovementSpeed; // lưu speed gốc để tính cộng thêm
     public float dodgeSpeed = 8f;
     public float rotationSpeed = 10f;
     public float _fleeRange = 8f;
@@ -55,7 +56,7 @@ public class EnemyAIByYang : MonoBehaviour
 
     [Header("VFX")]
     public ParticleSystem vfxHitEffect;
-
+    public ParticleSystem vfxEnrageEffect;
     public enum BossPhase
     {
         Phase1,
@@ -102,9 +103,12 @@ public class EnemyAIByYang : MonoBehaviour
         if (_aiPath == null) { Debug.LogError("AIPath component not found."); enabled = false; return; }
         if (_seeker == null) { Debug.LogError("Seeker component not found."); enabled = false; return; }
         if (_characterController == null) { Debug.LogError("CharacterController component not found."); enabled = false; return; }
-
+        
         _aiPath.maxSpeed = movementSpeed;
         _aiPath.enableRotation = false;
+
+        baseMovementSpeed = movementSpeed;
+
 
         spawnTime = Time.time;
 
@@ -244,6 +248,16 @@ public class EnemyAIByYang : MonoBehaviour
         {
             _isEnraged = true;
             attackCooldown = phase2AttackCooldown;
+
+            if (vfxEnrageEffect != null)
+            {
+                vfxEnrageEffect.Play();
+            }
+
+            movementSpeed = baseMovementSpeed + 1.1f;
+            _aiPath.maxSpeed = movementSpeed;
+
+
             StartCoroutine(PerformPhase2AnimationSequence()); // Bắt đầu chuỗi animation ở Phase 2
             Debug.Log("Boss is ENRAGED! Faster animation and new animation sequence!");
         }
@@ -276,7 +290,7 @@ public class EnemyAIByYang : MonoBehaviour
         _animator?.SetBool("isMoving", false);
         _animator?.SetFloat("Speed", 0f);
 
-        int animationChoice = UnityEngine.Random.Range(1, 4);
+        int animationChoice = UnityEngine.Random.Range(1, 3);
         switch (animationChoice)
         {
             case 1:
