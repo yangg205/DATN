@@ -10,8 +10,8 @@ namespace ND
         public int currentHealth;
 
         public int staminaLevel = 10;
-        public int maxStamina;
-        public int currentStamina;
+        public float maxStamina;
+        public float currentStamina;
 
         public int playerLevel = 1;
         public int currentEXP = 0;
@@ -23,7 +23,6 @@ namespace ND
         public TextMeshProUGUI levelText;
 
         AnimatorHandler animatorHandler;
-        SignalRClient signalRClient;
 
         private void Awake()
         {
@@ -31,9 +30,8 @@ namespace ND
             staminaBar = FindFirstObjectByType<StaminaBar>();
             expBar = FindFirstObjectByType<ExpBar>();
             animatorHandler = GetComponentInChildren<AnimatorHandler>();
-
-
         }
+
         void Start()
         {   
             maxHealth = SetMaxHealthFromHealthLevel();
@@ -42,6 +40,7 @@ namespace ND
 
             maxStamina = SetMaxStaminaFromStaminaLevel();
             currentStamina = maxStamina;
+            staminaBar.SetMaxStamina((int)maxStamina);
 
             expBar.SetMaxEXP(expToNextLevel);
             UpdateLevelText();
@@ -49,19 +48,17 @@ namespace ND
 
         private int SetMaxHealthFromHealthLevel()
         {
-            maxHealth = healthLevel * 10;
-            return maxHealth;
+            return healthLevel * 10;
         }
 
         private int SetMaxStaminaFromStaminaLevel()
         {
-            maxStamina = staminaLevel * 10;
-            return maxStamina;
+            return staminaLevel * 10;
         }
+
         public void TakeDamage(int damage)
         {
-            currentHealth = currentHealth - damage;
-
+            currentHealth -= damage;
             healthBar.SetCurrenHealth(currentHealth);
 
             animatorHandler.PlayTargetAnimation("DamageHit", true);
@@ -70,14 +67,15 @@ namespace ND
             {
                 currentHealth = 0;
                 animatorHandler.PlayTargetAnimation("Dead", true);
-                //handle dead 
+                // handle dead
             }
         }
 
         public void TakeStaminaDamage(int damage)
         {
-            currentStamina = currentStamina - damage;
-            staminaBar.SetCurrenStamina(currentStamina);
+            currentStamina -= damage;
+            currentStamina = Mathf.Clamp(currentStamina, 0, maxStamina);
+            staminaBar.SetCurrenStamina(Mathf.RoundToInt(currentStamina));
         }
 
         public void GainEXP(int amount)
@@ -95,6 +93,7 @@ namespace ND
                 LevelUp();
             }
         }
+
         private void LevelUp()
         {
             playerLevel++;
@@ -102,7 +101,6 @@ namespace ND
             expBar.SetMaxEXP(expToNextLevel);
             expBar.SetCurrentEXP(currentEXP);
             UpdateLevelText();
-
         }
 
         private void UpdateLevelText()
