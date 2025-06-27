@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System;
 
 public class ReturnPlayerCharacterSkill
@@ -58,4 +58,17 @@ public class Player
     public decimal Total_Money { get; set; } = 0.00M;
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime UpdatedAt { get; set; } = DateTime.Now;
+}
+public class PlayerAchievementDto
+{
+    public int AchievementId { get; set; }
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public int RequiredAmount { get; set; }
+    public int RewardCoin { get; set; }
+    public int RewardExp { get; set; }
+    public int CurrentProgress { get; set; }
+    public bool IsCompleted { get; set; }
+    public string Status { get; set; } // "Completed", "InProgress", "NotStarted"
+    public string IconPath { get; set; } // Đường dẫn đến biểu tượng của thành tựu
 }
