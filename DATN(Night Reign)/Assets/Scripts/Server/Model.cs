@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System;
 
 public class ReturnPlayerCharacterSkill
@@ -70,4 +70,5 @@ public class PlayerAchievementDto
     public int CurrentProgress { get; set; }
     public bool IsCompleted { get; set; }
     public string Status { get; set; } // "Completed", "InProgress", "NotStarted"
+    public string IconPath { get; set; } // Đường dẫn đến biểu tượng của thành tựu
 }
