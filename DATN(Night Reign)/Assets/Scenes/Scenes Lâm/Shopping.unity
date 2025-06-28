@@ -586,6 +586,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43bbef328ea9bee40a0a01e39731b44f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  text: {fileID: 1871426724}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  hoverColor: {r: 1, g: 0.8392157, b: 0, a: 1}
+  scaleAmount: 1.05
+  transitionSpeed: 5
+  outline: {fileID: 197006438}
 --- !u!114 &197006440
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1314,6 +1320,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: afaac4718d9fd5f4e8f51df34e3b82a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  buttonScale: {fileID: 0}
 --- !u!114 &506009499
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1530,6 +1537,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: afaac4718d9fd5f4e8f51df34e3b82a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  buttonScale: {fileID: 0}
 --- !u!1 &714415101
 GameObject:
   m_ObjectHideFlags: 0
@@ -1664,6 +1672,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: afaac4718d9fd5f4e8f51df34e3b82a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  buttonScale: {fileID: 0}
 --- !u!1 &717332203
 GameObject:
   m_ObjectHideFlags: 0
@@ -2164,6 +2173,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: afaac4718d9fd5f4e8f51df34e3b82a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  buttonScale: {fileID: 0}
 --- !u!114 &869652826
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2942,6 +2952,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43bbef328ea9bee40a0a01e39731b44f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  text: {fileID: 1222176056}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  hoverColor: {r: 1, g: 0.8392157, b: 0, a: 1}
+  scaleAmount: 1.05
+  transitionSpeed: 5
+  outline: {fileID: 1141604768}
 --- !u!114 &1141604770
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3100,6 +3116,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: afaac4718d9fd5f4e8f51df34e3b82a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  buttonScale: {fileID: 0}
 --- !u!114 &1161507868
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4455,6 +4472,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43bbef328ea9bee40a0a01e39731b44f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  text: {fileID: 1200848465}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  hoverColor: {r: 1, g: 0.8392157, b: 0, a: 1}
+  scaleAmount: 1.05
+  transitionSpeed: 5
+  outline: {fileID: 1560327377}
 --- !u!114 &1560327377
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5209,6 +5232,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: afaac4718d9fd5f4e8f51df34e3b82a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  buttonScale: {fileID: 0}
 --- !u!114 &1730834840
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5359,6 +5383,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43bbef328ea9bee40a0a01e39731b44f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  text: {fileID: 734663395}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  hoverColor: {r: 1, g: 0.8392157, b: 0, a: 1}
+  scaleAmount: 1.05
+  transitionSpeed: 5
+  outline: {fileID: 1740704529}
 --- !u!114 &1740704531
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6217,7 +6247,6 @@ GameObject:
   - component: {fileID: 1915986247}
   - component: {fileID: 1915986246}
   - component: {fileID: 1915986248}
-  - component: {fileID: 1915986249}
   m_Layer: 0
   m_Name: ChoiceManager
   m_TagString: Untagged
@@ -6264,18 +6293,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aefb83276c25be54db42db22c80af970, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1915986249
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1915986245}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7cc04003c1578034b84577748d046984, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  panels:
+  - {fileID: 1548943005}
+  - {fileID: 783953411}
+  - {fileID: 433758379}
+  - {fileID: 1300922885}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
