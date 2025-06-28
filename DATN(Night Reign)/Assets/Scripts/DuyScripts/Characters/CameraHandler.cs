@@ -1,4 +1,4 @@
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -39,8 +39,6 @@ namespace ND
         List<CharacterManager> availableTargets = new List<CharacterManager>();
         public Transform nearestLockOnTarget;
         public float maximumLockOnDistance = 30;
-
-
         private void Awake()
         {
             singleton = this;

@@ -4,6 +4,7 @@ namespace ND
 {
     public class UIManager : MonoBehaviour
     {
+        private MouseManager mouseManager;
         public PlayerInventory playerInventory;
 
         [Header("HUD Windows")]
@@ -17,6 +18,10 @@ namespace ND
 
         WeaponInventorySlot[] weaponInventorySlots;
 
+        private void Awake()
+        {
+            mouseManager = MouseManager.Instance;
+        }
         private void Start()
         {
             weaponInventorySlots = weaponInventorySlotsParent.GetComponentsInChildren<WeaponInventorySlot>();
@@ -45,11 +50,13 @@ namespace ND
 
         public void OpenSelectWindow()
         {
+            mouseManager.UnlockCursor();
             selectWindow.SetActive(true);
         }
 
         public void CloseSelectWindow()
         {
+            mouseManager.LockCursor();
             selectWindow.SetActive(false);
         }
 

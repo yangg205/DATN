@@ -122,5 +122,16 @@ namespace ND
             Vector3 velocity = deltaPosition / delta;
             playerLocomotion.rigidbody.linearVelocity = velocity;
         }
+
+        public void TriggerAttackVFX()
+        {
+            var attacker = GetComponentInParent<PlayerAttacker>();
+            var weapon = attacker?.weaponSlotManager?.attackingWeapon;
+
+            if (weapon != null && weapon.lightAttackVFX != null)
+            {
+                attacker.PlayAttackVFX(weapon.lightAttackVFX);
+            }
+        }
     }
 }

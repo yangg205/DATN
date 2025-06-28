@@ -1,3 +1,4 @@
+﻿using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Windows;
@@ -27,7 +28,6 @@ namespace ND
 
         public bool rollFlag;
         public bool sprintFlag;
-        public bool comboFlag;
         public bool lockOnFlag;
         public bool inventoryFlag;
         public float rollInputTimer;
@@ -56,15 +56,32 @@ namespace ND
             if (inputActions == null)
             {
                 inputActions = new PlayerControls();
-                inputActions.PlayerMovement.Movement.performed += inputActions => movementInput = inputActions.ReadValue<Vector2>();
+
+                inputActions.PlayerMovement.Movement.performed += i => movementInput = i.ReadValue<Vector2>();
                 inputActions.PlayerMovement.Camera.performed += i => cameraInput = i.ReadValue<Vector2>();
                 inputActions.PlayerActions.LightAttack.performed += i => lightAttack_input = true;
                 inputActions.PlayerActions.HeavyAttack.performed += i => heavyAttack_input = true;
-                inputActions.PlayerQuickSlots.DPadRight.performed += i => d_Pad_Right = true;
-                inputActions.PlayerQuickSlots.DPadLeft.performed += i => d_Pad_Left = true;
                 inputActions.PlayerActions.Interact.performed += i => interact_input = true;
                 inputActions.PlayerActions.Jump.performed += i => jump_input = true;
                 inputActions.PlayerActions.LockOn.performed += i => lockOn_input = true;
+                inputActions.PlayerQuickSlots.DPadRight.performed += i => d_Pad_Right = true;
+                inputActions.PlayerQuickSlots.DPadLeft.performed += i => d_Pad_Left = true;
+
+                inputActions.PlayerActions.Inventory.started += i =>
+                {
+                    inventoryFlag = true;
+                    uiManager.OpenSelectWindow();
+                    uiManager.UpdateUI();
+                    uiManager.hudWindow.SetActive(false);
+                };
+
+                inputActions.PlayerActions.Inventory.canceled += i =>
+                {
+                    inventoryFlag = false;
+                    uiManager.CloseSelectWindow();
+                    uiManager.CloseAllInventoryWindows();
+                    uiManager.hudWindow.SetActive(true);
+                };
             }
 
             inputActions.Enable();
@@ -81,7 +98,6 @@ namespace ND
             HandleRollInput(delta);
             HandleAttackInput(delta);
             HandleQuickSlotsInput();
-            HandleInventoryInput();
             HandleLockOnInput();
         }
 
@@ -119,82 +135,52 @@ namespace ND
         {
             if (lightAttack_input)
             {
-                if (playerManager.canDoCombo)
-                {
-                    comboFlag = true;
-                    playerAttacker.HandleWeaponCombo(playerInventory.rightWeapon);
-                    comboFlag = false;
-                }
-                else
-                {
-                    if (playerManager.isInteracting)
-                        return;
-
-                    if (playerManager.canDoCombo)
-                        return;
-
-                    playerAttacker.HandleLightAttack(playerInventory.rightWeapon);
-                }
+                playerAttacker.HandleLightAttack(playerInventory.rightWeapon);
             }
 
             if (heavyAttack_input)
             {
                 playerAttacker.HandleHeavyAttack(playerInventory.rightWeapon);
-
             }
         }
 
         private void HandleQuickSlotsInput()
         {
             if (d_Pad_Right)
-            {
                 playerInventory.ChangeRightWeapon();
-            }
             else if (d_Pad_Left)
-            {
                 playerInventory.ChangeLeftWeapon();
-            }
-        }
-
-        private void HandleInventoryInput()
-        {
-            inputActions.PlayerActions.Inventory.started += i =>
-            {
-                inventoryFlag = true;
-                uiManager.OpenSelectWindow();
-                uiManager.UpdateUI();
-                uiManager.hudWindow.SetActive(false);
-            };
-
-            inputActions.PlayerActions.Inventory.canceled += i =>
-            {
-                inventoryFlag = false;
-                uiManager.CloseSelectWindow();
-                uiManager.CloseAllInventoryWindows();
-                uiManager.hudWindow.SetActive(true);
-            };
         }
 
         private void HandleLockOnInput()
         {
-            if(lockOn_input && lockOnFlag == false)
+            if (lockOn_input && !lockOnFlag)
             {
                 lockOn_input = false;
                 lockOnFlag = true;
                 cameraHandler.currentLockOnTarget = cameraHandler.nearestLockOnTarget;
                 cameraHandler.HandleLockOn();
-                if(cameraHandler.nearestLockOnTarget != null)
-                {
-                    cameraHandler.currentLockOnTarget = cameraHandler.nearestLockOnTarget;
-                    lockOnFlag |= true;
-                }    
-            }    
-            else if(lockOn_input && lockOnFlag)
+            }
+            else if (lockOn_input && lockOnFlag)
             {
                 lockOn_input = false;
                 lockOnFlag = false;
                 cameraHandler.ClearLockOnTargets();
-            }    
-        }    
+            }
+        }
+
+        public void ResetFlags()
+        {
+            roll_input = false;
+            interact_input = false;
+            lightAttack_input = false;
+            heavyAttack_input = false;
+            jump_input = false;
+            lockOn_input = false;
+            d_Pad_Up = false;
+            d_Pad_Down = false;
+            d_Pad_Left = false;
+            d_Pad_Right = false;
+        }
     }
 }
