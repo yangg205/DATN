@@ -2,7 +2,7 @@
 using UnityEngine.UI; // Thêm dòng này để làm việc với UI
 using System.Collections.Generic; // Để sử dụng List
 
-public class PanelToggler : MonoBehaviour
+public class Panel_Toggler : MonoBehaviour
 {
     // Kéo thả tất cả các Panel bạn có vào đây trong Inspector
     // Đảm bảo thứ tự trong List này khớp với thứ tự của Button khi bạn gán hàm OnClick
