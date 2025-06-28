@@ -204,6 +204,11 @@ namespace ND
                     moveDirection.y = 0;
                     myTransform.rotation = Quaternion.LookRotation(moveDirection);
                 }
+                else
+                {
+                    // Nhảy tại chỗ
+                    animatorHandler.PlayTargetAnimation("JumpOnPlace", true);
+                }
             }
         }
 

@@ -118,6 +118,13 @@ namespace ND
         {
             playerStats.TakeStaminaDamage(Mathf.RoundToInt(attackingWeapon.baseStamina * attackingWeapon.heavyAttackMultiplier));
         }
+
+        public GameObject GetRightHandWeaponModel()
+        {
+            if (rightHandSlot != null && rightHandSlot.currentWeaponModel != null)
+                return rightHandSlot.currentWeaponModel;
+            return null;
+        }
         #endregion
     }
 }

@@ -16,12 +16,23 @@ namespace ND
         [Header("Attack Animations")]
         public string Oh_Light_Attack_1;
         public string Oh_Light_Attack_2;
+        public string Oh_Light_Attack_3;
+        public string Oh_Light_Attack_4;
         public string Oh_Heavy_Attack_1;
+        public string Oh_Heavy_Attack_2;
 
         [Header("Stamina Costs")]
         public int baseStamina;
         public float lightAttackMultiplier;
         public float heavyAttackMultiplier;
+
+        [Header("VFX Effects")]
+        public GameObject lightAttackVFX;
+        public GameObject heavyAttackVFX;
+        public GameObject weaponTrailVFX;
+
+        [Header("Skill")]
+        public GameObject specialSkillVFX;
     }
 }
 
