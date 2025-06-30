@@ -1,12 +1,17 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
 using System.Collections;
 
 public class LoadingSceneManager : MonoBehaviour
 {
+    [Header("UI Elements")]
     public Slider progressBar;
-    public float loadDuration = 5f; // thời gian đầy thanh slider
+    public TMP_Text loadingPercentText;
+
+    [Header("Loading Settings")]
+    public float loadDuration = 5f; // Tổng thời gian loading giả lập
 
     void Start()
     {
@@ -25,13 +30,17 @@ public class LoadingSceneManager : MonoBehaviour
         {
             timer += Time.deltaTime;
             float progress = Mathf.Clamp01(timer / loadDuration);
+
             if (progressBar != null)
                 progressBar.value = progress;
+
+            if (loadingPercentText != null)
+                loadingPercentText.text = Mathf.RoundToInt(progress * 100f) + "%";
 
             yield return null;
         }
 
-        // Khi timer đạt 5s, cho phép load scene
+        // Khi timer kết thúc, cho phép chuyển cảnh
         operation.allowSceneActivation = true;
     }
 }
