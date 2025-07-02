@@ -249,11 +249,6 @@ public class EnemyAIByYang : MonoBehaviour
             _isEnraged = true;
             attackCooldown = phase2AttackCooldown;
 
-            if (vfxEnrageEffect != null)
-            {
-                vfxEnrageEffect.Play();
-            }
-
             movementSpeed = baseMovementSpeed + 1.1f;
             _aiPath.maxSpeed = movementSpeed;
 
@@ -290,7 +285,7 @@ public class EnemyAIByYang : MonoBehaviour
         _animator?.SetBool("isMoving", false);
         _animator?.SetFloat("Speed", 0f);
 
-        int animationChoice = UnityEngine.Random.Range(1, 3);
+        int animationChoice = UnityEngine.Random.Range(1, 4);
         switch (animationChoice)
         {
             case 1:
@@ -300,6 +295,9 @@ public class EnemyAIByYang : MonoBehaviour
                 _animator?.SetTrigger("MeleeAttack3Speed");
                 break;
             case 3:
+                _animator?.SetTrigger("Jump");
+                break;
+            case 4:
                 _animator?.SetTrigger("MeleeAttack4Speed");
                 break;
         }
