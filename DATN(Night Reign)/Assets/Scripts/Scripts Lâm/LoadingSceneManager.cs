@@ -39,8 +39,17 @@ public class LoadingSceneManager : MonoBehaviour
 
             yield return null;
         }
-
         // Khi timer kết thúc, cho phép chuyển cảnh
         operation.allowSceneActivation = true;
+
+        // Chờ scene load xong
+        yield return new WaitUntil(() => operation.isDone);
+
+        // Tắt instance sau khi load
+        GameObject loadingInstance = GameObject.FindWithTag("LoadingUI"); // hoặc Find("LoadingUI(Clone)")
+        if (loadingInstance != null)
+        {
+            loadingInstance.SetActive(false); // hoặc Destroy(loadingInstance) nếu không cần nữa
+        }
     }
 }

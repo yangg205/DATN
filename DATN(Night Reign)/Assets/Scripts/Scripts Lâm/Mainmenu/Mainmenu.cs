@@ -5,9 +5,14 @@ using DG.Tweening;
 
 public class Mainmenu : MonoBehaviour
 {
+    private LoadingController loadingController;
+    public void Awake()
+    {
+        loadingController = FindAnyObjectByType<LoadingController>();
+    }
     public void Play()
     {
-        SceneManager.LoadScene("Selectioncharacter");
+        loadingController.LoadScene("Selectioncharacter");
     }
     public void Exit()
     {
