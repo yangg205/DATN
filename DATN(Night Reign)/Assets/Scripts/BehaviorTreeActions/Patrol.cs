@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using BehaviorDesigner.Runtime;
 using BehaviorDesigner.Runtime.Tasks;
 
@@ -7,13 +7,20 @@ public class Patrol : Action
     public Transform[] waypoints;
     private int currentIndex = 0;
     private BossMovementAStar movement;
+    private BossBlackboard blackboard;
 
     public float arriveThreshold = 1.5f;
 
     public override void OnStart()
     {
         movement = GetComponent<BossMovementAStar>();
-        if (waypoints.Length == 0) Debug.LogWarning("[Patrol] No waypoints assigned.");
+        blackboard = GetComponent<BossBlackboard>();
+
+        if (waypoints.Length == 0)
+            Debug.LogWarning("[Patrol] No waypoints assigned.");
+
+        //if (blackboard != null && blackboard.animator != null)
+        //    blackboard.animator.SetFloat("Speed", 1f); // Gán trạng thái đi bộ
     }
 
     public override TaskStatus OnUpdate()
@@ -31,5 +38,11 @@ public class Patrol : Action
         }
 
         return TaskStatus.Running;
+    }
+
+    public override void OnEnd()
+    {
+        if (blackboard != null && blackboard.animator != null)
+            blackboard.animator.SetFloat("Speed", 0f); // Dừng di chuyển
     }
 }

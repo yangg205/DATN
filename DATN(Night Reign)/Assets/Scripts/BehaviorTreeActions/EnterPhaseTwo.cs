@@ -13,13 +13,12 @@ public class EnterPhaseTwo : Action
 
     public override TaskStatus OnUpdate()
     {
-        if (!blackboard.isInSecondPhase && blackboard.currentHP < blackboard.maxHP * 0.5f)
+        if (!blackboard.isInSecondPhase && blackboard.currentHP <= blackboard.maxHP - 1000f)
         {
             blackboard.isInSecondPhase = true;
             Debug.Log("[EnterPhaseTwo] Boss entered Phase 2!");
             return TaskStatus.Success;
         }
-        Debug.Log("[EnterPhaseTwo] Boss is already in Phase 2 or HP not low enough.");
         return TaskStatus.Failure;
     }
 }

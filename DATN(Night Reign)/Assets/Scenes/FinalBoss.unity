@@ -1414,6 +1414,11 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 5916402974268935904, guid: 14ccd174c8be6884c9e4d6fbec4852cb,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5971472449373561246, guid: 14ccd174c8be6884c9e4d6fbec4852cb,
         type: 3}
       propertyPath: m_Layer
@@ -1710,14 +1715,14 @@ MonoBehaviour:
       startIndex: 
       variableStartIndex: 
       JSONSerialization: '{"EntryTask":{"Type":"BehaviorDesigner.Runtime.Tasks.EntryTask","NodeData":{"Offset":"(164.015869,-1234.17493)"},"ID":0,"Name":"Entry","Instant":true},"RootTask":{"Type":"BehaviorDesigner.Runtime.Tasks.Repeater","NodeData":{"Offset":"(0,130)"},"ID":1,"Name":"Repeater","Instant":true,"SharedIntcount":{"Type":"BehaviorDesigner.Runtime.SharedInt","Name":null,"Int32mValue":0},"SharedBoolrepeatForever":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":null,"BooleanmValue":true},"SharedBoolendOnFailure":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":null,"BooleanmValue":true},"Children":[{"Type":"BehaviorDesigner.Runtime.Tasks.Selector","NodeData":{"Offset":"(-4.939636,135.8224)"},"ID":2,"Name":"Selector","Instant":true,"AbortTypeabortType":"None","Children":[{"Type":"BehaviorDesigner.Runtime.Tasks.Sequence","NodeData":{"Offset":"(-280.4635,161.178085)"},"ID":3,"Name":"Sequence","Instant":true,"AbortTypeabortType":"None","Children":[{"Type":"EnterPhaseTwo","NodeData":{"Offset":"(-143.388077,144.733948)"},"ID":4,"Name":"Enter
-        Phase Two","Instant":true},{"Type":"BehaviorDesigner.Runtime.Tasks.Wait","NodeData":{"Offset":"(19.4599,158.880432)"},"ID":5,"Name":"Wait","Instant":true,"SharedFloatwaitTime":{"Type":"BehaviorDesigner.Runtime.SharedFloat","Name":null,"SinglemValue":0.5},"SharedBoolrandomWait":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":null,"BooleanmValue":false},"SharedFloatrandomWaitMin":{"Type":"BehaviorDesigner.Runtime.SharedFloat","Name":null,"SinglemValue":1},"SharedFloatrandomWaitMax":{"Type":"BehaviorDesigner.Runtime.SharedFloat","Name":null,"SinglemValue":1}}]},{"Type":"BehaviorDesigner.Runtime.Tasks.Sequence","NodeData":{"Offset":"(-1.11111641,171.363632)"},"ID":6,"Name":"Sequence","Instant":true,"AbortTypeabortType":"None","Children":[{"Type":"DetectPlayer","NodeData":{"Offset":"(-117.444839,178.5627)"},"ID":7,"Name":"Detect
-        Player","Instant":true,"SingledetectionRange":50,"LayerMaskplayerLayer":64,"SharedTransformplayerTransform":{"Type":"BehaviorDesigner.Runtime.SharedTransform","Name":null,"TransformmValue":0}},{"Type":"BehaviorDesigner.Runtime.Tasks.Selector","NodeData":{"Offset":"(-0.236845016,184.409042)"},"ID":8,"Name":"Selector","Instant":true,"AbortTypeabortType":"None","Children":[{"Type":"BehaviorDesigner.Runtime.Tasks.Sequence","NodeData":{"Offset":"(-174.976166,128.020752)"},"ID":9,"Name":"Sequence","Instant":true,"AbortTypeabortType":"None","Children":[{"Type":"EvadeIfLowStamina","NodeData":{"Offset":"(-72.11897,128.723419)"},"ID":10,"Name":"Evade
+        Phase Two","Instant":true},{"Type":"BehaviorDesigner.Runtime.Tasks.Wait","NodeData":{"Offset":"(6.959903,158.880432)"},"ID":5,"Name":"Wait","Instant":true,"SharedFloatwaitTime":{"Type":"BehaviorDesigner.Runtime.SharedFloat","Name":null,"SinglemValue":0.5},"SharedBoolrandomWait":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":null,"BooleanmValue":false},"SharedFloatrandomWaitMin":{"Type":"BehaviorDesigner.Runtime.SharedFloat","Name":null,"SinglemValue":1},"SharedFloatrandomWaitMax":{"Type":"BehaviorDesigner.Runtime.SharedFloat","Name":null,"SinglemValue":1}}]},{"Type":"BehaviorDesigner.Runtime.Tasks.Sequence","NodeData":{"Offset":"(-1.11111641,171.363632)"},"ID":6,"Name":"Sequence","Instant":true,"AbortTypeabortType":"None","Children":[{"Type":"DetectPlayer","NodeData":{"Offset":"(-117.444839,178.5627)"},"ID":7,"Name":"Detect
+        Player","Instant":true,"SingledetectionRange":10,"LayerMaskplayerLayer":64,"SharedTransformplayerTransform":{"Type":"BehaviorDesigner.Runtime.SharedTransform","Name":null,"TransformmValue":0}},{"Type":"BehaviorDesigner.Runtime.Tasks.Selector","NodeData":{"Offset":"(-0.236845016,184.409042)"},"ID":8,"Name":"Selector","Instant":true,"AbortTypeabortType":"None","Children":[{"Type":"BehaviorDesigner.Runtime.Tasks.Sequence","NodeData":{"Offset":"(-174.976166,128.020752)"},"ID":9,"Name":"Sequence","Instant":true,"AbortTypeabortType":"None","Children":[{"Type":"EvadeIfLowStamina","NodeData":{"Offset":"(-72.11897,128.723419)"},"ID":10,"Name":"Evade
         If Low Stamina","Instant":true,"Singlethreshold":20}]},{"Type":"BehaviorDesigner.Runtime.Tasks.Sequence","NodeData":{"Offset":"(1.42846489,115.306557)"},"ID":11,"Name":"Sequence","Instant":true,"AbortTypeabortType":"None","Children":[{"Type":"CheckDistance","NodeData":{"Offset":"(-74.28168,143.399292)"},"ID":12,"Name":"Check
         Distance","Instant":true,"SharedTransformplayerTransform":{"Type":"BehaviorDesigner.Runtime.SharedTransform","Name":null,"TransformmValue":1},"SingleminDistance":0,"SinglemaxDistance":3},{"Type":"AttackMelee","NodeData":{"Offset":"(56.38501,136.065979)"},"ID":13,"Name":"Attack
         Melee","Instant":true}]},{"Type":"BehaviorDesigner.Runtime.Tasks.Sequence","NodeData":{"Offset":"(205.374191,116.5401)"},"ID":14,"Name":"Sequence","Instant":true,"AbortTypeabortType":"None","Children":[{"Type":"CheckDistance","NodeData":{"Offset":"(-23.9780884,135.308136)"},"ID":15,"Name":"Check
         Distance","Instant":true,"SharedTransformplayerTransform":{"Type":"BehaviorDesigner.Runtime.SharedTransform","Name":null,"TransformmValue":2},"SingleminDistance":3,"SinglemaxDistance":50},{"Type":"AttackRanged","NodeData":{"Offset":"(95.40959,141.5582)"},"ID":16,"Name":"Attack
         Ranged","Instant":true}]}]},{"Type":"ChasePlayer","NodeData":{"Offset":"(124.4834,177.479568)"},"ID":17,"Name":"Chase
-        Player","Instant":true,"SharedTransformplayerTransform":{"Type":"BehaviorDesigner.Runtime.SharedTransform","Name":null,"TransformmValue":3}}]},{"Type":"BehaviorDesigner.Runtime.Tasks.Sequence","NodeData":{"Offset":"(255.170029,160)"},"ID":18,"Name":"Sequence","Instant":true,"AbortTypeabortType":"None","Children":[{"Type":"Patrol","NodeData":{"Offset":"(0.9599304,153.788452)"},"ID":19,"Name":"Patrol","Instant":true,"Transform[]waypoints":[4,5,6,7],"SinglearriveThreshold":1.5},{"Type":"BehaviorDesigner.Runtime.Tasks.Wait","NodeData":{"Offset":"(138.904724,131.0653)"},"ID":20,"Name":"Wait","Instant":true,"SharedFloatwaitTime":{"Type":"BehaviorDesigner.Runtime.SharedFloat","Name":null,"SinglemValue":0},"SharedBoolrandomWait":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":null,"BooleanmValue":false},"SharedFloatrandomWaitMin":{"Type":"BehaviorDesigner.Runtime.SharedFloat","Name":null,"SinglemValue":1},"SharedFloatrandomWaitMax":{"Type":"BehaviorDesigner.Runtime.SharedFloat","Name":null,"SinglemValue":1}}]}]}]}}'
+        Player","Instant":true,"SharedTransformplayerTransform":{"Type":"BehaviorDesigner.Runtime.SharedTransform","Name":null,"TransformmValue":3}}]},{"Type":"BehaviorDesigner.Runtime.Tasks.Sequence","NodeData":{"Offset":"(255.170029,160)"},"ID":18,"Name":"Sequence","Instant":true,"AbortTypeabortType":"None","Children":[{"Type":"Patrol","NodeData":{"Offset":"(0.9599304,142.677338)"},"ID":19,"Name":"Patrol","Instant":true,"Transform[]waypoints":[4,5,6,7],"SinglearriveThreshold":1.5},{"Type":"BehaviorDesigner.Runtime.Tasks.Wait","NodeData":{"Offset":"(138.904724,131.0653)"},"ID":20,"Name":"Wait","Instant":true,"SharedFloatwaitTime":{"Type":"BehaviorDesigner.Runtime.SharedFloat","Name":null,"SinglemValue":0},"SharedBoolrandomWait":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":null,"BooleanmValue":false},"SharedFloatrandomWaitMin":{"Type":"BehaviorDesigner.Runtime.SharedFloat","Name":null,"SinglemValue":1},"SharedFloatrandomWaitMax":{"Type":"BehaviorDesigner.Runtime.SharedFloat","Name":null,"SinglemValue":1}}]}]}]}}'
       fieldSerializationData:
         typeName: []
         fieldNameHash: 
@@ -1822,13 +1827,13 @@ MonoBehaviour:
   player: {fileID: 0}
   currentHP: 1000
   maxHP: 1000
-  stamina: 0
   isInSecondPhase: 0
   isInThirdPhase: 0
   canSeePlayer: 0
   lastKnownPlayerPosition: {x: 0, y: 0, z: 0}
   attackCooldown: 2
   timeSinceLastAttack: 4
+  animator: {fileID: 2056544538}
 --- !u!114 &2056544535
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1860,7 +1865,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2056544525}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5b95437d4527a32408b57e22372be350, type: 3}
   m_Name: 
@@ -1878,6 +1883,12 @@ MonoBehaviour:
   staminaBar: {fileID: 0}
   expBar: {fileID: 0}
   levelText: {fileID: 0}
+--- !u!95 &2056544538 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 896569166731225383, guid: fa4f7cfa07dbd7f42ba4bf9ebb5393ec,
+    type: 3}
+  m_PrefabInstance: {fileID: 570761877}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
