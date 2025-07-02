@@ -8,6 +8,7 @@ namespace ND
     public class CameraHandler : MonoBehaviour
     {
         InputHandler inputHandler;
+        PlayerManager playerManager;
 
         public Transform targetTransform;
         public Transform cameraTransform;
@@ -15,6 +16,7 @@ namespace ND
         private Transform myTransform;
         private Vector3 cameraTransformPosition;
         public LayerMask ignoreLayers;
+        public LayerMask environmentLayer;
         private Vector3 cameraFollowVelocity = Vector3.zero;
 
         public static CameraHandler singleton;
@@ -33,11 +35,15 @@ namespace ND
         public float cameraSphereRadius = 0.2f;
         public float cameraCollisionOffSet = 0.2f;
         public float minimumCollisionOffSet = 0.2f;
+        public float lockedPivotPosition = 2.25f;
+        public float unlockedPivotPosition = 1.65f;
 
-        public Transform currentLockOnTarget;
+        public CharacterManager currentLockOnTarget;
 
         List<CharacterManager> availableTargets = new List<CharacterManager>();
-        public Transform nearestLockOnTarget;
+        public CharacterManager nearestLockOnTarget;
+        public CharacterManager leftLockTarget;
+        public CharacterManager rightLockTarget;
         public float maximumLockOnDistance = 30;
         private void Awake()
         {
@@ -47,6 +53,12 @@ namespace ND
             ignoreLayers = ~(1 << 8 | 1 << 9 | 1 << 10);
             targetTransform = FindFirstObjectByType<PlayerManager>().transform;
             inputHandler = FindFirstObjectByType<InputHandler>();
+            playerManager = FindObjectOfType<PlayerManager>();
+        }
+
+        private void Start()
+        {
+            environmentLayer = LayerMask.NameToLayer("Environment");
         }
 
         public void FollowTarget(float delta)
@@ -81,14 +93,14 @@ namespace ND
             {
                 float velocity = 0;
 
-                Vector3 dir = currentLockOnTarget.position - transform.position;
+                Vector3 dir = currentLockOnTarget.transform.position - transform.position;
                 dir.Normalize();
                 dir.y = 0;
 
                 Quaternion targetRotation = Quaternion.LookRotation(dir);
                 transform.rotation = targetRotation;
 
-                dir = currentLockOnTarget.position - cameraPivotTransform.position;
+                dir = currentLockOnTarget.transform.position - cameraPivotTransform.position;
                 dir.Normalize();
 
                 targetRotation = Quaternion.LookRotation(dir);
@@ -124,7 +136,11 @@ namespace ND
 
         public void HandleLockOn()
         {
+            availableTargets.Clear();
+
             float shortestDistance = Mathf.Infinity;
+            float shortestDistanceOfLeftTarget = Mathf.Infinity;
+            float shortestDistanceOfRightTarget = Mathf.Infinity;
 
             Collider[] colliders = Physics.OverlapSphere(targetTransform.position, 26);
             
@@ -142,9 +158,20 @@ namespace ND
                         && viewableAngle > -50 && viewableAngle < 50
                         && distanceFromTarget <= maximumLockOnDistance)
                     {
-                        availableTargets.Add(character);
+                        //if (Physics.Linecast(playerManager.lockOnTransform.position, character.lockOnTransform.position, out hit))
+                        //{
+                        //    Debug.DrawLine(playerManager.lockOnTransform.position, character.lockOnTransform.position);
+                            
+                        //   /* if(hit.transform.gameObject.layer == evironmentLayer)
+                        //    {
+
+                        //    }
+                        //    else
+                        //    {
+                        //        availableTargets.Add(character);
+                        //    }*/
+                        //}
                     }
-                    
                 }
             }
 
@@ -155,7 +182,26 @@ namespace ND
                 if(distanceFromTarget < shortestDistance)
                 {
                     shortestDistance = distanceFromTarget;
-                    nearestLockOnTarget = availableTargets[k].lockOnTransform;
+                    nearestLockOnTarget = availableTargets[k];
+                }
+
+                if(inputHandler.lockOnFlag)
+                {
+                    Vector3 relativeEnemyPosition = inputHandler.transform.InverseTransformPoint(availableTargets[k].transform.position);
+                    var distanceFromLeftTarget = relativeEnemyPosition.x;
+                    var distanceFromRightTarget = relativeEnemyPosition.x;
+
+                    if (relativeEnemyPosition.x <= 0.00 && distanceFromLeftTarget < shortestDistanceOfLeftTarget)
+                    {
+                        shortestDistanceOfLeftTarget = distanceFromLeftTarget;
+                        leftLockTarget = availableTargets[k];
+                    }
+
+                    if(relativeEnemyPosition.x < 0.00 && distanceFromRightTarget < shortestDistanceOfRightTarget)
+                    {
+                        shortestDistanceOfRightTarget = distanceFromRightTarget;
+                        rightLockTarget = availableTargets[k];
+                    }
                 }
             }
         }
@@ -165,6 +211,22 @@ namespace ND
             availableTargets.Clear();
             nearestLockOnTarget = null;
             currentLockOnTarget = null;
-        }    
+        } 
+        
+        public void SetCameraHeight()
+        {
+            Vector3 velocity = Vector3.zero;
+            Vector3 newLockedPosition = new Vector3(0, lockedPivotPosition);
+            Vector3 newUnlockedPosition = new Vector3(0, unlockedPivotPosition);
+
+            if(currentLockOnTarget != null)
+            {
+                cameraPivotTransform.transform.localPosition = Vector3.SmoothDamp(cameraPivotTransform.transform.localPosition, newLockedPosition, ref velocity, Time.deltaTime);
+            }
+            else
+            {
+                cameraPivotTransform.transform.localPosition = Vector3.SmoothDamp(cameraPivotTransform.transform.localPosition, newUnlockedPosition, ref velocity, Time.deltaTime);
+            }
+        }
     }
 }
