@@ -158,19 +158,19 @@ namespace ND
                         && viewableAngle > -50 && viewableAngle < 50
                         && distanceFromTarget <= maximumLockOnDistance)
                     {
-                        if (Physics.Linecast(playerManager.lockOnTransform.position, character.lockOnTransform.position, out hit))
-                        {
-                            Debug.DrawLine(playerManager.lockOnTransform.position, character.lockOnTransform.position);
+                        //if (Physics.Linecast(playerManager.lockOnTransform.position, character.lockOnTransform.position, out hit))
+                        //{
+                        //    Debug.DrawLine(playerManager.lockOnTransform.position, character.lockOnTransform.position);
                             
-                           /* if(hit.transform.gameObject.layer == evironmentLayer)
-                            {
+                        //   /* if(hit.transform.gameObject.layer == evironmentLayer)
+                        //    {
 
-                            }
-                            else
-                            {
-                                availableTargets.Add(character);
-                            }*/
-                        }
+                        //    }
+                        //    else
+                        //    {
+                        //        availableTargets.Add(character);
+                        //    }*/
+                        //}
                     }
                 }
             }
