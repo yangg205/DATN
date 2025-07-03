@@ -278,11 +278,11 @@ public class SignalRClient : MonoBehaviour
             throw;
         }
     }
-    public async Task<List<Item>> GetAllItems()
+    public async Task<List<server.model.Item>> GetAllItems()
     {
         try
         {
-            var result = await _connection.InvokeAsync<List<Item>>("GetAllItems");
+            var result = await _connection.InvokeAsync<List<server.model.Item>>("GetAllItems");
             string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
             return result; // Trả về danh sách item
         }
