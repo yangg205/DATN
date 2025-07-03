@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using System.IO;
 using System;
 using ND;
+using server.model;
 
 public class SaveManager : MonoBehaviour
 {

@@ -6,6 +6,7 @@ using UnityEngine.SocialPlatforms.Impl;
 using TMPro;
 using System;
 using System.Collections;
+using server.model;
 
 public class AchievementManager : MonoBehaviour
 {

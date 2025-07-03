@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 using UnityEngine;
+using server.model;
 
 public class SignalRClient : MonoBehaviour
 {
@@ -77,7 +78,6 @@ public class SignalRClient : MonoBehaviour
             throw;
         }
     }
-
     public async Task<ReturnPlayerCharacterSkill> SendUpdateSkill(int playerCharacterId, int skillTreeId)
     {
         try
@@ -264,7 +264,90 @@ public class SignalRClient : MonoBehaviour
             throw;
         }
     }
-
+    public async Task<BuyItemResponseDTO> BuyItem(BuyItemRequestDTO request)
+    {
+        try
+        {
+            var result = await _connection.InvokeAsync<BuyItemResponseDTO>("BuyItem", request);
+            string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+            return result; // Trả về kết quả mua item
+        }
+        catch (Exception ex)
+        {
+            Debug.Log("gui yeu cau mua item that bai"+ ex.Message);
+            throw;
+        }
+    }
+    public async Task<List<Item>> GetAllItems()
+    {
+        try
+        {
+            var result = await _connection.InvokeAsync<List<Item>>("GetAllItems");
+            string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+            return result; // Trả về danh sách item
+        }
+        catch(Exception ex)
+        {
+            Debug.Log("gui yeu cau lay danh sach item that bai" + ex.Message);
+            throw;
+        }
+    }
+    public async Task<List<PlayerInventoryItemDTO>> GetInventory(int playerCharacterId)
+    {
+        try
+        {
+            var result = await _connection.InvokeAsync<List<PlayerInventoryItemDTO>>("GetInventory", playerCharacterId);
+            string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+            return result; // Trả về danh sách item trong inventory
+        }
+        catch(Exception ex)
+        {
+            Debug.Log("gui yeu cau lay danh sach item trong inventory that bai" + ex.Message);
+            throw;
+        }
+    }
+    public async Task<bool> AddOrUpdateInventoryItem(int playerCharacterId, int itemId, int quantityChange)
+    {
+        try
+        {
+            var result = await _connection.InvokeAsync<bool>("AddOrUpdateInventoryItem", playerCharacterId, itemId, quantityChange);
+            string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+            return result; // Trả về kết quả cập nhật inventory
+        }
+        catch(Exception ex)
+        {
+            Debug.Log("gui yeu cau cap nhat inventory that bai" + ex.Message);
+            throw;
+        }
+    }
+    public async Task<bool> ConsumeItem(ConsumeItemRequestDTO request)
+    {
+        try
+        {
+            var result = await _connection.InvokeAsync<bool>("ConsumeItem", request);
+            string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+            return result; // Trả về kết quả tiêu thụ item
+        }
+        catch(Exception ex)
+        {
+            Debug.Log("gui yeu cau su dung item that bai" + ex.Message);
+            throw;
+        }
+    }
+    public async Task<ExchangeCurrencyResponseDTO> ExchangeCurrency(ExchangeCurrencyRequestDTO request)
+    {
+        try
+        {
+            var result = await _connection.InvokeAsync<ExchangeCurrencyResponseDTO>("ExchangeCurrency", request);
+            string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+            return result; // Trả về kết quả đổi tiền tệ
+        }
+        catch(Exception ex)
+        {
+            Debug.Log("gui yeu cau doi tien that bai"+ex.Message);
+            throw;
+        }
+    }
 
     private async void OnDestroy()
     {
