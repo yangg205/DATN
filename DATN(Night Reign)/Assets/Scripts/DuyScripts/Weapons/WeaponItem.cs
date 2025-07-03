@@ -12,6 +12,7 @@ namespace ND
         [Header("Idle Animations")]
         public string right_hand_idle;
         public string left_hand_idle;
+        public string th_idle;
 
         [Header("Attack Animations")]
         public string Oh_Light_Attack_1;
@@ -33,6 +34,11 @@ namespace ND
 
         [Header("Skill")]
         public GameObject specialSkillVFX;
+
+        [Header("Skill Animation")]
+        public string skill_Charge;
+        public string skill_Attack_01;
+        public string skill_Attack_02;
     }
 }
 

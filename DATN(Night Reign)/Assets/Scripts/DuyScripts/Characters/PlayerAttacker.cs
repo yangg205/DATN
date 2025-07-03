@@ -1,9 +1,12 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 namespace ND
 {
     public class PlayerAttacker : MonoBehaviour
     {
+        PlayerInventory playerInventory;
+        PlayerManager playerManager;
         AnimatorHandler animatorHandler;
         InputHandler inputHandler;
         public WeaponSlotManager weaponSlotManager;
@@ -14,11 +17,16 @@ namespace ND
         private float comboResetTimer = 0f;
         private float comboResetDelay = 1.5f;
 
+        private float lastSkillTime = -Mathf.Infinity;
+        [SerializeField] private float skillCooldown = 5f;
+
         private void Awake()
         {
             animatorHandler = GetComponentInChildren<AnimatorHandler>();
             weaponSlotManager = GetComponentInChildren<WeaponSlotManager>();
             inputHandler = GetComponent<InputHandler>();
+            playerInventory = GetComponent<PlayerInventory>();
+            playerManager = GetComponent<PlayerManager>();
         }
 
         private void Update()
@@ -132,6 +140,54 @@ namespace ND
 
             GameObject vfxInstance = Instantiate(vfxPrefab, vfxSpawnPoint.position, vfxSpawnPoint.rotation);
             Destroy(vfxInstance, 2f);
+        }
+
+        public void TryUseSkill()
+        {
+            if (Time.time >= lastSkillTime + skillCooldown)
+            {
+                lastSkillTime = Time.time;
+                PerformWeaponSkill();
+            }
+            else
+            {
+                Debug.Log("Skill chưa hồi xong!");
+            }
+        }
+
+        public void PerformWeaponSkill()
+        {
+            if (playerInventory.rightWeapon == null)
+                return;
+
+            WeaponItem weapon = playerInventory.rightWeapon;
+
+            if (playerManager.isInteracting)
+                return;
+
+            playerManager.isInteracting = true;
+            animatorHandler.PlayTargetAnimation(weapon.skill_Charge, true);
+
+            StartCoroutine(ExecuteWeaponSkillCombo(weapon));
+        }
+
+        private IEnumerator ExecuteWeaponSkillCombo(WeaponItem weapon)
+        {
+            yield return new WaitForSeconds(1.0f); // Thời gian gồng
+
+            animatorHandler.PlayTargetAnimation(weapon.skill_Attack_01, true);
+            weaponSlotManager.OpenRightDamageCollider();
+            yield return new WaitForSeconds(0.6f);
+            weaponSlotManager.CloseRightHandDamageCollider();
+
+            yield return new WaitForSeconds(0.4f); // nghỉ ngắn giữa 2 đòn
+
+            animatorHandler.PlayTargetAnimation(weapon.skill_Attack_02, true);
+            weaponSlotManager.OpenRightDamageCollider();
+            yield return new WaitForSeconds(0.6f);
+            weaponSlotManager.CloseRightHandDamageCollider();
+
+            playerManager.isInteracting = false;
         }
     }
 }

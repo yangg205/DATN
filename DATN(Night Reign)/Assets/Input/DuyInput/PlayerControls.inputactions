@@ -252,6 +252,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Two Hand",
+                    "type": "Button",
+                    "id": "d94224f9-8c5b-40ba-9ad4-e1036bd2231f",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -412,11 +421,22 @@
                 {
                     "name": "",
                     "id": "1c078f53-48eb-4b92-9fe4-3ee5bd6a730b",
-                    "path": "<Keyboard>/1",
+                    "path": "<Keyboard>/q",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Skill",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4a953230-5dce-4c26-aed5-bbb29232f644",
+                    "path": "<Keyboard>/f",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Two Hand",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
