@@ -74,7 +74,7 @@ namespace ND
             deltaPosition.y = 0;
 
             Vector3 velocity = deltaPosition / delta;
-            playerLocomotion.rigidbody.velocity = velocity;
+            playerLocomotion.rigidbody.linearVelocity = velocity;
         }
 
         public void TriggerAttackVFX()

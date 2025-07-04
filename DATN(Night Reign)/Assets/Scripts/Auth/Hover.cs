@@ -61,6 +61,7 @@ public class Hover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         if (result.status)
         {
            notificationManager.ShowNotification(result.message,4);
+            SceneManager.LoadScene("MapTutorial");
         }
         else
         {

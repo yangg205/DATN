@@ -5,6 +5,7 @@ using System.IO;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using ND;
 
 public class NightMare : MonoBehaviour
 {
@@ -157,8 +158,8 @@ public class NightMare : MonoBehaviour
         Collider[] hitPlayers = Physics.OverlapSphere(attackPoint.position, attackRange, playerLayer);
         foreach (Collider player in hitPlayers)
         {
-/*            player.GetComponent<PlayerStats>()?.TakeDamage(15);            //============== thay bằng code HP player=============================***************************
-*/        }
+            player.GetComponent<PlayerStats>()?.TakeDamage(15);            //============== thay bằng code HP player=============================***************************
+        }
     }
     private void OnDrawGizmosSelected()
     {

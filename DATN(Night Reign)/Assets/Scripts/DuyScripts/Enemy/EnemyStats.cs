@@ -30,6 +30,7 @@ namespace ND
         {
             maxHealth = SetMaxHealthFromHealthLevel();
             currentHealth = maxHealth;
+            healthFill.fillAmount = currentHealth;
         }
 
         private int SetMaxHealthFromHealthLevel()
@@ -41,6 +42,7 @@ namespace ND
         public void TakeDamage(int damage)
         {
             currentHealth = currentHealth - damage;
+            healthFill.fillAmount = currentHealth;
 
             animator.Play("DamageHit");
 

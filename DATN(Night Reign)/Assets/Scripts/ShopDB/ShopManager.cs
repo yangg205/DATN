@@ -36,6 +36,7 @@ public class ShopManager : MonoBehaviour
     public GameObject currencyExchangePanel;
     public TMP_InputField moneyInputField;
     public Button changeButton;
+    [SerializeField] private TextMeshProUGUI coin;
     // Nếu bạn có TextMeshProUGUI riêng hiển thị tổng số tiền/coin của người chơi ở đâu đó trên UI chính, giữ lại biến này:
     // public TextMeshProUGUI currentMoneyText;
     // public TextMeshProUGUI currentCoinText;
@@ -387,7 +388,7 @@ public class ShopManager : MonoBehaviour
             if (response.Success)
             {
                 Debug.Log($"Exchange successful! You now have {response.NewPlayerTotalMoney:N0} Money and {response.NewPlayerTotalCoin:N0} Coin."); // Log thành công
-
+                coin.text = $"{response.NewPlayerTotalCoin}";
                 moneyInputField.text = "";
                 convertedCoinDisplay.text = "";
             }
