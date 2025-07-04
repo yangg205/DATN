@@ -15,6 +15,7 @@ namespace ND
 
         public bool roll_input;
         public bool interact_input;
+        public bool twoHand_input;
         public bool lightAttack_input;
         public bool heavyAttack_input;
         public bool jump_input;
@@ -22,6 +23,7 @@ namespace ND
         public bool lockOn_input;
         public bool right_Stick_Right_Input;
         public bool right_Stick_Left_Input;
+        public bool skill_input;
 
         public bool d_Pad_Up;
         public bool d_Pad_Down;
@@ -29,6 +31,7 @@ namespace ND
         public bool d_Pad_Right;
 
         public bool rollFlag;
+        public bool twoHandFlag;
         public bool sprintFlag;
         public bool lockOnFlag;
         public bool inventoryFlag;
@@ -38,6 +41,7 @@ namespace ND
         PlayerAttacker playerAttacker;
         PlayerInventory playerInventory;
         PlayerManager playerManager;
+        WeaponSlotManager weaponSlotManager;
         UIManager uiManager;
         CameraHandler cameraHandler;
 
@@ -49,6 +53,7 @@ namespace ND
             playerAttacker = GetComponent<PlayerAttacker>();
             playerInventory = GetComponent<PlayerInventory>();
             playerManager = GetComponent<PlayerManager>();
+            weaponSlotManager = GetComponentInChildren<WeaponSlotManager>();
             uiManager = FindFirstObjectByType<UIManager>();
             cameraHandler = FindFirstObjectByType<CameraHandler>();
         }
@@ -86,6 +91,8 @@ namespace ND
                 };
                 inputActions.PlayerMovement.LockOnTargetRight.performed += i => right_Stick_Right_Input = true;
                 inputActions.PlayerMovement.LockOnTargetLeft.performed += i => right_Stick_Left_Input = true;
+                inputActions.PlayerActions.TwoHand.performed += i => twoHand_input = true;
+                inputActions.PlayerActions.Skill.performed += i => skill_input = true;
             }
 
             inputActions.Enable();
@@ -103,6 +110,9 @@ namespace ND
             HandleAttackInput(delta);
             HandleQuickSlotsInput();
             HandleLockOnInput();
+            HandleTwoHandInput();
+            HandleSkillInput();
+
         }
 
         private void HandleMoveInput(float delta)
@@ -162,7 +172,7 @@ namespace ND
             {
                 lockOn_input = false;
                 cameraHandler.HandleLockOn();
-                if(cameraHandler.nearestLockOnTarget != null)
+                if (cameraHandler.nearestLockOnTarget != null)
                 {
                     cameraHandler.currentLockOnTarget = cameraHandler.nearestLockOnTarget;
                     lockOnFlag = true;
@@ -175,21 +185,21 @@ namespace ND
                 cameraHandler.ClearLockOnTargets();
             }
 
-            if(lockOnFlag && right_Stick_Left_Input)
+            if (lockOnFlag && right_Stick_Left_Input)
             {
                 right_Stick_Left_Input = false;
                 cameraHandler.HandleLockOn();
-                if(cameraHandler.leftLockTarget != null)
+                if (cameraHandler.leftLockTarget != null)
                 {
                     cameraHandler.currentLockOnTarget = cameraHandler.leftLockTarget;
                 }
             }
 
-            if(lockOnFlag && right_Stick_Right_Input)
+            if (lockOnFlag && right_Stick_Right_Input)
             {
                 right_Stick_Right_Input = false;
                 cameraHandler.HandleLockOn();
-                if(cameraHandler.rightLockTarget != null)
+                if (cameraHandler.rightLockTarget != null)
                 {
                     cameraHandler.currentLockOnTarget = cameraHandler.rightLockTarget;
                 }
@@ -198,18 +208,31 @@ namespace ND
             cameraHandler.SetCameraHeight();
         }
 
-        public void ResetFlags()
+        private void HandleTwoHandInput()
         {
-            roll_input = false;
-            interact_input = false;
-            lightAttack_input = false;
-            heavyAttack_input = false;
-            jump_input = false;
-            lockOn_input = false;
-            d_Pad_Up = false;
-            d_Pad_Down = false;
-            d_Pad_Left = false;
-            d_Pad_Right = false;
+            if (twoHand_input)
+            {
+                twoHandFlag = false;
+                twoHandFlag = !twoHandFlag;
+
+                if (twoHandFlag)
+                {
+                    weaponSlotManager.LoadWeaponOnSlot(playerInventory.rightWeapon, false);
+                }
+                else
+                {
+                    weaponSlotManager.LoadWeaponOnSlot(playerInventory.rightWeapon, false);
+                    weaponSlotManager.LoadWeaponOnSlot(playerInventory.leftWeapon, true);
+                }
+            }
+        }
+        private void HandleSkillInput()
+        {
+            if (skill_input)
+            {
+                skill_input = false;
+                playerAttacker.TryUseSkill(); // Gửi yêu cầu dùng skill
+            }
         }
     }
 }

@@ -139,7 +139,7 @@ namespace ND
             availableTargets.Clear();
 
             float shortestDistance = Mathf.Infinity;
-            float shortestDistanceOfLeftTarget = Mathf.Infinity;
+            float shortestDistanceOfLeftTarget = -Mathf.Infinity;
             float shortestDistanceOfRightTarget = Mathf.Infinity;
 
             Collider[] colliders = Physics.OverlapSphere(targetTransform.position, 26);
@@ -153,24 +153,25 @@ namespace ND
                     Vector3 lockTargetDirection = character.transform.position - targetTransform.position;
                     float distanceFromTarget = Vector3.Distance(targetTransform.position, character.transform.position);
                     float viewableAngle = Vector3.Angle(lockTargetDirection, cameraTransform.forward);
+                    RaycastHit hit;
 
                     if (character.transform.root != targetTransform.transform.root
                         && viewableAngle > -50 && viewableAngle < 50
                         && distanceFromTarget <= maximumLockOnDistance)
                     {
-                        //if (Physics.Linecast(playerManager.lockOnTransform.position, character.lockOnTransform.position, out hit))
-                        //{
-                        //    Debug.DrawLine(playerManager.lockOnTransform.position, character.lockOnTransform.position);
-                            
-                        //   /* if(hit.transform.gameObject.layer == evironmentLayer)
-                        //    {
+                        if (Physics.Linecast(playerManager.lockOnTransform.position, character.lockOnTransform.position, out hit))
+                        {
+                            Debug.DrawLine(playerManager.lockOnTransform.position, character.lockOnTransform.position);
 
-                        //    }
-                        //    else
-                        //    {
-                        //        availableTargets.Add(character);
-                        //    }*/
-                        //}
+                            if (hit.transform.gameObject.layer == environmentLayer)
+                            {
+
+                            }
+                            else
+                            {
+                                availableTargets.Add(character);
+                            }
+                        }
                     }
                 }
             }
@@ -191,13 +192,15 @@ namespace ND
                     var distanceFromLeftTarget = relativeEnemyPosition.x;
                     var distanceFromRightTarget = relativeEnemyPosition.x;
 
-                    if (relativeEnemyPosition.x <= 0.00 && distanceFromLeftTarget < shortestDistanceOfLeftTarget)
+                    if (relativeEnemyPosition.x <= 0.00 && distanceFromLeftTarget > shortestDistanceOfLeftTarget
+                        && availableTargets[k] != currentLockOnTarget)
                     {
                         shortestDistanceOfLeftTarget = distanceFromLeftTarget;
                         leftLockTarget = availableTargets[k];
                     }
 
-                    if(relativeEnemyPosition.x < 0.00 && distanceFromRightTarget < shortestDistanceOfRightTarget)
+                    else if(relativeEnemyPosition.x >= 0.00 && distanceFromRightTarget < shortestDistanceOfRightTarget
+                        && availableTargets[k] != currentLockOnTarget)
                     {
                         shortestDistanceOfRightTarget = distanceFromRightTarget;
                         rightLockTarget = availableTargets[k];

@@ -1,16 +1,26 @@
+using NUnit.Framework;
 using UnityEngine;
 
 namespace ND
 {
     public class UIManager : MonoBehaviour
     {
-        private MouseManager mouseManager;
-        public PlayerInventory playerInventory;
+/*        private MouseManager mouseManager;
+*/        public PlayerInventory playerInventory;
+        public EquipmentWindowUI equipmentWindowUI;
 
         [Header("HUD Windows")]
         public GameObject hudWindow;
         public GameObject selectWindow;
+        public GameObject equipmentScreenWindow;
         public GameObject weaponInventoryWindow;
+
+        [Header("Equipment Window Slot Selected")]
+        public bool rightHandSlot01Selected;
+        public bool rightHandSlot02Selected;
+        public bool leftHandSlot01Selected;
+        public bool leftHandSlot02Selected;
+
 
         [Header("Weapon Inventory")]
         public GameObject weaponInventorySlotPrefab;
@@ -20,11 +30,13 @@ namespace ND
 
         private void Awake()
         {
-            mouseManager = MouseManager.Instance;
+//            mouseManager = MouseManager.Instance;//
         }
+
         private void Start()
         {
             weaponInventorySlots = weaponInventorySlotsParent.GetComponentsInChildren<WeaponInventorySlot>();
+            equipmentWindowUI.LoadWeaponOnEquipmentScreen(playerInventory);
         }
         public void UpdateUI()
         {
@@ -50,19 +62,29 @@ namespace ND
 
         public void OpenSelectWindow()
         {
-            mouseManager.UnlockCursor();
+/*            mouseManager.UnlockCursor();*/
             selectWindow.SetActive(true);
         }
 
         public void CloseSelectWindow()
         {
-            mouseManager.LockCursor();
+/*            mouseManager.LockCursor();*/
             selectWindow.SetActive(false);
         }
 
         public void CloseAllInventoryWindows()
         {
+            ResetAllSelectedSlots();
             weaponInventoryWindow.SetActive(false);
+            equipmentScreenWindow.SetActive(false);
         }    
+
+        public void ResetAllSelectedSlots()
+        {
+            rightHandSlot01Selected = false;
+            rightHandSlot02Selected = false;
+            leftHandSlot01Selected = false;
+            leftHandSlot02Selected = false;
+        }
     }
 }
