@@ -1,5 +1,4 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections;
@@ -13,7 +12,8 @@ public class Hoverselectioncharacter : MonoBehaviour, IPointerEnterHandler, IPoi
     private bool isHovered = false;
     private bool isSelected = false;
 
-    private Outline outline;
+    [Header("Hiệu ứng khung hover bằng Image")]
+    public GameObject hoverFrameImage; // Gán Image phát sáng
 
     [Header("Panel hover chứa 2 button")]
     public GameObject hoverPanel;
@@ -37,9 +37,9 @@ public class Hoverselectioncharacter : MonoBehaviour, IPointerEnterHandler, IPoi
         originalScale = transform.localScale;
         targetScale = originalScale;
 
-        outline = GetComponent<Outline>();
-        if (outline != null)
-            outline.enabled = false;
+        // Ẩn khung hover
+        if (hoverFrameImage != null)
+            hoverFrameImage.SetActive(false);
 
         if (hoverPanel != null)
         {
@@ -64,12 +64,28 @@ public class Hoverselectioncharacter : MonoBehaviour, IPointerEnterHandler, IPoi
 
         if (panel1 != null) panel1.SetActive(false);
         if (panel2 != null) panel2.SetActive(false);
-        // Ngoài phần gán button1 và button2 như trước, thêm:
+
         if (panel1CloseButton != null)
             panel1CloseButton.onClick.AddListener(() => panel1.SetActive(false));
-
         if (panel2CloseButton != null)
             panel2CloseButton.onClick.AddListener(() => panel2.SetActive(false));
+    }
+
+    private void Awake()
+    {
+        if (panel1 != null)
+        {
+            Button panel1Button = panel1.GetComponent<Button>();
+            if (panel1Button != null)
+                panel1Button.onClick.AddListener(() => panel1.SetActive(false));
+        }
+
+        if (panel2 != null)
+        {
+            Button panel2Button = panel2.GetComponent<Button>();
+            if (panel2Button != null)
+                panel2Button.onClick.AddListener(() => panel2.SetActive(false));
+        }
     }
 
     private void Update()
@@ -83,11 +99,9 @@ public class Hoverselectioncharacter : MonoBehaviour, IPointerEnterHandler, IPoi
         if (!isSelected)
         {
             targetScale = originalScale * 1.1f;
-            if (outline != null)
-            {
-                outline.effectColor = Color.yellow;
-                outline.enabled = true;
-            }
+
+            if (hoverFrameImage != null)
+                hoverFrameImage.SetActive(true); // hiện khung hover
         }
 
         if (hoverPanel != null)
@@ -103,8 +117,9 @@ public class Hoverselectioncharacter : MonoBehaviour, IPointerEnterHandler, IPoi
         if (!isSelected)
         {
             targetScale = originalScale;
-            if (outline != null)
-                outline.enabled = false;
+
+            if (hoverFrameImage != null)
+                hoverFrameImage.SetActive(false); // ẩn khung nếu chưa được chọn
         }
 
         if (hoverPanel != null)
@@ -118,11 +133,9 @@ public class Hoverselectioncharacter : MonoBehaviour, IPointerEnterHandler, IPoi
     {
         isSelected = true;
         targetScale = originalScale * 1.15f;
-        if (outline != null)
-        {
-            outline.effectColor = new Color(1f, 0.84f, 0f); // Gold
-            outline.enabled = true;
-        }
+
+        if (hoverFrameImage != null)
+            hoverFrameImage.SetActive(true); // luôn hiển thị khung khi chọn
 
         foreach (Hoverselectioncharacter other in FindObjectsOfType<Hoverselectioncharacter>())
         {
@@ -135,8 +148,9 @@ public class Hoverselectioncharacter : MonoBehaviour, IPointerEnterHandler, IPoi
     {
         isSelected = false;
         targetScale = originalScale;
-        if (!isHovered && outline != null)
-            outline.enabled = false;
+
+        if (!isHovered && hoverFrameImage != null)
+            hoverFrameImage.SetActive(false); // ẩn nếu không hover nữa
     }
 
     private IEnumerator ShowPanelSmooth(bool show)
@@ -184,22 +198,5 @@ public class Hoverselectioncharacter : MonoBehaviour, IPointerEnterHandler, IPoi
     {
         if (panel1 != null) panel1.SetActive(false);
         if (panel2 != null) panel2.SetActive(true);
-    }
-    private void Awake()
-    {
-        // Gán sự kiện tắt panel khi bấm vào chính panel
-        if (panel1 != null)
-        {
-            Button panel1Button = panel1.GetComponent<Button>();
-            if (panel1Button != null)
-                panel1Button.onClick.AddListener(() => panel1.SetActive(false));
-        }
-
-        if (panel2 != null)
-        {
-            Button panel2Button = panel2.GetComponent<Button>();
-            if (panel2Button != null)
-                panel2Button.onClick.AddListener(() => panel2.SetActive(false));
-        }
     }
 }
