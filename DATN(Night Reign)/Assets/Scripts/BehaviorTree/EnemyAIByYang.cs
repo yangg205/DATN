@@ -56,7 +56,6 @@ public class EnemyAIByYang : MonoBehaviour
 
     [Header("VFX")]
     public ParticleSystem vfxHitEffect;
-    public ParticleSystem vfxEnrageEffect;
     public enum BossPhase
     {
         Phase1,
@@ -71,9 +70,8 @@ public class EnemyAIByYang : MonoBehaviour
     private bool _isEnraged = false;
     private bool _isCurrentlyFleeing = false;
     private bool _playerDodgedBossSkill = false;
+    public bool IsEnraged => _isEnraged;
 
-    private float _fleeStartTime;
-    private float maxFleeDuration = 6f;
 
     void Awake()
     {
@@ -768,4 +766,5 @@ public class EnemyAIByYang : MonoBehaviour
             sfxDead.PlayOneShot(sfxDead.clip);
         }
     }
+
 }

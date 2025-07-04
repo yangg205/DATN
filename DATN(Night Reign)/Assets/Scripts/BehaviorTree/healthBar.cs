@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class healthBar : MonoBehaviour
@@ -7,6 +7,12 @@ public class healthBar : MonoBehaviour
 
     public Slider healthSlider;
     public Slider easeHealthSlider;
+
+    public Image fillImage;
+    public Color normalColor = Color.red;
+    public Color enragedColor = new Color(0.6f, 0f, 0.8f); 
+
+
 
     private float lerpSpeed = 0.05f;
 
@@ -23,5 +29,19 @@ public class healthBar : MonoBehaviour
         {
             easeHealthSlider.value = Mathf.Lerp(easeHealthSlider.value, enemyAIByYang.currentHealth, lerpSpeed);
         }
+
+        // Đổi màu nếu Enraged
+        if (enemyAIByYang != null && fillImage != null)
+        {
+            if (enemyAIByYang.IsEnraged)
+            {
+                fillImage.color = enragedColor;
+            }
+            else
+            {
+                fillImage.color = normalColor;
+            }
+        }
+
     }
 }
