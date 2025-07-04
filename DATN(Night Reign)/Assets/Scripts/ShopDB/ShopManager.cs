@@ -22,7 +22,6 @@ public class ShopManager : MonoBehaviour
     public TMP_InputField quantityInputField;
     public Button buyButton;
 
-    // New: Buttons for quantity adjustment
     [Header("Quantity Adjustment Buttons")]
     public Button plusButton;
     public Button minusButton;
@@ -33,11 +32,25 @@ public class ShopManager : MonoBehaviour
     public Button potionButton;
     public Button currencyButton;
 
+    [Header("Currency Exchange Panel")]
+    public GameObject currencyExchangePanel;
+    public TMP_InputField moneyInputField;
+    public Button changeButton;
+    // Nếu bạn có TextMeshProUGUI riêng hiển thị tổng số tiền/coin của người chơi ở đâu đó trên UI chính, giữ lại biến này:
+    // public TextMeshProUGUI currentMoneyText;
+    // public TextMeshProUGUI currentCoinText;
+
+    // Đây là TextMeshProUGUI để hiển thị Coin được quy đổi
+    public TextMeshProUGUI convertedCoinDisplay;
+
+    // ĐÃ LOẠI BỎ: public TextMeshProUGUI exchangeResultText; // Không cần biến này nếu chỉ muốn log
+
     private SignalRClient _signalRClientService;
 
     private List<server.model.Item> allShopItems;
     private server.model.Item selectedItem;
     public int currentPlayerCharacterId;
+    private int currentPlayerId;
 
     void Awake()
     {
@@ -53,21 +66,27 @@ public class ShopManager : MonoBehaviour
     void Start()
     {
         currentPlayerCharacterId = PlayerPrefs.GetInt("PlayerCharacterId", 0);
+        currentPlayerId = PlayerPrefs.GetInt("PlayerId", 0);
+
         InitializeCategoryButtons();
 
         itemDesPanel.SetActive(false);
+        currencyExchangePanel.SetActive(false);
 
         quantityInputField.text = "1";
         quantityInputField.onValueChanged.AddListener(OnQuantityChanged);
 
-        // Assigning handlers for plus and minus buttons
         plusButton.onClick.AddListener(OnPlusButtonClicked);
         minusButton.onClick.AddListener(OnMinusButtonClicked);
 
         buyButton.onClick.AddListener(OnBuyButtonClicked);
         buyButton.interactable = false;
 
+        changeButton.onClick.AddListener(OnExchangeCurrencyClicked);
+        moneyInputField.onValueChanged.AddListener(OnMoneyInputValueChanged);
+
         LoadAllShopItems();
+        // RefreshPlayerCurrencyDisplays();
     }
 
     private void InitializeCategoryButtons()
@@ -75,7 +94,7 @@ public class ShopManager : MonoBehaviour
         weaponButton.onClick.AddListener(() => FilterItemsByType("weapon"));
         armorButton.onClick.AddListener(() => FilterItemsByType("armor"));
         potionButton.onClick.AddListener(() => FilterItemsByType("potion"));
-        currencyButton.onClick.AddListener(() => FilterItemsByType("currency"));
+        currencyButton.onClick.AddListener(OnCurrencyButtonClicked);
     }
 
     public async void LoadAllShopItems()
@@ -123,15 +142,8 @@ public class ShopManager : MonoBehaviour
             GameObject itemUIObject = Instantiate(itemPrefab, showItemParent);
             InventoryItemUI itemUI = itemUIObject.GetComponent<InventoryItemUI>();
 
-            if (itemUI != null)
-            {
-                itemUI.Initialize(itemData, this);
-                itemUIObject.name = $"ShopItem_{itemData.Name}";
-            }
-            else
-            {
-                Debug.LogError("ItemPrefab is missing the InventoryItemUI script!");
-            }
+            itemUI.Initialize(itemData, this);
+            itemUIObject.name = $"ShopItem_{itemData.Name}";
         }
     }
 
@@ -147,9 +159,9 @@ public class ShopManager : MonoBehaviour
 
         PopulateInventoryUI(filteredItems);
         itemDesPanel.SetActive(false);
+        currencyExchangePanel.SetActive(false);
         selectedItem = null;
         buyButton.interactable = false;
-        // Optionally disable plus/minus buttons if no item is selected
         plusButton.interactable = false;
         minusButton.interactable = false;
     }
@@ -167,38 +179,38 @@ public class ShopManager : MonoBehaviour
         }
 
         itemDesPanel.SetActive(true);
+        currencyExchangePanel.SetActive(false);
 
-        // --- IMPROVEMENT HERE: Load Icon from Resources ---
         if (!string.IsNullOrEmpty(itemData.IconPath))
         {
-            // Remove "Assets/" if present and ensure path is relative to a Resources folder
-            string resourcePath = itemData.IconPath.Replace("Assets/", "").Replace(".png", "");
+            string resourcePath = itemData.IconPath
+                                    .Replace("Assets/", "")
+                                    .Replace(".png", "");
+
             Sprite iconSprite = Resources.Load<Sprite>(resourcePath);
             if (iconSprite != null)
             {
                 itemDesIcon.sprite = iconSprite;
-                itemDesIcon.color = Color.white; // Ensure visibility if sprite is loaded
+                itemDesIcon.color = Color.white;
             }
             else
             {
-                itemDesIcon.sprite = null; // Clear if not found
-                itemDesIcon.color = new Color(1, 1, 1, 0); // Make transparent if no sprite
-                Debug.LogWarning($"Could not load sprite for item {itemData.Name} at path: {itemData.IconPath}. Make sure it's in a Resources folder and the path is correct.");
+                itemDesIcon.sprite = null;
+                itemDesIcon.color = new Color(1, 1, 1, 0);
+                Debug.LogWarning($"Could not load sprite for item {itemData.Name} at path: {itemData.IconPath}. Expected resource path: '{resourcePath}'. Make sure it's in a Resources folder and the path is correct (e.g., Assets/Resources/{resourcePath}.png).");
             }
         }
         else
         {
-            itemDesIcon.sprite = null; // Clear if no path
-            itemDesIcon.color = new Color(1, 1, 1, 0); // Make transparent if no sprite
+            itemDesIcon.sprite = null;
+            itemDesIcon.color = new Color(1, 1, 1, 0);
             Debug.LogWarning($"Item {itemData.Name} (ID: {itemData.Item_id}) has no icon path for description. Please ensure IconPath is provided.");
         }
-        // --- END IMPROVEMENT ---
 
         itemDesName.text = itemData.Name;
         itemDesDescription.text = itemData.Description;
         itemDesPrice.text = $"{itemData.Price} Gold";
 
-        // Reset quantity to 1 when a new item is selected
         quantityInputField.text = "1";
         CheckBuyButtonInteractability();
     }
@@ -219,7 +231,7 @@ public class ShopManager : MonoBehaviour
         }
         else
         {
-            quantityInputField.text = "1"; // Default to 1 if input is invalid or no item selected
+            quantityInputField.text = "1";
         }
         CheckBuyButtonInteractability();
     }
@@ -230,7 +242,7 @@ public class ShopManager : MonoBehaviour
         if (selectedItem != null && int.TryParse(quantityInputField.text, out currentQuantity))
         {
             currentQuantity--;
-            if (currentQuantity < 1) // Ensure quantity doesn't go below 1
+            if (currentQuantity < 1)
             {
                 currentQuantity = 1;
             }
@@ -239,7 +251,7 @@ public class ShopManager : MonoBehaviour
         }
         else
         {
-            quantityInputField.text = "1"; // Default to 1 if input is invalid or no item selected
+            quantityInputField.text = "1";
         }
         CheckBuyButtonInteractability();
     }
@@ -257,12 +269,9 @@ public class ShopManager : MonoBehaviour
         int quantity;
         if (int.TryParse(quantityInputField.text, out quantity) && quantity > 0)
         {
-            // Optional: Add logic to check if player has enough gold
-            // decimal totalPrice = selectedItem.Price * quantity;
-            // if (PlayerManager.Instance.CurrentGold >= totalPrice) { ... }
             buyButton.interactable = true;
-            plusButton.interactable = true; // Enable plus/minus if item is selected and quantity is valid
-            minusButton.interactable = (quantity > 1); // Disable minus if quantity is 1
+            plusButton.interactable = true;
+            minusButton.interactable = (quantity > 1);
         }
         else
         {
@@ -304,7 +313,6 @@ public class ShopManager : MonoBehaviour
             {
                 Debug.Log($"Successfully bought {quantity} of {selectedItem.Name}! Message: {response.Message}");
                 Debug.Log($"New Player Total Coin: {response.NewPlayerTotalCoin}");
-                // You might want to refresh player's gold display here
             }
             else
             {
@@ -316,4 +324,88 @@ public class ShopManager : MonoBehaviour
             Debug.LogError($"Error during purchase of {selectedItem.Name}: {ex.Message}");
         }
     }
+
+    // --- Currency Exchange Logic ---
+
+    private void OnCurrencyButtonClicked()
+    {
+        ClearInventoryDisplay();
+        itemDesPanel.SetActive(false);
+
+        currencyExchangePanel.SetActive(true);
+        moneyInputField.text = "";
+        convertedCoinDisplay.text = "";
+        // Debug.Log("Currency exchange panel opened. Input fields cleared."); // Log khi mở panel
+    }
+
+    private void OnMoneyInputValueChanged(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            convertedCoinDisplay.text = "";
+            Debug.Log("Money input is empty. Converted Coin display cleared."); // Log khi input rỗng
+            return;
+        }
+
+        if (decimal.TryParse(value, out decimal amountToExchange))
+        {
+            decimal convertedCoin = amountToExchange * 10000m;
+            convertedCoinDisplay.text = $"{convertedCoin:N0}";
+            Debug.Log($"Money input changed to '{value}'. Converted Coin: {convertedCoin:N0}"); // Log khi nhập hợp lệ
+        }
+        else
+        {
+            convertedCoinDisplay.text = "";
+            Debug.LogWarning($"Invalid input '{value}'. Please enter a valid number for Money."); // Log lỗi khi nhập không hợp lệ
+        }
+    }
+
+    private async void OnExchangeCurrencyClicked()
+    {
+        if (!decimal.TryParse(moneyInputField.text, out decimal amountToExchange) || amountToExchange <= 0)
+        {
+            Debug.LogWarning("Exchange failed: Please enter a valid amount to exchange."); // Log lỗi
+            return;
+        }
+
+        ExchangeCurrencyRequestDTO request = new ExchangeCurrencyRequestDTO
+        {
+            PlayerId = currentPlayerId,
+            PlayerCharacterId = currentPlayerCharacterId,
+            AmountToExchange = amountToExchange,
+            SourceCurrencyItemName = "Money",
+            TargetCurrencyItemName = "Coin"
+        };
+
+        Debug.Log($"Attempting to exchange {request.AmountToExchange} Money for Coin for Player ID: {request.PlayerId}, Character ID: {request.PlayerCharacterId}.");
+
+        try
+        {
+            // Đảm bảo tên phương thức đúng: ExchangeCurrencyAsync
+            ExchangeCurrencyResponseDTO response = await _signalRClientService.ExchangeCurrency(request);
+
+            if (response.Success)
+            {
+                Debug.Log($"Exchange successful! You now have {response.NewPlayerTotalMoney:N0} Money and {response.NewPlayerTotalCoin:N0} Coin."); // Log thành công
+
+                moneyInputField.text = "";
+                convertedCoinDisplay.text = "";
+            }
+            else
+            {
+                Debug.LogWarning($"Exchange failed: {response.Message}"); // Log lỗi từ server
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Exchange error: {ex.Message}"); // Log lỗi Exception
+        }
+    }
+
+    public async void RefreshPlayerCurrencyDisplays()
+    {
+        // Hàm này chỉ cần nếu bạn có TextMeshProUGUI riêng để hiển thị tổng tiền/coin ở đâu đó trên UI
+    }
 }
+
+// ... (Các DTO class và SignalRClient.cs vẫn giữ nguyên như cũ) ...
