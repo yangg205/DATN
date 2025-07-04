@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 
 namespace ND
@@ -6,6 +6,7 @@ namespace ND
     [CreateAssetMenu(menuName = "Items/Weapon Item")]
     public class WeaponItem : Item
     {
+        [Header("Model")]
         public GameObject modelPrefab;
         public bool isUnarmed;
 
@@ -14,31 +15,36 @@ namespace ND
         public string left_hand_idle;
         public string th_idle;
 
-        [Header("Attack Animations")]
+        [Header("Attack Animations - Light")]
         public string Oh_Light_Attack_1;
         public string Oh_Light_Attack_2;
         public string Oh_Light_Attack_3;
         public string Oh_Light_Attack_4;
+
+        [Header("Attack Animations - Heavy")]
         public string Oh_Heavy_Attack_1;
         public string Oh_Heavy_Attack_2;
 
-        [Header("Stamina Costs")]
-        public int baseStamina;
-        public float lightAttackMultiplier;
-        public float heavyAttackMultiplier;
+        [Header("Skill Animations")]
+        public string skill_Charge;         // Animation khi gồng (Q)
+        public string skill_Attack_01;      // Animation đòn 1
+        public string skill_Attack_02;      // Animation đòn 2
+        public string skill_BuffCharge;     // Animation khi buff tốc đánh (nếu có skill E chẳng hạn)
 
-        [Header("VFX Effects")]
+        [Header("Stamina Costs")]
+        public int baseStamina = 10;
+        public float lightAttackMultiplier = 1.0f;
+        public float heavyAttackMultiplier = 1.5f;
+
+        [Header("Normal VFX")]
         public GameObject lightAttackVFX;
         public GameObject heavyAttackVFX;
         public GameObject weaponTrailVFX;
 
-        [Header("Skill")]
-        public GameObject specialSkillVFX;
-
-        [Header("Skill Animation")]
-        public string skill_Charge;
-        public string skill_Attack_01;
-        public string skill_Attack_02;
+        [Header("Skill VFX")]
+        public GameObject skillChargeVFX;    // VFX gồng Q
+        public GameObject specialSkillVFX;   // VFX khi chém bằng Q
+        public GameObject attackSpeedVFX;    // VFX tăng tốc đánh
     }
 }
 

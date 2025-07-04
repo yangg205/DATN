@@ -5,6 +5,9 @@ namespace ND
 {
     public class PlayerStats : MonoBehaviour
     {
+        public float baseAttackSpeed = 1f;
+        public float currentAttackSpeed = 1f;
+
         public int healthLevel = 10;
         public int maxHealth;
         public int currentHealth;

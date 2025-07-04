@@ -283,6 +283,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""BoostAttackSpeed"",
+                    ""type"": ""Button"",
+                    ""id"": ""46551fda-6a52-4502-ac76-d44c10b078db"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -461,6 +470,17 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""Two Hand"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""53c755fe-5f8d-41b4-881a-2a32c67cf401"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""BoostAttackSpeed"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -616,6 +636,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_PlayerActions_LockOn = m_PlayerActions.FindAction("LockOn", throwIfNotFound: true);
         m_PlayerActions_Skill = m_PlayerActions.FindAction("Skill", throwIfNotFound: true);
         m_PlayerActions_TwoHand = m_PlayerActions.FindAction("Two Hand", throwIfNotFound: true);
+        m_PlayerActions_BoostAttackSpeed = m_PlayerActions.FindAction("BoostAttackSpeed", throwIfNotFound: true);
         // Player QuickSlots
         m_PlayerQuickSlots = asset.FindActionMap("Player QuickSlots", throwIfNotFound: true);
         m_PlayerQuickSlots_DPadUp = m_PlayerQuickSlots.FindAction("D-Pad Up", throwIfNotFound: true);
@@ -769,6 +790,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_PlayerActions_LockOn;
     private readonly InputAction m_PlayerActions_Skill;
     private readonly InputAction m_PlayerActions_TwoHand;
+    private readonly InputAction m_PlayerActions_BoostAttackSpeed;
     public struct PlayerActionsActions
     {
         private @PlayerControls m_Wrapper;
@@ -782,6 +804,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         public InputAction @LockOn => m_Wrapper.m_PlayerActions_LockOn;
         public InputAction @Skill => m_Wrapper.m_PlayerActions_Skill;
         public InputAction @TwoHand => m_Wrapper.m_PlayerActions_TwoHand;
+        public InputAction @BoostAttackSpeed => m_Wrapper.m_PlayerActions_BoostAttackSpeed;
         public InputActionMap Get() { return m_Wrapper.m_PlayerActions; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -818,6 +841,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @TwoHand.started += instance.OnTwoHand;
             @TwoHand.performed += instance.OnTwoHand;
             @TwoHand.canceled += instance.OnTwoHand;
+            @BoostAttackSpeed.started += instance.OnBoostAttackSpeed;
+            @BoostAttackSpeed.performed += instance.OnBoostAttackSpeed;
+            @BoostAttackSpeed.canceled += instance.OnBoostAttackSpeed;
         }
 
         private void UnregisterCallbacks(IPlayerActionsActions instance)
@@ -849,6 +875,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @TwoHand.started -= instance.OnTwoHand;
             @TwoHand.performed -= instance.OnTwoHand;
             @TwoHand.canceled -= instance.OnTwoHand;
+            @BoostAttackSpeed.started -= instance.OnBoostAttackSpeed;
+            @BoostAttackSpeed.performed -= instance.OnBoostAttackSpeed;
+            @BoostAttackSpeed.canceled -= instance.OnBoostAttackSpeed;
         }
 
         public void RemoveCallbacks(IPlayerActionsActions instance)
@@ -954,6 +983,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         void OnLockOn(InputAction.CallbackContext context);
         void OnSkill(InputAction.CallbackContext context);
         void OnTwoHand(InputAction.CallbackContext context);
+        void OnBoostAttackSpeed(InputAction.CallbackContext context);
     }
     public interface IPlayerQuickSlotsActions
     {

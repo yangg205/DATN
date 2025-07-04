@@ -1,3 +1,4 @@
+﻿using System.Collections;
 using UnityEngine;
 
 namespace ND
@@ -24,55 +25,17 @@ namespace ND
 
         public void UpdateAnimatorValues(float verticalMovement, float horizontalMovement, bool isSprinting)
         {
-            #region Vertical
             float v = 0;
+            if (verticalMovement > 0.55f) v = 1;
+            else if (verticalMovement > 0) v = 0.5f;
+            else if (verticalMovement < -0.55f) v = -1;
+            else if (verticalMovement < 0) v = -0.5f;
 
-            if (verticalMovement > 0 && verticalMovement < 0.55f)
-            {
-                v = 0.5f;
-            }
-            else if (verticalMovement > 0.55f)
-            {
-                v = 1;
-            }
-            else if (verticalMovement < 0 && verticalMovement > -0.55f)
-            {
-                v = -0.5f;
-            }
-            else if (verticalMovement < -0.55f)
-            {
-                v = -1;
-            }
-            else
-            {
-                v = 0;
-            }
-            #endregion
-
-            #region Horizontal
             float h = 0;
-
-            if (horizontalMovement > 0 && horizontalMovement < 0.55f)
-            {
-                h = 0.5f;
-            }
-            else if (horizontalMovement > 0.55f)
-            {
-                h = 1;
-            }
-            else if (horizontalMovement < 0 && horizontalMovement > -0.55f)
-            {
-                h = -0.5f;
-            }
-            else if (horizontalMovement < -0.55f)
-            {
-                h = -1;
-            }
-            else
-            {
-                h = 0;
-            }
-            #endregion
+            if (horizontalMovement > 0.55f) h = 1;
+            else if (horizontalMovement > 0) h = 0.5f;
+            else if (horizontalMovement < -0.55f) h = -1;
+            else if (horizontalMovement < 0) h = -0.5f;
 
             if (isSprinting)
             {
@@ -88,39 +51,30 @@ namespace ND
         {
             anim.applyRootMotion = isInteracting;
             anim.SetBool("isInteracting", isInteracting);
+
+            // Gán tốc độ animation theo buff (R)
+            var stats = playerManager.GetComponent<PlayerStats>();
+            anim.speed = stats != null ? stats.currentAttackSpeed : 1f;
+
             anim.CrossFade(targetAnim, 0.2f);
         }
 
-        public void CanRotate()
-        {
-            canRotate = true;
-        }
+        public void CanRotate() => canRotate = true;
+        public void StopRotation() => canRotate = false;
 
-        public void StopRotation()
-        {
-            canRotate = false;
-        }
-
-        public void EnableCombo()
-        {
-            anim.SetBool("canDoCombo", true);
-        }
-
-        public void DisableCombo()
-        {
-            anim.SetBool("canDoCombo", false);
-        }
+        public void EnableCombo() => anim.SetBool("canDoCombo", true);
+        public void DisableCombo() => anim.SetBool("canDoCombo", false);
 
         private void OnAnimatorMove()
         {
-            if (playerManager.isInteracting == false)
-                return;
+            if (!playerManager.isInteracting) return;
+
             float delta = Time.deltaTime;
-            playerLocomotion.rigidbody.linearDamping = 0;
             Vector3 deltaPosition = anim.deltaPosition;
             deltaPosition.y = 0;
+
             Vector3 velocity = deltaPosition / delta;
-            playerLocomotion.rigidbody.linearVelocity = velocity;
+            playerLocomotion.rigidbody.velocity = velocity;
         }
 
         public void TriggerAttackVFX()
