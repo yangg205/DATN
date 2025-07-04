@@ -90,6 +90,7 @@ namespace server.model
         public decimal Price { get; set; }
         public string Description { get; set; }
         public string Type { get; set; }
+        public string IconPath { get; set; }
     }
 
     public class PlayerInventoryItemDTO
@@ -99,7 +100,7 @@ namespace server.model
         public string ItemType { get; set; } = string.Empty;
         public int Quantity { get; set; }
         public string ItemDescription { get; set; }
-        // public string? IconPath { get; set; } // Nếu có cột IconPath trong bảng Item
+        public string IconPath { get; set; } // Nếu có cột IconPath trong bảng Item
     }
 
     public class ExchangeCurrencyRequestDTO

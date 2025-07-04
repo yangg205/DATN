@@ -168,8 +168,31 @@ public class ShopManager : MonoBehaviour
 
         itemDesPanel.SetActive(true);
 
-        itemDesIcon.sprite = null;
-        // Debug.LogWarning($"Item {itemData.Name} (ID: {itemData.Item_id}) has no icon path for description. Please ensure IconPath is provided or mapped.");
+        // --- IMPROVEMENT HERE: Load Icon from Resources ---
+        if (!string.IsNullOrEmpty(itemData.IconPath))
+        {
+            // Remove "Assets/" if present and ensure path is relative to a Resources folder
+            string resourcePath = itemData.IconPath.Replace("Assets/", "").Replace(".png", "");
+            Sprite iconSprite = Resources.Load<Sprite>(resourcePath);
+            if (iconSprite != null)
+            {
+                itemDesIcon.sprite = iconSprite;
+                itemDesIcon.color = Color.white; // Ensure visibility if sprite is loaded
+            }
+            else
+            {
+                itemDesIcon.sprite = null; // Clear if not found
+                itemDesIcon.color = new Color(1, 1, 1, 0); // Make transparent if no sprite
+                Debug.LogWarning($"Could not load sprite for item {itemData.Name} at path: {itemData.IconPath}. Make sure it's in a Resources folder and the path is correct.");
+            }
+        }
+        else
+        {
+            itemDesIcon.sprite = null; // Clear if no path
+            itemDesIcon.color = new Color(1, 1, 1, 0); // Make transparent if no sprite
+            Debug.LogWarning($"Item {itemData.Name} (ID: {itemData.Item_id}) has no icon path for description. Please ensure IconPath is provided.");
+        }
+        // --- END IMPROVEMENT ---
 
         itemDesName.text = itemData.Name;
         itemDesDescription.text = itemData.Description;
@@ -188,15 +211,15 @@ public class ShopManager : MonoBehaviour
     private void OnPlusButtonClicked()
     {
         int currentQuantity;
-        if (int.TryParse(quantityInputField.text, out currentQuantity))
+        if (selectedItem != null && int.TryParse(quantityInputField.text, out currentQuantity))
         {
             currentQuantity++;
             quantityInputField.text = currentQuantity.ToString();
-            itemDesPrice.text = $"{selectedItem.Price * currentQuantity} Gold"; 
+            itemDesPrice.text = $"{selectedItem.Price * currentQuantity} Gold";
         }
         else
         {
-            quantityInputField.text = "1"; // Default to 1 if input is invalid
+            quantityInputField.text = "1"; // Default to 1 if input is invalid or no item selected
         }
         CheckBuyButtonInteractability();
     }
@@ -204,7 +227,7 @@ public class ShopManager : MonoBehaviour
     private void OnMinusButtonClicked()
     {
         int currentQuantity;
-        if (int.TryParse(quantityInputField.text, out currentQuantity))
+        if (selectedItem != null && int.TryParse(quantityInputField.text, out currentQuantity))
         {
             currentQuantity--;
             if (currentQuantity < 1) // Ensure quantity doesn't go below 1
@@ -216,7 +239,7 @@ public class ShopManager : MonoBehaviour
         }
         else
         {
-            quantityInputField.text = "1"; // Default to 1 if input is invalid
+            quantityInputField.text = "1"; // Default to 1 if input is invalid or no item selected
         }
         CheckBuyButtonInteractability();
     }
@@ -281,6 +304,7 @@ public class ShopManager : MonoBehaviour
             {
                 Debug.Log($"Successfully bought {quantity} of {selectedItem.Name}! Message: {response.Message}");
                 Debug.Log($"New Player Total Coin: {response.NewPlayerTotalCoin}");
+                // You might want to refresh player's gold display here
             }
             else
             {
