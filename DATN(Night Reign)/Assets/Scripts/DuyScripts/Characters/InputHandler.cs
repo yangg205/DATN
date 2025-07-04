@@ -24,6 +24,7 @@ namespace ND
         public bool right_Stick_Right_Input;
         public bool right_Stick_Left_Input;
         public bool skill_input;
+        public bool attackSpeedBoost_input;
 
         public bool d_Pad_Up;
         public bool d_Pad_Down;
@@ -93,6 +94,7 @@ namespace ND
                 inputActions.PlayerMovement.LockOnTargetLeft.performed += i => right_Stick_Left_Input = true;
                 inputActions.PlayerActions.TwoHand.performed += i => twoHand_input = true;
                 inputActions.PlayerActions.Skill.performed += i => skill_input = true;
+                inputActions.PlayerActions.BoostAttackSpeed.performed += i => attackSpeedBoost_input = true;
             }
 
             inputActions.Enable();
@@ -112,6 +114,7 @@ namespace ND
             HandleLockOnInput();
             HandleTwoHandInput();
             HandleSkillInput();
+            HandleAttackSpeedBoostInput();
 
         }
 
@@ -231,7 +234,16 @@ namespace ND
             if (skill_input)
             {
                 skill_input = false;
-                playerAttacker.TryUseSkill(); // Gửi yêu cầu dùng skill
+                playerAttacker.TryUseSkill();
+            }
+        }
+
+        private void HandleAttackSpeedBoostInput()
+        {
+            if (attackSpeedBoost_input)
+            {
+                attackSpeedBoost_input = false;
+                playerAttacker.TryUseAttackSpeedBoost();
             }
         }
     }
