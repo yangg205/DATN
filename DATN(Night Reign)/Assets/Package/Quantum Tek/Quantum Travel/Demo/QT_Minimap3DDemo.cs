@@ -4,19 +4,15 @@ namespace QuantumTek.QuantumTravel.Demo
 {
     public class QT_Minimap3DDemo : MonoBehaviour
     {
-        public float moveSpeed = 1;
-        public float rotSpeed = 1;
+        public float rotSpeed = 1; // Tốc độ xoay khi di chuyển chuột
 
         private void Update()
         {
-            if (Input.GetKey(KeyCode.A))
-                transform.Rotate(0, -rotSpeed, 0);
-            if (Input.GetKey(KeyCode.D))
-                transform.Rotate(0, rotSpeed, 0);
-            if (Input.GetKey(KeyCode.W))
-                transform.localPosition += moveSpeed * Time.deltaTime * transform.forward;
-            if (Input.GetKey(KeyCode.S))
-                transform.localPosition += moveSpeed * Time.deltaTime * -transform.forward;
+            // Xoay nhân vật dựa trên input chuột
+            float mouseX = Input.GetAxis("Mouse X"); // Lấy sự thay đổi theo chiều ngang của chuột
+            transform.Rotate(0, mouseX * rotSpeed, 0); // Xoay theo trục Y
+
+            
         }
     }
 }

@@ -3,23 +3,15 @@ using UnityEngine.UI;
 
 public class SmallMinimapController : MonoBehaviour
 {
-    public Camera minimapCamera; // Camera của minimap nhỏ
-    public RectTransform minimapUIRectTransform; // RectTransform của SmallMinimap_MapDisplay_Raw (hoặc SmallMinimap_CircularMask nếu bạn muốn xoay cả mask)
-    public RectTransform playerIconRectTransform; // RectTransform của SmallMinimap_PlayerIcon
+    public Camera minimapCamera;
+    public RectTransform minimapUIRectTransform;
+    public RectTransform playerIconRectTransform;
 
-    public Transform playerTransform; // Transform của người chơi
-    public Transform playerCameraTransform; // Camera của người chơi
+    public Transform playerTransform;
+    public Transform playerMainCameraTransform; // Kéo Camera chính của người chơi vào đây
 
-    public float cameraHeight = 50f; // Độ cao camera minimap
-    public float zoomOrthographicSize = 37.5f; // Mức zoom
-
-    public RotationMode rotationMode = RotationMode.RotateMapInsteadOfPlayerIcon;
-
-    public enum RotationMode
-    {
-        RotateWithPlayerIcon,
-        RotateMapInsteadOfPlayerIcon
-    }
+    public float cameraHeight = 50f;
+    public float zoomOrthographicSize = 37.5f;
 
     void Start()
     {
@@ -31,48 +23,34 @@ public class SmallMinimapController : MonoBehaviour
 
     void LateUpdate()
     {
-        if (playerTransform == null || playerCameraTransform == null || minimapCamera == null)
+        if (playerTransform == null || minimapCamera == null || minimapUIRectTransform == null || playerIconRectTransform == null || playerMainCameraTransform == null)
         {
-            Debug.LogWarning("Tham chiếu cho Small Minimap Controller chưa được gán đầy đủ!");
+            Debug.LogWarning("Tham chiếu cho Small Minimap Controller chưa được gán đầy đủ! Vui lòng gán Player Transform, Player Main Camera Transform, Minimap Camera, Minimap UI Rect Transform và Player Icon Rect Transform trong Inspector.");
             return;
         }
 
-        // Di chuyển Camera Minimap theo người chơi
+        // 1. Di chuyển Camera Minimap theo người chơi
         Vector3 newCameraPos = playerTransform.position;
         newCameraPos.y = cameraHeight;
         minimapCamera.transform.position = newCameraPos;
         minimapCamera.transform.rotation = Quaternion.Euler(90f, 0f, 0f); // Luôn nhìn thẳng xuống
 
-        // Xử lý xoay minimap
-        HandleRotation();
-    }
+        // 2. Xoay minimap UI theo góc xoay của CAMERA NGƯỜI CHƠI
+        // Lấy góc Y của camera (quay quanh trục Y), đây là góc tuyệt đối của hướng nhìn.
+        // Dấu trừ để đảm bảo khi camera quay chiều kim đồng hồ (góc Y tăng),
+        // bản đồ UI quay ngược chiều kim đồng hồ để giữ cho "phía trước" của bản đồ là hướng camera đang nhìn.
+        minimapUIRectTransform.localEulerAngles = new Vector3(0, 0, playerMainCameraTransform.eulerAngles.y); // Không có dấu trừ nếu bạn muốn bản đồ xoay cùng chiều camera
 
-    void HandleRotation()
-    {
-        switch (rotationMode)
-        {
-            case RotationMode.RotateWithPlayerIcon:
-                // Minimap không xoay, icon xoay theo hướng người chơi
-                minimapUIRectTransform.localEulerAngles = Vector3.zero;
+        // Đảo ngược dấu của góc Y của camera để bản đồ xoay ngược lại với camera,
+        // làm cho hướng nhìn của camera luôn "hướng lên" trên minimap.
+        // Unity UI Z-rotation: dương là ngược chiều kim đồng hồ, âm là chiều kim đồng hồ.
+        // Camera Y-rotation: dương là chiều kim đồng hồ (nếu nhìn từ trên xuống).
+        // Vậy, để bản đồ xoay ngược lại với camera, ta dùng góc của camera.
+        minimapUIRectTransform.localEulerAngles = new Vector3(0, 0, -playerMainCameraTransform.eulerAngles.y);
 
-                Vector3 playerForward = playerCameraTransform.forward;
-                playerForward.y = 0;
-                playerForward.Normalize();
-
-                if (playerForward != Vector3.zero)
-                {
-                    float angle = Vector3.SignedAngle(Vector3.forward, playerForward, Vector3.up);
-                    playerIconRectTransform.localEulerAngles = new Vector3(0, 0, -angle);
-                }
-                break;
-
-            case RotationMode.RotateMapInsteadOfPlayerIcon:
-                // Icon không xoay, minimap xoay ngược hướng người chơi
-                playerIconRectTransform.localEulerAngles = Vector3.zero;
-
-                float playerRotationY = playerCameraTransform.eulerAngles.y;
-                minimapUIRectTransform.localEulerAngles = new Vector3(0, 0, playerRotationY);
-                break;
-        }
+        // 3. Icon người chơi trên minimap: LUÔN CHỈ THẲNG LÊN TRÊN (MŨI TÊN HƯỚNG LÊN TRÊN)
+        // Vì bản đồ đã được xoay để "phía trên" của nó là hướng nhìn của người chơi,
+        // icon người chơi chỉ cần đứng yên và hướng lên trên là đủ.
+        playerIconRectTransform.localEulerAngles = Vector3.zero;
     }
 }
