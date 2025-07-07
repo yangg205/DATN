@@ -215,7 +215,7 @@ namespace ND
         {
             if (twoHand_input)
             {
-                twoHandFlag = false;
+                twoHand_input = false;
                 twoHandFlag = !twoHandFlag;
 
                 if (twoHandFlag)

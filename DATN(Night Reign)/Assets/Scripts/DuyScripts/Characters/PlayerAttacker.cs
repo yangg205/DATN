@@ -52,18 +52,45 @@ namespace ND
                 return;
 
             comboResetTimer = 0f;
-            lightComboStep++;
 
-            string animName = lightComboStep switch
+            string animName;
+
+            if (inputHandler.twoHandFlag)
             {
-                1 => weapon.Oh_Light_Attack_1,
-                2 => weapon.Oh_Light_Attack_2,
-                3 => !string.IsNullOrEmpty(weapon.Oh_Light_Attack_3) ? weapon.Oh_Light_Attack_3 : weapon.Oh_Light_Attack_1,
-                4 => !string.IsNullOrEmpty(weapon.Oh_Light_Attack_4) ? weapon.Oh_Light_Attack_4 : weapon.Oh_Light_Attack_1,
-                _ => weapon.Oh_Light_Attack_1
-            };
+                // 🔒 Kiểm tra nếu chưa được phép combo (chỉ áp dụng cho đòn thứ 2)
+                if (lightComboStep == 2 && !animatorHandler.anim.GetBool("canDoCombo"))
+                    return;
 
-            if (lightComboStep > 4) lightComboStep = 1;
+                // Combo 2 tay: 2 đòn lặp lại
+                lightComboStep = (lightComboStep % 2) + 1;
+
+                animName = lightComboStep switch
+                {
+                    1 => weapon.Oh_Th_Attack_1,
+                    2 => weapon.Oh_Th_Attack_2,
+                    _ => weapon.Oh_Th_Attack_1
+                };
+
+                // Mỗi lần đánh xong reset canDoCombo
+                animatorHandler.anim.SetBool("canDoCombo", false);
+            }
+            else
+            {
+                // Combo 1 tay: 4 đòn
+                lightComboStep++;
+
+                animName = lightComboStep switch
+                {
+                    1 => weapon.Oh_Light_Attack_1,
+                    2 => weapon.Oh_Light_Attack_2,
+                    3 => !string.IsNullOrEmpty(weapon.Oh_Light_Attack_3) ? weapon.Oh_Light_Attack_3 : weapon.Oh_Light_Attack_1,
+                    4 => !string.IsNullOrEmpty(weapon.Oh_Light_Attack_4) ? weapon.Oh_Light_Attack_4 : weapon.Oh_Light_Attack_1,
+                    _ => weapon.Oh_Light_Attack_1
+                };
+
+                if (lightComboStep > 4)
+                    lightComboStep = 1;
+            }
 
             animatorHandler.PlayTargetAnimation(animName, true);
             lastAttack = animName;
@@ -77,22 +104,20 @@ namespace ND
             if (weapon == null || animatorHandler.anim.GetBool("isInteracting"))
                 return;
 
+            // ❌ Không cho dùng heavy attack ở chế độ 2 tay
+            if (inputHandler.twoHandFlag)
+                return;
+
             comboResetTimer = 0f;
             weaponSlotManager.attackingWeapon = weapon;
 
-            if (heavyComboStep == 0)
-            {
-                animatorHandler.PlayTargetAnimation(weapon.Oh_Heavy_Attack_1, true);
-                lastAttack = weapon.Oh_Heavy_Attack_1;
-                heavyComboStep = 1;
-            }
-            else
-            {
-                animatorHandler.PlayTargetAnimation(weapon.Oh_Heavy_Attack_2, true);
-                lastAttack = weapon.Oh_Heavy_Attack_2;
-                heavyComboStep = 0;
-            }
+            string animName;
 
+            heavyComboStep = (heavyComboStep % 2) + 1;
+            animName = heavyComboStep == 1 ? weapon.Oh_Heavy_Attack_1 : weapon.Oh_Heavy_Attack_2;
+
+            animatorHandler.PlayTargetAnimation(animName, true);
+            lastAttack = animName;
             PlayAttackVFX(weapon.heavyAttackVFX);
         }
 
