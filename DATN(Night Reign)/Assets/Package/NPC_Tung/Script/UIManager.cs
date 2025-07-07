@@ -10,18 +10,18 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance; // Phải là public static cho Singleton
 
     [Header("Quest Reward UI")]
-    [SerializeField] private GameObject rewardPopup; // Đã đổi thành private
-    [SerializeField] private TextMeshProUGUI coinText; // Đã đổi thành private
+    [SerializeField] private GameObject rewardPopup;
+    [SerializeField] private TextMeshProUGUI coinText;
 
-    [Header("Player Stats UI")] // Thêm phần này nếu bạn muốn hiển thị EXP của người chơi tổng thể
-    [SerializeField] private Slider expSlider; // Thêm Slider cho EXP
-    // Đã loại bỏ [SerializeField] private TextMeshProUGUI expSliderText; theo yêu cầu
+    [Header("Player Stats UI")]
+    [SerializeField] private Slider expSlider;
 
     [Header("Quest Progress UI")]
-    [SerializeField] private TextMeshProUGUI questProgressText; // Đã đổi thành private
+    [SerializeField] private TextMeshProUGUI questProgressText;
+    [SerializeField] private TextMeshProUGUI questDistanceText;
 
     [Header("Quest Notice Text (hiện trong Box)")]
-    [SerializeField] private TextMeshProUGUI questNoticeText; // Đã đổi thành private
+    [SerializeField] private TextMeshProUGUI questNoticeText;
 
     private Coroutine noticeCoroutine;
 
@@ -36,6 +36,38 @@ public class UIManager : MonoBehaviour
         {
             Destroy(gameObject);
             Debug.LogWarning("⚠️ Có nhiều hơn 1 UIManager trong scene, đã hủy bản sao.");
+        }
+
+        // Đăng ký sự kiện từ WaypointManager để cập nhật khoảng cách
+        if (FindObjectOfType<WaypointManager>() != null)
+        {
+            WaypointManager.Instance.OnActiveWaypointChanged += UpdateActiveWaypointDistance;
+        }
+        else
+        {
+            Debug.LogWarning("WaypointManager.Instance không tìm thấy. Tính năng hiển thị khoảng cách waypoint sẽ không hoạt động.");
+        }
+    }
+
+    private void Update()
+    {
+        // Cập nhật liên tục khoảng cách tới Active Waypoint
+        if (questDistanceText != null && FindObjectOfType<WaypointManager>() != null && WaypointManager.Instance.GetActiveWaypoint() != null)
+        {
+            float distance = WaypointManager.Instance.GetDistanceToActiveWaypoint();
+            if (distance >= 0)
+            {
+                questDistanceText.text = $"{Mathf.RoundToInt(distance)}m";
+                questDistanceText.gameObject.SetActive(true);
+            }
+            else
+            {
+                questDistanceText.gameObject.SetActive(false);
+            }
+        }
+        else if (questDistanceText != null)
+        {
+            questDistanceText.gameObject.SetActive(false);
         }
     }
 
@@ -71,7 +103,6 @@ public class UIManager : MonoBehaviour
         }
 
         coinText.text = $"Coin: {coin}";
-        // Không hiển thị EXP trên popup thưởng bằng Text nữa
         rewardPopup.SetActive(true);
         StartCoroutine(HideRewardPopupAfterDelay(2f));
     }
@@ -105,6 +136,9 @@ public class UIManager : MonoBehaviour
     {
         if (questProgressText != null)
             questProgressText.text = "";
+        if (questDistanceText != null)
+            questDistanceText.text = "";
+        questDistanceText.gameObject.SetActive(false);
     }
 
     // 🟢 Hàm để cập nhật EXP Slider
@@ -118,13 +152,28 @@ public class UIManager : MonoBehaviour
 
         expSlider.maxValue = maxExp;
         expSlider.value = currentExp;
+    }
 
-        // Đã loại bỏ phần cập nhật expSliderText ở đây
+    // Hàm gọi khi active waypoint thay đổi
+    private void UpdateActiveWaypointDistance(Waypoint activeWaypoint)
+    {
+        if (questDistanceText == null) return;
+
+        if (activeWaypoint != null)
+        {
+            questDistanceText.gameObject.SetActive(true);
+        }
+        else
+        {
+            questDistanceText.text = "";
+            questDistanceText.gameObject.SetActive(false);
+        }
     }
 
     private string GetLocalizedString(string tableName, string key)
     {
-        var table = LocalizationSettings.StringDatabase.GetTable(tableName);
+        // KHÔNG CÓ LocalizationSettings.HasInstance ở đây.
+        StringTable table = LocalizationSettings.StringDatabase.GetTable(tableName);
         if (table == null)
         {
             Debug.LogError($"❌ Bảng '{tableName}' không tồn tại. (UIManager)");
