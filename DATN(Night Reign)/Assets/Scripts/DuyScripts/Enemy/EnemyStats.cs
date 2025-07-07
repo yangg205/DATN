@@ -30,8 +30,8 @@ namespace ND
         {
             maxHealth = SetMaxHealthFromHealthLevel();
             currentHealth = maxHealth;
-            healthFill.fillAmount = currentHealth;
-        }
+/*            healthFill.fillAmount = currentHealth;
+*/        }
 
         private int SetMaxHealthFromHealthLevel()
         {
