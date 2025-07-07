@@ -1,9 +1,14 @@
 ﻿using UnityEngine;
 using TMPro;
 using System.Collections;
+using System;
+using UnityEngine.Localization.Settings;
+using UnityEngine.Localization.Tables;
 
 public class DialogueManager : MonoBehaviour
 {
+    public static DialogueManager Instance { get; private set; }
+
     [Header("UI Components")]
     public GameObject dialogueUI;
     public TextMeshProUGUI dialogueText;
@@ -12,105 +17,125 @@ public class DialogueManager : MonoBehaviour
     [Header("Typewriter Settings")]
     public float letterDelay = 0.03f;
 
-    private string[] currentDialogueLines;
+    private string[] currentDialogueKeys;
     private int currentLineIndex;
     private bool isDialogueActive = false;
     private Coroutine typingCoroutine;
+    private Action<string> _onDialogueEndCallback;
 
-    // 🟢 Gọi hàm này để bắt đầu đoạn hội thoại
-    public void StartDialogue(string[] lines)
+    void Awake()
     {
-        if (lines == null || lines.Length == 0)
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+    }
+
+    public void StartDialogue(string[] dialogueKeys, Action<string> onDialogueEnd = null)
+    {
+        if (dialogueKeys == null || dialogueKeys.Length == 0)
         {
-            Debug.LogWarning("⚠️ Không có đoạn thoại nào để hiển thị.");
+            EndDialogue();
             return;
         }
 
-        currentDialogueLines = lines;
+        currentDialogueKeys = dialogueKeys;
         currentLineIndex = 0;
+        _onDialogueEndCallback = onDialogueEnd;
 
-        // Hiển thị UI
         dialogueUI.SetActive(true);
         isDialogueActive = true;
-        dialogueText.text = ""; // Reset text
-
+        dialogueText.text = "";
         ShowLine();
 
-        if (nextButton != null)
-            nextButton.SetActive(true);
+        nextButton?.SetActive(true);
     }
 
-    // 🟢 Hiển thị dòng thoại hiện tại
     public void ShowLine()
     {
-        if (!isDialogueActive || currentDialogueLines == null || currentDialogueLines.Length == 0)
+        if (!isDialogueActive || currentDialogueKeys == null || currentDialogueKeys.Length == 0)
             return;
 
-        currentLineIndex = Mathf.Clamp(currentLineIndex, 0, currentDialogueLines.Length - 1);
+        currentLineIndex = Mathf.Clamp(currentLineIndex, 0, currentDialogueKeys.Length - 1);
 
         if (typingCoroutine != null)
             StopCoroutine(typingCoroutine);
 
-        string lineToDisplay = currentDialogueLines[currentLineIndex];
-        typingCoroutine = StartCoroutine(TypeLine(lineToDisplay));
+        string localizedLine = GetLocalizedDialogueString(currentDialogueKeys[currentLineIndex]);
+        typingCoroutine = StartCoroutine(TypeLine(localizedLine));
     }
 
-    // 🟢 Hiệu ứng gõ từng chữ
     private IEnumerator TypeLine(string line)
     {
         dialogueText.text = "";
-
         foreach (char c in line)
         {
             dialogueText.text += c;
             yield return new WaitForSeconds(letterDelay);
         }
-
-        typingCoroutine = null; // Đánh dấu là đã gõ xong
+        typingCoroutine = null;
     }
 
-    // 🟢 Gọi từ nút "Tiếp" để chuyển thoại
     public void NextLine()
     {
-        if (!isDialogueActive || currentDialogueLines == null || currentDialogueLines.Length == 0)
+        if (!isDialogueActive || currentDialogueKeys == null)
             return;
 
-        // Nếu đang gõ chữ thì hiển thị toàn bộ ngay lập tức
+        // Nếu đang gõ, dừng lại trước khi gõ dòng mới
         if (typingCoroutine != null)
         {
             StopCoroutine(typingCoroutine);
             typingCoroutine = null;
-
-            dialogueText.text = currentDialogueLines[currentLineIndex];
-            return;
         }
 
-        // Nếu còn thoại thì chuyển dòng
-        if (currentLineIndex < currentDialogueLines.Length - 1)
+        // Nếu còn dòng, tăng chỉ số và gõ dòng mới
+        if (currentLineIndex < currentDialogueKeys.Length)
         {
+            string localizedLine = GetLocalizedDialogueString(currentDialogueKeys[currentLineIndex]);
+            typingCoroutine = StartCoroutine(TypeLine(localizedLine));
             currentLineIndex++;
-            ShowLine();
         }
         else
         {
-            Debug.Log("📜 Hết đoạn thoại rồi, đóng hộp thoại.");
             EndDialogue();
         }
     }
 
-    // 🟢 Kết thúc đoạn thoại và ẩn UI
+
     public void EndDialogue()
     {
         isDialogueActive = false;
-
-        if (dialogueUI != null)
-            dialogueUI.SetActive(false);
-
-        if (nextButton != null)
-            nextButton.SetActive(false);
-
+        dialogueUI?.SetActive(false);
+        nextButton?.SetActive(false);
         dialogueText.text = "";
-        currentDialogueLines = null;
+        currentDialogueKeys = null;
         currentLineIndex = 0;
+
+        _onDialogueEndCallback?.Invoke("DialogueFinished");
+        _onDialogueEndCallback = null;
     }
+
+   private string GetLocalizedDialogueString(string key)
+{
+    if (string.IsNullOrEmpty(key))
+        return "[EMPTY KEY]";
+
+    key = key.Trim(); // Loại bỏ khoảng trắng đầu cuối, dấu xuống dòng
+
+    StringTable stringTable = LocalizationSettings.StringDatabase.GetTable("NhiemVu");
+    if (stringTable == null)
+    {
+        Debug.LogError("Localization StringTable 'NhiemVu' not found! (Check Package Manager & Localization Settings)");
+        return $"ERROR: Table Missing - {key}";
+    }
+
+    var entry = stringTable.GetEntry(key);
+    if (entry == null)
+    {
+        Debug.LogError($"❌ Key '{key}' không có trong bảng 'NhiemVu'");
+        return $"MISSING KEY: {key}";
+    }
+
+    return entry.GetLocalizedString();
+}
+
+
 }

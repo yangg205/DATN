@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-
+using QuantumTek.QuantumTravel;
 public class SmallMinimapController : MonoBehaviour
 {
     public Camera minimapCamera;
@@ -33,24 +33,17 @@ public class SmallMinimapController : MonoBehaviour
         Vector3 newCameraPos = playerTransform.position;
         newCameraPos.y = cameraHeight;
         minimapCamera.transform.position = newCameraPos;
-        minimapCamera.transform.rotation = Quaternion.Euler(90f, 0f, 0f); // Luôn nhìn thẳng xuống
+        minimapCamera.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
 
-        // 2. Xoay minimap UI theo góc xoay của CAMERA NGƯỜI CHƠI
-        // Lấy góc Y của camera (quay quanh trục Y), đây là góc tuyệt đối của hướng nhìn.
-        // Dấu trừ để đảm bảo khi camera quay chiều kim đồng hồ (góc Y tăng),
-        // bản đồ UI quay ngược chiều kim đồng hồ để giữ cho "phía trước" của bản đồ là hướng camera đang nhìn.
-        minimapUIRectTransform.localEulerAngles = new Vector3(0, 0, playerMainCameraTransform.eulerAngles.y); // Không có dấu trừ nếu bạn muốn bản đồ xoay cùng chiều camera
+        // 2. Xoay minimap UI theo góc xoay chuột chung
+        minimapUIRectTransform.localEulerAngles = new Vector3(0, 0, -QT_CompassBar.SharedMapRotationAngle);
 
-        // Đảo ngược dấu của góc Y của camera để bản đồ xoay ngược lại với camera,
-        // làm cho hướng nhìn của camera luôn "hướng lên" trên minimap.
-        // Unity UI Z-rotation: dương là ngược chiều kim đồng hồ, âm là chiều kim đồng hồ.
-        // Camera Y-rotation: dương là chiều kim đồng hồ (nếu nhìn từ trên xuống).
-        // Vậy, để bản đồ xoay ngược lại với camera, ta dùng góc của camera.
-        minimapUIRectTransform.localEulerAngles = new Vector3(0, 0, -playerMainCameraTransform.eulerAngles.y);
+        // 3. Xoay icon người chơi trên minimap để chỉ đúng hướng nhìn của player trên BẢN ĐỒ ĐÃ XOAY
+        Vector3 playerForwardWorld = new Vector3(playerMainCameraTransform.forward.x, 0, playerMainCameraTransform.forward.z).normalized;
+        float playerAbsoluteAngleFromNorth = Vector3.SignedAngle(Vector3.forward, playerForwardWorld, Vector3.up);
 
-        // 3. Icon người chơi trên minimap: LUÔN CHỈ THẲNG LÊN TRÊN (MŨI TÊN HƯỚNG LÊN TRÊN)
-        // Vì bản đồ đã được xoay để "phía trên" của nó là hướng nhìn của người chơi,
-        // icon người chơi chỉ cần đứng yên và hướng lên trên là đủ.
-        playerIconRectTransform.localEulerAngles = Vector3.zero;
+        float finalIconRotationZ_UI = playerAbsoluteAngleFromNorth + QT_CompassBar.SharedMapRotationAngle;
+
+        playerIconRectTransform.localEulerAngles = new Vector3(0, 0, -finalIconRotationZ_UI);
     }
 }

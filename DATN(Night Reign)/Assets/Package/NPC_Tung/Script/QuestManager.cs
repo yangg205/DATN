@@ -1,232 +1,374 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
+using System;
+using UnityEngine.Localization.Settings;
+using UnityEngine.Localization.Tables;
 
 public class QuestManager : MonoBehaviour
 {
-    public static QuestManager Instance;
+    public static QuestManager Instance { get; private set; }
 
+    [Header("References")]
     public QuestDatabase questDatabase;
-    public PlayerStats_Tung playerStats; // Đảm bảo đã gán PlayerStats_Tung GameObject vào đây trong Inspector
+    public PlayerStats_Tung playerStats;
 
-    private int currentQuestIndex = 0;
-    private int currentKills = 0;
-    private int currentItemCount = 0;
-    private bool isQuestActive = false;
-    private bool isQuestCompleted = false;
+    [Header("UI References (Optional)")]
+    [SerializeField] private GameObject _acceptButton;
+    [SerializeField] private GameObject _declineButton;
+    [SerializeField] private GameObject _claimRewardButton;
+    [SerializeField] private GameObject _questUI;
 
-    public GameObject acceptButton, declineButton, claimRewardButton;
-    public GameObject questUI;
+    [SerializeField] private Dictionary<QuestData, CurrentQuestStatus> _activeQuests = new Dictionary<QuestData, CurrentQuestStatus>();
+
+    private int _currentQuestIndex = 0;
+
+    private bool _isQuestActiveInternal = false;
+    private bool _isQuestCompletedInternal = false;
+
+    public class CurrentQuestStatus
+    {
+        public QuestData questData;
+        public int currentProgress;
+        public bool isObjectiveMet;
+        public bool isCompleted;
+
+        public CurrentQuestStatus(QuestData data)
+        {
+            questData = data;
+            currentProgress = 0;
+            isObjectiveMet = false;
+            isCompleted = false;
+        }
+
+        public int GetRequiredProgress()
+        {
+            switch (questData.questType)
+            {
+                case QuestType.KillEnemies:
+                    return questData.requiredKills;
+                case QuestType.CollectItem:
+                    return questData.requiredItemCount;
+                case QuestType.FindNPC:
+                    return 1;
+                default:
+                    return 0;
+            }
+        }
+    }
 
     private void Awake()
     {
-        if (Instance == null)
+        if (Instance != null && Instance != this)
         {
-            Instance = this;
-            Debug.Log("✨ QuestManager Instance đã được thiết lập.");
+            Destroy(gameObject);
         }
         else
         {
-            Destroy(gameObject);
-            Debug.LogWarning("⚠️ Đã có một instance QuestManager khác trong scene. Hủy bản sao này.");
+            Instance = this;
+            // DontDestroyOnLoad(gameObject); // Bỏ comment nếu bạn muốn nó tồn tại qua các cảnh
         }
     }
 
-    void Update()
+    private string GetLocalizedString(string tableName, string key, params object[] arguments)
     {
-        if (isQuestActive)
+        var table = LocalizationSettings.StringDatabase.GetTable(tableName);
+        if (table == null)
         {
-            var quest = GetCurrentQuest();
-            if (quest != null && quest.questType == QuestType.KillEnemies && Input.GetKeyDown(KeyCode.K))
-            {
-                ReportKill();
-            }
-            // Thêm logic kiểm tra thu thập vật phẩm ở đây nếu cần (tùy thuộc vào cách bạn làm game)
-            // Ví dụ: if (quest != null && quest.questType == QuestType.CollectItem) CheckItemCollectionProgress();
+            Debug.LogError($"❌ Bảng '{tableName}' không tồn tại. (QuestManager)");
+            return $"[TABLE NOT FOUND: {tableName}]";
         }
+
+        var entry = table.GetEntry(key);
+        if (entry == null)
+        {
+            Debug.LogError($"❌ Key '{key}' không có trong bảng '{tableName}' (QuestManager)");
+            return $"[MISSING KEY: {key}]";
+        }
+
+        return entry.GetLocalizedString(arguments) ?? $"[ERROR LOCALIZING: {key}]";
     }
 
-    public QuestData GetCurrentQuest() =>
-        (questDatabase != null && currentQuestIndex < questDatabase.quests.Length)
-        ? questDatabase.quests[currentQuestIndex]
-        : null;
+    public QuestData GetCurrentQuest()
+    {
+        if (questDatabase == null || questDatabase.quests == null || _currentQuestIndex >= questDatabase.quests.Length)
+        {
+            return null;
+        }
+        return questDatabase.quests[_currentQuestIndex];
+    }
 
     public void AcceptQuest()
     {
-        var quest = GetCurrentQuest();
-        if (quest == null || isQuestActive || isQuestCompleted)
-        {
-            Debug.LogWarning("⛔ Không thể chấp nhận nhiệm vụ: Không có nhiệm vụ, nhiệm vụ đang hoạt động, hoặc đã hoàn thành.");
-            return;
-        }
+        QuestData quest = GetCurrentQuest();
+        if (quest == null) return;
+        if (_activeQuests.ContainsKey(quest)) return;
 
-        isQuestActive = true;
-        isQuestCompleted = false;
-        currentKills = 0;
-        currentItemCount = 0;
+        _activeQuests.Add(quest, new CurrentQuestStatus(quest));
+        _isQuestActiveInternal = true;
+        _isQuestCompletedInternal = false;
 
-        Debug.Log($"🔵 Nhiệm vụ '{quest.questName}' đã được chấp nhận!");
-
-        if (quest.questType == QuestType.KillEnemies)
+        if (UIManager.Instance != null)
         {
-            UIManager.Instance.UpdateQuestProgress(0, quest.requiredKills);
+            if (quest.questType == QuestType.KillEnemies)
+            {
+                UIManager.Instance.UpdateQuestProgress(0, quest.requiredKills);
+            }
+            else if (quest.questType == QuestType.FindNPC)
+            {
+                // Sử dụng key "Quest_Progress_FindNPC"
+                string findNPCProgressText = GetLocalizedString("NhiemVu", "Quest_Progress_FindNPC");
+                UIManager.Instance.UpdateQuestProgressText(findNPCProgressText);
+            }
+            else if (quest.questType == QuestType.CollectItem)
+            {
+                UIManager.Instance.UpdateQuestProgress(0, quest.requiredItemCount);
+            }
         }
-        else if (quest.questType == QuestType.FindNPC)
-        {
-            UIManager.Instance.UpdateQuestProgressText("Tìm và nói chuyện với NPC mục tiêu");
-        }
-        else if (quest.questType == QuestType.CollectItem)
-        {
-            UIManager.Instance.UpdateQuestProgress(0, quest.requiredItemCount);
-        }
-
         HideQuestUI();
     }
 
     public void ReportKill()
     {
-        var quest = GetCurrentQuest();
-        if (!isQuestActive || isQuestCompleted || quest == null || quest.questType != QuestType.KillEnemies)
+        QuestData quest = GetCurrentQuest();
+        if (quest == null || !_isQuestActiveInternal || _isQuestCompletedInternal || quest.questType != QuestType.KillEnemies)
         {
-            Debug.LogWarning("⛔ Không thể báo cáo tiêu diệt: Nhiệm vụ không hoạt động, đã hoàn thành, hoặc không phải nhiệm vụ tiêu diệt.");
             return;
         }
 
-        currentKills++;
-        UIManager.Instance.UpdateQuestProgress(currentKills, quest.requiredKills);
-        Debug.Log($"🔄 Tiến độ tiêu diệt: {currentKills}/{quest.requiredKills}");
+        CurrentQuestStatus status = GetQuestStatus(quest);
+        if (status == null) return;
 
-        if (currentKills >= quest.requiredKills)
+        status.currentProgress++;
+        if (UIManager.Instance != null) UIManager.Instance.UpdateQuestProgress(status.currentProgress, status.GetRequiredProgress());
+
+        if (status.currentProgress >= status.GetRequiredProgress())
         {
-            CompleteQuest();
+            status.isObjectiveMet = true;
+            _isQuestCompletedInternal = true;
+            if (UIManager.Instance != null) UIManager.Instance.HideQuestProgress();
         }
     }
 
     public void CheckItemCollectionProgress()
     {
-        var quest = GetCurrentQuest();
-        if (!isQuestActive || isQuestCompleted || quest == null || quest.questType != QuestType.CollectItem)
+        QuestData quest = GetCurrentQuest();
+        if (quest == null || !_isQuestActiveInternal || _isQuestCompletedInternal || quest.questType != QuestType.CollectItem)
         {
-            Debug.LogWarning("⛔ Không thể kiểm tra vật phẩm: Nhiệm vụ không hoạt động, đã hoàn thành, hoặc không phải nhiệm vụ thu thập.");
             return;
         }
 
-        // Đảm bảo SimpleInventory.Instance không null
+        CurrentQuestStatus status = GetQuestStatus(quest);
+        if (status == null) return;
+
         if (SimpleInventory.Instance == null)
         {
-            Debug.LogError("🔴 LỖI: SimpleInventory.Instance là NULL. Không thể kiểm tra tiến độ vật phẩm.");
+            Debug.LogError("LỖI: SimpleInventory.Instance là NULL. Không thể kiểm tra tiến độ vật phẩm. Hãy đảm bảo SimpleInventory có trong cảnh và được setup.");
             return;
         }
 
-        int current = SimpleInventory.Instance.GetItemCount(quest.targetItemID);
-        currentItemCount = current;
-        UIManager.Instance.UpdateQuestProgress(currentItemCount, quest.requiredItemCount);
-        Debug.Log($"🔄 Tiến độ thu thập: {currentItemCount}/{quest.requiredItemCount}");
+        int currentInventoryCount = SimpleInventory.Instance.GetItemCount(quest.targetItemID);
+        status.currentProgress = currentInventoryCount;
+        if (UIManager.Instance != null) UIManager.Instance.UpdateQuestProgress(status.currentProgress, status.GetRequiredProgress());
 
-
-        if (currentItemCount >= quest.requiredItemCount)
+        if (status.currentProgress >= status.GetRequiredProgress())
         {
-            CompleteQuest();
+            status.isObjectiveMet = true;
+            _isQuestCompletedInternal = true;
+            if (UIManager.Instance != null) UIManager.Instance.HideQuestProgress();
         }
     }
 
     public void TryCompleteQuestByTalk()
     {
-        var quest = GetCurrentQuest();
-        if (quest != null && isQuestActive && !isQuestCompleted && quest.questType == QuestType.FindNPC)
+        QuestData quest = GetCurrentQuest();
+        if (quest == null || !_isQuestActiveInternal || _isQuestCompletedInternal || quest.questType != QuestType.FindNPC)
         {
-            Debug.Log($"✅ Nhiệm vụ FindNPC đã hoàn thành bằng cách nói chuyện với NPC: {quest.targetNPCID}");
-            CompleteQuest();
+            return;
         }
-        else
+
+        CurrentQuestStatus status = GetQuestStatus(quest);
+        if (status == null) return;
+
+        if (status.currentProgress == 0) // Chỉ hoàn thành nếu chưa hoàn thành
         {
-            Debug.LogWarning("⛔ Không thể hoàn thành nhiệm vụ FindNPC: Không đúng loại nhiệm vụ hoặc trạng thái.");
+            status.currentProgress = 1;
+            if (UIManager.Instance != null)
+            {
+                // Sử dụng key "Quest_Progress_NPCFound"
+                string npcFoundProgressText = GetLocalizedString("NhiemVu", "Quest_Progress_NPCFound");
+                UIManager.Instance.UpdateQuestProgressText(npcFoundProgressText);
+            }
+
+            if (status.currentProgress >= status.GetRequiredProgress())
+            {
+                status.isObjectiveMet = true;
+                _isQuestCompletedInternal = true;
+                if (UIManager.Instance != null) UIManager.Instance.HideQuestProgress();
+            }
         }
     }
 
     public void CompleteQuest()
     {
-        if (!isQuestActive || isQuestCompleted)
+        QuestData quest = GetCurrentQuest();
+        if (quest == null || !_isQuestActiveInternal) return;
+
+        CurrentQuestStatus status = GetQuestStatus(quest);
+        if (status == null) return;
+
+        if (status.isObjectiveMet && !status.isCompleted)
         {
-            Debug.LogWarning("⛔ Không thể hoàn thành nhiệm vụ: Nhiệm vụ không hoạt động hoặc đã hoàn thành.");
-            return;
+            status.isCompleted = true;
+            _isQuestActiveInternal = false;
+            _isQuestCompletedInternal = true;
+
+            if (UIManager.Instance != null) UIManager.Instance.HideQuestProgress();
+
+            if (playerStats == null)
+            {
+                Debug.LogError("LỖI: Tham chiếu PlayerStats trong QuestManager là NULL! Không thể thêm phần thưởng. Hãy gán nó trong Inspector.");
+            }
+            else
+            {
+                // Gọi ShowRewardPopup với coin và exp
+                playerStats.AddReward(quest.rewardCoin, quest.rewardExp);
+                if (UIManager.Instance != null) UIManager.Instance.ShowRewardPopup(quest.rewardCoin, quest.rewardExp);
+            }
+
+            if (quest.questType == QuestType.CollectItem && SimpleInventory.Instance != null)
+            {
+                SimpleInventory.Instance.AddItem(quest.targetItemID, -quest.requiredItemCount); // Trừ vật phẩm
+            }
+
+            _currentQuestIndex++; // Chuyển sang nhiệm vụ tiếp theo
+            _isQuestActiveInternal = false; // Reset trạng thái để chuẩn bị cho quest mới
+            _isQuestCompletedInternal = false; // Reset trạng thái
+            HideQuestUI();
         }
-
-        isQuestActive = false;
-        isQuestCompleted = true;
-        Debug.Log($"✅ Nhiệm vụ '{GetCurrentQuest()?.questName}' đã hoàn thành! Sẵn sàng nhận thưởng.");
-
-        UIManager.Instance.HideQuestProgress();
-
-        // Đảm bảo các nút được cập nhật đúng sau khi hoàn thành nhiệm vụ
-        acceptButton?.SetActive(false);
-        declineButton?.SetActive(false);
-        claimRewardButton?.SetActive(true);
     }
 
     public void ClaimReward()
     {
-        var quest = GetCurrentQuest();
-        if (!isQuestCompleted || quest == null)
-        {
-            Debug.LogWarning("⛔ Không thể nhận thưởng: Nhiệm vụ chưa hoàn thành hoặc không có nhiệm vụ.");
-            return;
-        }
-
-        Debug.Log($"🔵 Đang nhận thưởng cho nhiệm vụ: {quest.questName}. Soul: {quest.rewardSoul}, EXP: {quest.rewardExp}");
-
-        // --- KIỂM TRA THAM CHIẾU PLAYERSTATS TRƯỚC KHI GỌI HÀM ---
-        if (playerStats == null)
-        {
-            Debug.LogError("🔴 LỖI: Tham chiếu PlayerStats trong QuestManager là NULL! Không thể thêm phần thưởng. Hãy gán nó trong Inspector.");
-            HideQuestUI();
-            return;
-        }
-        // -----------------------------------------------------
-
-        playerStats.AddReward(quest.rewardSoul, quest.rewardExp); // Gọi PlayerStats_Tung để cộng dồn và cập nhật UI tổng
-
-        // UIManager.Instance.ShowRewardPopup chỉ hiển thị popup tạm thời, không liên quan đến tổng Soul/EXP
-        UIManager.Instance.ShowRewardPopup(quest.rewardSoul, quest.rewardExp);
-
-        UIManager.Instance.HideQuestProgress();
-
-        claimRewardButton?.SetActive(false);
-
-        // Chuyển sang nhiệm vụ tiếp theo
-        currentQuestIndex++;
-        isQuestCompleted = false; // Đặt lại trạng thái để có thể nhận nhiệm vụ tiếp theo
-
-        Debug.Log($"🟢 Đã nhận thưởng thành công. Tổng Soul hiện tại: {playerStats.soul}, Tổng EXP hiện tại: {playerStats.experience}. Chuyển sang nhiệm vụ tiếp theo (Index: {currentQuestIndex})");
-
-        HideQuestUI(); // Ẩn UI nhiệm vụ sau khi nhận thưởng
+        CompleteQuest();
     }
 
     public void DeclineQuest()
     {
-        isQuestActive = false;
-        isQuestCompleted = false;
-        Debug.Log("⛔ Nhiệm vụ đã bị từ chối.");
+        QuestData quest = GetCurrentQuest();
+        if (quest == null) return;
+        if (_activeQuests.ContainsKey(quest))
+        {
+            _activeQuests.Remove(quest);
+        }
 
-        acceptButton?.SetActive(false);
-        declineButton?.SetActive(false);
-        claimRewardButton?.SetActive(false);
+        _isQuestActiveInternal = false;
+        _isQuestCompletedInternal = false;
+
         HideQuestUI();
+    }
+
+    public bool IsQuestCompleted()
+    {
+        QuestData quest = GetCurrentQuest();
+        if (quest == null) return false;
+
+        CurrentQuestStatus status = GetQuestStatus(quest);
+        // Trả về true nếu mục tiêu đã đạt được nhưng chưa nhận thưởng
+        return status != null && status.isObjectiveMet && !status.isCompleted;
+    }
+
+    public bool IsQuestActive()
+    {
+        return _isQuestActiveInternal;
+    }
+
+    public bool IsQuestAccepted()
+    {
+        return _isQuestActiveInternal && !IsQuestCompleted();
+    }
+
+    public void DisplayQuestOfferUI(QuestData quest)
+    {
+        // Đặt _currentQuestIndex đến quest đang được tương tác
+        for (int i = 0; i < questDatabase.quests.Length; i++)
+        {
+            if (questDatabase.quests[i] == quest)
+            {
+                _currentQuestIndex = i;
+                break;
+            }
+        }
+
+        _isQuestActiveInternal = IsQuestActive();
+        _isQuestCompletedInternal = IsQuestCompleted();
+
+        if (_questUI != null)
+        {
+            _questUI.SetActive(true);
+
+            _acceptButton?.SetActive(false);
+            _declineButton?.SetActive(false);
+            _claimRewardButton?.SetActive(false);
+
+            CurrentQuestStatus status = GetQuestStatus(quest);
+
+            if (status != null)
+            {
+                if (status.isObjectiveMet && !status.isCompleted)
+                {
+                    _claimRewardButton?.SetActive(true);
+                }
+                else if (status.isCompleted)
+                {
+                    HideQuestUI(); // Đã hoàn thành và nhận thưởng, ẩn UI
+                }
+                else
+                {
+                    HideQuestUI(); // Quest đang hoạt động nhưng chưa hoàn thành mục tiêu, ẩn UI (thoại đã xử lý)
+                }
+            }
+            else
+            {
+                _acceptButton?.SetActive(true);
+                _declineButton?.SetActive(true);
+            }
+        }
+    }
+
+    public CurrentQuestStatus GetQuestStatus(QuestData quest)
+    {
+        _activeQuests.TryGetValue(quest, out CurrentQuestStatus status);
+        return status;
+    }
+
+    public bool IsQuestCurrentlyActive(QuestData quest)
+    {
+        return _activeQuests.ContainsKey(quest);
     }
 
     public void HideQuestUI()
     {
-        if (questUI != null)
+        if (_questUI != null)
         {
-            questUI.SetActive(false);
-            Debug.Log(" UI nhiệm vụ đã ẩn.");
+            _questUI.SetActive(false);
+            _acceptButton?.gameObject.SetActive(false);
+            _declineButton?.gameObject.SetActive(false);
+            _claimRewardButton?.gameObject.SetActive(false);
         }
     }
 
-    public bool IsQuestCompleted() => isQuestCompleted;
-    public bool IsQuestActive() => isQuestActive;
-
-    // Hàm kiểm tra người chơi đã nhận nhiệm vụ (đang hoạt động nhưng chưa hoàn thành)
-    public bool IsQuestAccepted()
+    public void OnAcceptButtonPress()
     {
-        return isQuestActive && !isQuestCompleted;
+        AcceptQuest();
+    }
+
+    public void OnDeclineButtonPress()
+    {
+        DeclineQuest();
+    }
+
+    public void OnClaimRewardButtonPress()
+    {
+        ClaimReward();
     }
 }
