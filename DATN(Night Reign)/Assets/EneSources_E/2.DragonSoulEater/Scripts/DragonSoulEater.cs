@@ -1,4 +1,5 @@
-﻿using Pathfinding;
+﻿using ND;
+using Pathfinding;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -24,6 +25,9 @@ public class DragonSoulEater : MonoBehaviour
     [Header("Damage Popup")]
     public GameObject damagePopupPrefab;
 
+    [Header("VFX")]
+    public ParticleSystem vfxDead;
+
     [Header("Freeze Effect")]
     public Material iceMaterial;             
     public Material originalMaterial;       
@@ -35,8 +39,8 @@ public class DragonSoulEater : MonoBehaviour
     public bool isDead = false;
     public bool isTakingDamage = false;
 
-    public float minAttackDamage = 5f;
-    public float maxAttackDamage = 15f;
+    public int minAttackDamage = 1;
+    public int maxAttackDamage = 3;
 
 
     void Start()
@@ -52,14 +56,14 @@ public class DragonSoulEater : MonoBehaviour
             healthFill.fillAmount = HP / maxHP;
         }
         //===test 
-        if (Input.GetKeyDown(KeyCode.E))
+     /*   if (Input.GetKeyDown(KeyCode.E))
         {
             TakeDamage(20);
         }if (Input.GetKeyDown(KeyCode.I))
             {
                 TakeIceDamageSoulEater(1);
              }
-
+*/
 
         if (isDead) return;
 
@@ -84,6 +88,11 @@ public class DragonSoulEater : MonoBehaviour
         if (HP <= 0)
         {
             isDead = true;
+
+            if (vfxDead != null)
+            {
+                vfxDead.Play();
+            }
 
             if (aiPath != null)
             {
@@ -130,6 +139,11 @@ public class DragonSoulEater : MonoBehaviour
         {
             isDead = true;
 
+            if (vfxDead != null)
+            {
+                vfxDead.Play();
+            }
+
             if (aiPath != null)
             {
                 aiPath.canMove = false;
@@ -156,13 +170,13 @@ public class DragonSoulEater : MonoBehaviour
 
     public void DealDamage()
     {
-        float damage = Random.Range(minAttackDamage, maxAttackDamage);
+        int damage = Random.Range(minAttackDamage, maxAttackDamage);
 
         Collider[] hitPlayers = Physics.OverlapSphere(attackPoint.position, attackRange, playerLayer);
         foreach (Collider player in hitPlayers)
         {
-/*            player.GetComponent<PlayerStats>()?.TakeDamage(15);
-*/            //============== thay bằng code HP player=============================***************************
+          player.GetComponent<PlayerStats>()?.TakeDamage(damage);
+       
         }
     }
     private void OnDrawGizmosSelected()

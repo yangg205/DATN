@@ -1,4 +1,5 @@
-﻿using Pathfinding;
+﻿using ND;
+using Pathfinding;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -22,6 +23,9 @@ public class DragonTerrorBringer : MonoBehaviour
     [Header("Damage Popup")]
     public GameObject damagePopupPrefab;
 
+    [Header("VFX")]
+    public ParticleSystem vfxDead;
+
     [Header("Freeze Effect")]
     public Material iceMaterial;
     public Material originalMaterial;
@@ -31,8 +35,8 @@ public class DragonTerrorBringer : MonoBehaviour
     public bool isDead = false;
     public bool isTakingDamage = false;
 
-    public float minAttackDamage = 5f;
-    public float maxAttackDamage = 15f;
+    public int minAttackDamage = 2;
+    public int maxAttackDamage = 6;
 
     private AIPath aiPath;
     private bool isDefending = false;
@@ -91,13 +95,13 @@ public class DragonTerrorBringer : MonoBehaviour
 
     public void DealDamage()
     {
-        float damage = Random.Range(minAttackDamage, maxAttackDamage);
+        int damage = Random.Range(minAttackDamage, maxAttackDamage);
         Collider[] hitPlayers = Physics.OverlapSphere(attackPoint.position, attackRange, playerLayer);
         foreach (Collider player in hitPlayers)
         {
             //player.GetComponent<PlayerClone>()?.TakeDamage(damage);
-/*            player.GetComponent<PlayerStats>()?.TakeDamage(15);
-*/        }
+            player.GetComponent<PlayerStats>()?.TakeDamage(damage);
+        }
     }
 
     public void TakeDamage(int damageAmount)
@@ -163,6 +167,11 @@ public class DragonTerrorBringer : MonoBehaviour
 
         GetComponent<Collider>().enabled = false;
         GetComponent<Rigidbody>().isKinematic = true;
+
+        if (vfxDead != null)
+        {
+            vfxDead.Play();
+        }
 
         Destroy(gameObject, 7f);
     }

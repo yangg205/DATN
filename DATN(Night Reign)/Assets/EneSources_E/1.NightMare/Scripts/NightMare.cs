@@ -24,6 +24,9 @@ public class NightMare : MonoBehaviour
     [Header("Damage Popup")]
     public GameObject damagePopupPrefab;
 
+    [Header("VFX")]
+    public ParticleSystem vfxDead;
+
     [Header("Freeze Effect")]
     public Material iceMaterial;             
     public Material originalMaterial;       
@@ -35,8 +38,8 @@ public class NightMare : MonoBehaviour
     public bool isDead = false;
     public bool isTakingDamage = false;
 
-    public float minAttackDamage = 5f;
-    public float maxAttackDamage = 15f;
+    public int minAttackDamage = 3;
+    public int maxAttackDamage = 5;
 
     void Start()
     {
@@ -50,12 +53,17 @@ public class NightMare : MonoBehaviour
         {
             healthFill.fillAmount = HP / maxHP;
         }
+
         //===test 
         if (Input.GetKeyDown(KeyCode.T))
         {
-            //TakeDamage(20);
-            TakeIceDamageNightMare(1);
+            TakeDamage(20);
+            
         }
+        //if (Input.GetKeyDown(KeyCode.I))
+        //{
+        //    TakeIceDamageNightMare(5);
+        //}
 
 
         if (isDead) return;
@@ -81,6 +89,11 @@ public class NightMare : MonoBehaviour
         if (HP <= 0)
         {
             isDead = true;
+
+            if (vfxDead != null)
+            {
+                vfxDead.Play();
+            }
 
             if (aiPath != null)
             {
@@ -127,6 +140,11 @@ public class NightMare : MonoBehaviour
         {
             isDead = true;
 
+            if (vfxDead != null)
+            {
+                vfxDead.Play();
+            }
+
             if (aiPath != null)
             {
                 aiPath.canMove = false;
@@ -151,14 +169,15 @@ public class NightMare : MonoBehaviour
         }
     }
 
-    public void DealDamage()
+    public void DealDamage() //hàm take damage player
     {
-        float damage = Random.Range(minAttackDamage, maxAttackDamage);
+        int damage = Random.Range(minAttackDamage, maxAttackDamage);
 
         Collider[] hitPlayers = Physics.OverlapSphere(attackPoint.position, attackRange, playerLayer);
         foreach (Collider player in hitPlayers)
         {
-            player.GetComponent<PlayerStats>()?.TakeDamage(15);            //============== thay bằng code HP player=============================***************************
+            //player.GetComponent<PlayerClone>()?.TakeDamage(damage);
+            player.GetComponent<PlayerStats>()?.TakeDamage(damage); //============== thay bằng code HP player=============================***************************
         }
     }
     private void OnDrawGizmosSelected()
@@ -222,5 +241,5 @@ public class NightMare : MonoBehaviour
     }
 
 
-
+  
 }
