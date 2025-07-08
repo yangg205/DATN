@@ -221,14 +221,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   largeMapPanel: {fileID: 7897209637892132933}
-  largeMapCamera: {fileID: 5645033546277199296}
+  largeMapDisplayRaw: {fileID: 6695339327385558122}
   playerIconLargeMapRectTransform: {fileID: 9164681782451083653}
+  waypointsParentRectTransform: {fileID: 0}
+  largeMapCamera: {fileID: 5645033546277199296}
   playerTransform: {fileID: 2500387954628419991}
+  playerMainCameraTransform: {fileID: 0}
+  activeTerrain: {fileID: 0}
   terrainWidth: 150
   terrainLength: 150
   terrainMinX: 0
   terrainMinZ: 0
-  largeMapDisplayRaw: {fileID: 6695339327385558122}
+  customWaypointIcon: {fileID: 0}
 --- !u!1 &810085867075950301
 GameObject:
   m_ObjectHideFlags: 0
@@ -670,6 +674,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 3885021718527303315}
   - {fileID: 2309292775978887116}
   - {fileID: 4219608645656340782}
   m_Father: {fileID: 5825870957805721040}
@@ -814,8 +819,10 @@ MonoBehaviour:
   playerIconRectTransform: {fileID: 4219608645656340782}
   playerTransform: {fileID: 2500387954628419991}
   playerMainCameraTransform: {fileID: 409795624822704841}
+  minimapWaypointsParent: {fileID: 0}
   cameraHeight: 100
   zoomOrthographicSize: 37.5
+  minimapScaleFactor: 1
 --- !u!1 &4621888559193690620
 GameObject:
   m_ObjectHideFlags: 0
@@ -847,7 +854,6 @@ RectTransform:
   - {fileID: 6448973240941833428}
   - {fileID: 7515820325245395848}
   - {fileID: 2711719529710513543}
-  - {fileID: 3885021718527303315}
   m_Father: {fileID: 4430827402001383626}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -956,7 +962,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7500960855924661705}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1024,7 +1030,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &5381386714601912499
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1252,7 +1258,7 @@ RectTransform:
   m_LocalScale: {x: 5.30671, y: 5.30671, z: 5.30671}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 5825870957805721040}
+  m_Father: {fileID: 2711719529710513543}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}

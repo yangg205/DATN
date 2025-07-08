@@ -10,6 +10,13 @@ public enum QuestType
     CollectItem
 }
 
+public enum QuestDialogueType
+{
+    BeforeComplete,
+    AfterComplete,
+    ObjectiveMet
+}
+
 [CreateAssetMenu(fileName = "New Quest", menuName = "Quests/Quest Data")]
 public class QuestData : ScriptableObject
 {
@@ -31,30 +38,38 @@ public class QuestData : ScriptableObject
     public int rewardCoin;
     public int rewardExp;
 
-    [Header("Dialogue")]
-    [TextArea(3, 5)]
-    public string[] keydialogueBeforeComplete; // Localization Keys cho thoại trước khi hoàn thành mục tiêu
+    // --- BỔ SUNG ĐỊA ĐIỂM NHIỆM VỤ ---
+    [Header("Quest Location (Optional)")]
+    [Tooltip("Check this if this quest has a specific location to mark on the map/world.")]
+    public bool hasQuestLocation = false;
+    [Tooltip("The world coordinates (Vector3) where the player needs to go for this quest.")]
+    public Vector3 questLocation;
+    [Tooltip("Optional: Custom icon for this quest's location marker. If null, a default will be used.")]
+    public Sprite questLocationIcon;
+    // --- KẾT THÚC BỔ SUNG ---
+
+    [Header("Dialogues")]
+    [Tooltip("Keys for dialogue lines before the quest is accepted.")]
+    [TextArea(3, 5)] public string[] keydialogueBeforeComplete;
     [Tooltip("Voice clips for dialogue lines before the quest is accepted. Must match 'keydialogueBeforeComplete' in length.")]
     public AudioClip[] voiceBeforeComplete;
 
-    [TextArea(3, 5)]
-    public string[] keydialogueAfterComplete;  // Localization Keys cho thoại sau khi nhiệm vụ đã hoàn thành
+    [Tooltip("Keys for dialogue lines after the quest objective is met.")]
+    [TextArea(3, 5)] public string[] keydialogueAfterComplete;
     [Tooltip("Voice clips for dialogue lines after the quest objective is met. Must match 'keydialogueAfterComplete' in length.")]
     public AudioClip[] voiceAfterComplete;
 
-    [TextArea(3, 5)]
-    public string[] keydialogueObjectiveMet; // Localization Keys cho thoại khi mục tiêu đã đạt được
+    [Tooltip("Keys for dialogue lines when the objective is met (can be used instead of AfterComplete).")]
+    [TextArea(3, 5)] public string[] keydialogueObjectiveMet;
     [Tooltip("Voice clips for dialogue lines when the objective is met. Must match 'keydialogueObjectiveMet' in length.")]
     public AudioClip[] voiceObjectiveMet;
 
-    // Hàm GetDialogueKeys của bạn (chỉ là passthrough)
     public string[] GetDialogueKeys(string[] keys)
     {
         if (keys == null) return new string[0];
         return keys;
     }
 
-    // Hàm để lấy các voice clips tương ứng
     public AudioClip[] GetDialogueVoiceClips(string[] keys)
     {
         if (keys == keydialogueBeforeComplete) return voiceBeforeComplete;
@@ -65,23 +80,20 @@ public class QuestData : ScriptableObject
 
     public string GetQuestNameLocalized()
     {
-        // Sử dụng tên bảng "NhiemVu"
         return GetLocalizedString("NhiemVu", questName);
     }
 
     public string GetDescriptionLocalized()
     {
-        // Sử dụng tên bảng "NhiemVu"
         return GetLocalizedString("NhiemVu", description);
     }
 
     private string GetLocalizedString(string tableName, string key)
     {
-        // KHÔNG CÓ LocalizationSettings.HasInstance ở đây.
         StringTable table = LocalizationSettings.StringDatabase.GetTable(tableName);
         if (table == null)
         {
-            Debug.LogError($"❌ Bảng '{tableName}' không tồn tại. (Check Localization Settings và tên bảng!)");
+            Debug.LogError($"Localization StringTable '{tableName}' not found! (Check Localization Settings và tên bảng!)");
             return $"[TABLE NOT FOUND: {tableName}]";
         }
 

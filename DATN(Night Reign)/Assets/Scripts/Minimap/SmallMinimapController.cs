@@ -1,96 +1,145 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-// using QuantumTek.QuantumTravel; // Không cần thiết nếu chỉ dùng cho SmallMinimap
 
-public class SmallMinimapController : MonoBehaviour
+// Không có namespace
+
+public class MinimapController : MonoBehaviour
 {
-    public Camera minimapCamera;
-    public RectTransform minimapUIRectTransform;
-    public RectTransform playerIconRectTransform;
+    [Header("UI References")]
+    public RawImage minimapDisplayRaw; // RawImage hiển thị minimap
+    public RectTransform playerIconMinimapRectTransform;
+    public RectTransform minimapWaypointsParentRectTransform; // Same as WaypointManager's minimapWaypointsParent
 
+    [Header("World References")]
+    public Camera minimapCamera; // Camera của minimap
     public Transform playerTransform;
-    public Transform playerMainCameraTransform; // Kéo Camera chính của người chơi vào đây
+    public Transform playerMainCameraTransform;
 
-    [Header("Minimap Waypoint UI")]
-    public RectTransform minimapWaypointsParent; // Kéo Minimap_WaypointsParent vào đây
+    [Header("Minimap Settings")]
+    [Tooltip("Kích thước thế giới mà minimap hiển thị (ví dụ: 100 có nghĩa là 100x100 mét quanh người chơi).")]
+    public float minimapViewRadius = 100f; // Kích thước của khu vực mà minimap hiển thị
 
-    public float cameraHeight = 50f;
-    public float zoomOrthographicSize = 37.5f;
-    public float minimapScaleFactor = 1.0f; // Tỉ lệ giữa đơn vị thế giới và pixel trên minimap (VD: 1 mét = 1 pixel)
-                                            // Tùy chỉnh để các marker hiển thị đúng khoảng cách trên UI
+    [Header("Terrain Reference")]
+    public Terrain activeTerrain; // Tham chiếu đến Terrain để lấy kích thước tổng thể
+
+    private void Awake()
+    {
+        if (activeTerrain != null)
+        {
+            if (WaypointManager.Instance != null)
+            {
+                WaypointManager.Instance.activeTerrain = activeTerrain; // Đảm bảo WaypointManager có terrain data
+            }
+            else
+            {
+                Debug.LogWarning("[MinimapController] WaypointManager Instance not found in Awake. Terrain might not be set.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[MinimapController] Active Terrain is not assigned. Minimap positioning might be incorrect.");
+        }
+    }
 
     void Start()
     {
-        if (minimapCamera != null)
-        {
-            minimapCamera.orthographicSize = zoomOrthographicSize;
-        }
+        CheckRequiredReferences();
+        SetupMinimapCamera();
 
-        if (minimapWaypointsParent == null) Debug.LogError("Minimap Waypoints Parent is not assigned in SmallMinimapController!");
+        // Set up player icon parent (should be the same as WaypointManager's minimapWaypointsParent)
+        if (playerIconMinimapRectTransform != null && minimapWaypointsParentRectTransform != null)
+        {
+            playerIconMinimapRectTransform.SetParent(minimapWaypointsParentRectTransform, false);
+            Debug.Log("[MinimapController] Player icon parent set to minimapWaypointsParentRectTransform.");
+        }
     }
 
     void LateUpdate()
     {
-        if (playerTransform == null || minimapCamera == null || minimapUIRectTransform == null || playerIconRectTransform == null || playerMainCameraTransform == null || minimapWaypointsParent == null)
+        UpdateMinimapCameraPosition();
+        UpdatePlayerIconPositionAndRotation();
+        UpdateWaypointUIsOnMinimap();
+    }
+
+    private void CheckRequiredReferences()
+    {
+        if (minimapDisplayRaw == null) Debug.LogError("[MinimapController] minimapDisplayRaw is not assigned!");
+        if (playerIconMinimapRectTransform == null) Debug.LogError("[MinimapController] playerIconMinimapRectTransform is not assigned!");
+        if (minimapWaypointsParentRectTransform == null) Debug.LogError("[MinimapController] minimapWaypointsParentRectTransform is not assigned!");
+        if (minimapCamera == null) Debug.LogError("[MinimapController] minimapCamera is not assigned!");
+        if (playerTransform == null) Debug.LogError("[MinimapController] playerTransform is not assigned!");
+        if (playerMainCameraTransform == null) Debug.LogError("[MinimapController] playerMainCameraTransform is not assigned!");
+        if (activeTerrain == null) Debug.LogError("[MinimapController] Active Terrain is not assigned!");
+    }
+
+    private void SetupMinimapCamera()
+    {
+        if (minimapCamera == null) return;
+
+        minimapCamera.orthographic = true;
+        minimapCamera.orthographicSize = minimapViewRadius / 2f; // Bán kính nhìn của minimap
+        minimapCamera.transform.rotation = Quaternion.Euler(90f, 0f, 0f); // Nhìn thẳng xuống
+    }
+
+    private void UpdateMinimapCameraPosition()
+    {
+        if (playerTransform == null || minimapCamera == null) return;
+
+        // Di chuyển camera minimap theo người chơi nhưng giữ nguyên chiều cao và xoay 90 độ
+        minimapCamera.transform.position = new Vector3(
+            playerTransform.position.x,
+            playerTransform.position.y + minimapViewRadius, // Đặt camera cao hơn người chơi
+            playerTransform.position.z
+        );
+    }
+
+    private void UpdatePlayerIconPositionAndRotation()
+    {
+        // Icon người chơi trên minimap không cần di chuyển vị trí, vì bản đồ quay quanh nó.
+        // Nó chỉ cần xoay để khớp với hướng của người chơi.
+        if (playerIconMinimapRectTransform != null && playerMainCameraTransform != null)
         {
-            Debug.LogWarning("Tham chiếu cho Small Minimap Controller chưa được gán đầy đủ! Vui lòng gán Player Transform, Player Main Camera Transform, Minimap Camera, Minimap UI Rect Transform, Player Icon Rect Transform và Minimap Waypoints Parent trong Inspector.");
-            return;
+            playerIconMinimapRectTransform.localEulerAngles = new Vector3(0, 0, -playerMainCameraTransform.eulerAngles.y);
         }
+    }
 
-        // 1. Di chuyển Camera Minimap theo người chơi
-        Vector3 newCameraPos = playerTransform.position;
-        newCameraPos.y = cameraHeight;
-        minimapCamera.transform.position = newCameraPos;
-        minimapCamera.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+    private void UpdateWaypointUIsOnMinimap()
+    {
+        if (WaypointManager.Instance == null || WaypointManager.Instance.minimapWaypointUIs == null || playerTransform == null || minimapDisplayRaw == null || minimapCamera == null) return;
 
-        // 2. Xoay minimap UI theo góc xoay của CAMERA NGƯỜI CHƠI
-        // Đảm bảo playerMainCameraTransform.eulerAngles.y là góc quay chuẩn từ Bắc (trục Z+).
-        minimapUIRectTransform.localEulerAngles = new Vector3(0, 0, -playerMainCameraTransform.eulerAngles.y);
+        float mapWidth = minimapDisplayRaw.rectTransform.rect.width;
+        float mapHeight = minimapDisplayRaw.rectTransform.rect.height;
 
-        // 3. Icon người chơi trên minimap: LUÔN CHỈ THẲNG LÊN TRÊN (MŨI TÊN HƯỚNG LÊN TRÊN)
-        // Vì bản đồ đã được xoay để "phía trên" của nó là hướng nhìn của người chơi,
-        // icon người chơi chỉ cần giữ nguyên góc xoay mặc định (0,0,0) là đủ.
-        playerIconRectTransform.localEulerAngles = Vector3.zero;
-
-
-        // 4. Cập nhật vị trí các Waypoint UI trên minimap
-        // Lấy các UI Waypoint từ WaypointManager
-        if (WaypointManager.Instance != null)
+        foreach (var entry in WaypointManager.Instance.minimapWaypointUIs)
         {
-            foreach (var entry in WaypointManager.Instance.activeWaypoints) // Truy cập public dictionary
+            WaypointUI waypointUI = entry.Value;
+            Waypoint waypointData = WaypointManager.Instance.activeWaypointsData[entry.Key]; // Lấy Waypoint data gốc
+
+            // Chuyển đổi vị trí thế giới của waypoint sang vị trí trên minimap UI
+            // Điểm 0,0 của minimap UI là tâm của nó
+            Vector3 relativePos = waypointData.worldPosition - minimapCamera.transform.position; // Vị trí tương đối với camera minimap
+
+            // Scale relativePos để khớp với kích thước của minimap UI
+            // orthographicSize là một nửa chiều cao của view frustum
+            float pixelsPerWorldUnitX = mapWidth / (minimapCamera.orthographicSize * 2f);
+            float pixelsPerWorldUnitY = mapHeight / (minimapCamera.orthographicSize * 2f);
+
+            float uiX = relativePos.x * pixelsPerWorldUnitX;
+            float uiY = relativePos.z * pixelsPerWorldUnitY; // Z của thế giới là Y trên UI
+
+            // Tính toán khoảng cách để scale và ẩn/hiện (nếu cần)
+            float distance = Vector3.Distance(playerTransform.position, waypointData.worldPosition);
+
+            // Kiểm tra xem waypoint có nằm trong phạm vi hiển thị của minimap camera không
+            // Nếu camera nhìn 100x100m, thì waypoint phải nằm trong 50m theo X và Z so với tâm camera.
+            if (Mathf.Abs(relativePos.x) <= minimapCamera.orthographicSize && Mathf.Abs(relativePos.z) <= minimapCamera.orthographicSize)
             {
-                Waypoint waypoint = entry.Value;
-                if (WaypointManager.Instance.minimapWaypointUIs.TryGetValue(waypoint.id, out WaypointUI markerUI))
-                {
-                    Vector3 directionToWaypoint = waypoint.worldPosition - playerTransform.position;
-                    // Chuyển đổi vị trí thế giới sang vị trí trên UI Minimap
-                    // Sử dụng vector2 cho mặt phẳng XZ
-                    Vector2 waypointPositionOnMap = new Vector2(directionToWaypoint.x, directionToWaypoint.z);
-
-                    // Xoay vị trí waypoint ngược lại với góc xoay của map UI để nó đứng yên tương đối trên UI
-                    // Angle của minimapUIRectTransform là -playerCamera.eulerAngles.y
-                    // Để xoay vector point ngược lại, ta xoay nó với +playerCamera.eulerAngles.y
-                    float angle = playerMainCameraTransform.eulerAngles.y; // Góc xoay của camera
-                    float radians = angle * Mathf.Deg2Rad;
-
-                    float rotatedX = waypointPositionOnMap.x * Mathf.Cos(radians) - waypointPositionOnMap.y * Mathf.Sin(radians);
-                    float rotatedY = waypointPositionOnMap.x * Mathf.Sin(radians) + waypointPositionOnMap.y * Mathf.Cos(radians);
-
-                    Vector2 finalUIPosition = new Vector2(rotatedX, rotatedY) * minimapScaleFactor;
-
-                    // Giới hạn marker trong phạm vi minimap
-                    float mapRadius = minimapUIRectTransform.rect.width / 2f;
-                    if (finalUIPosition.magnitude > mapRadius)
-                    {
-                        finalUIPosition = finalUIPosition.normalized * mapRadius;
-                    }
-
-                    markerUI.gameObject.SetActive(true); // Luôn hiển thị nếu trong phạm vi
-                    markerUI.GetComponent<RectTransform>().anchoredPosition = finalUIPosition;
-
-                    // Icon của marker trên minimap thường không xoay, giữ thẳng đứng.
-                    markerUI.GetComponent<RectTransform>().localEulerAngles = Vector3.zero;
-                }
+                waypointUI.gameObject.SetActive(true);
+                waypointUI.SetMapUIPosition(new Vector2(uiX, uiY), waypointUI.maxScale); // Scale mặc định maxScale cho Minimap
+            }
+            else
+            {
+                waypointUI.gameObject.SetActive(false);
             }
         }
     }

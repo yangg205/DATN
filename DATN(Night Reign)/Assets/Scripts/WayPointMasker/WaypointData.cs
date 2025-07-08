@@ -1,29 +1,31 @@
 ﻿using UnityEngine;
 
-public enum WaypointType // Loại điểm đánh dấu
+// Không có namespace
+
+public enum WaypointType
 {
-    QuestObjective,
-    CustomMarker,
-    OtherNPC
+    Objective,     // Mục tiêu nhiệm vụ chưa hoàn thành
+    Enemy,         // Vị trí kẻ thù
+    CustomMarker,  // Điểm đánh dấu của người chơi
+    QuestLocation, // Địa điểm nhiệm vụ đã hoàn thành / đạt được (m chết hả)
+    Other          // Các loại khác
 }
 
-[System.Serializable] // Cho phép hiển thị trong Inspector (nếu là List)
+[System.Serializable]
 public class Waypoint
 {
-    public string id; // ID duy nhất cho mỗi waypoint (GUID hoặc tên nhiệm vụ)
-    public string displayName; // Tên hiển thị (ví dụ: "Mục tiêu nhiệm vụ: Giết Goblin", "Điểm đánh dấu của tôi")
-    public Vector3 worldPosition; // Vị trí trong thế giới 3D
-    public WaypointType type; // Loại waypoint
-    public GameObject associatedObject; // Tham chiếu đến GameObject (ví dụ: NPC mục tiêu, quái mục tiêu) nếu có
-    public Sprite uiIcon; // Icon để hiển thị trên UI (minimap/la bàn)
+    public string id;
+    public string name;
+    public Vector3 worldPosition;
+    public WaypointType waypointType;
+    public Sprite icon;
 
-    public Waypoint(string id, string name, Vector3 position, WaypointType type, Sprite icon = null, GameObject obj = null)
+    public Waypoint(string id, string name, Vector3 worldPosition, WaypointType waypointType, Sprite icon)
     {
         this.id = id;
-        this.displayName = name;
-        this.worldPosition = position;
-        this.type = type;
-        this.uiIcon = icon;
-        this.associatedObject = obj;
+        this.name = name;
+        this.worldPosition = worldPosition;
+        this.waypointType = waypointType;
+        this.icon = icon;
     }
 }

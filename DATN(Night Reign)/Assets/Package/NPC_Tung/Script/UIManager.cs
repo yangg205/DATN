@@ -7,7 +7,7 @@ using UnityEngine.UI; // Thêm namespace này cho Slider
 
 public class UIManager : MonoBehaviour
 {
-    public static UIManager Instance; // Phải là public static cho Singleton
+    public static UIManager Instance;
 
     [Header("Quest Reward UI")]
     [SerializeField] private GameObject rewardPopup;
@@ -38,21 +38,40 @@ public class UIManager : MonoBehaviour
             Debug.LogWarning("⚠️ Có nhiều hơn 1 UIManager trong scene, đã hủy bản sao.");
         }
 
-        // Đăng ký sự kiện từ WaypointManager để cập nhật khoảng cách
-        if (FindObjectOfType<WaypointManager>() != null)
+        // Kiểm tra WaypointManager trước khi đăng ký sự kiện
+        // Có thể dùng FindObjectOfType<WaypointManager>() != null trong Awake,
+        // nhưng tốt hơn hết là để WaypointManager tự Awake trước UIManager.
+        // Hoặc tìm kiếm instance sau khi chắc chắn nó đã tồn tại.
+        // Trong trường hợp này, WaypointManager.Instance sẽ là null nếu nó chưa Awake.
+        // Dùng sự kiện OnEnable/OnDisable hoặc kiểm tra trong Start là tốt hơn.
+    }
+
+    private void Start()
+    {
+        if (WaypointManager.Instance != null)
         {
             WaypointManager.Instance.OnActiveWaypointChanged += UpdateActiveWaypointDistance;
+            Debug.Log("UIManager đã đăng ký sự kiện OnActiveWaypointChanged từ WaypointManager.");
         }
         else
         {
-            Debug.LogWarning("WaypointManager.Instance không tìm thấy. Tính năng hiển thị khoảng cách waypoint sẽ không hoạt động.");
+            Debug.LogWarning("WaypointManager.Instance không tìm thấy khi UIManager Start. Tính năng hiển thị khoảng cách waypoint sẽ không hoạt động.");
+        }
+    }
+
+    private void OnDestroy()
+    {
+        // Đảm bảo hủy đăng ký sự kiện để tránh lỗi khi đối tượng bị hủy
+        if (WaypointManager.Instance != null)
+        {
+            WaypointManager.Instance.OnActiveWaypointChanged -= UpdateActiveWaypointDistance;
+            Debug.Log("UIManager đã hủy đăng ký sự kiện OnActiveWaypointChanged.");
         }
     }
 
     private void Update()
     {
-        // Cập nhật liên tục khoảng cách tới Active Waypoint
-        if (questDistanceText != null && FindObjectOfType<WaypointManager>() != null && WaypointManager.Instance.GetActiveWaypoint() != null)
+        if (questDistanceText != null && WaypointManager.Instance != null && WaypointManager.Instance.GetActiveWaypoint() != null)
         {
             float distance = WaypointManager.Instance.GetDistanceToActiveWaypoint();
             if (distance >= 0)
@@ -71,7 +90,6 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // 🟢 Hiển thị thông báo tạm trong Box (Text UI)
     public void ShowNotice(string message, float duration = 2.5f)
     {
         if (questNoticeText == null)
@@ -93,7 +111,6 @@ public class UIManager : MonoBehaviour
         questNoticeText.text = "";
     }
 
-    // 🟢 Popup phần thưởng
     public void ShowRewardPopup(int coin, int exp)
     {
         if (rewardPopup == null || coinText == null)
@@ -113,7 +130,6 @@ public class UIManager : MonoBehaviour
         rewardPopup.SetActive(false);
     }
 
-    // Cập nhật tiến độ nhiệm vụ dạng số (vd: 0/5)
     public void UpdateQuestProgress(int current, int total)
     {
         if (questProgressText != null)
@@ -123,7 +139,6 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // Cập nhật tiến độ nhiệm vụ dạng text (vd: "Tìm và nói chuyện với NPC mục tiêu")
     public void UpdateQuestProgressText(string progressMessage)
     {
         if (questProgressText != null)
@@ -138,10 +153,10 @@ public class UIManager : MonoBehaviour
             questProgressText.text = "";
         if (questDistanceText != null)
             questDistanceText.text = "";
-        questDistanceText.gameObject.SetActive(false);
+        if (questDistanceText != null) // Đảm bảo không null trước khi truy cập gameObject
+            questDistanceText.gameObject.SetActive(false);
     }
 
-    // 🟢 Hàm để cập nhật EXP Slider
     public void UpdateExpSlider(float currentExp, float maxExp)
     {
         if (expSlider == null)
@@ -154,14 +169,17 @@ public class UIManager : MonoBehaviour
         expSlider.value = currentExp;
     }
 
-    // Hàm gọi khi active waypoint thay đổi
     private void UpdateActiveWaypointDistance(Waypoint activeWaypoint)
     {
+        // Logic hiển thị/ẩn TextDistance sẽ được thực hiện trong Update() hàng Frame
+        // Phương thức này chỉ đơn thuần kích hoạt việc hiển thị khoảng cách nếu có waypoint hoạt động
+        // hoặc ẩn nó nếu không có.
         if (questDistanceText == null) return;
 
         if (activeWaypoint != null)
         {
             questDistanceText.gameObject.SetActive(true);
+            // Giá trị text sẽ được cập nhật trong Update()
         }
         else
         {
@@ -172,7 +190,6 @@ public class UIManager : MonoBehaviour
 
     private string GetLocalizedString(string tableName, string key)
     {
-        // KHÔNG CÓ LocalizationSettings.HasInstance ở đây.
         StringTable table = LocalizationSettings.StringDatabase.GetTable(tableName);
         if (table == null)
         {

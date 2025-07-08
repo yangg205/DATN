@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using TMPro;
 using System.Collections;
-using System;
-using System.Collections.Generic;
+using System; // For Action
+using System.Collections.Generic; // Thêm để dùng Queue
 using UnityEngine.Localization.Settings;
 using UnityEngine.Localization.Tables;
 using UnityEngine.UI; // Để sử dụng Button
@@ -14,7 +14,7 @@ public class DialogueManager : MonoBehaviour
     [Header("UI Components")]
     public GameObject dialogueUI; // Panel chứa toàn bộ UI thoại
     public TextMeshProUGUI dialogueText;
-    public TextMeshProUGUI speakerNameText; // Trường cho tên người nói
+    public TextMeshProUGUI speakerNameText; // Trường cho tên người nói (vẫn giữ để hiển thị giá trị cố định)
     public GameObject nextButton; // Nút để chuyển câu thoại
 
     [Header("Typewriter Settings")]
@@ -26,7 +26,6 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] private AudioClip nextDialogueSound;
 
     private Queue<string> currentDialogueLines; // Hàng đợi cho nội dung thoại đã localize
-    private Queue<string> currentSpeakerNames; // Hàng đợi cho tên người nói đã localize
     private Queue<AudioClip> currentVoiceClips; // Hàng đợi cho voice clips
 
     private bool isDialogueActive = false;
@@ -49,14 +48,13 @@ public class DialogueManager : MonoBehaviour
 
         // Khởi tạo các hàng đợi
         currentDialogueLines = new Queue<string>();
-        currentSpeakerNames = new Queue<string>();
         currentVoiceClips = new Queue<AudioClip>();
 
         // Kiểm tra các tham chiếu UI
         if (dialogueUI == null) Debug.LogError("Dialogue UI (Panel) is not assigned in DialogueManager!");
         if (dialogueText == null) Debug.LogError("Dialogue Text (TextMeshProUGUI) is not assigned in DialogueManager!");
         if (speakerNameText == null) Debug.LogError("Speaker Name Text (TextMeshProUGUI) is not assigned in DialogueManager!");
-        if (nextButton == null) Debug.LogError("Next Button (GameObject) is not assigned in DialogueManager!");
+        if (nextButton == null) Debug.LogError("Next Button (GameObject) is not assigned!");
 
         // Kiểm tra và tự động thêm AudioSource nếu chưa có
         if (dialogueAudioSource == null)
@@ -69,6 +67,7 @@ public class DialogueManager : MonoBehaviour
         Button nextBtnComponent = nextButton?.GetComponent<Button>();
         if (nextBtnComponent != null)
         {
+            // SỬA LỖI: Gọi phương thức không có tham số
             nextBtnComponent.onClick.AddListener(DisplayNextSentence);
         }
         else
@@ -80,8 +79,8 @@ public class DialogueManager : MonoBehaviour
         nextButton?.SetActive(false);
     }
 
-    // Hàm StartDialogue mới, nhận cả keys, speaker names và voice clips
-    public void StartDialogue(string[] dialogueKeys, string[] speakerNameKeys, AudioClip[] voiceClips, Action onDialogueEnd = null)
+    // Hàm StartDialogue mới, KHÔNG NHẬN speakerNameKeys
+    public void StartDialogue(string[] dialogueKeys, AudioClip[] voiceClips, Action onDialogueEnd = null)
     {
         if (dialogueKeys == null || dialogueKeys.Length == 0)
         {
@@ -90,18 +89,15 @@ public class DialogueManager : MonoBehaviour
         }
 
         currentDialogueLines.Clear();
-        currentSpeakerNames.Clear();
         currentVoiceClips.Clear();
 
         // Đổ dữ liệu vào hàng đợi
         for (int i = 0; i < dialogueKeys.Length; i++)
         {
             string localizedLine = GetLocalizedDialogueString(dialogueKeys[i]);
-            string localizedSpeaker = (speakerNameKeys != null && i < speakerNameKeys.Length) ? GetLocalizedDialogueString(speakerNameKeys[i]) : "NPC"; // Mặc định là "NPC" nếu không có tên người nói
             AudioClip voiceClip = (voiceClips != null && i < voiceClips.Length) ? voiceClips[i] : null;
 
             currentDialogueLines.Enqueue(localizedLine);
-            currentSpeakerNames.Enqueue(localizedSpeaker);
             currentVoiceClips.Enqueue(voiceClip);
         }
 
@@ -109,16 +105,16 @@ public class DialogueManager : MonoBehaviour
         dialogueUI.SetActive(true);
         isDialogueActive = true;
         dialogueText.text = "";
-        speakerNameText.text = ""; // Xóa tên người nói cũ
+        speakerNameText.text = "NPC"; // Đặt tên người nói cố định là "NPC" hoặc "" nếu bạn không muốn hiển thị gì
         nextButton?.SetActive(true);
 
         DisplayNextSentence(); // Bắt đầu hiển thị câu thoại đầu tiên
     }
 
-    // Hàm thay thế cho NextLine() và ShowLine() của bạn
-    public void DisplayNextSentence()
+    // Hàm DisplayNextSentence đã sửa đổi: Đảm bảo mọi câu mới đều gõ chữ
+    public void DisplayNextSentence() // Đã bỏ tham số forceType
     {
-        // Nếu đang gõ chữ, dừng gõ và hiển thị toàn bộ câu ngay lập tức
+        // 1. Nếu đang gõ chữ (typingCoroutine đang chạy), dừng gõ và hiển thị toàn bộ câu hiện tại
         if (isTyping)
         {
             if (typingCoroutine != null)
@@ -126,79 +122,100 @@ public class DialogueManager : MonoBehaviour
                 StopCoroutine(typingCoroutine);
                 typingCoroutine = null;
             }
-            dialogueText.text = currentFullSentence;
+            dialogueText.text = currentFullSentence; // Hiển thị ngay lập tức
             isTyping = false;
-            // Dừng âm thanh gõ máy chữ nếu nó đang phát
-            if (dialogueAudioSource != null && dialogueAudioSource.isPlaying && dialogueAudioSource.clip == typewriterSound)
+            // Dừng âm thanh đang phát trên AudioSource (tiếng gõ máy chữ hoặc voice clip)
+            if (dialogueAudioSource != null && dialogueAudioSource.isPlaying)
             {
                 dialogueAudioSource.Stop();
             }
-            return; // Thoát để không chuyển sang câu tiếp theo ngay lập tức
+            return; // Quan trọng: Thoát để không chuyển sang câu tiếp theo ngay lập tức
         }
 
-        // Nếu hết câu thoại
+        // 2. Nếu đã hết câu thoại trong hàng đợi
         if (currentDialogueLines.Count == 0)
         {
             EndDialogue();
             return;
         }
 
-        // Phát âm thanh chuyển câu (nếu không phải câu đầu tiên)
+        // 3. Nếu không đang gõ chữ (câu trước đã hoàn tất hoặc bị bỏ qua), chuyển sang câu tiếp theo
+
+        // Phát âm thanh chuyển câu (chỉ khi có câu thoại trước đó, tức là không phải câu đầu tiên)
         if (dialogueAudioSource != null && nextDialogueSound != null && !string.IsNullOrEmpty(dialogueText.text))
         {
             dialogueAudioSource.PlayOneShot(nextDialogueSound);
         }
 
-        // Lấy câu thoại, tên người nói và voice clip tiếp theo
+        // Lấy câu thoại và voice clip tiếp theo
         string lineToDisplay = currentDialogueLines.Dequeue();
-        string speakerName = currentSpeakerNames.Dequeue();
         AudioClip voiceClip = currentVoiceClips.Dequeue();
 
-        speakerNameText.text = speakerName; // Cập nhật tên người nói
-        typingCoroutine = StartCoroutine(TypeLine(lineToDisplay, voiceClip)); // Bắt đầu gõ chữ và phát voice
+        currentFullSentence = lineToDisplay; // Cập nhật câu đầy đủ hiện tại
+
+        // LUÔN LUÔN BẮT ĐẦU HIỆU ỨNG GÕ CHỮ CHO MỌI CÂU THOẠI MỚI
+        typingCoroutine = StartCoroutine(TypeLine(lineToDisplay, voiceClip));
     }
+
 
     private IEnumerator TypeLine(string line, AudioClip voiceClip)
     {
         isTyping = true;
         currentFullSentence = line; // Lưu trữ câu đầy đủ
-        dialogueText.text = ""; // Xóa text hiện tại
+        dialogueText.text = ""; // Xóa text hiện tại để bắt đầu gõ lại
 
-        // Dừng mọi âm thanh đang phát trên AudioSource
+        // Dừng mọi âm thanh đang phát trên AudioSource để tránh chồng chéo
         if (dialogueAudioSource != null)
         {
             dialogueAudioSource.Stop();
         }
 
-        // Phát lồng tiếng (nếu có)
+        // Ưu tiên phát lồng tiếng (nếu có)
         if (dialogueAudioSource != null && voiceClip != null)
         {
             dialogueAudioSource.clip = voiceClip;
-            dialogueAudioSource.loop = false;
+            dialogueAudioSource.loop = false; // Lồng tiếng không lặp
             dialogueAudioSource.Play();
+
+            // Chạy hiệu ứng gõ chữ ngay cả khi có lồng tiếng
+            foreach (char c in line)
+            {
+                dialogueText.text += c;
+                yield return new WaitForSeconds(letterDelay);
+            }
         }
-        // Nếu không có lồng tiếng, phát âm thanh gõ máy chữ
+        // Nếu không có lồng tiếng, phát âm thanh gõ máy chữ (nếu có)
         else if (dialogueAudioSource != null && typewriterSound != null)
         {
             dialogueAudioSource.clip = typewriterSound;
-            dialogueAudioSource.loop = true;
+            dialogueAudioSource.loop = true; // Âm thanh gõ máy chữ lặp lại
             dialogueAudioSource.Play();
+
+            // Hiệu ứng gõ chữ
+            foreach (char c in line)
+            {
+                dialogueText.text += c;
+                yield return new WaitForSeconds(letterDelay);
+            }
+
+            // Dừng âm thanh gõ máy chữ khi gõ xong
+            if (dialogueAudioSource != null && dialogueAudioSource.isPlaying)
+            {
+                dialogueAudioSource.Stop();
+            }
+        }
+        else // Không có cả voice clip lẫn typewriter sound, vẫn gõ chữ (nhưng không có âm thanh)
+        {
+            foreach (char c in line)
+            {
+                dialogueText.text += c;
+                yield return new WaitForSeconds(letterDelay);
+            }
         }
 
-        // Hiệu ứng gõ chữ
-        foreach (char c in line)
-        {
-            dialogueText.text += c;
-            yield return new WaitForSeconds(letterDelay);
-        }
-
-        isTyping = false;
-        // Dừng âm thanh gõ máy chữ khi gõ xong (nếu nó đang phát)
-        if (dialogueAudioSource != null && dialogueAudioSource.isPlaying && dialogueAudioSource.clip == typewriterSound)
-        {
-            dialogueAudioSource.Stop();
-        }
+        isTyping = false; // Đảm bảo cờ isTyping là false sau khi gõ xong
     }
+
 
     public void EndDialogue()
     {
@@ -214,7 +231,6 @@ public class DialogueManager : MonoBehaviour
         dialogueText.text = "";
         speakerNameText.text = ""; // Xóa tên người nói khi kết thúc
         currentDialogueLines.Clear(); // Xóa hàng đợi
-        currentSpeakerNames.Clear();
         currentVoiceClips.Clear();
 
         if (dialogueAudioSource != null)
@@ -233,10 +249,10 @@ public class DialogueManager : MonoBehaviour
 
         key = key.Trim();
 
-        StringTable stringTable = LocalizationSettings.StringDatabase.GetTable("NhiemVu"); // Đã sửa thành "NhiemVu"
+        StringTable stringTable = LocalizationSettings.StringDatabase.GetTable("NhiemVu");
         if (stringTable == null)
         {
-            Debug.LogError("Localization StringTable 'NhiemVu' not found! (Check Package Manager & Localization Settings)");
+            Debug.LogError($"Localization StringTable 'NhiemVu' not found! (Check Package Manager & Localization Settings for key: {key})");
             return $"ERROR: Table Missing - {key}";
         }
 

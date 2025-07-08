@@ -11,6 +11,7 @@ public class QuestManager : MonoBehaviour
     [Header("References")]
     public QuestDatabase questDatabase;
     public PlayerStats_Tung playerStats;
+    // public WaypointManager waypointManager; // Không cần nếu WaypointManager là Singleton
 
     [Header("UI References (Optional)")]
     [SerializeField] private GameObject _acceptButton;
@@ -31,6 +32,7 @@ public class QuestManager : MonoBehaviour
         public int currentProgress;
         public bool isObjectiveMet;
         public bool isCompleted;
+        public string waypointId; // Thêm trường để lưu ID của waypoint đã tạo
 
         public CurrentQuestStatus(QuestData data)
         {
@@ -38,6 +40,7 @@ public class QuestManager : MonoBehaviour
             currentProgress = 0;
             isObjectiveMet = false;
             isCompleted = false;
+            waypointId = null; // Khởi tạo là null
         }
 
         public int GetRequiredProgress()
@@ -71,7 +74,7 @@ public class QuestManager : MonoBehaviour
 
     private string GetLocalizedString(string tableName, string key, params object[] arguments)
     {
-        var table = LocalizationSettings.StringDatabase.GetTable(tableName);
+        StringTable table = LocalizationSettings.StringDatabase.GetTable(tableName);
         if (table == null)
         {
             Debug.LogError($"❌ Bảng '{tableName}' không tồn tại. (QuestManager)");
@@ -103,9 +106,29 @@ public class QuestManager : MonoBehaviour
         if (quest == null) return;
         if (_activeQuests.ContainsKey(quest)) return;
 
-        _activeQuests.Add(quest, new CurrentQuestStatus(quest));
+        CurrentQuestStatus newStatus = new CurrentQuestStatus(quest);
+        _activeQuests.Add(quest, newStatus);
         _isQuestActiveInternal = true;
         _isQuestCompletedInternal = false;
+
+        // --- TÍNH NĂNG MỚI: TẠO WAYPOINT KHI CHẤP NHẬN NHIỆM VỤ ---
+        if (quest.hasQuestLocation && WaypointManager.Instance != null)
+        {
+            // Tạo ID duy nhất cho waypoint của nhiệm vụ
+            string waypointId = "Quest_" + quest.questName + "_" + Guid.NewGuid().ToString();
+            newStatus.waypointId = waypointId; // Lưu ID vào trạng thái nhiệm vụ
+
+            Waypoint newWaypoint = new Waypoint(
+                waypointId,
+                quest.GetQuestNameLocalized(), // Tên waypoint là tên nhiệm vụ
+                quest.questLocation,
+                WaypointType.QuestLocation, // Loại waypoint mới
+                quest.questLocationIcon // Icon tùy chỉnh (nếu có)
+            );
+            WaypointManager.Instance.AddWaypoint(newWaypoint, true); // Thêm waypoint và đặt nó làm active
+            Debug.Log($"Waypoint cho nhiệm vụ '{quest.questName}' đã được thêm tại {quest.questLocation}");
+        }
+        // --- KẾT THÚC TÍNH NĂNG MỚI ---
 
         if (UIManager.Instance != null)
         {
@@ -115,7 +138,6 @@ public class QuestManager : MonoBehaviour
             }
             else if (quest.questType == QuestType.FindNPC)
             {
-                // Sử dụng key "Quest_Progress_FindNPC"
                 string findNPCProgressText = GetLocalizedString("NhiemVu", "Quest_Progress_FindNPC");
                 UIManager.Instance.UpdateQuestProgressText(findNPCProgressText);
             }
@@ -194,7 +216,6 @@ public class QuestManager : MonoBehaviour
             status.currentProgress = 1;
             if (UIManager.Instance != null)
             {
-                // Sử dụng key "Quest_Progress_NPCFound"
                 string npcFoundProgressText = GetLocalizedString("NhiemVu", "Quest_Progress_NPCFound");
                 UIManager.Instance.UpdateQuestProgressText(npcFoundProgressText);
             }
@@ -220,7 +241,7 @@ public class QuestManager : MonoBehaviour
         {
             status.isCompleted = true;
             _isQuestActiveInternal = false;
-            _isQuestCompletedInternal = true;
+            _isQuestCompletedInternal = false; // Reset trạng thái này cho nhiệm vụ mới
 
             if (UIManager.Instance != null) UIManager.Instance.HideQuestProgress();
 
@@ -230,7 +251,6 @@ public class QuestManager : MonoBehaviour
             }
             else
             {
-                // Gọi ShowRewardPopup với coin và exp
                 playerStats.AddReward(quest.rewardCoin, quest.rewardExp);
                 if (UIManager.Instance != null) UIManager.Instance.ShowRewardPopup(quest.rewardCoin, quest.rewardExp);
             }
@@ -239,6 +259,14 @@ public class QuestManager : MonoBehaviour
             {
                 SimpleInventory.Instance.AddItem(quest.targetItemID, -quest.requiredItemCount); // Trừ vật phẩm
             }
+
+            // --- TÍNH NĂNG MỚI: XÓA WAYPOINT KHI HOÀN THÀNH NHIỆM VỤ ---
+            if (!string.IsNullOrEmpty(status.waypointId) && WaypointManager.Instance != null)
+            {
+                WaypointManager.Instance.RemoveWaypoint(status.waypointId);
+                Debug.Log($"Waypoint cho nhiệm vụ '{quest.questName}' đã được xóa.");
+            }
+            // --- KẾT THÚC TÍNH NĂNG MỚI ---
 
             _currentQuestIndex++; // Chuyển sang nhiệm vụ tiếp theo
             _isQuestActiveInternal = false; // Reset trạng thái để chuẩn bị cho quest mới
@@ -258,6 +286,14 @@ public class QuestManager : MonoBehaviour
         if (quest == null) return;
         if (_activeQuests.ContainsKey(quest))
         {
+            CurrentQuestStatus status = GetQuestStatus(quest);
+            // --- TÍNH NĂNG MỚI: XÓA WAYPOINT KHI TỪ CHỐI NHIỆM VỤ ---
+            if (status != null && !string.IsNullOrEmpty(status.waypointId) && WaypointManager.Instance != null)
+            {
+                WaypointManager.Instance.RemoveWaypoint(status.waypointId);
+                Debug.Log($"Waypoint cho nhiệm vụ '{quest.questName}' đã bị xóa do từ chối.");
+            }
+            // --- KẾT THÚC TÍNH NĂNG MỚI ---
             _activeQuests.Remove(quest);
         }
 
@@ -330,7 +366,7 @@ public class QuestManager : MonoBehaviour
             else
             {
                 _acceptButton?.SetActive(true);
-                _declineButton?.SetActive(true);
+                _declineButton?.gameObject.SetActive(true);
             }
         }
     }

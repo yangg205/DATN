@@ -25,22 +25,16 @@ public class NPCInteraction : MonoBehaviour
     [Header("Default Dialogues")]
     [Tooltip("Keys for default greeting dialogue lines.")]
     [TextArea(3, 5)][SerializeField] private string[] defaultGreetingDialogueKeys;
-    [Tooltip("Keys for default speaker names for greeting dialogue. Must match 'defaultGreetingDialogueKeys' length.")]
-    [SerializeField] private string[] defaultGreetingSpeakerKeys;
     [Tooltip("Voice clips for default greeting dialogue lines. Must match 'defaultGreetingDialogueKeys' in length.")]
     [SerializeField] private AudioClip[] defaultGreetingVoiceClips;
 
     [Tooltip("Keys for dialogue lines when quest is already accepted.")]
     [TextArea(3, 5)][SerializeField] private string[] questAlreadyAcceptedDialogueKeys;
-    [Tooltip("Keys for speaker names when quest is already accepted. Must match 'questAlreadyAcceptedDialogueKeys' length.")]
-    [SerializeField] private string[] questAlreadyAcceptedSpeakerKeys;
     [Tooltip("Voice clips for dialogue lines when quest is already accepted. Must match 'questAlreadyAcceptedDialogueKeys' in length.")]
     [SerializeField] private AudioClip[] questAlreadyAcceptedVoiceClips;
 
     [Tooltip("Keys for dialogue lines when no relevant quest is available.")]
     [TextArea(3, 3)][SerializeField] private string[] noRelevantQuestDialogueKeys;
-    [Tooltip("Keys for speaker names when no relevant quest is available. Must match 'noRelevantQuestDialogueKeys' length.")]
-    [SerializeField] private string[] noRelevantQuestSpeakerKeys;
     [Tooltip("Voice clips for dialogue lines when no relevant quest is available. Must match 'noRelevantQuestDialogueKeys' in length.")]
     [SerializeField] private AudioClip[] noRelevantQuestVoiceClips;
 
@@ -69,7 +63,8 @@ public class NPCInteraction : MonoBehaviour
         {
             var btn = _continueButton.GetComponent<Button>();
             if (btn != null)
-                btn.onClick.AddListener(dialogueManager.DisplayNextSentence);
+                // SỬA LỖI CS1503: Sử dụng lambda expression để gọi phương thức không có tham số
+                btn.onClick.AddListener(() => dialogueManager.DisplayNextSentence());
         }
 
         if (_questUI != null) _questUI.SetActive(false);
@@ -94,7 +89,7 @@ public class NPCInteraction : MonoBehaviour
         // Nếu không có nhiệm vụ hoặc NPCID không hợp lệ, hiển thị lời chào mặc định
         if (currentQuestInManager == null || string.IsNullOrEmpty(npcID))
         {
-            dialogueManager.StartDialogue(defaultGreetingDialogueKeys, defaultGreetingSpeakerKeys, defaultGreetingVoiceClips, OnDialogueCompleted);
+            dialogueManager.StartDialogue(defaultGreetingDialogueKeys, defaultGreetingVoiceClips, OnDialogueCompleted); // KHÔNG CÓ SPEAKER KEYS
             if (_questUI != null && _questUI.activeSelf) _questUI.SetActive(false);
             return;
         }
@@ -109,7 +104,7 @@ public class NPCInteraction : MonoBehaviour
         // Nếu không có nhiệm vụ liên quan, hiển thị thoại "không có nhiệm vụ liên quan"
         if (relevantQuestForNPC == null)
         {
-            dialogueManager.StartDialogue(noRelevantQuestDialogueKeys, noRelevantQuestSpeakerKeys, noRelevantQuestVoiceClips, OnDialogueCompleted);
+            dialogueManager.StartDialogue(noRelevantQuestDialogueKeys, noRelevantQuestVoiceClips, OnDialogueCompleted); // KHÔNG CÓ SPEAKER KEYS
             if (_questUI != null && _questUI.activeSelf) _questUI.SetActive(false);
             return;
         }
@@ -127,7 +122,7 @@ public class NPCInteraction : MonoBehaviour
         {
             if (isQuestAccepted && !isQuestCompleted) // Nhiệm vụ đã chấp nhận nhưng chưa hoàn thành mục tiêu
             {
-                dialogueManager.StartDialogue(questAlreadyAcceptedDialogueKeys, questAlreadyAcceptedSpeakerKeys, questAlreadyAcceptedVoiceClips, OnDialogueCompleted);
+                dialogueManager.StartDialogue(questAlreadyAcceptedDialogueKeys, questAlreadyAcceptedVoiceClips, OnDialogueCompleted); // KHÔNG CÓ SPEAKER KEYS
             }
             else if (isQuestCompleted) // Nhiệm vụ đã hoàn thành mục tiêu (chưa nhận thưởng)
             {
@@ -137,18 +132,11 @@ public class NPCInteraction : MonoBehaviour
 
                 AudioClip[] voicesToShow = relevantQuestForNPC.GetDialogueVoiceClips(keysToShow);
 
-                // Tên người nói cho thoại nhiệm vụ (có thể lấy từ NPCID hoặc một key chung)
-                string[] speakerKeysToShow = new string[keysToShow.Length];
-                for (int i = 0; i < speakerKeysToShow.Length; i++) speakerKeysToShow[i] = "NPC_NAME_" + npcID;
-
-                dialogueManager.StartDialogue(keysToShow, speakerKeysToShow, voicesToShow, OnDialogueCompleted);
+                dialogueManager.StartDialogue(keysToShow, voicesToShow, OnDialogueCompleted); // KHÔNG CÓ SPEAKER KEYS
             }
             else // Nhiệm vụ chưa được chấp nhận
             {
-                string[] speakerKeys = new string[relevantQuestForNPC.keydialogueBeforeComplete.Length];
-                for (int i = 0; i < speakerKeys.Length; i++) speakerKeys[i] = "NPC_NAME_" + npcID;
-
-                dialogueManager.StartDialogue(relevantQuestForNPC.keydialogueBeforeComplete, speakerKeys, relevantQuestForNPC.voiceBeforeComplete, OnDialogueCompleted);
+                dialogueManager.StartDialogue(relevantQuestForNPC.keydialogueBeforeComplete, relevantQuestForNPC.voiceBeforeComplete, OnDialogueCompleted); // KHÔNG CÓ SPEAKER KEYS
             }
         }
         else if (relevantQuestForNPC.questType == QuestType.FindNPC && relevantQuestForNPC.targetNPCID == npcID) // Nếu NPC này là mục tiêu của nhiệm vụ FindNPC
@@ -165,33 +153,27 @@ public class NPCInteraction : MonoBehaviour
 
                     AudioClip[] voicesToShow = relevantQuestForNPC.GetDialogueVoiceClips(keysToShow);
 
-                    string[] speakerKeysToShow = new string[keysToShow.Length];
-                    for (int i = 0; i < speakerKeysToShow.Length; i++) speakerKeysToShow[i] = "NPC_NAME_" + npcID;
-
-                    dialogueManager.StartDialogue(keysToShow, speakerKeysToShow, voicesToShow, OnDialogueCompleted);
+                    dialogueManager.StartDialogue(keysToShow, voicesToShow, OnDialogueCompleted); // KHÔNG CÓ SPEAKER KEYS
                 }
                 else
                 {
-                    dialogueManager.StartDialogue(noRelevantQuestDialogueKeys, noRelevantQuestSpeakerKeys, noRelevantQuestVoiceClips, OnDialogueCompleted);
+                    dialogueManager.StartDialogue(noRelevantQuestDialogueKeys, noRelevantQuestVoiceClips, OnDialogueCompleted); // KHÔNG CÓ SPEAKER KEYS
                     if (_questUI != null && _questUI.activeSelf) _questUI.SetActive(false);
                 }
             }
             else if (isQuestCompleted)
             {
-                string[] speakerKeys = new string[relevantQuestForNPC.keydialogueAfterComplete.Length];
-                for (int i = 0; i < speakerKeys.Length; i++) speakerKeys[i] = "NPC_NAME_" + npcID;
-
-                dialogueManager.StartDialogue(relevantQuestForNPC.keydialogueAfterComplete, speakerKeys, relevantQuestForNPC.voiceAfterComplete, OnDialogueCompleted);
+                dialogueManager.StartDialogue(relevantQuestForNPC.keydialogueAfterComplete, relevantQuestForNPC.voiceAfterComplete, OnDialogueCompleted); // KHÔNG CÓ SPEAKER KEYS
             }
             else
             {
-                dialogueManager.StartDialogue(noRelevantQuestDialogueKeys, noRelevantQuestSpeakerKeys, noRelevantQuestVoiceClips, OnDialogueCompleted);
+                dialogueManager.StartDialogue(noRelevantQuestDialogueKeys, noRelevantQuestVoiceClips, OnDialogueCompleted); // KHÔNG CÓ SPEAKER KEYS
                 if (_questUI != null && _questUI.activeSelf) _questUI.SetActive(false);
             }
         }
         else // NPC không liên quan trực tiếp đến nhiệm vụ đang hoạt động
         {
-            dialogueManager.StartDialogue(noRelevantQuestDialogueKeys, noRelevantQuestSpeakerKeys, noRelevantQuestVoiceClips, OnDialogueCompleted);
+            dialogueManager.StartDialogue(noRelevantQuestDialogueKeys, noRelevantQuestVoiceClips, OnDialogueCompleted); // KHÔNG CÓ SPEAKER KEYS
             if (_questUI != null && _questUI.activeSelf) _questUI.SetActive(false);
         }
     }
@@ -216,16 +198,15 @@ public class NPCInteraction : MonoBehaviour
 
         if (questManager.IsQuestAccepted())
         {
-            dialogueManager.StartDialogue(questAlreadyAcceptedDialogueKeys, questAlreadyAcceptedSpeakerKeys, questAlreadyAcceptedVoiceClips, OnDialogueCompleted);
+            dialogueManager.StartDialogue(questAlreadyAcceptedDialogueKeys, questAlreadyAcceptedVoiceClips, OnDialogueCompleted);
             ShowDefaultUI();
             return;
         }
 
         questManager.AcceptQuest();
         string[] acceptedKeys = new string[] { "DIALOGUE_KEY_QUEST_ACCEPTED" };
-        string[] acceptedSpeakerNames = new string[] { "SYSTEM_MESSAGE" };
         AudioClip[] acceptedVoices = new AudioClip[] { null };
-        dialogueManager.StartDialogue(acceptedKeys, acceptedSpeakerNames, acceptedVoices, OnDialogueCompleted);
+        dialogueManager.StartDialogue(acceptedKeys, acceptedVoices, OnDialogueCompleted); // KHÔNG CÓ SPEAKER NAMES
         ShowDefaultUI();
     }
 
@@ -233,9 +214,8 @@ public class NPCInteraction : MonoBehaviour
     {
         questManager.CompleteQuest();
         string[] claimedKeys = new string[] { "DIALOGUE_KEY_QUEST_CLAIMED_REWARD" };
-        string[] claimedSpeakerNames = new string[] { "SYSTEM_MESSAGE" };
         AudioClip[] claimedVoices = new AudioClip[] { null };
-        dialogueManager.StartDialogue(claimedKeys, claimedSpeakerNames, claimedVoices, OnDialogueCompleted);
+        dialogueManager.StartDialogue(claimedKeys, claimedVoices, OnDialogueCompleted); // KHÔNG CÓ SPEAKER NAMES
         HideAllButtons();
     }
 
@@ -243,9 +223,8 @@ public class NPCInteraction : MonoBehaviour
     {
         questManager.DeclineQuest();
         string[] declinedKeys = new string[] { "DIALOGUE_KEY_QUEST_DECLINED" };
-        string[] declinedSpeakerNames = new string[] { "SYSTEM_MESSAGE" };
         AudioClip[] declinedVoices = new AudioClip[] { null };
-        dialogueManager.StartDialogue(declinedKeys, declinedSpeakerNames, declinedVoices, OnDialogueCompleted);
+        dialogueManager.StartDialogue(declinedKeys, declinedVoices, OnDialogueCompleted); // KHÔNG CÓ SPEAKER NAMES
         HideAllButtons();
     }
 
