@@ -15,4 +15,14 @@ public class TutorialData : ScriptableObject
     public List<GameObject> manualIconObjects = new List<GameObject>();
 
     public bool onlyTriggerOnce = true;
+
+    [Header("Icon trong text TMP (Sprite TMP)")]
+    public List<TextIconMapping> inlineIcons = new List<TextIconMapping>();
+
+    [System.Serializable]
+    public class TextIconMapping
+    {
+        public string key;       // Dùng trong text, ví dụ: {icon_jump}
+        public Sprite sprite;    // Sprite bạn kéo trực tiếp vào
+    }
 }

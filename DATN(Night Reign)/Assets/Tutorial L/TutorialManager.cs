@@ -33,9 +33,10 @@ public class TutorialManager : MonoBehaviour
     {
         if (data == null) return;
 
-        popupText.text = data.tutorialText;
+        // Parse tutorialText để chèn icon TMP
+        popupText.text = ParseTextWithInlineIcons(data.tutorialText, data.inlineIcons);
 
-        // Sprite
+        // Sprite bên cạnh text
         if (tutorialImage != null)
         {
             tutorialImage.sprite = data.tutorialSprite;
@@ -54,10 +55,10 @@ public class TutorialManager : MonoBehaviour
             tutorialVideoDisplay.gameObject.SetActive(false);
         }
 
-        // Icons
+        // Icon UI thủ công (GameObject trong Scene)
         ShowManualIcons(data.manualIconObjects);
 
-        // UI
+        // Hiển thị UI
         popupCanvas.alpha = 1f;
         popupCanvas.interactable = true;
         popupCanvas.blocksRaycasts = true;
@@ -65,7 +66,7 @@ public class TutorialManager : MonoBehaviour
         isShowing = true;
         currentTrigger = trigger;
 
-        Time.timeScale = 0f;
+        Time.timeScale = 0f; // pause game khi hiển thị hướng dẫn
     }
 
     public void CloseCurrentPopup()
@@ -79,7 +80,6 @@ public class TutorialManager : MonoBehaviour
 
         HideAllIcons();
 
-        // Stop video
         if (tutorialVideoPlayer != null)
         {
             tutorialVideoPlayer.Stop();
@@ -119,5 +119,23 @@ public class TutorialManager : MonoBehaviour
         popupCanvas.blocksRaycasts = false;
         tutorialVideoDisplay.gameObject.SetActive(false);
         isShowing = false;
+    }
+
+    private string ParseTextWithInlineIcons(string rawText, List<TutorialData.TextIconMapping> iconMappings)
+    {
+        string processed = rawText;
+
+        if (iconMappings == null) return processed;
+
+        foreach (var icon in iconMappings)
+        {
+            if (!string.IsNullOrEmpty(icon.key) && icon.sprite != null)
+            {
+                string spriteName = icon.sprite.name;
+                processed = processed.Replace("{" + icon.key + "}", $"<sprite name=\"{spriteName}\">");
+            }
+        }
+
+        return processed;
     }
 }
