@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using ND;
+using UnityEngine;
 
 public class MouseManager : MonoBehaviour
 {
@@ -27,5 +28,17 @@ public class MouseManager : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+    }
+
+    public void ShowCursorAndDisableInput()
+    {
+        UnlockCursor();
+        FindObjectOfType<InputHandler>().isInputDisabled = true;
+    }
+
+    public void HideCursorAndEnableInput()
+    {
+        LockCursor();
+        FindObjectOfType<InputHandler>().isInputDisabled = false;
     }
 }

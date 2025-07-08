@@ -257,6 +257,7 @@ namespace ND
                 {
                     // Nhảy tại chỗ
                     animatorHandler.PlayTargetAnimation("JumpOnPlace", true);
+
                 }
             }
         }

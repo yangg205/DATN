@@ -45,8 +45,42 @@ namespace ND
             }
         }
 
-        #region Combo Attacks
-        public void HandleLightAttack(WeaponItem weapon)
+        public void HandleWeaponCombo(WeaponItem weapon)
+        {
+            if (animatorHandler.anim.GetBool("canDoCombo") == false)
+                return;
+
+            animatorHandler.anim.SetBool("canDoCombo", false);
+
+            if (inputHandler.twoHandFlag)
+            {
+                if (lastAttack == weapon.Oh_Th_Attack_1)
+                {
+                    animatorHandler.PlayTargetAnimation(weapon.Oh_Th_Attack_2, true);
+                    lastAttack = weapon.Oh_Th_Attack_2;
+                }
+            }
+            else
+            {
+                if (lastAttack == weapon.Oh_Light_Attack_1)
+                {
+                    animatorHandler.PlayTargetAnimation(weapon.Oh_Light_Attack_2, true);
+                    lastAttack = weapon.Oh_Light_Attack_2;
+                }
+                else if (lastAttack == weapon.Oh_Light_Attack_2)
+                {
+                    animatorHandler.PlayTargetAnimation(weapon.Oh_Light_Attack_3, true);
+                    lastAttack = weapon.Oh_Light_Attack_3;
+                }
+                else if (lastAttack == weapon.Oh_Light_Attack_3)
+                {
+                    animatorHandler.PlayTargetAnimation(weapon.Oh_Light_Attack_4, true);
+                    lastAttack = weapon.Oh_Light_Attack_4;
+                }
+            }
+        }
+            #region Combo Attacks
+            public void HandleLightAttack(WeaponItem weapon)
         {
             if (weapon == null || animatorHandler.anim.GetBool("isInteracting"))
                 return;

@@ -25,6 +25,8 @@ namespace ND
         public bool right_Stick_Left_Input;
         public bool skill_input;
         public bool attackSpeedBoost_input;
+        public bool isInputDisabled = false;
+
 
         public bool d_Pad_Up;
         public bool d_Pad_Down;
@@ -51,6 +53,8 @@ namespace ND
 
         private void Awake()
         {
+            if (isInputDisabled)
+                return;
             playerAttacker = GetComponent<PlayerAttacker>();
             playerInventory = GetComponent<PlayerInventory>();
             playerManager = GetComponent<PlayerManager>();
@@ -152,12 +156,23 @@ namespace ND
         {
             if (lightAttack_input)
             {
-                playerAttacker.HandleLightAttack(playerInventory.rightWeapon);
+                if (playerManager.canDoCombo) // ← Combo lần 2
+                {
+                    playerManager.canDoCombo = false;
+                    playerAttacker.HandleWeaponCombo(playerInventory.rightWeapon);
+                }
+                else // ← Đánh lần đầu
+                {
+                    playerAttacker.HandleLightAttack(playerInventory.rightWeapon);
+                }
+
+                lightAttack_input = false; // ← Reset flag
             }
 
             if (heavyAttack_input)
             {
                 playerAttacker.HandleHeavyAttack(playerInventory.rightWeapon);
+                heavyAttack_input = false;
             }
         }
 
