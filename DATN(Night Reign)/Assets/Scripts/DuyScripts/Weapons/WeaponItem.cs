@@ -20,6 +20,8 @@ namespace ND
         public string Oh_Light_Attack_2;
         public string Oh_Light_Attack_3;
         public string Oh_Light_Attack_4;
+        public string Oh_Th_Attack_1;
+        public string Oh_Th_Attack_2;
 
         [Header("Attack Animations - Heavy")]
         public string Oh_Heavy_Attack_1;
