@@ -283,7 +283,7 @@ public class EnemyAIByYang : MonoBehaviour
         _animator?.SetBool("isMoving", false);
         _animator?.SetFloat("Speed", 0f);
 
-        int animationChoice = UnityEngine.Random.Range(1, 4);
+        int animationChoice = UnityEngine.Random.Range(1, 5);
         switch (animationChoice)
         {
             case 1:
