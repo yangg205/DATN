@@ -12,6 +12,8 @@ namespace ND
         InputHandler inputHandler;
         public WeaponSlotManager weaponSlotManager;
         public string lastAttack;
+        public int CurrentLightComboStep => lightComboStep;
+
 
         private int lightComboStep = 0;
         private int heavyComboStep = 0;
@@ -130,7 +132,14 @@ namespace ND
             lastAttack = animName;
             weaponSlotManager.attackingWeapon = weapon;
 
-            PlayAttackVFX(weapon.lightAttackVFX);
+            switch (lightComboStep)
+            {
+                case 1: PlayAttackVFX(weapon.lightAttackVFX_1); break;
+                case 2: PlayAttackVFX(weapon.lightAttackVFX_2); break;
+                case 3: PlayAttackVFX(weapon.lightAttackVFX_3); break;
+                case 4: PlayAttackVFX(weapon.lightAttackVFX_4); break;
+            }
+
         }
 
         public void HandleHeavyAttack(WeaponItem weapon)
@@ -152,7 +161,6 @@ namespace ND
 
             animatorHandler.PlayTargetAnimation(animName, true);
             lastAttack = animName;
-            PlayAttackVFX(weapon.heavyAttackVFX);
         }
 
         public void ResetCombos()
@@ -278,7 +286,6 @@ namespace ND
                 return;
             }
 
-            // Tìm đúng đường dẫn "Weapon Pivot/VFX_SpawnPoint"
             Transform vfxSpawnPoint = weaponModel.transform.Find("Weapon Pivot/VFX_SpawnPoint");
 
             if (vfxSpawnPoint == null)

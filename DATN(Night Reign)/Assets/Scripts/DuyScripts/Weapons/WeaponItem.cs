@@ -39,7 +39,10 @@ namespace ND
         public float heavyAttackMultiplier = 1.5f;
 
         [Header("Normal VFX")]
-        public GameObject lightAttackVFX;
+        public GameObject lightAttackVFX_1;
+        public GameObject lightAttackVFX_2;
+        public GameObject lightAttackVFX_3;
+        public GameObject lightAttackVFX_4;
         public GameObject heavyAttackVFX;
         public GameObject weaponTrailVFX;
 

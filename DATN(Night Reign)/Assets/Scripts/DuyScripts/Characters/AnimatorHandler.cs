@@ -80,11 +80,17 @@ namespace ND
         public void TriggerAttackVFX()
         {
             var attacker = GetComponentInParent<PlayerAttacker>();
-            var weapon = attacker?.weaponSlotManager?.attackingWeapon;
+            if (attacker == null) return;
 
-            if (weapon != null && weapon.lightAttackVFX != null)
+            var weapon = attacker.weaponSlotManager?.attackingWeapon;
+            if (weapon == null) return;
+
+            switch (attacker.CurrentLightComboStep)
             {
-                attacker.PlayAttackVFX(weapon.lightAttackVFX);
+                case 1: attacker.PlayAttackVFX(weapon.lightAttackVFX_1); break;
+                case 2: attacker.PlayAttackVFX(weapon.lightAttackVFX_2); break;
+                case 3: attacker.PlayAttackVFX(weapon.lightAttackVFX_3); break;
+                case 4: attacker.PlayAttackVFX(weapon.lightAttackVFX_4); break;
             }
         }
     }
