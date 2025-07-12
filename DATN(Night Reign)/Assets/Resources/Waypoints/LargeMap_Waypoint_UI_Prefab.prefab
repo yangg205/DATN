@@ -34,8 +34,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -12.6}
-  m_SizeDelta: {x: 20, y: 5}
+  m_AnchoredPosition: {x: 0, y: -46.3}
+  m_SizeDelta: {x: 100, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5029284950605678613
 CanvasRenderer:
@@ -92,8 +92,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 4
-  m_fontSizeBase: 4
+  m_fontSize: 20
+  m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -147,10 +147,10 @@ GameObject:
   - component: {fileID: 183271049224426402}
   - component: {fileID: 7425927079191869716}
   - component: {fileID: 5304813754958989587}
-  - component: {fileID: 2728777995423004087}
-  - component: {fileID: 7948563574107169628}
+  - component: {fileID: 2621130130888252026}
+  - component: {fileID: 4081814807017405535}
   m_Layer: 5
-  m_Name: Compass_Waypoint_UI_Prefab
+  m_Name: LargeMap_Waypoint_UI_Prefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -174,7 +174,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 20, y: 20}
+  m_SizeDelta: {x: 70, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7425927079191869716
 CanvasRenderer:
@@ -214,7 +214,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &2728777995423004087
+--- !u!114 &2621130130888252026
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -227,11 +227,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rectTransform: {fileID: 183271049224426402}
-  canvasGroup: {fileID: 7948563574107169628}
+  canvasGroup: {fileID: 4081814807017405535}
   distanceTMP: {fileID: 6899288995796133738}
   iconImage: {fileID: 5304813754958989587}
   maxScale: 1
---- !u!225 &7948563574107169628
+--- !u!225 &4081814807017405535
 CanvasGroup:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

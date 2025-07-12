@@ -148,6 +148,7 @@ GameObject:
   - component: {fileID: 7425927079191869716}
   - component: {fileID: 5304813754958989587}
   - component: {fileID: 2621130130888252026}
+  - component: {fileID: 4081814807017405535}
   m_Layer: 5
   m_Name: LargeMap_Waypoint_UI_Prefab
   m_TagString: Untagged
@@ -225,11 +226,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f244a1288b3eb144aa314f8b014de5f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  waypointIcon: {fileID: 5304813754958989587}
-  distanceText: {fileID: 6899288995796133738}
-  maxDisplayDistance: 500
-  hideNearDistance: 5
-  questLocationCompletionDistance: 5
-  minScale: 0.5
+  rectTransform: {fileID: 183271049224426402}
+  canvasGroup: {fileID: 4081814807017405535}
+  distanceTMP: {fileID: 6899288995796133738}
+  iconImage: {fileID: 5304813754958989587}
   maxScale: 1
-  uiType: 3
+--- !u!225 &4081814807017405535
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3896000824754047393}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0

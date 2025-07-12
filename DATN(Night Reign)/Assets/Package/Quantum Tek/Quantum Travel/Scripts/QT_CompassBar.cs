@@ -1,156 +1,160 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using System; // For events
-
-// QT_CompassBar giữ nguyên namespace QuantumTek.QuantumTravel theo yêu cầu của bạn trước đó.
-// Tuy nhiên, nếu bạn thực sự muốn KHÔNG CÓ BẤT KỲ namespace nào, kể cả cho QT_CompassBar,
-// thì bạn có thể xóa dòng "namespace QuantumTek.QuantumTravel" và dấu "}" cuối cùng.
-// Tôi sẽ để nó như cũ vì bạn chỉ nói "t kh cần namespace" nói chung, nhưng QT_CompassBar ban đầu có.
-// Nếu bạn muốn xóa namespace này, hãy nói rõ.
+﻿using UnityEngine;
+using System.Collections.Generic;
 
 namespace QuantumTek.QuantumTravel
 {
     public class QT_CompassBar : MonoBehaviour
     {
-        [SerializeField] private RectTransform rectTransform = null;
-        [SerializeField] private RawImage image = null;
+        [SerializeField] private RectTransform rectTransform = null; // RectTransform của QT_CompassBar (khung hiển thị)
+        [SerializeField] private UnityEngine.UI.RawImage image = null; // RawImage của texture la bàn cuộn
 
         [Header("Compass Bar Variables")]
-        public Vector2 CompassSize = new Vector2(200, 25); // Kích thước texture của la bàn (ví dụ: 200px = 360 độ)
-        public Vector2 ShownCompassSize = new Vector2(100, 25); // Kích thước hiển thị của thanh la bàn (ví dụ: 100px = 180 độ)
-        public float MaxRenderDistance = 100f; // Khoảng cách tối đa marker hiển thị trên la bàn
-        public float MinScale = 0.5f; // Tỉ lệ nhỏ nhất của marker khi ở xa
-        public float MaxScale = 1.0f; // Tỉ lệ lớn nhất của marker khi ở gần
+        public Vector2 CompassSize = new Vector2(200, 25); // Kích thước của texture la bàn đầy đủ (chiều dài cuộn)
+        public Vector2 ShownCompassSize = new Vector2(100, 25); // Kích thước hiển thị thực tế của la bàn trên UI
 
-        [Tooltip("Adjust this to center 'North' (or your desired default direction) on the compass texture at 0 degrees. " +
-                 "If North is at the very left edge of your seamless texture, this might be 0. " +
-                 "If North is at the center of the texture's visible part when player camera is facing North (Z+), this might be 0.5. " +
-                 "Experiment until North aligns correctly.")]
+        public float MaxRenderDistance = 100f; // Khoảng cách tối đa để waypoint hiển thị trên la bàn
+        public float MinScale = 0.5f;
+        public float MaxScale = 1.0f;
+
         [Range(-1f, 1f)]
         public float compassTextureInitialOffset = 0f;
 
         [Header("Camera Reference")]
-        public Transform playerMainCameraTransform; // Kéo Camera chính của người chơi vào đây
+        public Transform playerMainCameraTransform;
 
-        // Biến này được sử dụng để đồng bộ góc quay của bản đồ nhỏ nếu cần.
-        // QT_CompassBar cập nhật nó, các script khác đọc nó (ví dụ: MinimapController có thể dùng để xoay minimap)
-        public static float SharedMapRotationAngle_ForUV = 0f;
+        public static float SharedMapRotationAngle_ForUV = 0f; // Góc xoay của bản đồ/la bàn cho UV texture
+
+        // Tham chiếu đến RectTransform của Player Marker trên Compass (để đảm bảo không bị đè)
+        [Header("Player Marker Reference")]
+        public RectTransform playerCompassMarkerRectTransform; // Kéo thả WaypointUI_PlayerCustomMarker vào đây
 
         private void Awake()
         {
-            if (rectTransform == null) Debug.LogError("RectTransform is null on QT_CompassBar!");
-            if (image == null) Debug.LogError("RawImage is null on QT_CompassBar!");
-            if (playerMainCameraTransform == null) Debug.LogError("Player Main Camera Transform is null on QT_CompassBar! Compass will not rotate correctly.");
+            if (rectTransform == null) rectTransform = GetComponent<RectTransform>();
+            if (image == null) image = GetComponent<UnityEngine.UI.RawImage>();
+            if (playerMainCameraTransform == null)
+                Debug.LogError("[QT_CompassBar] Player Main Camera Transform is not assigned!");
+            if (playerCompassMarkerRectTransform == null)
+                Debug.LogWarning("[QT_CompassBar] Player Compass Marker RectTransform is not assigned. Waypoints might overlay player marker.");
 
-            // Kích thước của thanh la bàn hiển thị (RectTransform của QT_CompassBar)
+            // Đảm bảo kích thước của rectTransform phù hợp với ShownCompassSize (kích thước khung nhìn)
             rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, ShownCompassSize.x);
             rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, ShownCompassSize.y);
 
-            // Kích thước của RawImage (background chứa texture la bàn)
-            // Đảm bảo image có cùng RectTransform với QT_CompassBar hoặc là con của nó và fill toàn bộ.
-            // Ở đây, tôi giả định image là component trên cùng GameObject với QT_CompassBar.
+            // Kích thước của RawImage (texture cuộn) lớn hơn ShownCompassSize để cho phép cuộn
             image.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, CompassSize.x);
             image.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, CompassSize.y);
+            image.rectTransform.anchoredPosition = Vector2.zero; // Đảm bảo RawImage ở tâm của rectTransform
         }
 
         private void Update()
         {
             if (playerMainCameraTransform == null) return;
 
-            // Cập nhật SharedMapRotationAngle_ForUV LẤY TỪ GÓC XOAY Y CỦA CAMERA NGƯỜI CHƠI
-            // Góc của camera (0-360) theo chiều kim đồng hồ từ trục Z+.
-            // Dấu trừ để la bàn dịch chuyển UV ngược lại với góc quay của camera, tạo hiệu ứng la bàn quay.
+            // Cập nhật UV của texture la bàn để xoay theo hướng của người chơi
             SharedMapRotationAngle_ForUV = Mathf.Repeat(-playerMainCameraTransform.eulerAngles.y, 360f);
-
-            // Cập nhật UV Rect của la bàn để nó xoay
             float uvX = (SharedMapRotationAngle_ForUV / 360f) + compassTextureInitialOffset;
-            uvX = Mathf.Repeat(uvX, 1f); // Đảm bảo uvX nằm trong khoảng [0, 1)
-
+            uvX = Mathf.Repeat(uvX, 1f);
             image.uvRect = new Rect(uvX, 0, 1, 1);
 
-            // Cập nhật vị trí và tỉ lệ của các marker (WaypointUI) trên la bàn
-            if (WaypointManager.Instance != null && WaypointManager.Instance.playerTransform != null)
+            if (WaypointManager.Instance == null || WaypointManager.Instance.playerTransform == null)
+                return;
+
+            // Đảm bảo player marker luôn ở giữa la bàn (0,0) và luôn active
+            if (playerCompassMarkerRectTransform != null)
             {
-                // Lấy tất cả các WaypointUI đang active trên Compass
-                foreach (var entry in WaypointManager.Instance.compassWaypointUIs)
+                playerCompassMarkerRectTransform.anchoredPosition = Vector2.zero;
+                if (!playerCompassMarkerRectTransform.gameObject.activeSelf)
+                    playerCompassMarkerRectTransform.gameObject.SetActive(true);
+            }
+
+            UpdateWaypointUIsOnCompass();
+        }
+
+        private void UpdateWaypointUIsOnCompass()
+        {
+            if (WaypointManager.Instance.compassWaypointUIs == null || WaypointManager.Instance.compassWaypointsParent == null) return;
+
+            // Kích thước thực tế của khung hiển thị la bàn UI
+            float compassUIHalfWidth = rectTransform.rect.width / 2f;
+
+            // Duyệt qua TẤT CẢ các waypoint trong từ điển của WaypointManager
+            foreach (var entry in WaypointManager.Instance.compassWaypointUIs)
+            {
+                WaypointUI markerUI = entry.Value;
+                Waypoint waypointData = entry.Value.GetWaypointData(); // Lấy dữ liệu từ WaypointUI
+
+                if (markerUI == null || markerUI.gameObject == null)
                 {
-                    string waypointId = entry.Key;
-                    WaypointUI markerUI = entry.Value;
+                    Debug.LogWarning($"[QT_CompassBar] compassWaypointUI for ID '{entry.Key}' is null or its GameObject is null. Skipping.");
+                    continue;
+                }
 
-                    // Lấy dữ liệu Waypoint gốc từ WaypointManager
-                    if (WaypointManager.Instance.activeWaypointsData.TryGetValue(waypointId, out Waypoint waypointData))
-                    {
-                        // Kiểm tra khoảng cách để quyết định có hiển thị hay không
-                        float distance = Vector3.Distance(WaypointManager.Instance.playerTransform.position, waypointData.worldPosition);
+                float distance = Vector3.Distance(WaypointManager.Instance.playerTransform.position, waypointData.worldPosition);
 
-                        if (distance <= MaxRenderDistance)
-                        {
-                            markerUI.gameObject.SetActive(true);
-                            // Tính toán vị trí X trên thanh la bàn
-                            Vector2 anchoredPos = CalculatePosition(waypointData);
-                            // QT_CompassBar sẽ đặt vị trí và scale cho markerUI
-                            markerUI.SetMapUIPosition(anchoredPos, CalculateScale(waypointData));
-                        }
-                        else
-                        {
-                            markerUI.gameObject.SetActive(false); // Ẩn nếu quá xa
-                        }
-                    }
-                    else
-                    {
-                        // Waypoint Data không tồn tại, có thể do đã bị xóa từ nơi khác.
-                        // Đảm bảo markerUI cũng bị hủy (đã được xử lý bởi WaypointManager.RemoveWaypoint)
-                        if (markerUI != null) markerUI.gameObject.SetActive(false); // Ẩn phòng trường hợp
-                    }
+                // Kiểm tra khoảng cách: chỉ hiển thị waypoint nếu nó nằm trong MaxRenderDistance
+                if (distance <= MaxRenderDistance)
+                {
+                    Vector2 anchoredPos = CalculatePosition(waypointData);
+                    float scale = CalculateScale(distance); // Scale dựa trên khoảng cách
+
+                    // Đảm bảo waypoint được bật
+                    if (!markerUI.gameObject.activeSelf) markerUI.gameObject.SetActive(true);
+
+                    markerUI.SetMapUIPosition(anchoredPos, scale); // Gửi scale cho WaypointUI để điều chỉnh kích thước
+                    markerUI.SetDistanceText(distance);
+                    // Debug.Log($"[QT_CompassBar] Updating waypoint '{waypointData.id}' at position {anchoredPos}, scale {scale}. Distance: {distance:F0}m");
+                }
+                else
+                {
+                    // Ẩn waypoint nếu quá xa
+                    if (markerUI.gameObject.activeSelf) markerUI.gameObject.SetActive(false);
                 }
             }
         }
 
-        // Tính toán vị trí X của marker trên la bàn
         private Vector2 CalculatePosition(Waypoint waypoint)
         {
-            // CompassSize.x là tổng chiều rộng của texture la bàn (ví dụ: 200px = 360 độ)
-            // ShownCompassSize.x là chiều rộng của phần la bàn hiển thị (ví dụ: 100px = 180 độ)
-            // Tỷ lệ pixel / độ cho thanh la bàn hiển thị (ví dụ: 100px / 180 độ = 0.555 px/deg)
-            float pixelsPerDegreeOnShownCompass = ShownCompassSize.x / 180f; // Số pixel trên 1 độ hiển thị trên thanh la bàn
+            float compassDegrees = 180f; // La bàn hiển thị 180 độ (từ -90 đến 90)
+            float pixelsPerDegree = ShownCompassSize.x / compassDegrees; // Số pixel cho mỗi độ trên la bàn hiển thị
 
-            // Hướng từ người chơi đến waypoint trong mặt phẳng XZ (y=0)
-            Vector3 directionToWaypoint = waypoint.worldPosition - WaypointManager.Instance.playerTransform.position;
-            Vector2 direction2D = new Vector2(directionToWaypoint.x, directionToWaypoint.z).normalized;
+            Vector3 dirToWaypoint = waypoint.worldPosition - WaypointManager.Instance.playerTransform.position;
+            // Chỉ quan tâm đến hướng trên mặt phẳng XZ (bỏ qua chiều cao)
+            Vector2 dir2D = new Vector2(dirToWaypoint.x, dirToWaypoint.z).normalized;
+            Vector2 forward2D = new Vector2(playerMainCameraTransform.forward.x, playerMainCameraTransform.forward.z).normalized;
 
-            // Hướng nhìn của camera trong mặt phẳng XZ
-            Vector2 playerForward2D = new Vector2(playerMainCameraTransform.forward.x, playerMainCameraTransform.forward.z).normalized;
+            // Tính góc tương đối so với hướng nhìn của người chơi (trên mặt phẳng ngang)
+            float relativeAngle = Vector2.SignedAngle(forward2D, dir2D); // Góc từ -180 đến 180
 
-            // Góc tương đối của waypoint so với hướng nhìn của người chơi (từ -180 đến 180)
-            // Góc 0 là thẳng phía trước, -90 là bên trái, 90 là bên phải.
-            float markerRelativeAngle = Vector2.SignedAngle(playerForward2D, direction2D);
+            // Clamp góc vào phạm vi hiển thị của la bàn (-90 đến 90 độ)
+            // Nếu waypoint nằm ngoài phạm vi này, nó sẽ được hiển thị ở rìa
+            relativeAngle = Mathf.Clamp(relativeAngle, -90f, 90f);
 
-            // Chuyển đổi góc thành vị trí X trên UI la bàn
-            // Giả sử tâm của thanh la bàn là 0.
-            // markerRelativeAngle chạy từ -90 đến 90 (nếu chỉ hiển thị 180 độ).
-            float xPos = markerRelativeAngle * pixelsPerDegreeOnShownCompass;
+            // Chuyển đổi góc sang vị trí X trên UI
+            // Vị trí X sẽ là `relativeAngle * pixelsPerDegree`
+            // Và sau đó điều chỉnh để 0 là trung tâm của ShownCompassSize.x
+            float xPos = relativeAngle * pixelsPerDegree;
 
-            // Đảm bảo marker nằm trong phạm vi hiển thị của la bàn
-            // Thanh la bàn hiển thị có chiều rộng là ShownCompassSize.x. Tâm là 0.
-            // Do đó, giới hạn là từ -ShownCompassSize.x / 2f đến +ShownCompassSize.x / 2f.
-            xPos = Mathf.Clamp(xPos, -ShownCompassSize.x / 2f, ShownCompassSize.x / 2f);
+            // Giới hạn xPos trong nửa chiều rộng của la bàn để nó nằm trong khung hiển thị
+            float halfShownWidth = ShownCompassSize.x / 2f;
+            xPos = Mathf.Clamp(xPos, -halfShownWidth, halfShownWidth);
 
-            return new Vector2(xPos, 0); // Vị trí Y cố định trên la bàn (tâm Y)
+            // Vị trí Y cố định cho waypoint trên la bàn. Thường là 0 nếu la bàn là dải ngang ở giữa.
+            // Điều này đảm bảo chúng không đè lên Player Marker nếu Player Marker cũng ở Y=0.
+            // Nếu Player Marker của bạn có kích thước và nằm ở một vị trí khác (ví dụ: hơi cao hơn/thấp hơn),
+            // bạn có thể điều chỉnh yPos ở đây để tránh va chạm.
+            float yPos = 0f; // Để test, có thể thay đổi thành 5f hoặc -5f nếu vẫn bị đè
+
+            return new Vector2(xPos, yPos);
         }
 
-        private float CalculateScale(Waypoint waypoint)
+        private float CalculateScale(float distance)
         {
-            float distance = Vector3.Distance(WaypointManager.Instance.playerTransform.position, waypoint.worldPosition);
-
-            // Tỉ lệ scale giảm dần khi khoảng cách tăng
-            // Normalized distance từ 0 (gần nhất) đến 1 (MaxRenderDistance)
-            float normalizedDistance = Mathf.InverseLerp(0, MaxRenderDistance, distance);
-            float scale = Mathf.Lerp(MaxScale, MinScale, normalizedDistance);
-
-            // Đảm bảo scale nằm trong khoảng MinScale và MaxScale
-            scale = Mathf.Clamp(scale, MinScale, MaxScale);
-            return scale;
+            // Lerp scale từ MaxScale (gần) đến MinScale (xa)
+            // Khi distance = 0, t = 0, scale = MaxScale
+            // Khi distance = MaxRenderDistance, t = 1, scale = MinScale
+            float t = Mathf.InverseLerp(0, MaxRenderDistance, distance);
+            return Mathf.Lerp(MaxScale, MinScale, t);
         }
     }
 }
