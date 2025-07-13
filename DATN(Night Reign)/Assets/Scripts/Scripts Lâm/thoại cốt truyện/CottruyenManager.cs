@@ -4,42 +4,79 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
+using DG.Tweening;
+using UnityEngine.Playables;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+SceneManager.LoadScene("");
 
 public class DialogueQueueManager : MonoBehaviour
 {
+    
     [Header("UI Elements")]
     public GameObject dialoguePanel;
     public TMP_Text dialogueText;
+    public GameObject blackScreenPanel;        // 🎯 Là panel chứa background đen
+    private Image blackScreenImage;            // Image nằm trên chính panel đó
 
     [Header("Settings")]
     public float displayTimePerDialogue = 5f;
-    public float typewriterSpeed = 0.03f; // Tốc độ gõ từng ký tự
+    public float finalDialogueHoldTime = 3f;
+    public float typewriterSpeed = 0.03f;
+    public float fadeDuration = 1f;
 
     [Header("Dialogue Data")]
     public DialogueData dialogueData;
 
+    [Header("Timeline")]
+    public PlayableDirector cutsceneTimeline;
+
     private Queue<LocalizedString> dialogueQueue = new Queue<LocalizedString>();
-    private bool isDisplaying = false;
+    private bool hasPlayed = false;
 
-    private const string TableName = "CutsceneNew"; // Tên bảng localization
+    private const string TableName = "CutsceneNew";
 
-    IEnumerator Start()
+    void Start()
     {
-        yield return LocalizationSettings.InitializationOperation;
+        dialoguePanel.SetActive(false);
 
-        if (dialogueData != null)
+        if (blackScreenPanel != null)
         {
-            PlayDialogueData(dialogueData);
+            blackScreenImage = blackScreenPanel.GetComponent<Image>();
+            if (blackScreenImage == null)
+            {
+                Debug.LogError("⚠️ Panel phải có component Image để fade alpha.");
+            }
+            else
+            {
+                Color c = blackScreenImage.color;
+                c.a = 0f;
+                blackScreenImage.color = c;
+                blackScreenPanel.SetActive(false);
+            }
         }
     }
 
-    public void PlayDialogueData(DialogueData data)
+    public void TriggerCutscene()
     {
-        if (data == null || data.keys.Count == 0)
+        if (hasPlayed) return;
+        hasPlayed = true;
+
+        if (cutsceneTimeline != null)
         {
-            Debug.LogWarning("⚠️ DialogueData null hoặc rỗng.");
-            return;
+            cutsceneTimeline.Play();
         }
+
+        if (dialogueData != null)
+        {
+            PrepareDialogue(dialogueData);
+            StartCoroutine(ProcessQueueThenFadeOut());
+        }
+    }
+
+    private void PrepareDialogue(DialogueData data)
+    {
+        dialogueQueue.Clear();
 
         foreach (string rawKey in data.keys)
         {
@@ -52,15 +89,21 @@ public class DialogueQueueManager : MonoBehaviour
 
             dialogueQueue.Enqueue(locString);
         }
-
-        if (!isDisplaying)
-            StartCoroutine(ProcessQueue());
     }
 
-    private IEnumerator ProcessQueue()
+    private IEnumerator ProcessQueueThenFadeOut()
     {
-        isDisplaying = true;
+        yield return StartCoroutine(ProcessQueue(holdLastDialogue: true));
 
+        yield return new WaitUntil(() =>
+            cutsceneTimeline == null || cutsceneTimeline.state != PlayState.Playing
+        );
+
+        yield return StartCoroutine(FadeBlackScreen());
+    }
+
+    private IEnumerator ProcessQueue(bool holdLastDialogue = false)
+    {
         while (dialogueQueue.Count > 0)
         {
             var locString = dialogueQueue.Dequeue();
@@ -72,18 +115,6 @@ public class DialogueQueueManager : MonoBehaviour
 
             void OnStringReady(string value)
             {
-                string localeCode = LocalizationSettings.SelectedLocale?.Identifier.Code;
-
-                if (value.Contains("Not Found"))
-                {
-                    string message = $"❌ Không tìm thấy key: {locString.TableReference}/{locString.TableEntryReference} (locale: {localeCode})";
-
-                    if (localeCode == "vi")
-                        Debug.LogError(message);
-                    else
-                        Debug.LogWarning(message);
-                }
-
                 fullText = value;
                 isLoaded = true;
                 locString.StringChanged -= OnStringReady;
@@ -94,18 +125,46 @@ public class DialogueQueueManager : MonoBehaviour
             dialoguePanel.SetActive(true);
             dialogueText.text = "";
 
-            // Bắt đầu gõ từng ký tự
             foreach (char c in fullText)
             {
                 dialogueText.text += c;
                 yield return new WaitForSeconds(typewriterSpeed);
             }
 
-            // Giữ nguyên panel một lúc sau khi gõ xong
-            yield return new WaitForSeconds(displayTimePerDialogue);
-            dialoguePanel.SetActive(false);
+            if (dialogueQueue.Count == 0 && holdLastDialogue)
+            {
+                yield return new WaitForSeconds(finalDialogueHoldTime);
+                yield break;
+            }
+            else
+            {
+                yield return new WaitForSeconds(displayTimePerDialogue);
+                dialoguePanel.SetActive(false);
+            }
         }
-
-        isDisplaying = false;
     }
+
+    private IEnumerator FadeBlackScreen()
+    {
+        Debug.Log("✅ Bắt đầu fade Panel đen (BlackScreenPanel)");
+
+        if (blackScreenImage == null) yield break;
+
+        blackScreenPanel.SetActive(true);
+
+        Color fromColor = blackScreenImage.color;
+        fromColor.a = 0f;
+        blackScreenImage.color = fromColor;
+
+        Color toColor = fromColor;
+        toColor.a = 1f;
+
+        yield return blackScreenImage
+            .DOColor(toColor, fadeDuration)
+            .SetEase(Ease.Linear)
+            .WaitForCompletion();
+
+        Debug.Log("🎬 Fade Panel hoàn tất. Load scene tiếp theo nếu muốn.");
+    }
+
 }
