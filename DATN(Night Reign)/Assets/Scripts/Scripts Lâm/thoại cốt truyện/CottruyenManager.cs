@@ -4,20 +4,16 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
-using DG.Tweening;
 using UnityEngine.Playables;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-SceneManager.LoadScene("");
+using DG.Tweening;
 
 public class DialogueQueueManager : MonoBehaviour
 {
-    
     [Header("UI Elements")]
     public GameObject dialoguePanel;
     public TMP_Text dialogueText;
-    public GameObject blackScreenPanel;        // 🎯 Là panel chứa background đen
-    private Image blackScreenImage;            // Image nằm trên chính panel đó
+    public GameObject blackScreenPanel;
 
     [Header("Settings")]
     public float displayTimePerDialogue = 5f;
@@ -31,30 +27,35 @@ public class DialogueQueueManager : MonoBehaviour
     [Header("Timeline")]
     public PlayableDirector cutsceneTimeline;
 
+    [Header("Scene To Load After Cutscene")]
+    public string nextSceneName = "Map_SaMac";
+
+    [Header("Voice Settings")]
+    public AudioSource voiceSource;
+
     private Queue<LocalizedString> dialogueQueue = new Queue<LocalizedString>();
     private bool hasPlayed = false;
+    private CanvasGroup canvasGroup;
 
     private const string TableName = "CutsceneNew";
 
     void Start()
     {
-        dialoguePanel.SetActive(false);
+        canvasGroup = dialoguePanel.GetComponent<CanvasGroup>();
+        if (canvasGroup == null)
+            canvasGroup = dialoguePanel.AddComponent<CanvasGroup>();
+
+        canvasGroup.alpha = 0f;
 
         if (blackScreenPanel != null)
         {
-            blackScreenImage = blackScreenPanel.GetComponent<Image>();
-            if (blackScreenImage == null)
-            {
-                Debug.LogError("⚠️ Panel phải có component Image để fade alpha.");
-            }
-            else
-            {
-                Color c = blackScreenImage.color;
-                c.a = 0f;
-                blackScreenImage.color = c;
-                blackScreenPanel.SetActive(false);
-            }
+            var img = blackScreenPanel.GetComponent<UnityEngine.UI.Image>();
+            if (img != null)
+                img.color = new Color(0, 0, 0, 0);
         }
+
+        if (voiceSource == null)
+            voiceSource = gameObject.AddComponent<AudioSource>();
     }
 
     public void TriggerCutscene()
@@ -63,14 +64,12 @@ public class DialogueQueueManager : MonoBehaviour
         hasPlayed = true;
 
         if (cutsceneTimeline != null)
-        {
             cutsceneTimeline.Play();
-        }
 
         if (dialogueData != null)
         {
             PrepareDialogue(dialogueData);
-            StartCoroutine(ProcessQueueThenFadeOut());
+            StartCoroutine(ProcessQueueThenCheckTimeline());
         }
     }
 
@@ -86,12 +85,11 @@ public class DialogueQueueManager : MonoBehaviour
                 TableReference = TableName,
                 TableEntryReference = key
             };
-
             dialogueQueue.Enqueue(locString);
         }
     }
 
-    private IEnumerator ProcessQueueThenFadeOut()
+    private IEnumerator ProcessQueueThenCheckTimeline()
     {
         yield return StartCoroutine(ProcessQueue(holdLastDialogue: true));
 
@@ -99,11 +97,13 @@ public class DialogueQueueManager : MonoBehaviour
             cutsceneTimeline == null || cutsceneTimeline.state != PlayState.Playing
         );
 
-        yield return StartCoroutine(FadeBlackScreen());
+        EndCutscene();
     }
 
     private IEnumerator ProcessQueue(bool holdLastDialogue = false)
     {
+        int index = 0;
+
         while (dialogueQueue.Count > 0)
         {
             var locString = dialogueQueue.Dequeue();
@@ -123,7 +123,11 @@ public class DialogueQueueManager : MonoBehaviour
             yield return new WaitUntil(() => isLoaded);
 
             dialoguePanel.SetActive(true);
+            canvasGroup.alpha = 0f;
+            canvasGroup.DOFade(1f, fadeDuration);
             dialogueText.text = "";
+
+            PlayVoiceByIndex(index); // 🔊 phát voice theo ngôn ngữ
 
             foreach (char c in fullText)
             {
@@ -139,32 +143,55 @@ public class DialogueQueueManager : MonoBehaviour
             else
             {
                 yield return new WaitForSeconds(displayTimePerDialogue);
+                canvasGroup.DOFade(0f, fadeDuration);
+                yield return new WaitForSeconds(fadeDuration);
                 dialoguePanel.SetActive(false);
             }
+
+            index++;
         }
     }
 
-    private IEnumerator FadeBlackScreen()
+    private void PlayVoiceByIndex(int index)
     {
-        Debug.Log("✅ Bắt đầu fade Panel đen (BlackScreenPanel)");
+        if (dialogueData == null || voiceSource == null) return;
 
-        if (blackScreenImage == null) yield break;
+        string langCode = LocalizationSettings.SelectedLocale.Identifier.Code.ToLower();
+        AudioClip clip = null;
 
-        blackScreenPanel.SetActive(true);
+        if (langCode == "vi" && index < dialogueData.voiceVi.Count)
+            clip = dialogueData.voiceVi[index];
+        else if (langCode == "en" && index < dialogueData.voiceEn.Count)
+            clip = dialogueData.voiceEn[index];
 
-        Color fromColor = blackScreenImage.color;
-        fromColor.a = 0f;
-        blackScreenImage.color = fromColor;
-
-        Color toColor = fromColor;
-        toColor.a = 1f;
-
-        yield return blackScreenImage
-            .DOColor(toColor, fadeDuration)
-            .SetEase(Ease.Linear)
-            .WaitForCompletion();
-
-        Debug.Log("🎬 Fade Panel hoàn tất. Load scene tiếp theo nếu muốn.");
+        if (clip != null)
+        {
+            voiceSource.Stop();
+            voiceSource.clip = clip;
+            voiceSource.Play();
+        }
     }
 
+    private void EndCutscene()
+    {
+        Debug.Log("✅ Thoại và Timeline kết thúc. Fade màn hình đen.");
+
+        if (blackScreenPanel != null)
+        {
+            var img = blackScreenPanel.GetComponent<UnityEngine.UI.Image>();
+            if (img != null)
+            {
+                blackScreenPanel.SetActive(true);
+                img.DOFade(1f, 1f).OnComplete(() =>
+                {
+                    Debug.Log("🎬 Fade hoàn tất. Chuyển scene...");
+                    SceneManager.LoadScene(nextSceneName);
+                });
+            }
+        }
+        else
+        {
+            SceneManager.LoadScene(nextSceneName);
+        }
+    }
 }
