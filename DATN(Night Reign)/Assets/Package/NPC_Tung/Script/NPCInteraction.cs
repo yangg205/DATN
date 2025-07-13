@@ -73,7 +73,7 @@ public class NPCInteraction : MonoBehaviour
 
     void Update()
     {
-        if (isPlayerInRange && Input.GetKeyDown(KeyCode.E))
+        if (isPlayerInRange && Input.GetKeyDown(KeyCode.C))
         {
             HandleInteraction();
         }
