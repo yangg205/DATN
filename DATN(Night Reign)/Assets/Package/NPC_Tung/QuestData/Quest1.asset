@@ -20,10 +20,10 @@ MonoBehaviour:
   targetNPCID: 
   targetItemID: 
   requiredItemCount: 1
-  rewardCoin: 0
-  rewardExp: 100
+  rewardCoin: 100
+  rewardExp: 50
   hasQuestLocation: 1
-  questLocation: {x: 63.75311, y: 1.28, z: 165.52}
+  questLocation: {x: 46, y: 0.47, z: 213}
   questLocationIcon: {fileID: 21300000, guid: 34a32c830edc1e447b2e44cc600cbfe8, type: 3}
   keydialogueBeforeComplete:
   - "\rDialogue/Flamekeeper_Q001_Intro\r\n"
@@ -33,10 +33,15 @@ MonoBehaviour:
   voiceBeforeComplete:
   - {fileID: 8300000, guid: 96fa98a31f569734b941e11b8b4bec0f, type: 3}
   keydialogueAfterComplete:
+  - Dialogue/Flamekeeper_Q001_Completion
+  - Dialogue/Player_Q001_Completed
   - Dialogue/Flamekeeper_Q001_NextSteps
-  - Dialogue/Player_Q001_WhereIsKael
+  - 'Dialogue/Player_Q001_WhereIsKael
+
+
+'
   - Dialogue/Flamekeeper_Q001_KaelLocation
   voiceAfterComplete: []
   keydialogueObjectiveMet:
-  - Dialogue/Flamekeeper_Q001_Completion
+  - Quest_Objective/Q001_Main
   voiceObjectiveMet: []
