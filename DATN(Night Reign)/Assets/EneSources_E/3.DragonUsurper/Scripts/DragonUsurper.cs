@@ -321,10 +321,6 @@ public class DragonUsurper : MonoBehaviour
         {
             healthFill.fillAmount = HP / maxHP;
         }
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            TakeDamage(10);
-        }
         
     }
 
