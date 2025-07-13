@@ -49,6 +49,8 @@ namespace ND
 
         public void HandleWeaponCombo(WeaponItem weapon)
         {
+            if (inputHandler.isInputDisabled) return; // ← thêm dòng này
+
             if (animatorHandler.anim.GetBool("canDoCombo") == false)
                 return;
 
@@ -84,6 +86,8 @@ namespace ND
             #region Combo Attacks
             public void HandleLightAttack(WeaponItem weapon)
         {
+            if (inputHandler.isInputDisabled) return; // ← thêm dòng này
+
             if (weapon == null || animatorHandler.anim.GetBool("isInteracting"))
                 return;
 
@@ -144,6 +148,8 @@ namespace ND
 
         public void HandleHeavyAttack(WeaponItem weapon)
         {
+            if (inputHandler.isInputDisabled) return; // ← thêm dòng này
+
             if (weapon == null || animatorHandler.anim.GetBool("isInteracting"))
                 return;
 
@@ -174,6 +180,8 @@ namespace ND
         #region Skill (Q)
         public void TryUseSkill()
         {
+            if (inputHandler.isInputDisabled) return; // ← thêm dòng này
+
             if (Time.time >= lastSkillTime + skillCooldown)
             {
                 lastSkillTime = Time.time;
@@ -220,6 +228,8 @@ namespace ND
         #region Buff R
         public void TryUseAttackSpeedBoost()
         {
+            if (inputHandler.isInputDisabled) return; // ← thêm dòng này
+
             if (Time.time < lastBoostTime + boostCooldown)
             {
                 Debug.Log("Buff chưa hồi!");

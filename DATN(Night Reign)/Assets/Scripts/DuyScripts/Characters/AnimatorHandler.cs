@@ -43,19 +43,17 @@ namespace ND
                 h = horizontalMovement;
             }
 
-            anim.SetFloat(vertical, v, 0.1f, Time.deltaTime);
-            anim.SetFloat(horizontal, h, 0.1f, Time.deltaTime);
+            anim.SetFloat("Vertical", v, 0.1f, Time.deltaTime);
+            anim.SetFloat("Horizontal", h, 0.1f, Time.deltaTime);
+            anim.SetBool("isSprinting", isSprinting);
+
+            Debug.Log($"[AnimatorHandler] Set Vertical: {v}, Horizontal: {h}, Sprinting: {isSprinting}");
         }
 
         public void PlayTargetAnimation(string targetAnim, bool isInteracting)
         {
             anim.applyRootMotion = isInteracting;
             anim.SetBool("isInteracting", isInteracting);
-
-            // Gán tốc độ animation theo buff (R)
-            var stats = playerManager.GetComponent<PlayerStats>();
-            anim.speed = stats != null ? stats.currentAttackSpeed : 1f;
-
             anim.CrossFade(targetAnim, 0.2f);
         }
 

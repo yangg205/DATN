@@ -7,6 +7,9 @@ namespace ND
 {
     public class InputHandler : MonoBehaviour
     {
+        //thu cuoi
+        MountSystem mountSystem;
+
         public float horizontal;
         public float vertical;
         public float moveAmount;
@@ -27,6 +30,8 @@ namespace ND
         public bool attackSpeedBoost_input;
         public bool isInputDisabled = false;
 
+        //thu cuoi
+        public bool mount_input;
 
         public bool d_Pad_Up;
         public bool d_Pad_Down;
@@ -61,6 +66,9 @@ namespace ND
             weaponSlotManager = GetComponentInChildren<WeaponSlotManager>();
             uiManager = FindFirstObjectByType<UIManager>();
             cameraHandler = FindFirstObjectByType<CameraHandler>();
+
+            //thu cuoi
+            mountSystem = GetComponent<MountSystem>();
         }
 
         public void OnEnable()
@@ -99,6 +107,9 @@ namespace ND
                 inputActions.PlayerActions.TwoHand.performed += i => twoHand_input = true;
                 inputActions.PlayerActions.Skill.performed += i => skill_input = true;
                 inputActions.PlayerActions.BoostAttackSpeed.performed += i => attackSpeedBoost_input = true;
+
+                //thu cuoi
+                inputActions.PlayerActions.Mount.performed += i => mount_input = true;
             }
 
             inputActions.Enable();
@@ -119,11 +130,16 @@ namespace ND
             HandleTwoHandInput();
             HandleSkillInput();
             HandleAttackSpeedBoostInput();
+            //thu cuoi
+            HandleMountInput();
 
         }
 
         private void HandleMoveInput(float delta)
         {
+            /*if (isInputDisabled)
+                return;*/
+
             horizontal = movementInput.x;
             vertical = movementInput.y;
             moveAmount = Mathf.Clamp01(Mathf.Abs(horizontal) + Mathf.Abs(vertical));
@@ -259,6 +275,16 @@ namespace ND
             {
                 attackSpeedBoost_input = false;
                 playerAttacker.TryUseAttackSpeedBoost();
+            }
+        }
+
+        //thu cuoi
+        private void HandleMountInput()
+        {
+            if (mount_input)
+            {
+                mount_input = false;
+                mountSystem.TryMountOrDismount();
             }
         }
     }

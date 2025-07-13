@@ -167,7 +167,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""78221d18-43e2-4899-b6e4-749213e9d93d"",
-                    ""path"": ""<Keyboard>/1"",
+                    ""path"": ""<Keyboard>/9"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -189,7 +189,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""7cb5d72e-c155-476f-9905-332c14616a3e"",
-                    ""path"": ""<Keyboard>/2"",
+                    ""path"": ""<Keyboard>/0"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -288,6 +288,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""name"": ""BoostAttackSpeed"",
                     ""type"": ""Button"",
                     ""id"": ""46551fda-6a52-4502-ac76-d44c10b078db"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Mount"",
+                    ""type"": ""Button"",
+                    ""id"": ""1bc1fbcc-545b-46ed-be88-55d369d48f2a"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -452,7 +461,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""1c078f53-48eb-4b92-9fe4-3ee5bd6a730b"",
-                    ""path"": ""<Keyboard>/q"",
+                    ""path"": ""<Keyboard>/1"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -474,11 +483,22 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""53c755fe-5f8d-41b4-881a-2a32c67cf401"",
-                    ""path"": ""<Keyboard>/r"",
+                    ""path"": ""<Keyboard>/2"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""BoostAttackSpeed"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""fd383413-3e52-4956-860c-a69448b9d3b6"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Mount"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -637,6 +657,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_PlayerActions_Skill = m_PlayerActions.FindAction("Skill", throwIfNotFound: true);
         m_PlayerActions_TwoHand = m_PlayerActions.FindAction("Two Hand", throwIfNotFound: true);
         m_PlayerActions_BoostAttackSpeed = m_PlayerActions.FindAction("BoostAttackSpeed", throwIfNotFound: true);
+        m_PlayerActions_Mount = m_PlayerActions.FindAction("Mount", throwIfNotFound: true);
         // Player QuickSlots
         m_PlayerQuickSlots = asset.FindActionMap("Player QuickSlots", throwIfNotFound: true);
         m_PlayerQuickSlots_DPadUp = m_PlayerQuickSlots.FindAction("D-Pad Up", throwIfNotFound: true);
@@ -791,6 +812,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_PlayerActions_Skill;
     private readonly InputAction m_PlayerActions_TwoHand;
     private readonly InputAction m_PlayerActions_BoostAttackSpeed;
+    private readonly InputAction m_PlayerActions_Mount;
     public struct PlayerActionsActions
     {
         private @PlayerControls m_Wrapper;
@@ -805,6 +827,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         public InputAction @Skill => m_Wrapper.m_PlayerActions_Skill;
         public InputAction @TwoHand => m_Wrapper.m_PlayerActions_TwoHand;
         public InputAction @BoostAttackSpeed => m_Wrapper.m_PlayerActions_BoostAttackSpeed;
+        public InputAction @Mount => m_Wrapper.m_PlayerActions_Mount;
         public InputActionMap Get() { return m_Wrapper.m_PlayerActions; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -844,6 +867,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @BoostAttackSpeed.started += instance.OnBoostAttackSpeed;
             @BoostAttackSpeed.performed += instance.OnBoostAttackSpeed;
             @BoostAttackSpeed.canceled += instance.OnBoostAttackSpeed;
+            @Mount.started += instance.OnMount;
+            @Mount.performed += instance.OnMount;
+            @Mount.canceled += instance.OnMount;
         }
 
         private void UnregisterCallbacks(IPlayerActionsActions instance)
@@ -878,6 +904,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @BoostAttackSpeed.started -= instance.OnBoostAttackSpeed;
             @BoostAttackSpeed.performed -= instance.OnBoostAttackSpeed;
             @BoostAttackSpeed.canceled -= instance.OnBoostAttackSpeed;
+            @Mount.started -= instance.OnMount;
+            @Mount.performed -= instance.OnMount;
+            @Mount.canceled -= instance.OnMount;
         }
 
         public void RemoveCallbacks(IPlayerActionsActions instance)
@@ -984,6 +1013,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         void OnSkill(InputAction.CallbackContext context);
         void OnTwoHand(InputAction.CallbackContext context);
         void OnBoostAttackSpeed(InputAction.CallbackContext context);
+        void OnMount(InputAction.CallbackContext context);
     }
     public interface IPlayerQuickSlotsActions
     {
