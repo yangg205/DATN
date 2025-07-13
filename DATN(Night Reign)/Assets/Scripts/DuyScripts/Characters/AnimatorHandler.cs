@@ -43,19 +43,17 @@ namespace ND
                 h = horizontalMovement;
             }
 
-            anim.SetFloat(vertical, v, 0.1f, Time.deltaTime);
-            anim.SetFloat(horizontal, h, 0.1f, Time.deltaTime);
+            anim.SetFloat("Vertical", v, 0.1f, Time.deltaTime);
+            anim.SetFloat("Horizontal", h, 0.1f, Time.deltaTime);
+            anim.SetBool("isSprinting", isSprinting);
+
+            Debug.Log($"[AnimatorHandler] Set Vertical: {v}, Horizontal: {h}, Sprinting: {isSprinting}");
         }
 
         public void PlayTargetAnimation(string targetAnim, bool isInteracting)
         {
             anim.applyRootMotion = isInteracting;
             anim.SetBool("isInteracting", isInteracting);
-
-            // Gán tốc độ animation theo buff (R)
-            var stats = playerManager.GetComponent<PlayerStats>();
-            anim.speed = stats != null ? stats.currentAttackSpeed : 1f;
-
             anim.CrossFade(targetAnim, 0.2f);
         }
 
@@ -80,11 +78,17 @@ namespace ND
         public void TriggerAttackVFX()
         {
             var attacker = GetComponentInParent<PlayerAttacker>();
-            var weapon = attacker?.weaponSlotManager?.attackingWeapon;
+            if (attacker == null) return;
 
-            if (weapon != null && weapon.lightAttackVFX != null)
+            var weapon = attacker.weaponSlotManager?.attackingWeapon;
+            if (weapon == null) return;
+
+            switch (attacker.CurrentLightComboStep)
             {
-                attacker.PlayAttackVFX(weapon.lightAttackVFX);
+                case 1: attacker.PlayAttackVFX(weapon.lightAttackVFX_1); break;
+                case 2: attacker.PlayAttackVFX(weapon.lightAttackVFX_2); break;
+                case 3: attacker.PlayAttackVFX(weapon.lightAttackVFX_3); break;
+                case 4: attacker.PlayAttackVFX(weapon.lightAttackVFX_4); break;
             }
         }
     }

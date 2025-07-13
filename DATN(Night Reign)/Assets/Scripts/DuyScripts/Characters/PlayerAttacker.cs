@@ -12,6 +12,8 @@ namespace ND
         InputHandler inputHandler;
         public WeaponSlotManager weaponSlotManager;
         public string lastAttack;
+        public int CurrentLightComboStep => lightComboStep;
+
 
         private int lightComboStep = 0;
         private int heavyComboStep = 0;
@@ -47,6 +49,8 @@ namespace ND
 
         public void HandleWeaponCombo(WeaponItem weapon)
         {
+            if (inputHandler.isInputDisabled) return; // ← thêm dòng này
+
             if (animatorHandler.anim.GetBool("canDoCombo") == false)
                 return;
 
@@ -82,6 +86,8 @@ namespace ND
             #region Combo Attacks
             public void HandleLightAttack(WeaponItem weapon)
         {
+            if (inputHandler.isInputDisabled) return; // ← thêm dòng này
+
             if (weapon == null || animatorHandler.anim.GetBool("isInteracting"))
                 return;
 
@@ -130,11 +136,20 @@ namespace ND
             lastAttack = animName;
             weaponSlotManager.attackingWeapon = weapon;
 
-            PlayAttackVFX(weapon.lightAttackVFX);
+            switch (lightComboStep)
+            {
+                case 1: PlayAttackVFX(weapon.lightAttackVFX_1); break;
+                case 2: PlayAttackVFX(weapon.lightAttackVFX_2); break;
+                case 3: PlayAttackVFX(weapon.lightAttackVFX_3); break;
+                case 4: PlayAttackVFX(weapon.lightAttackVFX_4); break;
+            }
+
         }
 
         public void HandleHeavyAttack(WeaponItem weapon)
         {
+            if (inputHandler.isInputDisabled) return; // ← thêm dòng này
+
             if (weapon == null || animatorHandler.anim.GetBool("isInteracting"))
                 return;
 
@@ -152,7 +167,6 @@ namespace ND
 
             animatorHandler.PlayTargetAnimation(animName, true);
             lastAttack = animName;
-            PlayAttackVFX(weapon.heavyAttackVFX);
         }
 
         public void ResetCombos()
@@ -166,6 +180,8 @@ namespace ND
         #region Skill (Q)
         public void TryUseSkill()
         {
+            if (inputHandler.isInputDisabled) return; // ← thêm dòng này
+
             if (Time.time >= lastSkillTime + skillCooldown)
             {
                 lastSkillTime = Time.time;
@@ -212,6 +228,8 @@ namespace ND
         #region Buff R
         public void TryUseAttackSpeedBoost()
         {
+            if (inputHandler.isInputDisabled) return; // ← thêm dòng này
+
             if (Time.time < lastBoostTime + boostCooldown)
             {
                 Debug.Log("Buff chưa hồi!");
@@ -278,7 +296,6 @@ namespace ND
                 return;
             }
 
-            // Tìm đúng đường dẫn "Weapon Pivot/VFX_SpawnPoint"
             Transform vfxSpawnPoint = weaponModel.transform.Find("Weapon Pivot/VFX_SpawnPoint");
 
             if (vfxSpawnPoint == null)
