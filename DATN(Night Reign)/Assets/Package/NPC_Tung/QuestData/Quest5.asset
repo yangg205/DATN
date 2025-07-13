@@ -12,17 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c93b2c574055c9540934f0b3c4b91d4d, type: 3}
   m_Name: Quest10
   m_EditorClassIdentifier: 
-  questName: "T\u1EC9nh Th\u1EE9c"
-  giverNPCID: Grusk
-  description: 
-  questType: 0
+  questName: Quest_Title/Q005_FindGrusk
+  giverNPCID: Flamekeeper
+  description: Quest_Objective/Q005_Main
+  questType: 1
   requiredKills: 0
-  targetNPCID: 
+  targetNPCID: Grusk
   targetItemID: 
   requiredItemCount: 1
-  rewardSoul: 0
-  rewardExp: 0
-  dialogueBeforeComplete:
-  - 
-  - 
-  dialogueAfterComplete: []
+  rewardCoin: 75
+  rewardExp: 30
+  hasQuestLocation: 0
+  questLocation: {x: 0, y: 0, z: 0}
+  questLocationIcon: {fileID: 0}
+  keydialogueBeforeComplete: []
+  voiceBeforeComplete: []
+  keydialogueAfterComplete: []
+  voiceAfterComplete: []
+  keydialogueObjectiveMet: []
+  voiceObjectiveMet: []

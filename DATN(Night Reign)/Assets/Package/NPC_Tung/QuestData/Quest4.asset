@@ -12,29 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c93b2c574055c9540934f0b3c4b91d4d, type: 3}
   m_Name: Quest6
   m_EditorClassIdentifier: 
-  questName: 
-  giverNPCID: Grusk
-  description: 
-  questType: 2
-  requiredKills: 0
+  questName: Quest_Title/Q004_DefeatAshen
+  giverNPCID: Flamekeeper
+  description: Quest_Objective/Q004_Main
+  questType: 0
+  requiredKills: 1
   targetNPCID: 
-  targetItemID: 1
-  requiredItemCount: 5
-  rewardSoul: 100
-  rewardExp: 100
+  targetItemID: Dawn Shard
+  requiredItemCount: 1
+  rewardCoin: 500
+  rewardExp: 200
+  hasQuestLocation: 0
+  questLocation: {x: 0, y: 0, z: 0}
+  questLocationIcon: {fileID: 21300000, guid: 34a32c830edc1e447b2e44cc600cbfe8, type: 3}
   keydialogueBeforeComplete:
-  - "Grusk:\u201CM\u1EA3nh V\u1EE1 ti\u1EBFp theo n\xF3 r\u01A1i v\xE0o tay Sentinel
-    k\u1EBB \u0111\xE3 ph\u1EA3n b\u1ED9i l\u1EA1i Th\xE1p \xE1nh s\xE1ng.H\u1EAFn 
-    tr\xFA ng\u1EE5 trong Hang S\u01B0\u01A1ng Tr\u1EAFng, n\u01A1i m\xE0 ng\u01B0\u01A1i
-    th\u1EDF ra h\u01A1i l\u1EA1nh l\xE0 m\xE1u s\u1EBD \u0111\xF3ng l\u1EA1i trong
-    tim.\u201D\r\n"
-  - "Grusk: \u201C\u0110\u1EC3 v\xE0o \u0111\u01B0\u1EE3c hang \u0111\xF3, ng\u01B0\u01A1i
-    c\u1EA7n ph\u1EA3i c\xF3 thu\u1ED1c kh\xE1ng l\u1EA1nh kh\xF4ng c\xF3 thu\u1ED1c
-    kh\xE1ng l\u1EA1nh, ng\u01B0\u01A1i s\u1EBD ch\u1EBFt tr\u01B0\u1EDBc khi th\u1EA5y
-    \u0111\u01B0\u1EE3c b\xF3ng h\u1EAFn. H\xE3y \u0111i t\xECm cho ta (tinh th\u1EC3
-    tuy\u1EBFt  ) \u0111\u1EC3 ta c\xF3 th\u1EC3 ch\u1EBF t\u1EA1o thu\u1ED1c kh\xE1ng
-    l\u1EA1nh gi\xFAp ng\u01B0\u01A1i \u201D\r"
+  - Dialogue/Flamekeeper_Q004_Intro
+  - Dialogue/Player_Q004_Resolve
+  voiceBeforeComplete: []
   keydialogueAfterComplete:
-  - "Player : \u201C Nguy\xEAn li\u1EC7u c\u1EE7a \xF4ng \u0111\xE2y .\u201D\r\n"
-  - "Grusk: \u201C T\u1ED1t ta s\u1EBD ch\u1EBF t\u1EA1o thu\u1ED1c cho ng\u01B0\u01A1i
-    ngay \u0111\xE2y \u201D\r"
+  - Dialogue/Flamekeeper_Q004_Completion
+  - Dialogue/Flamekeeper_Ch2_NextShard
+  voiceAfterComplete: []
+  keydialogueObjectiveMet: []
+  voiceObjectiveMet: []
