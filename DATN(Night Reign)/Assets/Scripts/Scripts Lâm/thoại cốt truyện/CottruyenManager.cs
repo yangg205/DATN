@@ -8,7 +8,7 @@ using DG.Tweening;
 using UnityEngine.Playables;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-SceneManager.LoadScene("");
+//SceneManager.LoadScene("");
 
 public class DialogueQueueManager : MonoBehaviour
 {
