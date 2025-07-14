@@ -13,6 +13,9 @@ public class DragonSoulEater : MonoBehaviour
     public float maxHP = 100f;
     public Animator animator;
 
+    public int expReward = 25;
+    public PlayerStats playerStats;
+
 
     public Transform attackPoint;
     public float attackRange = 1.5f;
@@ -25,9 +28,6 @@ public class DragonSoulEater : MonoBehaviour
     [Header("Damage Popup")]
     public GameObject damagePopupPrefab;
 
-    [Header("VFX")]
-    public ParticleSystem vfxDead;
-
     [Header("Freeze Effect")]
     public Material iceMaterial;             
     public Material originalMaterial;       
@@ -39,14 +39,17 @@ public class DragonSoulEater : MonoBehaviour
     public bool isDead = false;
     public bool isTakingDamage = false;
 
-    public int minAttackDamage = 1;
-    public int maxAttackDamage = 3;
-
+    public float minAttackDamage = 5f;
+    public float maxAttackDamage = 15f;
 
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
 
+        if (player != null)
+        {
+            playerStats = player.GetComponent<PlayerStats>();
+        }
     }
 
     void Update()
@@ -56,14 +59,14 @@ public class DragonSoulEater : MonoBehaviour
             healthFill.fillAmount = HP / maxHP;
         }
         //===test 
-     /*   if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.E))
         {
             TakeDamage(20);
         }if (Input.GetKeyDown(KeyCode.I))
             {
                 TakeIceDamageSoulEater(1);
              }
-*/
+
 
         if (isDead) return;
 
@@ -89,11 +92,6 @@ public class DragonSoulEater : MonoBehaviour
         {
             isDead = true;
 
-            if (vfxDead != null)
-            {
-                vfxDead.Play();
-            }
-
             if (aiPath != null)
             {
                 aiPath.canMove = false;
@@ -104,6 +102,26 @@ public class DragonSoulEater : MonoBehaviour
             animator.SetTrigger("die");
             GetComponent<Collider>().enabled = false;
             GetComponent<Rigidbody>().isKinematic = true;
+            // 💥 Nếu enemy này đang bị lock-on thì thoát lock-on
+            if (ND.CameraHandler.singleton != null &&
+                ND.CameraHandler.singleton.currentLockOnTarget == this)
+            {
+                ND.InputHandler inputHandler = FindObjectOfType<ND.InputHandler>();
+
+                // Tắt lock-on mode
+                if (inputHandler != null)
+                {
+                    inputHandler.lockOnFlag = false;
+                }
+
+                // Reset camera
+                ND.CameraHandler.singleton.ClearLockOnTargets();
+            }
+
+            if (playerStats != null)
+            {
+                playerStats.GainEXP(expReward);
+            }
             Destroy(gameObject, 7f);
 
         }
@@ -139,11 +157,6 @@ public class DragonSoulEater : MonoBehaviour
         {
             isDead = true;
 
-            if (vfxDead != null)
-            {
-                vfxDead.Play();
-            }
-
             if (aiPath != null)
             {
                 aiPath.canMove = false;
@@ -154,6 +167,7 @@ public class DragonSoulEater : MonoBehaviour
             animator.SetTrigger("die");
             GetComponent<Collider>().enabled = false;
             GetComponent<Rigidbody>().isKinematic = true;
+
             Destroy(gameObject, 7f);
 
         }
@@ -170,13 +184,12 @@ public class DragonSoulEater : MonoBehaviour
 
     public void DealDamage()
     {
-        int damage = Random.Range(minAttackDamage, maxAttackDamage);
+        float damage = Random.Range(minAttackDamage, maxAttackDamage);
 
         Collider[] hitPlayers = Physics.OverlapSphere(attackPoint.position, attackRange, playerLayer);
         foreach (Collider player in hitPlayers)
         {
-          player.GetComponent<PlayerStats>()?.TakeDamage(damage);
-       
+            playerStats.TakeDamage(50);
         }
     }
     private void OnDrawGizmosSelected()

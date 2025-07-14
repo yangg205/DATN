@@ -67,7 +67,7 @@ public class MountSystem : MonoBehaviour
         if (TryGetComponent(out Collider col)) col.enabled = false;
 
         transform.position = mountSeat.position;
-        transform.rotation = mountSeat.rotation;
+        transform.rotation = Quaternion.Euler(0, mountSeat.eulerAngles.y, 0);
 
         if (mountController != null)
             mountController.enabled = true;

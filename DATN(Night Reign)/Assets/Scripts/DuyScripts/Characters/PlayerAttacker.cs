@@ -228,8 +228,8 @@ namespace ND
         #region Buff R
         public void TryUseAttackSpeedBoost()
         {
-            if (inputHandler.isInputDisabled) return; // ← thêm dòng này
-
+/*            if (inputHandler.isInputDisabled) return; // ← thêm dòng này
+*/
             if (Time.time < lastBoostTime + boostCooldown)
             {
                 Debug.Log("Buff chưa hồi!");
@@ -252,7 +252,7 @@ namespace ND
 
             yield return new WaitForSeconds(1f); // animation kết thúc
 
-            playerStats.currentAttackSpeed = 1.5f;
+            playerStats.currentAttackSpeed = 5f;
             Debug.Log("Tăng tốc đánh!");
 
             yield return new WaitForSeconds(boostDuration);

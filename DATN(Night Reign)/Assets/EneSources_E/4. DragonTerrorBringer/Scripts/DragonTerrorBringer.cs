@@ -23,9 +23,6 @@ public class DragonTerrorBringer : MonoBehaviour
     [Header("Damage Popup")]
     public GameObject damagePopupPrefab;
 
-    [Header("VFX")]
-    public ParticleSystem vfxDead;
-
     [Header("Freeze Effect")]
     public Material iceMaterial;
     public Material originalMaterial;
@@ -35,8 +32,8 @@ public class DragonTerrorBringer : MonoBehaviour
     public bool isDead = false;
     public bool isTakingDamage = false;
 
-    public int minAttackDamage = 2;
-    public int maxAttackDamage = 6;
+    public float minAttackDamage = 5f;
+    public float maxAttackDamage = 15f;
 
     private AIPath aiPath;
     private bool isDefending = false;
@@ -95,13 +92,13 @@ public class DragonTerrorBringer : MonoBehaviour
 
     public void DealDamage()
     {
-        int damage = Random.Range(minAttackDamage, maxAttackDamage);
+        float damage = Random.Range(minAttackDamage, maxAttackDamage);
         Collider[] hitPlayers = Physics.OverlapSphere(attackPoint.position, attackRange, playerLayer);
         foreach (Collider player in hitPlayers)
         {
             //player.GetComponent<PlayerClone>()?.TakeDamage(damage);
-            player.GetComponent<PlayerStats>()?.TakeDamage(damage);
-        }
+/*            player.GetComponent<PlayerStats>()?.TakeDamage(15);
+*/        }
     }
 
     public void TakeDamage(int damageAmount)
@@ -168,9 +165,20 @@ public class DragonTerrorBringer : MonoBehaviour
         GetComponent<Collider>().enabled = false;
         GetComponent<Rigidbody>().isKinematic = true;
 
-        if (vfxDead != null)
+        // 💥 Nếu enemy này đang bị lock-on thì thoát lock-on
+        if (ND.CameraHandler.singleton != null &&
+            ND.CameraHandler.singleton.currentLockOnTarget == this)
         {
-            vfxDead.Play();
+            ND.InputHandler inputHandler = FindObjectOfType<ND.InputHandler>();
+
+            // Tắt lock-on mode
+            if (inputHandler != null)
+            {
+                inputHandler.lockOnFlag = false;
+            }
+
+            // Reset camera
+            ND.CameraHandler.singleton.ClearLockOnTargets();
         }
 
         Destroy(gameObject, 7f);
