@@ -113,21 +113,12 @@ public class MinimapController : MonoBehaviour
             return;
         }
 
-        // Sử dụng kích thước của container (khung hiển thị thực tế của minimap trên UI)
-        float mapUIHalfWidth = minimapContainerRect.rect.width / 2f;
-        float mapUIHalfHeight = minimapContainerRect.rect.height / 2f;
-
-        // Tính toán tỉ lệ chuyển đổi từ đơn vị thế giới sang đơn vị UI (pixel)
-        // worldUnitPerUIPixel = (minimapCamera.orthographicSize * 2f) / minimapUIContainerSize;
-        // pixelsPerWorldUnit = minimapUIContainerSize / (minimapCamera.orthographicSize * 2f);
-
-        // orthographicSize là một nửa chiều cao của khung nhìn. Khung nhìn là hình vuông.
-        // Vậy chiều rộng/chiều cao thế giới mà camera nhìn thấy là 2 * minimapCamera.orthographicSize
         float worldVisibleSize = minimapCamera.orthographicSize * 2f;
-        float pixelsPerWorldUnit = minimapContainerRect.rect.width / worldVisibleSize; // Giả sử container hình vuông
+        float pixelsPerWorldUnit = minimapContainerRect.rect.width / worldVisibleSize;
 
         Vector3 playerWorldPos = WaypointManager.Instance.playerTransform.position;
 
+        // Duyệt qua TẤT CẢ các waypoint đã được WaypointManager tạo UI cho minimap
         foreach (var entry in WaypointManager.Instance.minimapWaypointUIs)
         {
             WaypointUI waypointUI = entry.Value;
@@ -139,34 +130,21 @@ public class MinimapController : MonoBehaviour
                 continue;
             }
 
-            // Chỉ hiển thị waypoint nếu nó là ACTIVE WAYPOINT.
-            // Nếu bạn muốn hiển thị TẤT CẢ các waypoint trong phạm vi, hãy bỏ `&& isActiveWaypoint`
-            bool isActiveWaypoint = (WaypointManager.Instance.activeWaypoint != null && WaypointManager.Instance.activeWaypoint.id == waypointData.id);
+            // Tính toán khoảng cách
+            Vector3 relativeWorldPos = waypointData.worldPosition - playerWorldPos;
+            Vector2 relativeWorldPos2D = new Vector2(relativeWorldPos.x, relativeWorldPos.z);
+            float distance = relativeWorldPos2D.magnitude;
 
-            if (isActiveWaypoint)
+            // Chỉ hiển thị waypoint nếu nó nằm trong bán kính nhìn của minimap
+            if (distance <= minimapViewRadius)
             {
-                // Vị trí waypoint tương đối so với người chơi (trung tâm của minimap)
-                // Chỉ lấy thành phần XZ
-                Vector3 relativeWorldPos = waypointData.worldPosition - playerWorldPos;
-                Vector2 relativeWorldPos2D = new Vector2(relativeWorldPos.x, relativeWorldPos.z);
-
-                float distance = relativeWorldPos2D.magnitude;
-
-                // Ẩn waypoint nếu nó nằm ngoài bán kính nhìn của minimap
-                if (distance > minimapViewRadius)
-                {
-                    if (waypointUI.gameObject.activeSelf) waypointUI.gameObject.SetActive(false);
-                    continue; // Bỏ qua các tính toán khác nếu đã ẩn
-                }
-
                 // Chuyển đổi vị trí tương đối thế giới sang tọa độ UI
-                // uiX và uiY là offset từ tâm của UI container (0,0)
                 float uiX = relativeWorldPos2D.x * pixelsPerWorldUnit;
                 float uiY = relativeWorldPos2D.y * pixelsPerWorldUnit;
 
-                // Clamp vị trí UI vào bên trong khung minimap (nếu cần, để tránh vượt ra ngoài rìa)
-                // Điều này hữu ích nếu bạn muốn waypoint dừng lại ở rìa bản đồ thay vì biến mất
-                // Nhưng với logic khoảng cách và setActive(false) ở trên, việc này ít cần thiết hơn.
+                // Clamp vị trí UI vào bên trong khung minimap (nếu cần)
+                float mapUIHalfWidth = minimapContainerRect.rect.width / 2f;
+                float mapUIHalfHeight = minimapContainerRect.rect.height / 2f;
                 uiX = Mathf.Clamp(uiX, -mapUIHalfWidth, mapUIHalfWidth);
                 uiY = Mathf.Clamp(uiY, -mapUIHalfHeight, mapUIHalfHeight);
 
@@ -177,7 +155,7 @@ public class MinimapController : MonoBehaviour
             }
             else
             {
-                // Ẩn nếu không phải là active waypoint
+                // Ẩn nếu ngoài phạm vi
                 if (waypointUI.gameObject.activeSelf) waypointUI.gameObject.SetActive(false);
             }
         }
