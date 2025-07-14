@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine.UI;
 using UnityEngine.Video;
 using System.Collections.Generic;
+using ND;
 
 public class TutorialManager : MonoBehaviour
 {
@@ -66,7 +67,13 @@ public class TutorialManager : MonoBehaviour
         isShowing = true;
         currentTrigger = trigger;
 
-        Time.timeScale = 0f; // pause game khi hiển thị hướng dẫn
+        // ✨ Pause game và vô hiệu hóa camera xoay
+        Time.timeScale = 0f;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        if (CameraHandler.singleton != null)
+            CameraHandler.singleton.canRotate = false;
     }
 
     public void CloseCurrentPopup()
@@ -76,7 +83,6 @@ public class TutorialManager : MonoBehaviour
         popupCanvas.blocksRaycasts = false;
 
         isShowing = false;
-        Time.timeScale = 1f;
 
         HideAllIcons();
 
@@ -90,6 +96,17 @@ public class TutorialManager : MonoBehaviour
             currentTrigger.Deactivate();
             currentTrigger = null;
         }
+
+        // ✅ Resume game
+        Time.timeScale = 1f;
+
+        // ✅ Khóa chuột & ẩn
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        // ✅ Bật xoay camera
+        if (CameraHandler.singleton != null)
+            CameraHandler.singleton.canRotate = true;
     }
 
     private void ShowManualIcons(List<GameObject> icons)
