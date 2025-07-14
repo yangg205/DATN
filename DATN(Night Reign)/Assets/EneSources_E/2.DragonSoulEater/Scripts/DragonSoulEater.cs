@@ -1,4 +1,5 @@
-﻿using Pathfinding;
+﻿using ND;
+using Pathfinding;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -11,6 +12,9 @@ public class DragonSoulEater : MonoBehaviour
     public float HP = 100f;
     public float maxHP = 100f;
     public Animator animator;
+
+    public int expReward = 25;
+    public PlayerStats playerStats;
 
 
     public Transform attackPoint;
@@ -38,11 +42,14 @@ public class DragonSoulEater : MonoBehaviour
     public float minAttackDamage = 5f;
     public float maxAttackDamage = 15f;
 
-
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
 
+        if (player != null)
+        {
+            playerStats = player.GetComponent<PlayerStats>();
+        }
     }
 
     void Update()
@@ -95,6 +102,26 @@ public class DragonSoulEater : MonoBehaviour
             animator.SetTrigger("die");
             GetComponent<Collider>().enabled = false;
             GetComponent<Rigidbody>().isKinematic = true;
+            // 💥 Nếu enemy này đang bị lock-on thì thoát lock-on
+            if (ND.CameraHandler.singleton != null &&
+                ND.CameraHandler.singleton.currentLockOnTarget == this)
+            {
+                ND.InputHandler inputHandler = FindObjectOfType<ND.InputHandler>();
+
+                // Tắt lock-on mode
+                if (inputHandler != null)
+                {
+                    inputHandler.lockOnFlag = false;
+                }
+
+                // Reset camera
+                ND.CameraHandler.singleton.ClearLockOnTargets();
+            }
+
+            if (playerStats != null)
+            {
+                playerStats.GainEXP(expReward);
+            }
             Destroy(gameObject, 7f);
 
         }
@@ -140,6 +167,7 @@ public class DragonSoulEater : MonoBehaviour
             animator.SetTrigger("die");
             GetComponent<Collider>().enabled = false;
             GetComponent<Rigidbody>().isKinematic = true;
+
             Destroy(gameObject, 7f);
 
         }
@@ -161,8 +189,7 @@ public class DragonSoulEater : MonoBehaviour
         Collider[] hitPlayers = Physics.OverlapSphere(attackPoint.position, attackRange, playerLayer);
         foreach (Collider player in hitPlayers)
         {
-/*            player.GetComponent<PlayerStats>()?.TakeDamage(15);
-*/            //============== thay bằng code HP player=============================***************************
+            playerStats.TakeDamage(50);
         }
     }
     private void OnDrawGizmosSelected()

@@ -395,7 +395,8 @@ GameObject:
   - component: {fileID: 2380192786557340144}
   - component: {fileID: 2849465924608352558}
   - component: {fileID: 3139485145790890128}
-  m_Layer: 6
+  - component: {fileID: 2822489204249143341}
+  m_Layer: 0
   m_Name: DragonSoulEater_Green
   m_TagString: DragonSoulEater
   m_Icon: {fileID: 0}
@@ -420,6 +421,7 @@ Transform:
   - {fileID: 6826880930841457318}
   - {fileID: 3075427399358709597}
   - {fileID: 3116812948318496701}
+  - {fileID: 1479495880374787926}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!95 &3483141855582954558
@@ -601,13 +603,16 @@ MonoBehaviour:
   HP: 100
   maxHP: 100
   animator: {fileID: 3483141855582954558}
+  expReward: 25
+  playerStats: {fileID: 0}
   attackPoint: {fileID: 6826880930841457318}
   attackRange: 0.78
   playerLayer:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 1
   healthFill: {fileID: 3264342681793275870}
-  damagePopupPrefab: {fileID: 247968149220129898, guid: 04f99676d4ee40d44b375f9d7ef86f4d, type: 3}
+  damagePopupPrefab: {fileID: 247968149220129898, guid: 04f99676d4ee40d44b375f9d7ef86f4d,
+    type: 3}
   iceMaterial: {fileID: 2100000, guid: 9d02d36f4103207499528d9223003d19, type: 2}
   originalMaterial: {fileID: 2100000, guid: a0c281dfd6b92bd4db117147759c5b8f, type: 2}
   freezeDuration: 5
@@ -616,6 +621,19 @@ MonoBehaviour:
   isTakingDamage: 0
   minAttackDamage: 5
   maxAttackDamage: 15
+--- !u!114 &2822489204249143341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1873686811714228870}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 604dcb9ed21d1c74cb59c45003b9049b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lockOnTransform: {fileID: 1479495880374787926}
 --- !u!1 &2070847864099225129
 GameObject:
   m_ObjectHideFlags: 0
@@ -630,7 +648,7 @@ GameObject:
   - component: {fileID: 4458521645520918376}
   - component: {fileID: 9133208439853317303}
   - component: {fileID: 7952268012141509227}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: EnemyCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -733,6 +751,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b8ec973004147640b3e2096b5fb6497, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerTransform: {fileID: 0}
+  visibleDistance: 5
 --- !u!114 &7952268012141509227
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -745,6 +765,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b8ec973004147640b3e2096b5fb6497, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerTransform: {fileID: 0}
+  visibleDistance: 5
+--- !u!1 &2216047670142191355
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1479495880374787926}
+  m_Layer: 0
+  m_Name: Lock On Transform (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1479495880374787926
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2216047670142191355}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3483812630738011059}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2302912056811212576
 GameObject:
   m_ObjectHideFlags: 0
@@ -1172,7 +1225,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6826880930841457318}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: AT Point
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1444,7 +1497,7 @@ GameObject:
   - component: {fileID: 1465588730580260844}
   - component: {fileID: 6913463708193771360}
   - component: {fileID: 3210143117406451810}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2487,7 +2540,7 @@ GameObject:
   - component: {fileID: 2699270341264240374}
   - component: {fileID: 4712828783735929819}
   - component: {fileID: 3264342681793275870}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Fill
   m_TagString: Untagged
   m_Icon: {fileID: 0}

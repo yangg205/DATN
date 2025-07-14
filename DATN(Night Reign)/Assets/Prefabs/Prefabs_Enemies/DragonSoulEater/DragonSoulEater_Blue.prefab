@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3726696033554117560}
   - component: {fileID: 2534813714220942167}
   - component: {fileID: 1388436227140391623}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -123,7 +123,8 @@ GameObject:
   - component: {fileID: 1237087366057114915}
   - component: {fileID: 197621399689941129}
   - component: {fileID: 8739783472854189292}
-  m_Layer: 6
+  - component: {fileID: 7808348894588340680}
+  m_Layer: 0
   m_Name: DragonSoulEater_Blue
   m_TagString: DragonSoulEater
   m_Icon: {fileID: 0}
@@ -148,6 +149,7 @@ Transform:
   - {fileID: 7602705919481297996}
   - {fileID: 3429804251977467432}
   - {fileID: 3410575725194899926}
+  - {fileID: 8469099288214012254}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!95 &3854826361488099466
@@ -329,11 +331,13 @@ MonoBehaviour:
   HP: 100
   maxHP: 100
   animator: {fileID: 3854826361488099466}
+  expReward: 25
+  playerStats: {fileID: 0}
   attackPoint: {fileID: 7602705919481297996}
   attackRange: 0.78
   playerLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1
   healthFill: {fileID: 1245346233960677374}
   damagePopupPrefab: {fileID: 247968149220129898, guid: 04f99676d4ee40d44b375f9d7ef86f4d,
     type: 3}
@@ -345,6 +349,50 @@ MonoBehaviour:
   isTakingDamage: 0
   minAttackDamage: 5
   maxAttackDamage: 15
+--- !u!114 &7808348894588340680
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 983970137812721851}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 604dcb9ed21d1c74cb59c45003b9049b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lockOnTransform: {fileID: 8469099288214012254}
+--- !u!1 &1023582689791430590
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8469099288214012254}
+  m_Layer: 0
+  m_Name: Lock On Transform
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8469099288214012254
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1023582689791430590}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2122478552522060171}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1145329816963469586
 GameObject:
   m_ObjectHideFlags: 0
@@ -1079,7 +1127,7 @@ GameObject:
   - component: {fileID: 7127476600018845188}
   - component: {fileID: 7849582761330210360}
   - component: {fileID: 1245346233960677374}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Fill
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2114,7 +2162,7 @@ GameObject:
   - component: {fileID: 307013269285225403}
   - component: {fileID: 2459281590895268730}
   - component: {fileID: 3061572287019213609}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: EnemyCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2534,7 +2582,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7602705919481297996}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: AT Point
   m_TagString: Untagged
   m_Icon: {fileID: 0}

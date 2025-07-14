@@ -13,6 +13,9 @@ public class NightMare : MonoBehaviour
     public float maxHP = 100f;
     public Animator animator;
 
+    public int expReward = 25;
+    public PlayerStats playerStats;
+
     public Transform attackPoint;
     public float attackRange = 1.5f;
     public LayerMask playerLayer;
@@ -41,6 +44,10 @@ public class NightMare : MonoBehaviour
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
+        if (player != null)
+        {
+            playerStats = player.GetComponent<PlayerStats>();
+        }
 
     }
 
@@ -92,6 +99,27 @@ public class NightMare : MonoBehaviour
             animator.SetTrigger("die");
             GetComponent<Collider>().enabled = false;
             GetComponent<Rigidbody>().isKinematic = true;
+
+            // 💥 Nếu enemy này đang bị lock-on thì thoát lock-on
+            if (ND.CameraHandler.singleton != null &&
+                ND.CameraHandler.singleton.currentLockOnTarget == this)
+            {
+                ND.InputHandler inputHandler = FindObjectOfType<ND.InputHandler>();
+
+                // Tắt lock-on mode
+                if (inputHandler != null)
+                {
+                    inputHandler.lockOnFlag = false;
+                }
+
+                // Reset camera
+                ND.CameraHandler.singleton.ClearLockOnTargets();
+            }
+            if (playerStats != null)
+            {
+                playerStats.GainEXP(expReward);
+            }
+
             Destroy(gameObject, 7f);
 
         }

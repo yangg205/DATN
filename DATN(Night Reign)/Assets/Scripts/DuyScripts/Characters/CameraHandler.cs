@@ -39,11 +39,11 @@ namespace ND
         public float unlockedPivotPosition = 1.65f;
 
         public CharacterManager currentLockOnTarget;
-
-        List<CharacterManager> availableTargets = new List<CharacterManager>();
         public CharacterManager nearestLockOnTarget;
         public CharacterManager leftLockTarget;
         public CharacterManager rightLockTarget;
+
+        List<CharacterManager> availableTargets = new List<CharacterManager>();
         public float maximumLockOnDistance = 30;
         private void Awake()
         {
@@ -91,7 +91,13 @@ namespace ND
             }    
             else
             {
-                float velocity = 0;
+                // Nếu enemy đã bị Destroy thì thoát khỏi lock-on
+                if (currentLockOnTarget == null || currentLockOnTarget.gameObject == null)
+                {
+                    ClearLockOnTargets();
+                    inputHandler.lockOnFlag = false;
+                    return;
+                }
 
                 Vector3 dir = currentLockOnTarget.transform.position - transform.position;
                 dir.Normalize();

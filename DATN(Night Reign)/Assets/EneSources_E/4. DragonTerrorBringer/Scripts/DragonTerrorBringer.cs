@@ -1,4 +1,5 @@
-﻿using Pathfinding;
+﻿using ND;
+using Pathfinding;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -163,6 +164,22 @@ public class DragonTerrorBringer : MonoBehaviour
 
         GetComponent<Collider>().enabled = false;
         GetComponent<Rigidbody>().isKinematic = true;
+
+        // 💥 Nếu enemy này đang bị lock-on thì thoát lock-on
+        if (ND.CameraHandler.singleton != null &&
+            ND.CameraHandler.singleton.currentLockOnTarget == this)
+        {
+            ND.InputHandler inputHandler = FindObjectOfType<ND.InputHandler>();
+
+            // Tắt lock-on mode
+            if (inputHandler != null)
+            {
+                inputHandler.lockOnFlag = false;
+            }
+
+            // Reset camera
+            ND.CameraHandler.singleton.ClearLockOnTargets();
+        }
 
         Destroy(gameObject, 7f);
     }
