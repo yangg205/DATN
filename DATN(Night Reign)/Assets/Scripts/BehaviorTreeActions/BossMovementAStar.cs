@@ -23,4 +23,14 @@ public class BossMovementAStar : MonoBehaviour
             _blackboard.animator?.SetFloat("Speed", 1f); // Set walking animation
         }
     }
+
+    public void StopMoving()
+    {
+        if (_aiPath != null)
+        {
+            _aiPath.canMove = false;
+            _blackboard.animator?.SetFloat("Speed", 0f); // Idle
+        }
+    }
+
 }
