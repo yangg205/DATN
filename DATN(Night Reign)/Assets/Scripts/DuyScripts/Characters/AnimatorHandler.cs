@@ -74,22 +74,5 @@ namespace ND
             Vector3 velocity = deltaPosition / delta;
             playerLocomotion.rigidbody.linearVelocity = velocity;
         }
-
-        public void TriggerAttackVFX()
-        {
-            var attacker = GetComponentInParent<PlayerAttacker>();
-            if (attacker == null) return;
-
-            var weapon = attacker.weaponSlotManager?.attackingWeapon;
-            if (weapon == null) return;
-
-            switch (attacker.CurrentLightComboStep)
-            {
-                case 1: attacker.PlayAttackVFX(weapon.lightAttackVFX_1); break;
-                case 2: attacker.PlayAttackVFX(weapon.lightAttackVFX_2); break;
-                case 3: attacker.PlayAttackVFX(weapon.lightAttackVFX_3); break;
-                case 4: attacker.PlayAttackVFX(weapon.lightAttackVFX_4); break;
-            }
-        }
     }
 }

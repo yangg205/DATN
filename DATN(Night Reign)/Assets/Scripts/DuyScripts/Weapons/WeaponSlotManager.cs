@@ -20,12 +20,16 @@ namespace ND
         PlayerStats playerStats;
 
         InputHandler inputHandler;
+
+        PlayerEffectManager playerEffectManager;
+
         private void Awake()
         {
             animator = GetComponent<Animator>();
             quickSlotsUI = FindFirstObjectByType<QuickSlotsUI>();
             playerStats = GetComponentInParent<PlayerStats>();
             inputHandler = GetComponentInParent<InputHandler>();
+            playerEffectManager = GetComponentInParent<PlayerEffectManager>();
 
             WeaponHolderSlot[] weaponHolderSlots = GetComponentsInChildren<WeaponHolderSlot>();
             foreach (WeaponHolderSlot weaponSlot in weaponHolderSlots)
@@ -101,31 +105,38 @@ namespace ND
         private void LoadLeftWeaponDamageCollider()
         {
             leftHandDamageCollider = leftHandSlot.currentWeaponModel.GetComponentInChildren<DamageCollider>();
+            playerEffectManager.leftWeaponFX = leftHandSlot.currentWeaponModel.GetComponentInChildren<WeaponFX>();
         }
 
         private void LoadRightWeaponDamageCollider()
         {
             rightHandDamageCollider = rightHandSlot.currentWeaponModel.GetComponentInChildren<DamageCollider>();
+            playerEffectManager.rightWeaponFX = rightHandSlot.currentWeaponModel.GetComponentInChildren<WeaponFX>();
         }
 
         public void OpenRightDamageCollider()
         {
             rightHandDamageCollider.EnableDamageCollider();
+            Debug.Log("Opening Right Damage Collider");
+            playerEffectManager?.PlayWeaponFX(false); // ← Bật trail
         }
 
         public void OpenLeftDamageCollider()
         {
             leftHandDamageCollider.EnableDamageCollider();
+            playerEffectManager?.PlayWeaponFX(true);  // ← Bật trail
         }
 
         public void CloseRightHandDamageCollider()
         {
             rightHandDamageCollider.DisableDamageCollider();
+            playerEffectManager?.StopWeaponFX(false); // ← Tắt trail
         }
 
         public void CloseLeftHandDamageCollider()
         {
             leftHandDamageCollider.DisableDamageCollider();
+            playerEffectManager?.StopWeaponFX(true); // ← Tắt trail
         }
         #endregion
 
