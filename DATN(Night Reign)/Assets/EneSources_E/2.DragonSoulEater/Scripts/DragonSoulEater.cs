@@ -41,11 +41,12 @@ public class DragonSoulEater : MonoBehaviour
 
     public float minAttackDamage = 5f;
     public float maxAttackDamage = 15f;
+    public QuestManager questManager;
 
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
-
+        questManager = FindObjectOfType<QuestManager>();
         if (player != null)
         {
             playerStats = player.GetComponent<PlayerStats>();
@@ -91,7 +92,7 @@ public class DragonSoulEater : MonoBehaviour
         if (HP <= 0)
         {
             isDead = true;
-
+            questManager.ReportKill();
             if (aiPath != null)
             {
                 aiPath.canMove = false;
@@ -189,7 +190,7 @@ public class DragonSoulEater : MonoBehaviour
         Collider[] hitPlayers = Physics.OverlapSphere(attackPoint.position, attackRange, playerLayer);
         foreach (Collider player in hitPlayers)
         {
-            playerStats.TakeDamage(50);
+            playerStats.TakeDamage((int)damage);
         }
     }
     private void OnDrawGizmosSelected()

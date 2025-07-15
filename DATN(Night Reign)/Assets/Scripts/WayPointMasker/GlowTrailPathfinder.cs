@@ -1,24 +1,31 @@
 ﻿using Pathfinding; // Đảm bảo đã import A* Pathfinding Project
+using System.Collections; // Cần thiết cho Coroutine
 using System.Collections.Generic;
 using UnityEngine;
-using System; // Để sử dụng Action cho event OnActiveWaypointChanged nếu WaypointManager dùng
+using System;
 
-[RequireComponent(typeof(LineRenderer), typeof(Seeker))]
+[RequireComponent(typeof(Seeker))]
 public class GlowTrailPathfinder : MonoBehaviour
 {
     [Header("References")]
     public Transform playerTransform; // Kéo (drag) người chơi của bạn vào đây trong Inspector!
-    public LineRenderer glowTrailLineRenderer;
+    public ParticleSystem glowTrailParticleSystem; // Kéo Particle System của bạn vào đây!
 
     [Header("Settings")]
     [Tooltip("Thời gian giữa các lần tính toán lại đường đi (giây).")]
-    public float updateInterval = 0.5f; // Thời gian giữa các lần tính toán lại đường đi
+    public float updateInterval = 0.2f; // Tăng tần suất cập nhật để đường mượt hơn
     [Tooltip("Khoảng cách người chơi phải di chuyển để kích hoạt tính toán lại đường đi.")]
-    public float pathRecalculateDistance = 1.0f; // Tính toán lại đường đi nếu người chơi di chuyển xa hơn khoảng này
+    public float pathRecalculateDistance = 0.5f; // Giảm khoảng cách để cập nhật thường xuyên hơn
     [Tooltip("Khoảng cách nâng vệt sáng lên khỏi mặt đất.")]
     public float heightOffset = 0.2f;
-    [Tooltip("Thời gian vệt sáng hiển thị khi kích hoạt thủ công (bằng phím V).")]
-    public float trailVisibleDuration = 5f;
+    [Tooltip("Thời gian vệt sáng hiển thị sau khi kích hoạt (bằng phím V hoặc tự động).")]
+    public float trailVisibleDuration = 5f; // Thời gian đường dẫn tồn tại sau khi được kích hoạt
+    [Tooltip("Khoảng cách giữa các hạt đom đóm trên đường đi.")]
+    public float particleSpacing = 0.3f; // Giảm khoảng cách để đường mượt hơn
+    [Tooltip("Số lượng hạt tối đa cho phép hiển thị.")]
+    public int maxParticles = 1000; // Tăng giới hạn hạt
+    [Tooltip("Thời gian để vệt sáng chạy từ đầu đến cuối đường (giây).")]
+    public float trailRevealDuration = 0.7f; // Thời gian để đường đi xuất hiện hoàn chỉnh (giảm xuống để cảm giác nhanh hơn)
 
     private Seeker seeker;
     public Path currentPath { get; private set; } // Public getter để các script khác có thể truy cập path
@@ -28,34 +35,38 @@ public class GlowTrailPathfinder : MonoBehaviour
     private float updateTimer = 0f;
     private float trailVisibilityTimer = 0f;
 
-    private bool trailManualActivated = false; // True nếu được kích hoạt bằng phím 'V'
-    private bool trailAutoActivated = false;   // True nếu được kích hoạt bởi sự thay đổi waypoint active
+    private bool trailIsActive = false; // True nếu vệt sáng đang được hiển thị (thủ công hoặc tự động)
+    private Coroutine revealTrailCoroutine; // Để kiểm soát Coroutine đang chạy
+
+    // Particle System module references
+    private ParticleSystem.MainModule mainModule;
+    private ParticleSystem.EmissionModule emissionModule;
 
     private void Awake()
     {
         seeker = GetComponent<Seeker>();
-        if (glowTrailLineRenderer == null)
-            glowTrailLineRenderer = GetComponent<LineRenderer>();
+        if (glowTrailParticleSystem == null)
+        {
+            Debug.LogError("[GlowTrailPathfinder] ParticleSystem reference is NULL. Please assign it in the Inspector!");
+            enabled = false; // Tắt script nếu không có Particle System
+            return;
+        }
 
-        // Thiết lập cơ bản cho LineRenderer
-        glowTrailLineRenderer.positionCount = 0;
-        glowTrailLineRenderer.useWorldSpace = true;
-        glowTrailLineRenderer.alignment = LineAlignment.View; // Để vệt sáng luôn nhìn về camera
-        glowTrailLineRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        glowTrailLineRenderer.receiveShadows = false;
-        glowTrailLineRenderer.widthMultiplier = 0.2f; // Độ dày của vệt sáng
-        glowTrailLineRenderer.enabled = false; // Mặc định tắt khi khởi tạo
-        Debug.Log("[GlowTrailPathfinder] Awake completed. LineRenderer and Seeker initialized.");
+        mainModule = glowTrailParticleSystem.main;
+        emissionModule = glowTrailParticleSystem.emission;
+
+        // Đảm bảo Particle System ban đầu không phát hạt và sạch sẽ
+        emissionModule.enabled = false; // Tắt việc phát hạt tự động
+        glowTrailParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear); // Dừng và xóa tất cả hạt
+        Debug.Log("[GlowTrailPathfinder] Awake completed. Particle System and Seeker initialized.");
     }
 
     private void OnEnable()
     {
-        // Đăng ký sự kiện thay đổi waypoint active từ WaypointManager
         if (WaypointManager.Instance != null)
         {
             WaypointManager.Instance.OnActiveWaypointChanged += OnActiveWaypointChanged;
-            // Kiểm tra ngay lập tức waypoint active hiện tại khi script được bật
-            OnActiveWaypointChanged(WaypointManager.Instance.GetActiveWaypoint());
+            OnActiveWaypointChanged(WaypointManager.Instance.GetActiveWaypoint()); // Kiểm tra waypoint hiện tại
             Debug.Log("[GlowTrailPathfinder] Subscribed to OnActiveWaypointChanged event.");
         }
         else
@@ -66,7 +77,6 @@ public class GlowTrailPathfinder : MonoBehaviour
 
     private void OnDisable()
     {
-        // Hủy đăng ký để tránh rò rỉ bộ nhớ
         if (WaypointManager.Instance != null)
         {
             WaypointManager.Instance.OnActiveWaypointChanged -= OnActiveWaypointChanged;
@@ -82,16 +92,11 @@ public class GlowTrailPathfinder : MonoBehaviour
 
         if (currentActiveWaypoint != null)
         {
-            // Nếu có waypoint active, tự động bật vệt sáng (trừ khi đang bật thủ công để ưu tiên thời gian)
-            if (!trailManualActivated)
-            {
-                trailAutoActivated = true;
-                // Yêu cầu path ngay lập tức khi waypoint active thay đổi
-                RequestPath(playerTransform.position, currentActiveWaypoint.worldPosition);
-                glowTrailLineRenderer.enabled = true;
-                Debug.Log("[GlowTrailPathfinder] Trail activated automatically due to active waypoint change.");
-            }
-            // Nếu đang kích hoạt thủ công, giữ nguyên timer của nó.
+            // Khi waypoint active thay đổi, tự động kích hoạt vệt sáng và yêu cầu path ngay lập tức
+            trailIsActive = true;
+            trailVisibilityTimer = trailVisibleDuration; // Bắt đầu đếm ngược thời gian hiển thị
+            RequestPath(playerTransform.position, currentActiveWaypoint.worldPosition);
+            Debug.Log("[GlowTrailPathfinder] Trail activated automatically due to active waypoint change.");
         }
         else
         {
@@ -103,14 +108,11 @@ public class GlowTrailPathfinder : MonoBehaviour
 
     private void Update()
     {
-        // Kiểm tra các tham chiếu cần thiết
-        if (WaypointManager.Instance == null || playerTransform == null)
+        if (WaypointManager.Instance == null || playerTransform == null || glowTrailParticleSystem == null)
         {
             ClearTrail();
-            if (playerTransform == null)
-            {
-                Debug.LogWarning("[GlowTrailPathfinder] Player Transform is NULL. Please assign it in the Inspector for GlowTrailPathfinder to work.");
-            }
+            if (playerTransform == null) Debug.LogWarning("[GlowTrailPathfinder] Player Transform is NULL. Please assign it in the Inspector.");
+            if (glowTrailParticleSystem == null) Debug.LogWarning("[GlowTrailPathfinder] Particle System is NULL. Please assign it in the Inspector.");
             return;
         }
 
@@ -120,80 +122,53 @@ public class GlowTrailPathfinder : MonoBehaviour
             var activeWaypoint = WaypointManager.Instance.GetActiveWaypoint();
             if (activeWaypoint != null)
             {
-                currentActiveWaypoint = activeWaypoint; // Đảm bảo currentActiveWaypoint được thiết lập
-                RequestPath(playerTransform.position, activeWaypoint.worldPosition);
-                trailManualActivated = true;
-                trailAutoActivated = false; // Kích hoạt thủ công ghi đè tự động
+                currentActiveWaypoint = activeWaypoint;
+                trailIsActive = true;
                 trailVisibilityTimer = trailVisibleDuration; // Bắt đầu đếm ngược thời gian hiển thị
-                glowTrailLineRenderer.enabled = true;
+                RequestPath(playerTransform.position, activeWaypoint.worldPosition);
                 Debug.Log("[GlowTrailPathfinder] Trail manually activated by 'V' key.");
             }
             else
             {
                 Debug.LogWarning("[GlowTrailPathfinder] Cannot activate trail with 'V' key: No active waypoint set in WaypointManager.");
-                ClearTrail(); // Không có waypoint thì xóa trail
+                ClearTrail();
             }
         }
 
-        // --- Xử lý hẹn giờ hiển thị vệt sáng khi kích hoạt thủ công ---
-        if (trailManualActivated)
+        // --- Xử lý hẹn giờ hiển thị vệt sáng ---
+        if (trailIsActive)
         {
             trailVisibilityTimer -= Time.deltaTime;
             if (trailVisibilityTimer <= 0f)
             {
                 ClearTrail();
-                Debug.Log("[GlowTrailPathfinder] Trail cleared due to manual activation timeout.");
+                Debug.Log("[GlowTrailPathfinder] Trail cleared due to timeout.");
             }
-        }
-
-        // --- Logic cập nhật đường dẫn liên tục ---
-        // Vệt sáng sẽ cập nhật nếu có waypoint active VÀ đang trong trạng thái được kích hoạt (thủ công hoặc tự động)
-        if (currentActiveWaypoint != null && (trailManualActivated || trailAutoActivated))
-        {
-            updateTimer += Time.deltaTime;
-            float distanceToLastPathStart = Vector3.Distance(playerTransform.position, lastPathStartPoint);
-
-            // Debug log để kiểm tra điều kiện cập nhật
-            // Debug.Log($"[GlowTrailPathfinder] Update check: Timer={updateTimer:F2}/{updateInterval:F2}, Dist={distanceToLastPathStart:F2}/{pathRecalculateDistance:F2}");
-
-            // Tính toán lại đường đi định kỳ HOẶC nếu người chơi đã di chuyển đáng kể
-            if (updateTimer >= updateInterval || distanceToLastPathStart > pathRecalculateDistance)
+            else
             {
-                updateTimer = 0f; // Reset timer
-                lastPathStartPoint = playerTransform.position; // Cập nhật điểm bắt đầu path
-                RequestPath(playerTransform.position, currentActiveWaypoint.worldPosition);
-                // Debug.Log($"[GlowTrailPathfinder] Requesting new path due to movement/time. Start: {playerTransform.position}, End: {currentActiveWaypoint.worldPosition}");
-            }
+                // Nếu vệt sáng đang active và còn thời gian, kiểm tra để update path
+                updateTimer += Time.deltaTime;
+                float distanceToLastPathStart = Vector3.Distance(playerTransform.position, lastPathStartPoint);
 
-            // Luôn vẽ lại đường dẫn hiện có (nếu có), ngay cả khi không tính toán lại trong khung hình này.
-            // Điều này đảm bảo LineRenderer được cập nhật vị trí các điểm nếu LineAlignment.View được sử dụng,
-            // hoặc đơn giản là để vẽ lại path nếu LineRenderer bị tắt/bật lại.
-            if (currentPath != null && currentPath.vectorPath != null && currentPath.vectorPath.Count > 0)
-            {
-                DrawGlowTrail(currentPath.vectorPath);
+                // Yêu cầu path nếu người chơi di chuyển đáng kể hoặc đến thời gian cập nhật
+                if (currentActiveWaypoint != null && (updateTimer >= updateInterval || distanceToLastPathStart > pathRecalculateDistance))
+                {
+                    updateTimer = 0f; // Reset timer
+                    lastPathStartPoint = playerTransform.position; // Cập nhật điểm bắt đầu path
+                    RequestPath(playerTransform.position, currentActiveWaypoint.worldPosition);
+                    //Debug.Log($"[GlowTrailPathfinder] Re-requesting path due to movement/time. Player: {playerTransform.position}, Waypoint: {currentActiveWaypoint.worldPosition}");
+                }
             }
-            else if (glowTrailLineRenderer.enabled) // Nếu không có path nhưng renderer vẫn bật, hãy tắt nó
-            {
-                Debug.LogWarning("[GlowTrailPathfinder] No path to draw but LineRenderer is enabled. Disabling LineRenderer.");
-                glowTrailLineRenderer.enabled = false;
-            }
-        }
-        else if (glowTrailLineRenderer.enabled) // Nếu không có waypoint active hoặc không được kích hoạt, tắt vệt sáng
-        {
-            ClearTrail();
-            // Debug.Log("[GlowTrailPathfinder] Trail disabled because no active waypoint or not activated.");
         }
     }
 
     private void RequestPath(Vector3 startPos, Vector3 endPos)
     {
-        // Đảm bảo Seeker component đang hoạt động
-        if (seeker == null || !seeker.enabled) // Đã sửa từ IsActive() sang enabled
+        if (seeker == null || !seeker.enabled)
         {
             Debug.LogWarning("[GlowTrailPathfinder] Seeker component is NULL or not enabled. Cannot request path.");
             return;
         }
-        //Debug.Log($"[GlowTrailPathfinder] Requesting path from {startPos} to {endPos} for waypoint '{currentActiveWaypoint?.id}'.");
         seeker.StartPath(startPos, endPos, OnPathComplete);
     }
 
@@ -202,9 +177,15 @@ public class GlowTrailPathfinder : MonoBehaviour
         if (!p.error)
         {
             currentPath = p;
-            //Debug.Log($"[GlowTrailPathfinder] Path calculated with {p.vectorPath.Count} points. Drawing trail.");
-            DrawGlowTrail(p.vectorPath);
-            glowTrailLineRenderer.enabled = true; // Đảm bảo renderer bật sau khi path hoàn thành
+            Debug.Log($"[GlowTrailPathfinder] Path calculated with {p.vectorPath.Count} points. Starting trail reveal.");
+
+            // Dừng coroutine cũ nếu có để tránh xung đột
+            if (revealTrailCoroutine != null)
+            {
+                StopCoroutine(revealTrailCoroutine);
+            }
+            // Khởi động coroutine mới để hiển thị đường đi dần dần
+            revealTrailCoroutine = StartCoroutine(RevealGlowTrailParticles(p.vectorPath));
         }
         else
         {
@@ -213,33 +194,158 @@ public class GlowTrailPathfinder : MonoBehaviour
         }
     }
 
-    private void DrawGlowTrail(List<Vector3> pathPoints)
+    private IEnumerator RevealGlowTrailParticles(List<Vector3> pathPoints)
     {
-        if (pathPoints == null || pathPoints.Count == 0)
+        if (pathPoints == null || pathPoints.Count < 2)
         {
             ClearTrail();
-            return;
+            yield break; // Thoát khỏi coroutine
         }
 
-        glowTrailLineRenderer.positionCount = pathPoints.Count;
-        for (int i = 0; i < pathPoints.Count; i++)
+        // Dừng và xóa tất cả các hạt hiện có trước khi bắt đầu lộ diện đường mới
+        glowTrailParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        emissionModule.enabled = false; // Đảm bảo emission tắt trước khi emit thủ công
+
+        ParticleSystem.EmitParams emitParams = new ParticleSystem.EmitParams();
+        emitParams.startLifetime = mainModule.startLifetime.constant;
+        emitParams.startSize = mainModule.startSize.constant;
+        emitParams.startColor = mainModule.startColor.color;
+        emitParams.velocity = Vector3.zero; // Hạt đứng yên tại chỗ sinh ra
+
+        int emittedCount = 0;
+        Vector3 tempPos;
+
+        // Tính tổng độ dài đường đi
+        float totalPathLength = 0f;
+        for (int i = 0; i < pathPoints.Count - 1; i++)
         {
-            Vector3 pos = pathPoints[i];
-            pos.y += heightOffset; // Nâng vệt sáng lên khỏi mặt đất một chút
-            glowTrailLineRenderer.SetPosition(i, pos);
+            totalPathLength += Vector3.Distance(pathPoints[i], pathPoints[i + 1]);
         }
+
+        // Xử lý trường hợp đường quá ngắn để tránh lỗi chia cho 0 hoặc hiển thị không đúng
+        if (totalPathLength < particleSpacing * 0.5f)
+        {
+            // Nếu đường quá ngắn, chỉ phát một hạt tại điểm đích
+            tempPos = pathPoints[pathPoints.Count - 1]; // Phát tại điểm cuối cùng
+            tempPos.y += heightOffset;
+            emitParams.position = tempPos;
+            glowTrailParticleSystem.Emit(emitParams, 1);
+            glowTrailParticleSystem.Play(); // Đảm bảo Particle System đang chạy
+            yield break; // Kết thúc coroutine
+        }
+
+        // --- Logic mới để vệt sáng chạy từ đầu đến cuối ---
+        float timeElapsed = 0f;
+        float currentLerpT = 0f; // Vị trí hiện tại trên toàn bộ đường đi (0.0 đến 1.0)
+
+        Vector3 lastEmittedPoint = pathPoints[0]; // Điểm cuối cùng mà một hạt đã được emit
+
+        while (timeElapsed < trailRevealDuration)
+        {
+            timeElapsed += Time.deltaTime;
+            currentLerpT = Mathf.Clamp01(timeElapsed / trailRevealDuration);
+
+            // Tìm điểm hiện tại trên đường đi dựa vào currentLerpT
+            Vector3 currentRevealPoint = GetPointAlongPath(pathPoints, currentLerpT);
+
+            // Phát hạt nếu đủ khoảng cách từ hạt cuối cùng được emit
+            if (emittedCount == 0 || Vector3.Distance(lastEmittedPoint, currentRevealPoint) >= particleSpacing)
+            {
+                if (emittedCount >= maxParticles)
+                {
+                    Debug.LogWarning("[GlowTrailPathfinder] Reached maxParticles limit. Not emitting more particles.");
+                    // Vẫn tiếp tục yield null để coroutine chạy hết thời gian
+                    // nhưng không emit thêm hạt
+                }
+                else
+                {
+                    tempPos = currentRevealPoint;
+                    tempPos.y += heightOffset;
+                    emitParams.position = tempPos;
+                    glowTrailParticleSystem.Emit(emitParams, 1);
+                    emittedCount++;
+                    lastEmittedPoint = currentRevealPoint; // Cập nhật điểm cuối cùng đã phát
+                    glowTrailParticleSystem.Play(); // Đảm bảo Particle System đang chơi
+                }
+            }
+            yield return null; // Chờ 1 frame trước khi tiếp tục
+        }
+
+        // Đảm bảo tất cả các hạt trên đường đã được phát khi kết thúc thời gian reveal
+        // (Trong trường hợp path dài và trailRevealDuration ngắn)
+        tempPos = GetPointAlongPath(pathPoints, 1.0f); // Điểm cuối cùng của path
+        if (Vector3.Distance(lastEmittedPoint, tempPos) >= particleSpacing || emittedCount == 0) // Emit hạt cuối nếu cần
+        {
+            if (emittedCount < maxParticles)
+            {
+                tempPos.y += heightOffset;
+                emitParams.position = tempPos;
+                glowTrailParticleSystem.Emit(emitParams, 1);
+                glowTrailParticleSystem.Play();
+            }
+        }
+
+        Debug.Log("[GlowTrailPathfinder] Trail reveal completed.");
     }
+
+    /// <summary>
+    /// Lấy một điểm trên đường đi dựa trên tỷ lệ (0.0 đến 1.0)
+    /// </summary>
+    /// <param name="path">Danh sách các điểm của đường đi.</param>
+    /// <param name="t">Tỷ lệ (0.0 là bắt đầu, 1.0 là kết thúc).</param>
+    /// <returns>Vị trí 3D trên đường đi.</returns>
+    private Vector3 GetPointAlongPath(List<Vector3> path, float t)
+    {
+        if (path == null || path.Count < 2) return Vector3.zero;
+
+        // Nếu t = 0, trả về điểm đầu tiên
+        if (t <= 0f) return path[0];
+        // Nếu t = 1, trả về điểm cuối cùng
+        if (t >= 1f) return path[path.Count - 1];
+
+        float totalLength = 0f;
+        for (int i = 0; i < path.Count - 1; i++)
+        {
+            totalLength += Vector3.Distance(path[i], path[i + 1]);
+        }
+
+        float targetLength = t * totalLength;
+        float currentLength = 0f;
+
+        for (int i = 0; i < path.Count - 1; i++)
+        {
+            float segmentLength = Vector3.Distance(path[i], path[i + 1]);
+            if (currentLength + segmentLength >= targetLength)
+            {
+                // Điểm nằm trong đoạn hiện tại
+                float segmentT = (targetLength - currentLength) / segmentLength;
+                return Vector3.Lerp(path[i], path[i + 1], segmentT);
+            }
+            currentLength += segmentLength;
+        }
+
+        // Trường hợp fallback (không nên xảy ra nếu logic đúng)
+        return path[path.Count - 1];
+    }
+
 
     public void ClearTrail()
     {
-        if (glowTrailLineRenderer != null)
+        // Dừng coroutine đang chạy nếu có
+        if (revealTrailCoroutine != null)
         {
-            glowTrailLineRenderer.positionCount = 0;
-            glowTrailLineRenderer.enabled = false;
+            StopCoroutine(revealTrailCoroutine);
+            revealTrailCoroutine = null;
+        }
+
+        // Dừng Particle System và xóa tất cả các hạt đang hiển thị
+        if (glowTrailParticleSystem != null)
+        {
+            glowTrailParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            emissionModule.enabled = false; // Đảm bảo emission tắt
         }
         currentPath = null;
-        trailManualActivated = false;
-        trailAutoActivated = false;
+        trailIsActive = false; // Đặt lại trạng thái không active
         trailVisibilityTimer = 0f;
         updateTimer = 0f;
         currentActiveWaypoint = null; // Xóa tham chiếu waypoint active
