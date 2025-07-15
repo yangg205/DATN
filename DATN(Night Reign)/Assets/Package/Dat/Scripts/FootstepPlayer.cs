@@ -32,12 +32,14 @@ public class FootstepPlayer : MonoBehaviour
     private bool leftFootDown = false;
     private bool rightFootDown = false;
 
-    private Animator animator;
+    [Header("References")]
+    public Animator animatorRef;
+
     private Rigidbody rb;
 
     void Awake()
     {
-        animator = GetComponent<Animator>();
+        animatorRef = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
 
         materialToClipMap = new Dictionary<string, AudioClip>();
@@ -140,9 +142,9 @@ public class FootstepPlayer : MonoBehaviour
 
     bool IsWalking()
     {
-        if (animator != null)
+        if (animatorRef != null)
         {
-            float speed = animator.GetFloat("Speed");
+            float speed = animatorRef.GetFloat("Speed");
             return speed > 0.1f;
         }
 
