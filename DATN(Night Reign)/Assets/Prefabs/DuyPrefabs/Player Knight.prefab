@@ -652,8 +652,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   parentOverride: {fileID: 6568201747411682015}
+  currentWeapon: {fileID: 0}
   isLeftHandSlot: 1
   isRightHandSlot: 0
+  isBackSlot: 0
   currentWeaponModel: {fileID: 0}
 --- !u!1 &747084152437370597
 GameObject:
@@ -5637,7 +5639,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0.112995796, y: -0.33062977, z: 0.16141915, w: 0.92296255}
   m_LocalPosition: {x: -0.1616306, y: -0.0020866187, z: 0.00064925314}
-  m_LocalScale: {x: 1, y: 0.9999999, z: 1.0000001}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 93595348499519279}
@@ -7137,6 +7139,8 @@ GameObject:
   - component: {fileID: 7389318014068750452}
   - component: {fileID: 2899616094353553794}
   - component: {fileID: 1399208394795927015}
+  - component: {fileID: 711344553567719296}
+  - component: {fileID: 38774504068948278}
   m_Layer: 10
   m_Name: Player Knight
   m_TagString: Player
@@ -7231,16 +7235,24 @@ MonoBehaviour:
   mouseY: 0
   roll_input: 0
   interact_input: 0
+  twoHand_input: 0
   lightAttack_input: 0
   heavyAttack_input: 0
   jump_input: 0
   inventory_input: 0
   lockOn_input: 0
+  right_Stick_Right_Input: 0
+  right_Stick_Left_Input: 0
+  skill_input: 0
+  attackSpeedBoost_input: 0
+  isInputDisabled: 0
+  mount_input: 0
   d_Pad_Up: 0
   d_Pad_Down: 0
   d_Pad_Left: 0
   d_Pad_Right: 0
   rollFlag: 0
+  twoHandFlag: 0
   sprintFlag: 0
   lockOnFlag: 0
   inventoryFlag: 0
@@ -7330,6 +7342,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponSlotManager: {fileID: 0}
   lastAttack: 
+  skillCooldown: 5
 --- !u!114 &2899616094353553794
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7342,6 +7355,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b95437d4527a32408b57e22372be350, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  baseAttackSpeed: 1
+  currentAttackSpeed: 1
   healthLevel: 10
   maxHealth: 0
   currentHealth: 0
@@ -7368,6 +7383,127 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inventory: {fileID: 11400000, guid: 1086ab34c4d8bf94594303d54e438a4b, type: 2}
+--- !u!114 &711344553567719296
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5916402974268935904}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efaa1dcff1d1d5d45adddd231f9f86d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  footL: {fileID: 5521408309805209388}
+  footR: {fileID: 2661333318394564634}
+  audioSource: {fileID: 38774504068948278}
+  defaultFootstepClip: {fileID: 8300000, guid: a2fc8e319a1d6a4438f33589d8e3c194, type: 3}
+  footstepClips:
+  - materialName: SandMaterial
+    clip: {fileID: 8300000, guid: a2fc8e319a1d6a4438f33589d8e3c194, type: 3}
+  stepRate: 0.5
+  raycastDistance: 0.2
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 4096
+--- !u!82 &38774504068948278
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5916402974268935904}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &5971472449373561246
 GameObject:
   m_ObjectHideFlags: 0
@@ -7995,8 +8131,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   parentOverride: {fileID: 3100569832935546639}
+  currentWeapon: {fileID: 0}
   isLeftHandSlot: 0
   isRightHandSlot: 1
+  isBackSlot: 0
   currentWeaponModel: {fileID: 0}
 --- !u!1 &6345558710820371547
 GameObject:
@@ -8394,8 +8532,8 @@ Transform:
   m_GameObject: {fileID: 6484492229477151362}
   serializedVersion: 2
   m_LocalRotation: {x: -0.0000000091496055, y: 4.7847126e-12, z: -0.122419745, w: 0.99247843}
-  m_LocalPosition: {x: -0.18875343, y: 0.038011603, z: 0.000000014704877}
-  m_LocalScale: {x: 1, y: 0.9999999, z: 1}
+  m_LocalPosition: {x: -0.18875343, y: 0.038011603, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7063065698648835900}

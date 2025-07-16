@@ -5,9 +5,9 @@ namespace ND
     public class PlayerLocomotion : MonoBehaviour
     {
         CameraHandler cameraHandler;
-        PlayerManager playerManager;
+        [HideInInspector] public PlayerManager playerManager;
         Transform cameraObject;
-        InputHandler inputHandler;
+        public InputHandler inputHandler;
         public Vector3 moveDirection;
 
         [HideInInspector] public Transform myTransform;
