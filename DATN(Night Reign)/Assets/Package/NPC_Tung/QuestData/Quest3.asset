@@ -20,19 +20,33 @@ MonoBehaviour:
   targetNPCID: 
   targetItemID: Shadow Fangs
   requiredItemCount: 5
+  hasQuestLocation: 0
+  questLocation: {x: -161.2, y: -6.1, z: 133}
+  giverNPCTransform: {x: -161.2, y: -6.1, z: 133}
+  questLocationIcon: {fileID: 21300000, guid: 34a32c830edc1e447b2e44cc600cbfe8, type: 3}
   rewardCoin: 150
   rewardExp: 75
-  hasQuestLocation: 0
-  questLocation: {x: 0, y: 0, z: 0}
-  questLocationIcon: {fileID: 21300000, guid: 34a32c830edc1e447b2e44cc600cbfe8, type: 3}
   keydialogueBeforeComplete:
   - Dialogue/Kael_Q003_Intro
   - Dialogue/Kael_Q003_Objective
   - Dialogue/Kael_Q003_Warning
-  voiceBeforeComplete: []
   keydialogueAfterComplete:
   - Dialogue/Player_Q003_Completion
   - Dialogue/Kael_Q003_NextSteps
-  voiceAfterComplete: []
   keydialogueObjectiveMet: []
-  voiceObjectiveMet: []
+  voiceBeforeComplete_EN:
+  - {fileID: 8300000, guid: 320a7b5016c8f794f979ef2add142a35, type: 3}
+  - {fileID: 8300000, guid: 7101e9504f051f649a2b7460aebf40d8, type: 3}
+  - {fileID: 8300000, guid: 3faf3b56eaa481546a38c375cc504b87, type: 3}
+  voiceAfterComplete_EN:
+  - {fileID: 8300000, guid: b310a80c18613ec4f957b85d467978df, type: 3}
+  - {fileID: 8300000, guid: e89496e8227c85d409b11b3c30a14c7e, type: 3}
+  voiceObjectiveMet_EN: []
+  voiceBeforeComplete_VI:
+  - {fileID: 8300000, guid: 965685156e50d304085dc85c2dda8edb, type: 3}
+  - {fileID: 8300000, guid: e81a9252a75951146b117f183e17a020, type: 3}
+  - {fileID: 8300000, guid: d1ecc14bf489e5c499eec50004798237, type: 3}
+  voiceAfterComplete_VI:
+  - {fileID: 8300000, guid: 50f2f36591927434f9c55f7df1c6dd16, type: 3}
+  - {fileID: 8300000, guid: 0363bef88cdad3449af30b958a9e115a, type: 3}
+  voiceObjectiveMet_VI: []
