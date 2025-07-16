@@ -15,7 +15,7 @@ public class BossMovementAStar : MonoBehaviour
 
     public void MoveTo(Vector3 position)
     {
-        Debug.Log("[BossMovementAStar] Moving to: " + position);
+        //Debug.Log("[BossMovementAStar] Moving to: " + position);
         if (_aiPath != null)
         {
             _aiPath.destination = position;

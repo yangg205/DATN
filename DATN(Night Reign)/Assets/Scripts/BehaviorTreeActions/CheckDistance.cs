@@ -14,7 +14,7 @@ public class CheckDistance : Conditional
         float dist = Vector3.Distance(transform.position, playerTransform.Value.position);
         if (dist >= minDistance && dist <= maxDistance)
         {
-            Debug.Log($"[CheckDistance] Distance {dist} in range ({minDistance}-{maxDistance})");
+            //Debug.Log($"[CheckDistance] Distance {dist} in range ({minDistance}-{maxDistance})");
             return TaskStatus.Success;
         }
         return TaskStatus.Failure;
