@@ -45,6 +45,9 @@ namespace ND
 
         List<CharacterManager> availableTargets = new List<CharacterManager>();
         public float maximumLockOnDistance = 30;
+
+        //Lam chinh sua tutorial
+        public bool canRotate = true; 
         private void Awake()
         {
             singleton = this;
@@ -72,7 +75,13 @@ namespace ND
 
         public void HandleCameraRotation(float delta, float mouseXInput, float mouseYInput)
         {
-            if(inputHandler.lockOnFlag == false && currentLockOnTarget == null)
+            //Lam
+            if (!canRotate)
+                return;
+            if (Mathf.Approximately(delta, 0f))
+                return; // ✅ Bảo vệ không chia 0x
+            //
+            if (inputHandler.lockOnFlag == false && currentLockOnTarget == null)
             {
                 lookAngle += (mouseXInput * lookSpeed) / delta;
                 pivotAngle -= (mouseYInput * pivotSpeed) / delta;
@@ -237,5 +246,20 @@ namespace ND
                 cameraPivotTransform.transform.localPosition = Vector3.SmoothDamp(cameraPivotTransform.transform.localPosition, newUnlockedPosition, ref velocity, Time.deltaTime);
             }
         }
+
+        // Lam
+        void LateUpdate()
+        {
+            if (inputHandler == null) return;
+
+            float delta = Time.deltaTime;
+
+            // Nếu game đang pause thì dùng unscaled delta để tránh chia 0
+            if (Time.timeScale == 0f)
+                delta = Time.unscaledDeltaTime;
+
+            HandleCameraRotation(delta, inputHandler.mouseX, inputHandler.mouseY);
+        }
+        //
     }
 }
