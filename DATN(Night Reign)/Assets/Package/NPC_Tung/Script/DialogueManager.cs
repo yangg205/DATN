@@ -16,7 +16,7 @@ public class DialogueManager : MonoBehaviour
     public TextMeshProUGUI dialogueText;
     //public TextMeshProUGUI speakerNameText; // Trường cho tên người nói (vẫn giữ để hiển thị giá trị cố định)
     public GameObject nextButton; // Nút để chuyển câu thoại
-
+    public bool IsDialogueActive => isDialogueActive;
     [Header("Typewriter Settings")]
     public float letterDelay = 0.03f; // Tốc độ gõ chữ
 
@@ -110,39 +110,63 @@ public class DialogueManager : MonoBehaviour
 
     // Hàm DisplayNextSentence đã sửa đổi: Bất cứ khi nào chuyển câu, đều gõ chữ
     public void DisplayNextSentence()
+{
+    // Nếu không còn câu thoại nào thì kết thúc
+    if (currentDialogueLines.Count == 0 && !isTyping)
     {
-        // 1. Nếu đang gõ chữ (typingCoroutine đang chạy), KHÔNG LÀM GÌ CẢ.
-        // Người dùng phải đợi hiệu ứng gõ chữ hoàn tất tự nhiên.
-        if (isTyping)
-        {
-            return; // Thoát khỏi hàm, bỏ qua input này
-        }
-
-        // 2. Nếu đã hết câu thoại trong hàng đợi (và không đang gõ chữ)
-        if (currentDialogueLines.Count == 0)
-        {
-            EndDialogue();
-            return;
-        }
-
-        // 3. Nếu không đang gõ chữ và còn câu thoại, chuyển sang câu tiếp theo và BẮT ĐẦU GÕ CHỮ
-
-        // Phát âm thanh chuyển câu (chỉ khi có câu thoại trước đó, tức là không phải câu đầu tiên)
-        // Kiểm tra !string.IsNullOrEmpty(dialogueText.text) để tránh phát âm thanh khi bắt đầu dialogue trống rỗng
-        if (dialogueAudioSource != null && nextDialogueSound != null && !string.IsNullOrEmpty(dialogueText.text))
-        {
-            dialogueAudioSource.PlayOneShot(nextDialogueSound);
-        }
-
-        // Lấy câu thoại và voice clip tiếp theo
-        string lineToDisplay = currentDialogueLines.Dequeue();
-        AudioClip voiceClip = currentVoiceClips.Dequeue();
-
-        currentFullSentence = lineToDisplay; // Vẫn lưu trữ nhưng không dùng để skip
-
-        // BẮT ĐẦU HIỆU ỨNG GÕ CHỮ CHO CÂU THOẠI MỚI
-        typingCoroutine = StartCoroutine(TypeLine(lineToDisplay, voiceClip));
+        EndDialogue();
+        return;
     }
+
+    // Nếu đang gõ chữ (typingCoroutine đang chạy), tức người chơi bấm next giữa chừng:
+    if (isTyping)
+    {
+        // Ngắt hiệu ứng gõ chữ hiện tại
+        if (typingCoroutine != null)
+        {
+            StopCoroutine(typingCoroutine);
+        }
+
+        // Hiện luôn toàn bộ câu thoại hiện tại
+        dialogueText.text = currentFullSentence;
+
+        // Dừng voice clip đang phát
+        if (dialogueAudioSource != null && dialogueAudioSource.isPlaying)
+        {
+            dialogueAudioSource.Stop();
+        }
+
+        // Đánh dấu không còn đang gõ nữa để lần bấm next sau sẽ sang câu mới
+        isTyping = false;
+
+        // Trả về, không chuyển câu mới ngay lúc này, người chơi cần bấm next lần nữa để chuyển
+        return;
+    }
+
+    // Đến đây có nghĩa là không đang gõ, và còn câu thoại mới cần hiện
+
+    // Nếu có voice đang phát thì ngắt luôn
+    if (dialogueAudioSource != null && dialogueAudioSource.isPlaying)
+    {
+        dialogueAudioSource.Stop();
+    }
+
+    // Phát âm thanh chuyển câu (chỉ khi không phải câu đầu)
+    if (dialogueAudioSource != null && nextDialogueSound != null && !string.IsNullOrEmpty(dialogueText.text))
+    {
+        dialogueAudioSource.PlayOneShot(nextDialogueSound);
+    }
+
+    // Lấy câu thoại tiếp theo
+    string lineToDisplay = currentDialogueLines.Dequeue();
+    AudioClip voiceClip = currentVoiceClips.Dequeue();
+
+    currentFullSentence = lineToDisplay;
+
+    // Bắt đầu hiệu ứng gõ chữ cho câu thoại mới
+    typingCoroutine = StartCoroutine(TypeLine(lineToDisplay, voiceClip));
+}
+
 
 
     private IEnumerator TypeLine(string line, AudioClip voiceClip)

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Localization.Settings;
 using UnityEngine.Localization.Tables;
-using System.Collections.Generic;
+using System;
 
 public enum QuestType
 {
@@ -12,9 +12,10 @@ public enum QuestType
 
 public enum QuestDialogueType
 {
-    BeforeComplete,
-    AfterComplete,
-    ObjectiveMet
+    BeforeComplete,    // When offering the quest
+    AfterComplete,     // After claiming reward and quest is done
+    ObjectiveMet,      // When objective is met, but reward not claimed
+    InProgress         // When quest is accepted but objective not yet met
 }
 
 [CreateAssetMenu(fileName = "New Quest", menuName = "Quests/Quest Data")]
@@ -22,7 +23,8 @@ public class QuestData : ScriptableObject
 {
     [Header("Quest Info")]
     public string questName; // Localization Key cho tên nhiệm vụ
-    public string giverNPCID; // ID của NPC giao nhiệm vụ
+    [Tooltip("ID của NPC giao nhiệm vụ (dùng để hiển thị tên).")]
+    public string giverNPCID;
 
     [TextArea(3, 5)]
     public string description; // Localization Key cho mô tả nhiệm vụ
@@ -30,52 +32,72 @@ public class QuestData : ScriptableObject
     [Header("Quest Requirements")]
     public QuestType questType;
     public int requiredKills;
-    public string targetNPCID;
-    public string targetItemID;
+    public string targetNPCID;   // Với FindNPC
+    public string targetItemID;  // Với CollectItem
     public int requiredItemCount = 1;
+
+    [Header("Quest Location (Waypoint)")]
+    [Tooltip("Chỉ định nếu nhiệm vụ có một vị trí cụ thể (dùng waypoint).")]
+    public bool hasQuestLocation;
+
+    [Tooltip("Vị trí cụ thể trên bản đồ – dùng làm waypoint cho mục tiêu nhiệm vụ.")]
+    public Vector3 questLocation;
+
+    [Tooltip("Vị trí của NPC giao nhiệm vụ (dùng làm waypoint quay lại).")]
+    public Vector3 giverNPCTransform;
+
+    [Tooltip("Icon waypoint tùy chỉnh (nếu null thì dùng mặc định).")]
+    public Sprite questLocationIcon;
 
     [Header("Quest Rewards")]
     public int rewardCoin;
     public int rewardExp;
 
-    // --- BỔ SUNG ĐỊA ĐIỂM NHIỆM VỤ ---
-    [Header("Quest Location (Optional)")]
-    [Tooltip("Check this if this quest has a specific location to mark on the map/world.")]
-    public bool hasQuestLocation = false;
-    [Tooltip("The world coordinates (Vector3) where the player needs to go for this quest.")]
-    public Vector3 questLocation;
-    [Tooltip("Optional: Custom icon for this quest's location marker. If null, a default will be used.")]
-    public Sprite questLocationIcon;
-    // --- KẾT THÚC BỔ SUNG ---
-
-    [Header("Dialogues")]
-    [Tooltip("Keys for dialogue lines before the quest is accepted.")]
+    [Header("Dialogues - Keys")]
+    [Tooltip("Keys cho lời thoại trước khi nhận nhiệm vụ.")]
     [TextArea(3, 5)] public string[] keydialogueBeforeComplete;
-    [Tooltip("Voice clips for dialogue lines before the quest is accepted. Must match 'keydialogueBeforeComplete' in length.")]
-    public AudioClip[] voiceBeforeComplete;
 
-    [Tooltip("Keys for dialogue lines after the quest objective is met.")]
+    [Tooltip("Keys cho lời thoại sau khi hoàn thành.")]
     [TextArea(3, 5)] public string[] keydialogueAfterComplete;
-    [Tooltip("Voice clips for dialogue lines after the quest objective is met. Must match 'keydialogueAfterComplete' in length.")]
-    public AudioClip[] voiceAfterComplete;
 
-    [Tooltip("Keys for dialogue lines when the objective is met (can be used instead of AfterComplete).")]
+    [Tooltip("Keys cho lời thoại khi mục tiêu đã đạt được.")]
     [TextArea(3, 5)] public string[] keydialogueObjectiveMet;
-    [Tooltip("Voice clips for dialogue lines when the objective is met. Must match 'keydialogueObjectiveMet' in length.")]
-    public AudioClip[] voiceObjectiveMet;
 
-    public string[] GetDialogueKeys(string[] keys)
+    [Header("Voice Clips (English)")]
+    public AudioClip[] voiceBeforeComplete_EN;
+    public AudioClip[] voiceAfterComplete_EN;
+    public AudioClip[] voiceObjectiveMet_EN;
+
+    [Header("Voice Clips (Vietnamese)")]
+    public AudioClip[] voiceBeforeComplete_VI;
+    public AudioClip[] voiceAfterComplete_VI;
+    public AudioClip[] voiceObjectiveMet_VI;
+
+    // --- Helper methods ---
+
+    public string[] GetDialogueKeys(QuestDialogueType dialogueType)
     {
-        if (keys == null) return new string[0];
-        return keys;
+        return dialogueType switch
+        {
+            QuestDialogueType.BeforeComplete => keydialogueBeforeComplete,
+            QuestDialogueType.AfterComplete => keydialogueAfterComplete,
+            QuestDialogueType.ObjectiveMet => keydialogueObjectiveMet,
+            _ => Array.Empty<string>(),
+        };
     }
 
-    public AudioClip[] GetDialogueVoiceClips(string[] keys)
+    public AudioClip[] GetDialogueVoiceClips(QuestDialogueType dialogueType)
     {
-        if (keys == keydialogueBeforeComplete) return voiceBeforeComplete;
-        if (keys == keydialogueAfterComplete) return voiceAfterComplete;
-        if (keys == keydialogueObjectiveMet) return voiceObjectiveMet;
-        return new AudioClip[0];
+        var locale = LocalizationSettings.SelectedLocale?.Identifier.Code ?? "en";
+        bool isVI = locale.StartsWith("vi", StringComparison.OrdinalIgnoreCase);
+
+        return dialogueType switch
+        {
+            QuestDialogueType.BeforeComplete => isVI ? voiceBeforeComplete_VI : voiceBeforeComplete_EN,
+            QuestDialogueType.AfterComplete => isVI ? voiceAfterComplete_VI : voiceAfterComplete_EN,
+            QuestDialogueType.ObjectiveMet => isVI ? voiceObjectiveMet_VI : voiceObjectiveMet_EN,
+            _ => Array.Empty<AudioClip>(),
+        };
     }
 
     public string GetQuestNameLocalized()
@@ -88,22 +110,42 @@ public class QuestData : ScriptableObject
         return GetLocalizedString("NhiemVu", description);
     }
 
+    public string GetTargetNPCNameLocalized()
+    {
+        if (string.IsNullOrEmpty(targetNPCID)) return "";
+        return GetLocalizedString("NPC_Names", targetNPCID);
+    }
+
+    public string GetTargetItemNameLocalized()
+    {
+        if (string.IsNullOrEmpty(targetItemID)) return "";
+        return GetLocalizedString("Item_Names", targetItemID);
+    }
+
+    public string GetGiverNPCNameLocalized()
+    {
+        if (string.IsNullOrEmpty(giverNPCID)) return "";
+        return GetLocalizedString("NPC_Names", giverNPCID);
+    }
+
     private string GetLocalizedString(string tableName, string key)
     {
-        StringTable table = LocalizationSettings.StringDatabase.GetTable(tableName);
+        var table = LocalizationSettings.StringDatabase.GetTable(tableName);
         if (table == null)
         {
-            Debug.LogError($"Localization StringTable '{tableName}' not found! (Check Localization Settings và tên bảng!)");
+            Debug.LogError($"⚠️ Localization Table '{tableName}' not found.");
             return $"[TABLE NOT FOUND: {tableName}]";
         }
 
+        key = key.Trim();
         var entry = table.GetEntry(key);
         if (entry == null)
         {
-            Debug.LogError($"❌ Key '{key}' không có trong bảng '{tableName}'");
+            Debug.LogError($"❌ Localization Key '{key}' not found in table '{tableName}'.");
             return $"[MISSING KEY: {key}]";
         }
 
         return entry.GetLocalizedString();
     }
+
 }

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c93b2c574055c9540934f0b3c4b91d4d, type: 3}
   m_Name: Quest1
   m_EditorClassIdentifier: 
-  questName: 'Quest_Title/Q001_PathToDragonLair  '
+  questName: Quest_Title/Q001_PathToDragonLair
   giverNPCID: Flamekeeper
   description: Quest_Objective/Q001_Main
   questType: 0
@@ -20,18 +20,17 @@ MonoBehaviour:
   targetNPCID: 
   targetItemID: 
   requiredItemCount: 1
+  hasQuestLocation: 1
+  questLocation: {x: 132.6, y: -21.27, z: 354.16}
+  giverNPCTransform: {x: 144.2206, y: -85.06152, z: 460.017}
+  questLocationIcon: {fileID: 21300000, guid: 34a32c830edc1e447b2e44cc600cbfe8, type: 3}
   rewardCoin: 100
   rewardExp: 50
-  hasQuestLocation: 1
-  questLocation: {x: 46, y: 0.47, z: 213}
-  questLocationIcon: {fileID: 21300000, guid: 34a32c830edc1e447b2e44cc600cbfe8, type: 3}
   keydialogueBeforeComplete:
   - "\rDialogue/Flamekeeper_Q001_Intro\r\n"
   - 'Dialogue/Flamekeeper_Q001_CombatHint
 
 '
-  voiceBeforeComplete:
-  - {fileID: 8300000, guid: 96fa98a31f569734b941e11b8b4bec0f, type: 3}
   keydialogueAfterComplete:
   - Dialogue/Flamekeeper_Q001_Completion
   - Dialogue/Player_Q001_Completed
@@ -41,7 +40,18 @@ MonoBehaviour:
 
 '
   - Dialogue/Flamekeeper_Q001_KaelLocation
-  voiceAfterComplete: []
   keydialogueObjectiveMet:
   - Quest_Objective/Q001_Main
-  voiceObjectiveMet: []
+  voiceBeforeComplete_EN:
+  - {fileID: 8300000, guid: 684113a9004ce8d49b9132a400d3d914, type: 3}
+  - {fileID: 8300000, guid: ba4661c8a41cd644ea8a24113ad118b6, type: 3}
+  voiceAfterComplete_EN:
+  - {fileID: 8300000, guid: dd0bf22a5aef01640a9855119821f988, type: 3}
+  - {fileID: 8300000, guid: d1ccee9fdeb04cf4399b324bac3606ff, type: 3}
+  - {fileID: 8300000, guid: 47d2b5717e714c8458bb4fcd5d142cd3, type: 3}
+  - {fileID: 8300000, guid: 014ff7249f2785542a32404ff7da9864, type: 3}
+  - {fileID: 8300000, guid: 256e2c4679cedc141945834ee1f0b849, type: 3}
+  voiceObjectiveMet_EN: []
+  voiceBeforeComplete_VI: []
+  voiceAfterComplete_VI: []
+  voiceObjectiveMet_VI: []
