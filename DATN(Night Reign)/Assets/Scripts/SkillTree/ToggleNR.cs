@@ -5,9 +5,11 @@ public class ToggleNR : MonoBehaviour
 {
     [SerializeField] GameObject GO;
     [SerializeField] KeyCode key;
+    private MouseManager mouseManager;
 
     void Start()
     {
+        mouseManager = FindObjectOfType<MouseManager>();
         // Đảm bảo UI được tắt khi bắt đầu
         if (GO != null)
         {
@@ -48,6 +50,7 @@ public class ToggleNR : MonoBehaviour
                 Canvas canvas = GO.GetComponent<Canvas>();
                 if (canvas != null)
                 {
+                    mouseManager.ShowCursorAndDisableInput();
                     canvas.enabled = true;
                 }
             }
