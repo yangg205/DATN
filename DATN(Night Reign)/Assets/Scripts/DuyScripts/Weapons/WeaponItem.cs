@@ -37,19 +37,6 @@ namespace ND
         public int baseStamina = 10;
         public float lightAttackMultiplier = 1.0f;
         public float heavyAttackMultiplier = 1.5f;
-
-        [Header("Normal VFX")]
-        public GameObject lightAttackVFX_1;
-        public GameObject lightAttackVFX_2;
-        public GameObject lightAttackVFX_3;
-        public GameObject lightAttackVFX_4;
-        public GameObject heavyAttackVFX;
-        public GameObject weaponTrailVFX;
-
-        [Header("Skill VFX")]
-        public GameObject skillChargeVFX;    // VFX gồng Q
-        public GameObject specialSkillVFX;   // VFX khi chém bằng Q
-        public GameObject attackSpeedVFX;    // VFX tăng tốc đánh
     }
 }
 
