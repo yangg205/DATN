@@ -300,7 +300,7 @@ public class DragonUsurper : MonoBehaviour
 
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
 
-        waypointHolder = FindObjectOfType<WaypointHolder>();
+        waypointHolder = FindAnyObjectByType<WaypointHolder>();
 
         fireBreathVFX = fireSpawnPoint.GetComponentInChildren<ParticleSystem>();
         StopFireBreath();
@@ -321,6 +321,8 @@ public class DragonUsurper : MonoBehaviour
         {
             healthFill.fillAmount = HP / maxHP;
         }
+
+
         if (Input.GetKeyDown(KeyCode.P))
         {
             TakeDamage(10);
@@ -328,6 +330,7 @@ public class DragonUsurper : MonoBehaviour
         
     }
 
+    //=============== ở script FireBreathDamage.cs vào gọi hàm takedamage player 
     public void ActionFlame()
     {
         if (fireBreathVFX && !fireBreathVFX.isPlaying)
