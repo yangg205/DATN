@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Pathfinding;
-using UnityEngine.UI;
 
 public class EnemyAIByYang : MonoBehaviour
 {
@@ -163,7 +162,7 @@ public class EnemyAIByYang : MonoBehaviour
         }
 
         float distToPlayer = targetPlayer != null ? Vector3.Distance(transform.position, targetPlayer.position) : -1f;
-        Debug.Log($"Phase: {currentPhase}, IsEnraged: {_isEnraged}, IsFleeing: {_isCurrentlyFleeing}, DistanceToPlayer: {distToPlayer}, AIPathStopped: {_aiPath.isStopped}");
+        //Debug.Log($"Phase: {currentPhase}, IsEnraged: {_isEnraged}, IsFleeing: {_isCurrentlyFleeing}, DistanceToPlayer: {distToPlayer}, AIPathStopped: {_aiPath.isStopped}");
 
         if (_rootNode != null)
         {
@@ -766,5 +765,22 @@ public class EnemyAIByYang : MonoBehaviour
             sfxDead.PlayOneShot(sfxDead.clip);
         }
     }
+
+
+    /*void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, detectionRange);
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, engageRange);
+
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(transform.position, approachDistance);
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(transform.position, meleeAttackRange);
+    }*/
+
 
 }
