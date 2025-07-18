@@ -9,7 +9,8 @@ public class EnemyAIByYang : MonoBehaviour
     [Header("Target & Detection")]
     public Transform targetPlayer;
     public float detectionRange = 15f;
-    public float engageRange = 10f;
+    [SerializeField] private float endReachedDistance = 7f;
+    [SerializeField] private float engageRange = 14f;
     public float approachDistance = 10f;
     public float meleeAttackRange = 6f;
 
@@ -40,7 +41,9 @@ public class EnemyAIByYang : MonoBehaviour
     private float _lastDodgeTime;
 
     [Header("Damage & Hitboxes")]
-    public GameObject meleeAttackHitbox;
+    //public GameObject meleeAttackHitbox;
+    [SerializeField] private List<GameObject> meleeAttackHitboxes = new List<GameObject>();
+
     public float meleeDamage = 50f;
 
     private Node _rootNode;
@@ -106,16 +109,17 @@ public class EnemyAIByYang : MonoBehaviour
 
         baseMovementSpeed = movementSpeed;
 
+        if (meleeAttackHitboxes != null)
+        {
+            foreach (var hitbox in meleeAttackHitboxes)
+                hitbox.SetActive(false);
+        }
 
         spawnTime = Time.time;
 
-        _aiPath.endReachedDistance = engageRange * 0.5f;
+        _aiPath.endReachedDistance = endReachedDistance;
         _aiPath.slowdownDistance = engageRange;
 
-        if (meleeAttackHitbox != null)
-        {
-            meleeAttackHitbox.SetActive(false);
-        }
 
         SetupBehaviorTree();
 
@@ -422,18 +426,18 @@ public class EnemyAIByYang : MonoBehaviour
 
         if (_aiPath.pathPending)
         {
-            Debug.Log("[MoveTowardsPlayer] Path pending... RUNNING.");
+            //Debug.Log("[MoveTowardsPlayer] Path pending... RUNNING.");
             return NodeState.RUNNING;
         }
 
         if (_aiPath.hasPath && !_aiPath.isStopped)
         {
-            Debug.Log("[MoveTowardsPlayer] Moving towards player... RUNNING.");
+            //Debug.Log("[MoveTowardsPlayer] Moving towards player... RUNNING.");
             return NodeState.RUNNING;
         }
 
         _seeker.StartPath(_aiPath.position, targetPlayer.position, null);
-        Debug.LogWarning("[MoveTowardsPlayer] Failed to find path, requesting new path. RUNNING.");
+        //Debug.LogWarning("[MoveTowardsPlayer] Failed to find path, requesting new path. RUNNING.");
         return NodeState.RUNNING;
     }
 
@@ -632,22 +636,19 @@ public class EnemyAIByYang : MonoBehaviour
         Debug.Log("Animation Event: Die animation ended. Boss fully dead.");
     }
 
-    public void ActivateMeleeAttackHitbox()
+    public void ActivateMeleeAttackHitbox(int index)
     {
-        if (meleeAttackHitbox != null)
+        if (meleeAttackHitboxes != null)
         {
-            meleeAttackHitbox.SetActive(true);
-            Debug.Log("Animation Event: Melee Attack Hitbox Activated!");
+            if (index >= 0 && index < meleeAttackHitboxes.Count)
+                meleeAttackHitboxes[index].SetActive(true);
         }
     }
 
     public void DeactivateMeleeAttackHitbox()
     {
-        if (meleeAttackHitbox != null)
-        {
-            meleeAttackHitbox.SetActive(false);
-            Debug.Log("Animation Event: Melee Attack Hitbox Deactivated!");
-        }
+        foreach (var hitbox in meleeAttackHitboxes)
+            hitbox.SetActive(false);
     }
 
     private void SetupBehaviorTree()

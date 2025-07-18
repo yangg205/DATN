@@ -133,7 +133,7 @@ public class NightMare : MonoBehaviour
                 playerStats.GainEXP(expReward);
             }
 
-            Destroy(gameObject, 7f);
+            Destroy(gameObject, 6f);
 
         }
         else
