@@ -1,34 +1,51 @@
 ﻿using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.UI;
+using System.Collections;
 
 public class CutsceneEndHandler : MonoBehaviour
 {
-    public PlayableDirector director;
-    public GameObject continueButton; // Gán Button trong Inspector
-    public Image blackScreen;         // Gán ảnh đen (Image UI) toàn màn hình
+    [Header("References")]
+    public PlayableDirector director;     // Timeline cần skip
+    public GameObject continueButton;     // Button "Continue" trong Inspector
+    public Image blackScreen;             // UI ảnh đen toàn màn hình (Image)
+
+    private bool isCutsceneEnded = false;
 
     private void Start()
     {
+        // Ẩn nút khi bắt đầu, đặt màn hình đen trong suốt
         continueButton.SetActive(false);
         blackScreen.gameObject.SetActive(true);
-        blackScreen.color = new Color(0, 0, 0, 0); // Bắt đầu trong suốt
+        blackScreen.color = new Color(0, 0, 0, 0);
 
+        // Bắt sự kiện khi timeline kết thúc
         director.stopped += OnCutsceneEnd;
     }
 
     private void OnCutsceneEnd(PlayableDirector obj)
     {
-        continueButton.SetActive(true); // Hiện nút sau khi timeline kết thúc
+        isCutsceneEnded = true;
+        continueButton.SetActive(true); // Hiện nút sau khi timeline tự chạy hết
     }
 
+    // Gọi khi bấm nút "Continue"
     public void OnContinuePressed()
     {
+        // Nếu timeline chưa kết thúc, skip luôn về cuối
+        if (!isCutsceneEnded && director != null)
+        {
+            director.time = director.duration;
+            director.Evaluate();
+            director.Stop();
+        }
+
         continueButton.SetActive(false);
         StartCoroutine(FadeToBlack());
     }
 
-    private System.Collections.IEnumerator FadeToBlack()
+    // Hiệu ứng fade màn hình đen
+    private IEnumerator FadeToBlack()
     {
         float duration = 2f;
         float elapsed = 0f;
@@ -41,6 +58,8 @@ public class CutsceneEndHandler : MonoBehaviour
             yield return null;
         }
 
-        // TODO: Load scene tiếp theo hoặc hành động khác tại đây
+        // TODO: Tại đây bạn có thể load scene mới hoặc bật gameplay
+        // Ví dụ:
+        // SceneManager.LoadScene("NextSceneName");
     }
 }
