@@ -2584,6 +2584,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 909828992918151709}
+  - component: {fileID: 6169113617457851458}
   m_Layer: 0
   m_Name: Neck1
   m_TagString: Untagged
@@ -2607,6 +2608,29 @@ Transform:
   - {fileID: 6515448763097135995}
   m_Father: {fileID: 8355944805102611977}
   m_LocalEulerAnglesHint: {x: 35.936897, y: 80.22247, z: -59.706703}
+--- !u!136 &6169113617457851458
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6544477798921920763}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 114.70713
+  m_Height: 469.3077
+  m_Direction: 1
+  m_Center: {x: -28.37426, y: 158.15381, z: 0.000046413417}
 --- !u!1 &6576467153840050107
 GameObject:
   m_ObjectHideFlags: 0
@@ -2806,11 +2830,11 @@ GameObject:
   m_Component:
   - component: {fileID: 6209560056025643310}
   - component: {fileID: 646400233321181519}
-  - component: {fileID: 5838309456312619267}
   - component: {fileID: 6606426982377201829}
   - component: {fileID: 8097611984526369140}
   - component: {fileID: 4958954091516304719}
   - component: {fileID: 695512418146258138}
+  - component: {fileID: 8349375781102197430}
   m_Layer: 6
   m_Name: DragonTerrorBringer_Green
   m_TagString: DragonNightMare
@@ -2861,29 +2885,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!136 &5838309456312619267
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7005901715425054280}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 1.56
-  m_Height: 5.07
-  m_Direction: 2
-  m_Center: {x: 0, y: 1.69, z: -0.43}
 --- !u!54 &6606426982377201829
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2999,7 +3000,27 @@ MonoBehaviour:
   attackCooldownMin: 3
   attackCooldownMax: 5
   defendBox: {fileID: 2183988588758808020}
-  animator: {fileID: 646400233321181519}
+--- !u!65 &8349375781102197430
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7005901715425054280}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 3.4230862, y: 1.4136977, z: 3.971868}
+  m_Center: {x: 0.012663841, y: 0.7171662, z: -1.2326505}
 --- !u!1 &7340705039827207183
 GameObject:
   m_ObjectHideFlags: 0

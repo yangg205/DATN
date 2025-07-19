@@ -901,7 +901,6 @@ Transform:
   m_Children:
   - {fileID: 845404532164283265}
   - {fileID: 4061492281988972594}
-  - {fileID: 7339505967267502050}
   - {fileID: 6567276864757526676}
   - {fileID: 6395553853663658732}
   - {fileID: 3817608635362548625}
@@ -1019,7 +1018,7 @@ MonoBehaviour:
   expReward: 25
   playerStats: {fileID: 0}
   attackPoint: {fileID: 7339505967267502050}
-  attackRange: 1.07
+  attackRange: 0.4
   playerLayer:
     serializedVersion: 2
     m_Bits: 1
@@ -1842,12 +1841,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4979117107605371334}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.73, z: 4.35}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalRotation: {x: 0.030083764, y: 0.70646656, z: 0.030083764, w: -0.70646656}
+  m_LocalPosition: {x: -51, y: -42, z: -0}
+  m_LocalScale: {x: 100, y: 100, z: 100.000015}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 8541300506992404009}
+  m_Father: {fileID: 5535669481667021878}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5231627135449102290
 GameObject:
@@ -2455,7 +2454,8 @@ Transform:
   m_LocalPosition: {x: -96.1918, y: -1.1368684e-13, z: 1.0679433e-14}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 7339505967267502050}
   m_Father: {fileID: 1967949872483610242}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8194262617320912629
