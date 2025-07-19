@@ -2,6 +2,7 @@
 using UnityEngine.Localization.Settings;
 using UnityEngine.Localization.Tables;
 using System;
+using System.Collections.Generic; // Thêm để dùng List
 
 public enum QuestType
 {
@@ -12,10 +13,10 @@ public enum QuestType
 
 public enum QuestDialogueType
 {
-    BeforeComplete,    // When offering the quest
-    AfterComplete,     // After claiming reward and quest is done
-    ObjectiveMet,      // When objective is met, but reward not claimed
-    InProgress         // When quest is accepted but objective not yet met
+    BeforeComplete,     // When offering the quest
+    AfterComplete,      // After claiming reward and quest is done
+    ObjectiveMet,       // When objective is met, but reward not claimed
+    InProgress          // When quest is accepted but objective not yet met
 }
 
 [CreateAssetMenu(fileName = "New Quest", menuName = "Quests/Quest Data")]
@@ -32,8 +33,8 @@ public class QuestData : ScriptableObject
     [Header("Quest Requirements")]
     public QuestType questType;
     public int requiredKills;
-    public string targetNPCID;   // Với FindNPC
-    public string targetItemID;  // Với CollectItem
+    public string targetNPCID;    // Với FindNPC
+    public string targetItemID;   // Với CollectItem
     public int requiredItemCount = 1;
 
     [Header("Quest Location (Waypoint)")]
@@ -52,6 +53,12 @@ public class QuestData : ScriptableObject
     [Header("Quest Rewards")]
     public int rewardCoin;
     public int rewardExp;
+    // --- THÊM CÁC TRƯỜNG VẬT PHẨM THƯỞNG MỚI ---
+    [Tooltip("ID của vật phẩm thưởng. Có thể để trống nếu không có vật phẩm.")]
+    public string rewardItemID;
+    [Tooltip("Số lượng vật phẩm thưởng.")]
+    public int rewardItemCount = 1;
+    // ------------------------------------------
 
     [Header("Dialogues - Keys")]
     [Tooltip("Keys cho lời thoại trước khi nhận nhiệm vụ.")]
@@ -128,6 +135,14 @@ public class QuestData : ScriptableObject
         return GetLocalizedString("NPC_Names", giverNPCID);
     }
 
+    // --- Phương thức để lấy tên vật phẩm thưởng đã bản địa hóa ---
+    public string GetRewardItemNameLocalized()
+    {
+        if (string.IsNullOrEmpty(rewardItemID)) return "";
+        return GetLocalizedString("Item_Names", rewardItemID); // Giả định có bảng "Item_Names"
+    }
+    // -------------------------------------------------------------
+
     private string GetLocalizedString(string tableName, string key)
     {
         var table = LocalizationSettings.StringDatabase.GetTable(tableName);
@@ -147,5 +162,4 @@ public class QuestData : ScriptableObject
 
         return entry.GetLocalizedString();
     }
-
 }

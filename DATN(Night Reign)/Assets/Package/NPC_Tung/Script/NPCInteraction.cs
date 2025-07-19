@@ -12,7 +12,7 @@ public class NPCInteraction : MonoBehaviour
     [SerializeField] private Button _acceptButton;
     [SerializeField] private Button _declineButton;
     [SerializeField] private Button _claimRewardButton;
-    [SerializeField] private GameObject _continueButton;
+    [SerializeField] private Button _continueButton;
 
     [Header("Quest")]
     public QuestManager questManager;
@@ -30,12 +30,12 @@ public class NPCInteraction : MonoBehaviour
 
     private bool isPlayerInRange = false;
     private string _npcID;
-
     private bool _shouldContinueAfterComplete = false;
     private QuestData _lastCompletedQuest = null;
 
     void Start()
     {
+        
         if (!questManager || !dialogueManager || !TryGetComponent(out NPCIdentity npcIdentity))
         {
             Debug.LogError("Missing required components.");
@@ -56,9 +56,14 @@ public class NPCInteraction : MonoBehaviour
 
     void Update()
     {
+        
         if (isPlayerInRange && Input.GetKeyDown(KeyCode.C))
         {
+            _continueButton.gameObject.SetLocalizationKey("btn_next");
+            _claimRewardButton.gameObject.SetLocalizationKey("btn_claim");
             HandleInteraction();
+            
+
         }
         if (Input.GetKeyDown(KeyCode.T))
         {
@@ -314,7 +319,7 @@ public class NPCInteraction : MonoBehaviour
         _acceptButton?.gameObject.SetActive(true);
         _declineButton?.gameObject.SetActive(true);
         _claimRewardButton?.gameObject.SetActive(false);
-        if (_continueButton != null) _continueButton.SetActive(false);
+        if (_continueButton != null) _continueButton.gameObject.SetActive(false);
     }
 
     private void ShowClaimRewardUI()
@@ -322,7 +327,7 @@ public class NPCInteraction : MonoBehaviour
         _acceptButton?.gameObject.SetActive(false);
         _declineButton?.gameObject.SetActive(false);
         _claimRewardButton?.gameObject.SetActive(true);
-        if (_continueButton != null) _continueButton.SetActive(false);
+        if (_continueButton != null) _continueButton.gameObject.SetActive(false);
     }
 
     private void HideAllActionButtons()
@@ -330,12 +335,12 @@ public class NPCInteraction : MonoBehaviour
         _acceptButton?.gameObject.SetActive(false);
         _declineButton?.gameObject.SetActive(false);
         _claimRewardButton?.gameObject.SetActive(false);
-        if (_continueButton != null) _continueButton.SetActive(false);
+        if (_continueButton != null) _continueButton.gameObject.SetActive(false);
     }
 
     private void OnDialogueCompleted()
     {
-        if (_continueButton != null) _continueButton.SetActive(false);
+        if (_continueButton != null) _continueButton.gameObject.SetActive(false);
         MouseManager.Instance.HideCursorAndEnableInput();
     }
 
