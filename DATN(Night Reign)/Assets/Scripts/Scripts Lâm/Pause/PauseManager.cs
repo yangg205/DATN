@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-
 public class PauseManager : MonoBehaviour
 {
     public GameObject pauseMenuUI;
@@ -27,6 +26,9 @@ public class PauseManager : MonoBehaviour
         isPaused = true;
         pauseMenuUI.SetActive(true);
 
+        // Đảm bảo panel luôn nằm trên cùng
+        BringToFront(pauseMenuUI);
+
         if (settingsPanel != null) settingsPanel.SetActive(false);
         if (saveConfirmPanel != null) saveConfirmPanel.SetActive(false);
 
@@ -40,7 +42,7 @@ public class PauseManager : MonoBehaviour
         isPaused = false;
         pauseMenuUI.SetActive(false);
     }
-    // ✅ Quit Game (gọi từ nút Quit)
+
     public void QuitGame()
     {
         Debug.Log("Quitting game...");
@@ -50,5 +52,19 @@ public class PauseManager : MonoBehaviour
 #else
         Application.Quit();
 #endif
+    }
+
+    private void BringToFront(GameObject uiElement)
+    {
+        // Đưa transform lên cuối để luôn render trên cùng
+        uiElement.transform.SetAsLastSibling();
+
+        // Nếu có Canvas riêng, tăng Sorting Order
+        Canvas canvas = uiElement.GetComponent<Canvas>();
+        if (canvas != null)
+        {
+            canvas.overrideSorting = true;
+            canvas.sortingOrder = 999; // số lớn để luôn trên cùng
+        }
     }
 }
