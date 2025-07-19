@@ -21,8 +21,6 @@ public class NightMare : MonoBehaviour
     public LayerMask playerLayer;
 
     private Transform player;
-    [Header("UI")]
-    public Image healthFill;
 
     [Header("Damage Popup")]
     public GameObject damagePopupPrefab;
@@ -46,6 +44,7 @@ public class NightMare : MonoBehaviour
 
     void Start()
     {
+
         player = GameObject.FindGameObjectWithTag("Player").transform;
         if (player != null)
         {
@@ -56,22 +55,6 @@ public class NightMare : MonoBehaviour
 
     void Update()
     {
-        if (healthFill != null)
-        {
-            healthFill.fillAmount = HP / maxHP;
-        }
-
-        //===test 
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            TakeDamage(20);
-            
-        }
-        //if (Input.GetKeyDown(KeyCode.I))
-        //{
-        //    TakeIceDamageNightMare(5);
-        //}
-
 
         if (isDead) return;
 

@@ -45,9 +45,9 @@ GameObject:
   - component: {fileID: 5941690926911646086}
   - component: {fileID: 3083104820166620596}
   - component: {fileID: 4638255463251071888}
+  - component: {fileID: 8739783472854189292}
   - component: {fileID: 1237087366057114915}
   - component: {fileID: 197621399689941129}
-  - component: {fileID: 8739783472854189292}
   - component: {fileID: 7808348894588340680}
   m_Layer: 0
   m_Name: DragonSoulEater_Blue
@@ -171,6 +171,39 @@ Rigidbody:
   m_Interpolate: 2
   m_Constraints: 64
   m_CollisionDetection: 0
+--- !u!114 &8739783472854189292
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 983970137812721851}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a5b93fe93fc37946aa7ec1b3209e99d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  HP: 100
+  maxHP: 100
+  animator: {fileID: 3854826361488099466}
+  expReward: 25
+  playerStats: {fileID: 0}
+  attackPoint: {fileID: 7602705919481297996}
+  attackRange: 0.78
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 1
+  damagePopupPrefab: {fileID: 247968149220129898, guid: 04f99676d4ee40d44b375f9d7ef86f4d,
+    type: 3}
+  iceMaterial: {fileID: 2100000, guid: 9fca7ea8014af5244aa081ccdc46d112, type: 2}
+  originalMaterial: {fileID: 2100000, guid: 5fcde950c31077243850f23d14ba9a5a, type: 2}
+  freezeDuration: 5
+  bodyRenderer: {fileID: 2747715081455283824}
+  isDead: 0
+  isTakingDamage: 0
+  minAttackDamage: 5
+  maxAttackDamage: 15
+  questManager: {fileID: 0}
 --- !u!114 &1237087366057114915
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -241,39 +274,6 @@ MonoBehaviour:
   slowWhenNotFacingTarget: 1
   whenCloseToDestination: 0
   constrainInsideGraph: 0
---- !u!114 &8739783472854189292
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 983970137812721851}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9a5b93fe93fc37946aa7ec1b3209e99d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  HP: 100
-  maxHP: 100
-  animator: {fileID: 3854826361488099466}
-  expReward: 25
-  playerStats: {fileID: 0}
-  attackPoint: {fileID: 7602705919481297996}
-  attackRange: 0.78
-  playerLayer:
-    serializedVersion: 2
-    m_Bits: 1
-  damagePopupPrefab: {fileID: 247968149220129898, guid: 04f99676d4ee40d44b375f9d7ef86f4d,
-    type: 3}
-  iceMaterial: {fileID: 2100000, guid: 9fca7ea8014af5244aa081ccdc46d112, type: 2}
-  originalMaterial: {fileID: 2100000, guid: 5fcde950c31077243850f23d14ba9a5a, type: 2}
-  freezeDuration: 5
-  bodyRenderer: {fileID: 2747715081455283824}
-  isDead: 0
-  isTakingDamage: 0
-  minAttackDamage: 5
-  maxAttackDamage: 15
-  questManager: {fileID: 0}
 --- !u!114 &7808348894588340680
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2487,6 +2487,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2122478552522060171}
     m_Modifications:
+    - target: {fileID: 1071421766567528166, guid: 6ff2a79b20312634599f61937b0ebf12,
+        type: 3}
+      propertyPath: enemy
+      value: 
+      objectReference: {fileID: 8739783472854189292}
     - target: {fileID: 1071421766567528166, guid: 6ff2a79b20312634599f61937b0ebf12,
         type: 3}
       propertyPath: enemyScript

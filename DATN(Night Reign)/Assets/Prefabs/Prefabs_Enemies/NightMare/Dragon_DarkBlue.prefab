@@ -875,9 +875,9 @@ GameObject:
   - component: {fileID: 3810874712472608455}
   - component: {fileID: 3556176822766434288}
   - component: {fileID: 71168371820696015}
+  - component: {fileID: 4318226666121649342}
   - component: {fileID: 4582639075186881726}
   - component: {fileID: 7275069775046822866}
-  - component: {fileID: 4318226666121649342}
   - component: {fileID: 4096344553630355621}
   m_Layer: 6
   m_Name: Dragon_DarkBlue
@@ -1001,6 +1001,39 @@ Rigidbody:
   m_Interpolate: 2
   m_Constraints: 64
   m_CollisionDetection: 0
+--- !u!114 &4318226666121649342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2749465251524075490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8edd8f2d67deb14e8c7fcb17b04fe99, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  HP: 100
+  maxHP: 100
+  animator: {fileID: 5290440288207539689}
+  expReward: 25
+  playerStats: {fileID: 0}
+  attackPoint: {fileID: 7339505967267502050}
+  attackRange: 1.07
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 1
+  damagePopupPrefab: {fileID: 247968149220129898, guid: 04f99676d4ee40d44b375f9d7ef86f4d,
+    type: 3}
+  vfxDead: {fileID: 0}
+  iceMaterial: {fileID: 2100000, guid: 8ad408b164cc7654d963fc1d6f4d2828, type: 2}
+  originalMaterial: {fileID: 2100000, guid: 8a2d1f9276d746a42925272a2372ca11, type: 2}
+  freezeDuration: 5
+  bodyRenderer: {fileID: 7610099212727793656}
+  isDead: 0
+  isTakingDamage: 0
+  minAttackDamage: 5
+  maxAttackDamage: 15
 --- !u!114 &4582639075186881726
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1071,39 +1104,6 @@ MonoBehaviour:
   slowWhenNotFacingTarget: 1
   whenCloseToDestination: 0
   constrainInsideGraph: 0
---- !u!114 &4318226666121649342
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2749465251524075490}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c8edd8f2d67deb14e8c7fcb17b04fe99, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  HP: 100
-  maxHP: 100
-  animator: {fileID: 5290440288207539689}
-  expReward: 25
-  playerStats: {fileID: 0}
-  attackPoint: {fileID: 7339505967267502050}
-  attackRange: 1.07
-  playerLayer:
-    serializedVersion: 2
-    m_Bits: 1
-  damagePopupPrefab: {fileID: 247968149220129898, guid: 04f99676d4ee40d44b375f9d7ef86f4d,
-    type: 3}
-  vfxDead: {fileID: 0}
-  iceMaterial: {fileID: 2100000, guid: 8ad408b164cc7654d963fc1d6f4d2828, type: 2}
-  originalMaterial: {fileID: 2100000, guid: 8a2d1f9276d746a42925272a2372ca11, type: 2}
-  freezeDuration: 5
-  bodyRenderer: {fileID: 7610099212727793656}
-  isDead: 0
-  isTakingDamage: 0
-  minAttackDamage: 5
-  maxAttackDamage: 15
 --- !u!114 &4096344553630355621
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2786,6 +2786,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8541300506992404009}
     m_Modifications:
+    - target: {fileID: 1071421766567528166, guid: 6ff2a79b20312634599f61937b0ebf12,
+        type: 3}
+      propertyPath: enemy
+      value: 
+      objectReference: {fileID: 4318226666121649342}
     - target: {fileID: 1071421766567528166, guid: 6ff2a79b20312634599f61937b0ebf12,
         type: 3}
       propertyPath: NightMare

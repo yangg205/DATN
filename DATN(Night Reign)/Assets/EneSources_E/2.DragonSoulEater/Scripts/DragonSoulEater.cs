@@ -22,8 +22,6 @@ public class DragonSoulEater : MonoBehaviour
     public LayerMask playerLayer;
 
     private Transform player;
-    [Header("UI")]
-    public Image healthFill;
 
     [Header("Damage Popup")]
     public GameObject damagePopupPrefab;
@@ -55,19 +53,6 @@ public class DragonSoulEater : MonoBehaviour
 
     void Update()
     {
-        if (healthFill != null)
-        {
-            healthFill.fillAmount = HP / maxHP;
-        }
-        //===test 
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            TakeDamage(20);
-        }if (Input.GetKeyDown(KeyCode.I))
-            {
-                TakeIceDamageSoulEater(1);
-             }
-
 
         if (isDead) return;
 
@@ -92,7 +77,6 @@ public class DragonSoulEater : MonoBehaviour
         if (HP <= 0)
         {
             isDead = true;
-            questManager.ReportKill();
             if (aiPath != null)
             {
                 aiPath.canMove = false;
@@ -103,6 +87,10 @@ public class DragonSoulEater : MonoBehaviour
             animator.SetTrigger("die");
             GetComponent<Collider>().enabled = false;
             GetComponent<Rigidbody>().isKinematic = true;
+
+            Destroy(gameObject, 7f);
+
+            questManager.ReportKill();
             // 💥 Nếu enemy này đang bị lock-on thì thoát lock-on
             if (ND.CameraHandler.singleton != null &&
                 ND.CameraHandler.singleton.currentLockOnTarget == this)
@@ -118,12 +106,12 @@ public class DragonSoulEater : MonoBehaviour
                 // Reset camera
                 ND.CameraHandler.singleton.ClearLockOnTargets();
             }
+            
 
             if (playerStats != null)
             {
                 playerStats.GainEXP(expReward);
             }
-            Destroy(gameObject, 7f);
 
         }
         else

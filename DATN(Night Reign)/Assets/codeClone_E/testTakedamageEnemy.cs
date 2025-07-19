@@ -6,17 +6,14 @@ public class testTakedamageEnemy : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("DragonNightMare"))
+        if (other.CompareTag("DragonSoulEater"))
         {
-            NightMare nightmare = other.GetComponent<NightMare>();
-            if (nightmare != null)
+            DragonSoulEater ene = other.GetComponent<DragonSoulEater>();
+            if (ene != null)
             {
-                nightmare.TakeDamage(damageAmount);
+                ene.TakeDamage(damageAmount);
             }
-            else
-            {
-                Debug.LogWarning("NightMare script not found on object with tag Enemy.");
-            }
+         
         }
     }
 }

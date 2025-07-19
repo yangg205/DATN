@@ -4,7 +4,9 @@ using UnityEngine.UI;
 
 public class HealthBarForEnemies : MonoBehaviour
 {
-    public NightMare NightMare;
+    //public NightMare NightMare;
+
+    public MonoBehaviour enemy;
 
     public Slider healthSlider;
     public Slider easeHealthSlider;
@@ -17,17 +19,27 @@ public class HealthBarForEnemies : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (healthSlider.value != NightMare.HP)
+        float currentHP = GetHP();
+
+        if (healthSlider.value != currentHP)
         {
-            healthSlider.value = NightMare.HP;
+            healthSlider.value = currentHP;
         }
 
-        if (healthSlider.value != easeHealthSlider.value)
+        if (easeHealthSlider.value != currentHP)
         {
-            easeHealthSlider.value = Mathf.Lerp(easeHealthSlider.value, NightMare.HP, lerpSpeed);
+            easeHealthSlider.value = Mathf.Lerp(easeHealthSlider.value, currentHP, lerpSpeed);
         }
 
-        hpText.text = $"{NightMare.HP}";
+        hpText.text = $"{currentHP}";
 
     }
+
+    private float GetHP()
+    {
+        if (enemy is NightMare nm) return nm.HP;
+        if (enemy is DragonSoulEater se) return se.HP;
+        return 0;
+    }
+
 }
