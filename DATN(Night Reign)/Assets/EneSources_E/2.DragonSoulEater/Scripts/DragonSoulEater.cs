@@ -23,8 +23,8 @@ public class DragonSoulEater : MonoBehaviour
 
     private Transform player;
 
-    [Header("Damage Popup")]
-    public GameObject damagePopupPrefab;
+    [Header("VFX")]
+    public ParticleSystem vfxDead;
 
     [Header("Freeze Effect")]
     public Material iceMaterial;             
@@ -53,6 +53,10 @@ public class DragonSoulEater : MonoBehaviour
 
     void Update()
     {
+        /*if (Input.GetKeyDown(KeyCode.R))
+        {
+            TakeDamage(15);
+        }*/
 
         if (isDead) return;
 
@@ -68,11 +72,9 @@ public class DragonSoulEater : MonoBehaviour
         AIPath aiPath = GetComponent<AIPath>();
 
         // Hiện damage popup
-        if (damagePopupPrefab != null)
-        {
-            GameObject popup = Instantiate(damagePopupPrefab, transform.position + Vector3.up * 2f, Quaternion.identity);
-            popup.GetComponent<DamagePopup>().Setup(damageAmount);
-        }
+        DamagePopup popup = DamagePopupPool.Instance.GetFromPool();
+        popup.transform.position = transform.position + Vector3.up * 2f;
+        popup.Setup(damageAmount);
 
         if (HP <= 0)
         {
@@ -81,6 +83,11 @@ public class DragonSoulEater : MonoBehaviour
             {
                 aiPath.canMove = false;
                 aiPath.canSearch = false;
+            }
+
+            if (vfxDead != null)
+            {
+                vfxDead.Play();
             }
 
             AudioManager_Enemy.instance.Play("DragonDeath");
@@ -134,12 +141,9 @@ public class DragonSoulEater : MonoBehaviour
 
         AIPath aiPath = GetComponent<AIPath>();
 
-        // Hiện damage popup
-        if (damagePopupPrefab != null)
-        {
-            GameObject popup = Instantiate(damagePopupPrefab, transform.position + Vector3.up * 2f, Quaternion.identity);
-            popup.GetComponent<DamagePopup>().Setup(damageAmount);
-        }
+        DamagePopup popup = DamagePopupPool.Instance.GetFromPool();
+        popup.transform.position = transform.position + Vector3.up * 2f;
+        popup.Setup(damageAmount);
 
         // Nếu chết
         if (HP <= 0)
@@ -152,6 +156,10 @@ public class DragonSoulEater : MonoBehaviour
                 aiPath.canSearch = false;
             }
 
+            if (vfxDead != null)
+            {
+                vfxDead.Play();
+            }
             AudioManager_Enemy.instance.Play("DragonDeath");
             animator.SetTrigger("die");
             GetComponent<Collider>().enabled = false;

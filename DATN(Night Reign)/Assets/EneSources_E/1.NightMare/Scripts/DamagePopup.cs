@@ -7,35 +7,42 @@ public class DamagePopup : MonoBehaviour
     public float fadeOutSpeed = 2f;
     private TextMesh textMesh;
     private Color textColor;
+    private float lifetime = 1.5f;
+    private float timer;
 
     void Awake()
     {
         textMesh = GetComponent<TextMesh>();
-        textColor = textMesh.color;
     }
 
     public void Setup(int damageAmount)
     {
         textMesh.text = damageAmount.ToString();
+        textColor = textMesh.color;
+        textColor.a = 1f;
+        textMesh.color = textColor;
+        timer = 0f;
+        gameObject.SetActive(true);
     }
+
     void LateUpdate()
     {
         transform.LookAt(Camera.main.transform);
-        transform.Rotate(0, 180, 0); // Quay lại mặt đúng hướng camera
+        transform.Rotate(0, 180, 0);
     }
 
     void Update()
     {
-        // Di chuyển lên
         transform.position += Vector3.up * moveUpSpeed * Time.deltaTime;
 
-        // Mờ dần
-        textColor.a -= fadeOutSpeed * Time.deltaTime;
+        timer += Time.deltaTime;
+        float alpha = Mathf.Lerp(1f, 0f, timer / lifetime);
+        textColor.a = alpha;
         textMesh.color = textColor;
 
-        if (textColor.a <= 0f)
+        if (timer >= lifetime)
         {
-            Destroy(gameObject);
+            DamagePopupPool.Instance.ReturnToPool(this);
         }
     }
 }

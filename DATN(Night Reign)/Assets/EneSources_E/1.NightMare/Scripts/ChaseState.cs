@@ -11,7 +11,7 @@ public class ChaseState : StateMachineBehaviour
     Transform player;
     Path path;
     int currentWaypoint = 0;
-    float speed = 4f;
+    float speed = 3f;
     float chaseRange = 13f;
     float attackRange = 3.3f;
     float nextWaypointDistance = 1f;

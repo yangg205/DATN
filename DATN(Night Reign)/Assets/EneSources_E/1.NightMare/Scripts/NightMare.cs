@@ -23,7 +23,7 @@ public class NightMare : MonoBehaviour
     private Transform player;
 
     [Header("Damage Popup")]
-    public GameObject damagePopupPrefab;
+    //public GameObject damagePopupPrefab;
 
     [Header("VFX")]
     public ParticleSystem vfxDead;
@@ -55,7 +55,11 @@ public class NightMare : MonoBehaviour
 
     void Update()
     {
-
+       /* if (Input.GetKeyDown(KeyCode.E))
+        {
+            TakeDamage(15);
+        }
+*/
         if (isDead) return;
 
         if (player == null) return;
@@ -70,11 +74,11 @@ public class NightMare : MonoBehaviour
         AIPath aiPath = GetComponent<AIPath>();
 
         // Hiện damage popup
-        if (damagePopupPrefab != null)
-        {
-            GameObject popup = Instantiate(damagePopupPrefab, transform.position + Vector3.up * 2f, Quaternion.identity);
-            popup.GetComponent<DamagePopup>().Setup(damageAmount);
-        }
+       
+            DamagePopup popup = DamagePopupPool.Instance.GetFromPool();
+            popup.transform.position = transform.position + Vector3.up * 2f;
+            popup.Setup(damageAmount);
+       
 
         if (HP <= 0)
         {
@@ -96,6 +100,8 @@ public class NightMare : MonoBehaviour
             GetComponent<Collider>().enabled = false;
             GetComponent<Rigidbody>().isKinematic = true;
 
+            Destroy(gameObject, 6f);
+
             // 💥 Nếu enemy này đang bị lock-on thì thoát lock-on
             if (ND.CameraHandler.singleton != null &&
                 ND.CameraHandler.singleton.currentLockOnTarget == this)
@@ -115,8 +121,6 @@ public class NightMare : MonoBehaviour
             {
                 playerStats.GainEXP(expReward);
             }
-
-            Destroy(gameObject, 6f);
 
         }
         else
@@ -140,11 +144,11 @@ public class NightMare : MonoBehaviour
         AIPath aiPath = GetComponent<AIPath>();
 
         // Hiện damage popup
-        if (damagePopupPrefab != null)
-        {
-            GameObject popup = Instantiate(damagePopupPrefab, transform.position + Vector3.up * 2f, Quaternion.identity);
-            popup.GetComponent<DamagePopup>().Setup(damageAmount);
-        }
+        
+            DamagePopup popup = DamagePopupPool.Instance.GetFromPool();
+            popup.transform.position = transform.position + Vector3.up * 2f;
+            popup.Setup(damageAmount);
+        
 
         // Nếu chết
         if (HP <= 0)
