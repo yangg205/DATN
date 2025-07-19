@@ -22,11 +22,7 @@ public class PlayerClone : MonoBehaviour
     }
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.E))
-        {
-            hitEnemy(10);
-            Debug.Log("hit usurper");
-        }
+      
         // Kiểm tra xem có đứng trên mặt đất không
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
 
@@ -56,11 +52,7 @@ public class PlayerClone : MonoBehaviour
         controller.Move(velocity * Time.deltaTime);
     }
 
-    public void hitEnemy(float damage)
-    {
-       
 
-    }
     public void TakeDamage(float damage)
     {
         Debug.Log("takedame Player");

@@ -1,279 +1,174 @@
 ﻿using ND;
-using Pathfinding;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class DragonTerrorBringer : MonoBehaviour
 {
-    public float HP = 200f;
-    public float maxHP = 200f;
-    public Animator animator;
-
-    public Transform attackPoint;
-    public float attackRange = 1.5f;
-    public float detectionRange = 10f;
-    public LayerMask playerLayer;
-
-    private Transform player;
-
-    [Header("UI")]
-    public Image healthFill;
-
-    [Header("Damage Popup")]
-    public GameObject damagePopupPrefab;
-
-    [Header("Freeze Effect")]
-    public Material iceMaterial;
-    public Material originalMaterial;
-    public float freezeDuration = 5f;
-    public SkinnedMeshRenderer bodyRenderer;
-
-    public bool isDead = false;
-    public bool isTakingDamage = false;
-
-    public float minAttackDamage = 5f;
-    public float maxAttackDamage = 15f;
-
-    private AIPath aiPath;
+    [Header("Stats")]
+    public float maxHP = 150f;
+    private float currentHP;
+    private bool isDead = false;
     private bool isDefending = false;
 
-    private float attackCooldown = 3f;
-    private float lastAttackTime = -999f;
+    [Header("Combat")]
+    private Transform player;
+    public Transform detectRange;
+    public Transform attackRange;
+    public float attackCooldownMin = 3f;
+    public float attackCooldownMax = 5f;
+    private float nextAttackTime = 0f;
+    private bool isAttacking = false;
+
+    public GameObject defendBox;
+
+    private Animator animator;
 
     void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player")?.transform;
-        aiPath = GetComponent<AIPath>();
-        if (aiPath != null)
+        if (player == null)
         {
-            aiPath.canMove = false;
-            aiPath.canSearch = false;
+            GameObject playerObj = GameObject.FindWithTag("Player");
+            if (playerObj != null)
+            {
+                player = playerObj.transform;
+                Debug.Log("Found Player with tag 'Player'.");
+            }
+            else
+            {
+                Debug.LogWarning("Player object with 'Player' tag not found. Please assign targetPlayer manually or ensure Player has the correct tag.");
+            }
         }
+
+        if (defendBox != null)
+        {
+            defendBox.SetActive(false);
+        }
+
+        animator = GetComponent<Animator>();
+
+
+        currentHP = maxHP;
+        animator.SetTrigger("Scream"); // trigger để Animator chuyển từ Any → Scream
+        Invoke(nameof(TriggerIdle), 2f); // sau khi scream thì chuyển sang Idle
+    }
+
+    void TriggerIdle()
+    {
+        if (!isDead) animator.SetTrigger("Idle");
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        if (isDead || isDefending) return;
+
+        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+        float detectDist = Vector3.Distance(transform.position, detectRange.position);
+        float attackDist = Vector3.Distance(transform.position, attackRange.position);
+
+        if (distanceToPlayer <= detectDist && Time.time >= nextAttackTime)
         {
-            TakeDamage(20);
-        }
-
-        if (healthFill != null)
-            healthFill.fillAmount = HP / maxHP;
-
-        if (isDead || isTakingDamage) return;
-
-        Collider[] detectedPlayers = Physics.OverlapSphere(transform.position, detectionRange, playerLayer);
-        if (detectedPlayers.Length > 0)
-        {
-            Transform targetPlayer = detectedPlayers[0].transform;
-            transform.LookAt(targetPlayer);
-
-            if (HP <= maxHP * 0.3f)
+            if (distanceToPlayer <= attackDist)
             {
-                if (!isDefending)
-                    StartCoroutine(DefendRoutine());
-            }
-            else
-            {
-                if (Time.time - lastAttackTime >= attackCooldown)
-                {
-                    lastAttackTime = Time.time;
-                    animator.SetTrigger("attack");
-                }
+                StartCoroutine(Attack());
+                nextAttackTime = Time.time + Random.Range(attackCooldownMin, attackCooldownMax);
             }
         }
-        else
+
+        if(Input.GetKeyDown(KeyCode.E))
         {
-            animator.SetBool("isIdle", true);
+            TakeDamage(10);
         }
     }
 
-    public void DealDamage()
+    IEnumerator Attack()
     {
-        float damage = Random.Range(minAttackDamage, maxAttackDamage);
-        Collider[] hitPlayers = Physics.OverlapSphere(attackPoint.position, attackRange, playerLayer);
-        foreach (Collider player in hitPlayers)
-        {
-            //player.GetComponent<PlayerClone>()?.TakeDamage(damage);
-/*            player.GetComponent<PlayerStats>()?.TakeDamage(15);
-*/        }
+        isAttacking = true;
+
+        int randomAttack = Random.Range(0, 2);
+        if (randomAttack == 0)
+            animator.SetTrigger("Attack1");
+        else
+            animator.SetTrigger("Attack2");
+
+        yield return new WaitForSeconds(1.5f); // chờ hết animation
+        isAttacking = false;
+
+        if (!isDead && !isDefending)
+            animator.SetTrigger("Idle");
     }
 
-    public void TakeDamage(int damageAmount)
+    public void TakeDamage(float damage)
     {
         if (isDead) return;
 
-        HP -= damageAmount;
-        HP = Mathf.Clamp(HP, 0, maxHP);
+        currentHP -= damage;
 
-        if (damagePopupPrefab != null)
-        {
-            GameObject popup = Instantiate(damagePopupPrefab, transform.position + Vector3.up * 2.5f + Vector3.forward * 2f, Quaternion.identity);
-            popup.GetComponent<DamagePopup>().Setup(damageAmount);
-        }
-
-        if (HP <= 0)
+        if (currentHP <= 0)
         {
             Die();
+
+            
+
         }
         else
         {
-            StartCoroutine(DamageStunCoroutine());
-            AudioManager_Enemy.instance?.Play("DragonHurt");
-            animator.SetTrigger("damage");
-        }
-    }
+            animator.SetTrigger("GetHit");
 
-    public void TakeIceDamageSoulEater(int damageAmount)
-    {
-        if (isDead) return;
-
-        HP -= damageAmount;
-        HP = Mathf.Clamp(HP, 0, maxHP);
-
-        if (damagePopupPrefab != null)
-        {
-            GameObject popup = Instantiate(damagePopupPrefab, transform.position + Vector3.up * 2f, Quaternion.identity);
-            popup.GetComponent<DamagePopup>().Setup(damageAmount);
-        }
-
-        if (HP <= 0)
-        {
-            Die();
-        }
-        else
-        {
-            Freeze();
-        }
-    }
-
-    private void Die()
-    {
-        isDead = true;
-
-        if (aiPath != null)
-        {
-            aiPath.canMove = false;
-            aiPath.canSearch = false;
-        }
-
-        AudioManager_Enemy.instance?.Play("DragonDeath");
-        animator.SetTrigger("die");
-
-        GetComponent<Collider>().enabled = false;
-        GetComponent<Rigidbody>().isKinematic = true;
-
-        // 💥 Nếu enemy này đang bị lock-on thì thoát lock-on
-        if (ND.CameraHandler.singleton != null &&
-            ND.CameraHandler.singleton.currentLockOnTarget == this)
-        {
-            ND.InputHandler inputHandler = FindObjectOfType<ND.InputHandler>();
-
-            // Tắt lock-on mode
-            if (inputHandler != null)
+            if (currentHP <= 70 && !isDefending)
             {
-                inputHandler.lockOnFlag = false;
-            }
-
-            // Reset camera
-            ND.CameraHandler.singleton.ClearLockOnTargets();
-        }
-
-        Destroy(gameObject, 7f);
-    }
-
-    IEnumerator DamageStunCoroutine()
-    {
-        isTakingDamage = true;
-
-        if (aiPath != null)
-        {
-            aiPath.canMove = false;
-            aiPath.canSearch = false;
-        }
-
-        yield return new WaitForSeconds(2f);
-
-        if (!isDead)
-        {
-            isTakingDamage = false;
-            if (aiPath != null)
-            {
-                aiPath.canMove = true;
-                aiPath.canSearch = true;
+                StartCoroutine(Defend());
             }
         }
     }
 
-    IEnumerator DefendRoutine()
+    IEnumerator Defend()
     {
         isDefending = true;
-
-        if (aiPath != null)
-        {
-            aiPath.canMove = false;
-            aiPath.canSearch = false;
-        }
-
-        animator.SetTrigger("defend");
-        AudioManager_Enemy.instance?.Play("DragonDefend");
-
-        yield return new WaitForSeconds(3f);
-
+        animator.SetTrigger("Defend");
+        yield return new WaitForSeconds(2f); // thời gian animation defend
         isDefending = false;
+
+        if (!isDead)
+            animator.SetTrigger("Idle");
     }
-
-    public void Freeze()
+    public void ActivateDefendBox()
     {
-        StartCoroutine(FreezeCoroutine());
-    }
-
-    IEnumerator FreezeCoroutine()
-    {
-        isTakingDamage = true;
-
-        if (aiPath != null)
+        if (defendBox != null)
         {
-            aiPath.canMove = false;
-            aiPath.canSearch = false;
+            defendBox.SetActive(true);
+            Debug.Log("Animation Event: Melee Attack Hitbox Activated!");
+        }
+    }
+
+    public void DeactivateDefendBox()
+    {
+        if (defendBox != null)
+        {
+            defendBox.SetActive(false);
+            Debug.Log("Animation Event: Melee Attack Hitbox Deactivated!");
+        }
+    }
+    void Die()
+    {
+        isDead = true;
+        animator.SetTrigger("Dead");
+
+        Destroy(gameObject, 5f);
+    }
+    void OnDrawGizmos()
+    {
+        if (detectRange != null)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(transform.position, Vector3.Distance(transform.position, detectRange.position));
         }
 
-        if (animator != null)
-            animator.speed = 0f;
-
-        if (bodyRenderer != null && iceMaterial != null)
-            bodyRenderer.material = iceMaterial;
-
-        AudioManager_Enemy.instance?.Play("Freeze");
-
-        yield return new WaitForSeconds(freezeDuration);
-
-        if (animator != null)
-            animator.speed = 1f;
-
-        if (bodyRenderer != null && originalMaterial != null)
-            bodyRenderer.material = originalMaterial;
-
-        if (aiPath != null && !isDead)
-        {
-            aiPath.canMove = true;
-            aiPath.canSearch = true;
-        }
-
-        isTakingDamage = false;
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        if (attackPoint != null)
+        if (attackRange != null)
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(attackPoint.position, attackRange);
+            Gizmos.DrawWireSphere(transform.position, Vector3.Distance(transform.position, attackRange.position));
         }
-
-        Gizmos.color = Color.blue;
-        Gizmos.DrawWireSphere(transform.position, detectionRange);
     }
+
 }
