@@ -22,8 +22,10 @@ public class NightMare : MonoBehaviour
 
     private Transform player;
 
-    [Header("Damage Popup")]
-    //public GameObject damagePopupPrefab;
+    [Header("Item Drop")]
+    public GameObject itemDropPrefab;
+
+    public Transform dropPoint; 
 
     [Header("VFX")]
     public ParticleSystem vfxDead;
@@ -55,11 +57,11 @@ public class NightMare : MonoBehaviour
 
     void Update()
     {
-       /* if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.E))
         {
             TakeDamage(15);
         }
-*/
+
         if (isDead) return;
 
         if (player == null) return;
@@ -100,7 +102,7 @@ public class NightMare : MonoBehaviour
             GetComponent<Collider>().enabled = false;
             GetComponent<Rigidbody>().isKinematic = true;
 
-            Destroy(gameObject, 6f);
+            StartCoroutine(DeathCoroutine());
 
             // 💥 Nếu enemy này đang bị lock-on thì thoát lock-on
             if (ND.CameraHandler.singleton != null &&
@@ -170,7 +172,9 @@ public class NightMare : MonoBehaviour
             animator.SetTrigger("die");
             GetComponent<Collider>().enabled = false;
             GetComponent<Rigidbody>().isKinematic = true;
-            Destroy(gameObject, 7f);
+
+            StartCoroutine(DeathCoroutine());
+
 
         }
         else
@@ -255,6 +259,18 @@ public class NightMare : MonoBehaviour
         isTakingDamage = false;
     }
 
+    IEnumerator DeathCoroutine()
+    {
+        yield return new WaitForSeconds(1f);
 
-  
+        // Rơi item
+        if (itemDropPrefab != null)
+        {
+            Vector3 dropPosition = dropPoint != null ? dropPoint.position : transform.position;
+            Instantiate(itemDropPrefab, dropPosition, Quaternion.identity);
+        }
+
+        Destroy(gameObject, 7f);
+    }
+
 }

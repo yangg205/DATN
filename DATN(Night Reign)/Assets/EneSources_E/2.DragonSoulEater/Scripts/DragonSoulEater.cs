@@ -13,9 +13,13 @@ public class DragonSoulEater : MonoBehaviour
     public float maxHP = 100f;
     public Animator animator;
 
+    [Header("Item Drop")]
+    public GameObject itemDropPrefab;
+
+    public Transform dropPoint;
+
     public int expReward = 25;
     public PlayerStats playerStats;
-
 
     public Transform attackPoint;
     public float attackRange = 1.5f;
@@ -71,7 +75,7 @@ public class DragonSoulEater : MonoBehaviour
 
         AIPath aiPath = GetComponent<AIPath>();
 
-        // Hiện damage popup
+        //damage popup
         DamagePopup popup = DamagePopupPool.Instance.GetFromPool();
         popup.transform.position = transform.position + Vector3.up * 2f;
         popup.Setup(damageAmount);
@@ -95,14 +99,14 @@ public class DragonSoulEater : MonoBehaviour
             GetComponent<Collider>().enabled = false;
             GetComponent<Rigidbody>().isKinematic = true;
 
-            Destroy(gameObject, 7f);
+            StartCoroutine(DeathCoroutine());
 
             questManager.ReportKill();
             // 💥 Nếu enemy này đang bị lock-on thì thoát lock-on
             if (ND.CameraHandler.singleton != null &&
                 ND.CameraHandler.singleton.currentLockOnTarget == this)
             {
-                ND.InputHandler inputHandler = FindObjectOfType<ND.InputHandler>();
+                ND.InputHandler inputHandler = FindAnyObjectByType<ND.InputHandler>();
 
                 // Tắt lock-on mode
                 if (inputHandler != null)
@@ -165,7 +169,8 @@ public class DragonSoulEater : MonoBehaviour
             GetComponent<Collider>().enabled = false;
             GetComponent<Rigidbody>().isKinematic = true;
 
-            Destroy(gameObject, 7f);
+            StartCoroutine(DeathCoroutine());
+
 
         }
         else
@@ -249,6 +254,18 @@ public class DragonSoulEater : MonoBehaviour
         isTakingDamage = false;
     }
 
+    IEnumerator DeathCoroutine()
+    {
+        yield return new WaitForSeconds(1f);
 
+        // Rơi item
+        if (itemDropPrefab != null)
+        {
+            Vector3 dropPosition = dropPoint != null ? dropPoint.position : transform.position;
+            Instantiate(itemDropPrefab, dropPosition, Quaternion.identity);
+        }
+
+        Destroy(gameObject, 7f);
+    }
 
 }

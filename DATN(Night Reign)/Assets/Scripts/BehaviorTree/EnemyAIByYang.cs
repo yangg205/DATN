@@ -6,6 +6,10 @@ using Pathfinding;
 
 public class EnemyAIByYang : MonoBehaviour
 {
+    [Header("Item Drop")]
+    public GameObject itemDropPrefab;
+    public Transform dropPoint;
+
     [Header("Target & Detection")]
     public Transform targetPlayer;
     public float detectionRange = 15f;
@@ -206,14 +210,18 @@ public class EnemyAIByYang : MonoBehaviour
         }
     }
 
-    public void TakeDamage(float damage)
+    public void TakeDamage(float damageAmount)
     {
-        currentHealth -= damage;
+        currentHealth -= damageAmount;
 
         if (vfxHitEffect != null)
         {
             vfxHitEffect.Play();
         }
+
+        DamagePopup popup = DamagePopupPool.Instance.GetFromPool();
+        popup.transform.position = transform.position + Vector3.up * 2f;
+        popup.Setup(damageAmount);
 
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
@@ -229,14 +237,17 @@ public class EnemyAIByYang : MonoBehaviour
 
     private void Die()
     {
-        Debug.Log("Boss has been defeated!");
         _animator?.SetTrigger("Die");
         _aiPath.isStopped = true;
         enabled = false;
 
+        StartCoroutine(DeathCoroutine());
+        Debug.Log("spider drop item");
+
         if (EnemyAIManager.Instance != null)
         {
             EnemyAIManager.Instance.UnregisterEnemy(this);
+            Debug.Log("spider die");
         }
     }
 
@@ -768,20 +779,17 @@ public class EnemyAIByYang : MonoBehaviour
     }
 
 
-    /*void OnDrawGizmosSelected()
+    IEnumerator DeathCoroutine()
     {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, detectionRange);
+        yield return new WaitForSeconds(2f);
 
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, engageRange);
+        // Rơi item
+        if (itemDropPrefab != null)
+        {
+            Vector3 dropPosition = dropPoint != null ? dropPoint.position : transform.position;
+            Instantiate(itemDropPrefab, dropPosition, Quaternion.identity);
+        }
 
-        Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(transform.position, approachDistance);
-
-        Gizmos.color = Color.blue;
-        Gizmos.DrawWireSphere(transform.position, meleeAttackRange);
-    }*/
-
+    }
 
 }

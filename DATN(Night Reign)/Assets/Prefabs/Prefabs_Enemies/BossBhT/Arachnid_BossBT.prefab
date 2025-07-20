@@ -79,13 +79,16 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 142670190417585255}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 017409b68dca4bd418549048b12b8cae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  itemDropPrefab: {fileID: 0}
+  dropPoint: {fileID: 0}
   targetPlayer: {fileID: 0}
   detectionRange: 15
+  endReachedDistance: 7
   engageRange: 4
   approachDistance: 10
   meleeAttackRange: 4
@@ -103,7 +106,7 @@ MonoBehaviour:
   _fleeRange: 8
   attackCooldown: 1.5
   dodgeCooldown: 2
-  meleeAttackHitbox: {fileID: 2855008849554849914}
+  meleeAttackHitboxes: []
   meleeDamage: 50
   vfxHitEffect: {fileID: 2811795697579420608}
   currentPhase: 0
@@ -1552,6 +1555,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28b03315a8cc0d0429108f040aaf7f87, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerStats: {fileID: 0}
 --- !u!1 &3168793428815948003
 GameObject:
   m_ObjectHideFlags: 0
@@ -3940,9 +3944,10 @@ MonoBehaviour:
   enemyAIByYang: {fileID: 275548272227186678}
   healthSlider: {fileID: 685691876155943845}
   easeHealthSlider: {fileID: 8885333103016910222}
-  healthFillImage: {fileID: 0}
-  normalFillSprite: {fileID: 0}
-  enragedFillSprite: {fileID: 0}
+  hpText: {fileID: 0}
+  fillImage: {fileID: 0}
+  normalColor: {r: 1, g: 0, b: 0, a: 1}
+  enragedColor: {r: 0.6, g: 0, b: 0.8, a: 1}
 --- !u!1 &8729714942009295287
 GameObject:
   m_ObjectHideFlags: 0
