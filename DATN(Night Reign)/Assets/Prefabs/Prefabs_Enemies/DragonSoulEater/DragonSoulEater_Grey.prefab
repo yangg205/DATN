@@ -798,72 +798,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 837693208003386434}
   m_LocalEulerAnglesHint: {x: -3.0042114, y: -3.5534246, z: -7.800074}
---- !u!1 &3627260994320207910
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 617536765153073800}
-  - component: {fileID: 293921071289176108}
-  m_Layer: 0
-  m_Name: AudioManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &617536765153073800
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3627260994320207910}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.1597636, y: 2.17, z: -0.21}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1032023115684727054}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &293921071289176108
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3627260994320207910}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a41e6f6603f88724ea4c513377273631, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sounds:
-  - name: DragonDeath
-    clip: {fileID: 8300000, guid: 83374346b6a1f914b86a818794cbdd11, type: 3}
-    mixer: {fileID: 0}
-    volume: 1
-    pitch: 1
-    loop: 0
-    source: {fileID: 0}
-  - name: DragonHurt
-    clip: {fileID: 8300000, guid: c48f1b113bca1084fa7a431a1360e459, type: 3}
-    mixer: {fileID: 0}
-    volume: 1
-    pitch: 1
-    loop: 0
-    source: {fileID: 0}
-  - name: Freeze
-    clip: {fileID: 8300000, guid: dbf7b31283aa3e845b17d78ae87eee27, type: 3}
-    mixer: {fileID: 0}
-    volume: 1
-    pitch: 1
-    loop: 0
-    source: {fileID: 0}
 --- !u!1 &3631837035998049129
 GameObject:
   m_ObjectHideFlags: 0
@@ -1641,7 +1575,6 @@ Transform:
   - {fileID: 8656696601442438115}
   - {fileID: 748835406429513765}
   - {fileID: 163150883132484561}
-  - {fileID: 617536765153073800}
   - {fileID: 4512201556971328082}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}

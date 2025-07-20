@@ -38,7 +38,7 @@ public class NightMare : MonoBehaviour
 
     public SkinnedMeshRenderer bodyRenderer;           
 
-    public bool isDead = false;
+    public bool isDead;
     public bool isTakingDamage = false;
 
     public int minAttackDamage = 3;
@@ -46,7 +46,7 @@ public class NightMare : MonoBehaviour
 
     void Start()
     {
-
+        isDead = false;
         player = GameObject.FindGameObjectWithTag("Player").transform;
         if (player != null)
         {
@@ -108,7 +108,8 @@ public class NightMare : MonoBehaviour
             if (ND.CameraHandler.singleton != null &&
                 ND.CameraHandler.singleton.currentLockOnTarget == this)
             {
-                ND.InputHandler inputHandler = FindObjectOfType<ND.InputHandler>();
+                //ND.InputHandler inputHandler = FindObjectOfType<ND.InputHandler>();
+                ND.InputHandler inputHandler = FindAnyObjectByType<ND.InputHandler>();
 
                 // Tắt lock-on mode
                 if (inputHandler != null)
@@ -139,7 +140,7 @@ public class NightMare : MonoBehaviour
     }
     public void TakeIceDamageNightMare(int damageAmount)       //dành cho char có skill đóng băng
     { 
-        if (isDead) return;
+        if (!isDead) return;
         HP -= damageAmount;
         HP = Mathf.Clamp(HP, 0, maxHP);
 
