@@ -39,7 +39,7 @@ public class Player : MonoBehaviour
         //RippleCamera.transform.position = transform.position + Vector3.up * 10;
         if(isGround.collider) ripple.transform.position = transform.position + transform.forward;
         else ripple.transform.position = transform.position;
-        Shader.SetGlobalVector("Player", transform.position);
+        Shader.SetGlobalVector("_Player", transform.position);
     }
     void PlayerMovement()
     {

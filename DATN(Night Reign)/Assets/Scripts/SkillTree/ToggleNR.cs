@@ -9,7 +9,7 @@ public class ToggleNR : MonoBehaviour
 
     void Start()
     {
-        mouseManager = FindFirstObjectByType<MouseManager>();
+        mouseManager = FindObjectOfType<MouseManager>();
         // Đảm bảo UI được tắt khi bắt đầu
         if (GO != null)
         {
