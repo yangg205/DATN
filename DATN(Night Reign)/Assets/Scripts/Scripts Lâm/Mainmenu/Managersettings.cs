@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Localization.Settings;
 
 public class SettingsManager : MonoBehaviour
 {
@@ -17,11 +18,15 @@ public class SettingsManager : MonoBehaviour
 
     [Header("Language")]
     public TMP_Dropdown languageDropdown;
-    public LocalizationManager localizationManager;
 
-    private Resolution[] resolutions;
+    // Danh sách độ phân giải cố định
+    private readonly Resolution[] customResolutions = new Resolution[]
+    {
+        new Resolution { width = 1280, height = 720, refreshRate = 60 },
+        new Resolution { width = 1920, height = 1080, refreshRate = 60 }
+    };
 
-    // Biến tạm
+    // Biến tạm (thay đổi trong Settings Menu nhưng chưa lưu)
     private float tempMusicVolume;
     private float tempEffectsVolume;
     private bool tempFullscreen;
@@ -30,29 +35,27 @@ public class SettingsManager : MonoBehaviour
     private float tempMouseSensitivity;
     private int tempLanguageIndex;
 
+    // Biến để khôi phục nếu Cancel
+    private int savedLanguageIndex;
+
     private float defaultMouseSensitivity = 5.0f;
 
     void Start()
     {
-        resolutions = Screen.resolutions;
+        InitResolutionDropdown();
+        LoadSettings();
+    }
+
+    private void InitResolutionDropdown()
+    {
         resolutionDropdown.ClearOptions();
 
-        int currentResolutionIndex = 0;
         var options = new System.Collections.Generic.List<string>();
-        for (int i = 0; i < resolutions.Length; i++)
+        foreach (var res in customResolutions)
         {
-            string res = resolutions[i].width + " x " + resolutions[i].height;
-            options.Add(res);
-
-            if (resolutions[i].width == Screen.currentResolution.width &&
-                resolutions[i].height == Screen.currentResolution.height)
-            {
-                currentResolutionIndex = i;
-            }
+            options.Add(res.width + " x " + res.height);
         }
         resolutionDropdown.AddOptions(options);
-
-        LoadSettings(currentResolutionIndex);
     }
 
     public void LoadSettings(int defaultResIndex = 0)
@@ -61,10 +64,12 @@ public class SettingsManager : MonoBehaviour
         tempMusicVolume = PlayerPrefs.GetFloat("MusicVolume", 1f);
         tempEffectsVolume = PlayerPrefs.GetFloat("EffectsVolume", 1f);
         tempFullscreen = PlayerPrefs.GetInt("Fullscreen", 1) == 1;
-        tempResolutionIndex = PlayerPrefs.GetInt("ResolutionIndex", defaultResIndex);
+        tempResolutionIndex = Mathf.Clamp(PlayerPrefs.GetInt("ResolutionIndex", defaultResIndex), 0, customResolutions.Length - 1);
         tempFPS = PlayerPrefs.GetInt("TargetFPS", 60);
         tempMouseSensitivity = PlayerPrefs.GetFloat("MouseSensitivity", defaultMouseSensitivity);
         tempLanguageIndex = PlayerPrefs.GetInt("LanguageIndex", 0);
+
+        savedLanguageIndex = tempLanguageIndex;
 
         // Gán vào UI
         musicSlider.value = tempMusicVolume;
@@ -100,15 +105,20 @@ public class SettingsManager : MonoBehaviour
         languageDropdown.value = tempLanguageIndex;
         languageDropdown.RefreshShownValue();
         languageDropdown.onValueChanged.RemoveAllListeners();
-        languageDropdown.onValueChanged.AddListener((index) =>
+        languageDropdown.onValueChanged.AddListener(OnLanguageChangedTemp);
+    }
+
+    private void OnLanguageChangedTemp(int index)
+    {
+        tempLanguageIndex = index;
+        if (LocalizationSettings.AvailableLocales.Locales.Count > index)
         {
-            tempLanguageIndex = index;
-        });
+            LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.Locales[index];
+        }
     }
 
     public void ApplySettings()
     {
-        // Lấy dữ liệu mới
         tempMusicVolume = musicSlider.value;
         tempEffectsVolume = effectsSlider.value;
         tempFullscreen = fullscreenToggle.isOn;
@@ -117,9 +127,9 @@ public class SettingsManager : MonoBehaviour
         tempMouseSensitivity = mouseSlider.value;
         tempLanguageIndex = languageDropdown.value;
 
-        // Áp dụng vào hệ thống
+        // Áp dụng độ phân giải
         Screen.fullScreen = tempFullscreen;
-        Resolution res = resolutions[tempResolutionIndex];
+        Resolution res = customResolutions[tempResolutionIndex];
         Screen.SetResolution(res.width, res.height, tempFullscreen);
         Application.targetFrameRate = tempFPS;
 
@@ -133,18 +143,21 @@ public class SettingsManager : MonoBehaviour
         PlayerPrefs.SetInt("LanguageIndex", tempLanguageIndex);
         PlayerPrefs.Save();
 
-        // Gọi đổi ngôn ngữ nếu có
-        if (localizationManager != null)
-        {
-            localizationManager.SetLanguage(tempLanguageIndex);
-        }
+        savedLanguageIndex = tempLanguageIndex;
 
         Debug.Log("Settings Applied");
     }
 
     public void CancelSettings()
     {
-        LoadSettings(); // Khôi phục lại giá trị đã lưu
+        // Khôi phục ngôn ngữ và các cài đặt gốc
+        tempLanguageIndex = savedLanguageIndex;
+        if (LocalizationSettings.AvailableLocales.Locales.Count > savedLanguageIndex)
+        {
+            LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.Locales[savedLanguageIndex];
+        }
+
+        LoadSettings(); // Khôi phục UI
         Debug.Log("Settings Cancelled");
     }
 

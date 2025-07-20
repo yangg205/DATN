@@ -4,48 +4,87 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Collections;
 
-public class SkipCutscenButton : MonoBehaviour
+public class SkipCutsceneButton : MonoBehaviour
 {
     [Header("References")]
     public PlayableDirector director;         // Timeline
-    public GameObject continueButton;         // Nút Skip
-    public Image blackScreen;                 // Ảnh đen toàn màn hình
+    public CanvasGroup skipButtonCanvas;      // CanvasGroup của nút Skip (để làm fade)
+    public Image blackScreen;                 // Ảnh đen full màn hình
 
-    [Header("Fade & Scene Settings")]
-    public float fadeDuration = 1f;           // Thời gian fade đen
-    public string nextSceneName;              // Tên scene sẽ load sau khi skip
+    [Header("Settings")]
+    public float skipDelay = 5f;              // Thời gian chờ trước khi hiện nút Skip
+    public float skipFadeDuration = 0.5f;     // Thời gian nút Skip mờ dần xuất hiện
+    public float fadeDuration = 1f;           // Thời gian fade màn hình đen
+    public string nextSceneName;              // Tên Scene sẽ load
 
-    private bool isCutsceneEnded = true;
+    private bool cutsceneEnded = false;
 
     private void Start()
     {
-        // Ẩn nút và chuẩn bị màn hình đen (trong suốt)
-        continueButton.SetActive(true);
-        blackScreen.gameObject.SetActive(true);
-        blackScreen.color = new Color(0, 0, 0, 0);
+        // Ẩn nút Skip lúc đầu (alpha = 0)
+        if (skipButtonCanvas)
+        {
+            skipButtonCanvas.alpha = 0f;
+            skipButtonCanvas.gameObject.SetActive(false);
+        }
 
-        // Lắng nghe sự kiện khi timeline tự kết thúc
-        director.stopped += OnCutsceneEnd;
+        if (blackScreen)
+        {
+            blackScreen.gameObject.SetActive(true);
+            blackScreen.color = new Color(0, 0, 0, 0);
+        }
+
+        StartCoroutine(ShowSkipButtonAfterDelay());
+
+        if (director) director.stopped += OnCutsceneEnded;
     }
 
-    private void OnCutsceneEnd(PlayableDirector obj)
+    private IEnumerator ShowSkipButtonAfterDelay()
     {
-        isCutsceneEnded = true;
-        continueButton.SetActive(true);  // Hiện nút nếu timeline kết thúc tự nhiên
+        yield return new WaitForSeconds(skipDelay);
+
+        if (!cutsceneEnded && skipButtonCanvas)
+        {
+            skipButtonCanvas.gameObject.SetActive(true);
+
+            // Hiệu ứng mờ dần xuất hiện
+            float elapsed = 0f;
+            while (elapsed < skipFadeDuration)
+            {
+                elapsed += Time.deltaTime;
+                skipButtonCanvas.alpha = Mathf.Clamp01(elapsed / skipFadeDuration);
+                yield return null;
+            }
+            skipButtonCanvas.alpha = 1f;
+        }
     }
 
-    // Khi bấm nút Skip
-    public void OnContinuePressed()
+    private void OnCutsceneEnded(PlayableDirector obj)
     {
-        continueButton.SetActive(false);
+        cutsceneEnded = true;
 
-        // Nếu timeline đang chạy, dừng luôn
-        if (!isCutsceneEnded && director != null)
+        // Destroy luôn nút Skip khi Timeline kết thúc
+        if (skipButtonCanvas)
+        {
+            Destroy(skipButtonCanvas.gameObject);
+        }
+    }
+
+    // Gọi khi nhấn Skip
+    public void OnSkipPressed()
+    {
+        // Destroy nút Skip ngay khi bấm
+        if (skipButtonCanvas)
+        {
+            Destroy(skipButtonCanvas.gameObject);
+        }
+
+        // Dừng timeline nếu còn chạy
+        if (!cutsceneEnded && director)
         {
             director.Stop();
         }
 
-        // Bắt đầu fade đen và load scene
         StartCoroutine(FadeAndLoadScene());
     }
 
@@ -57,18 +96,16 @@ public class SkipCutscenButton : MonoBehaviour
         {
             elapsed += Time.deltaTime;
             float alpha = Mathf.Clamp01(elapsed / fadeDuration);
-            blackScreen.color = new Color(0, 0, 0, alpha);
+
+            if (blackScreen)
+                blackScreen.color = new Color(0, 0, 0, alpha);
+
             yield return null;
         }
 
-        // Load scene tiếp theo
         if (!string.IsNullOrEmpty(nextSceneName))
-        {
             SceneManager.LoadScene(nextSceneName);
-        }
         else
-        {
             Debug.LogWarning("Chưa gán tên Scene trong Inspector!");
-        }
     }
 }

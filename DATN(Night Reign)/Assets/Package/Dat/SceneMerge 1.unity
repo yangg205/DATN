@@ -5763,8 +5763,8 @@ MonoBehaviour:
 
 '
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: b0d58e5b1ba314f45bd650ac9b45223b, type: 2}
-  m_sharedMaterial: {fileID: 5350000462873330320, guid: b0d58e5b1ba314f45bd650ac9b45223b,
+  m_fontAsset: {fileID: 11400000, guid: 324a83f608e1f734795d75d2cddcb8de, type: 2}
+  m_sharedMaterial: {fileID: -2770325413736153788, guid: 324a83f608e1f734795d75d2cddcb8de,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -6086,8 +6086,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   director: {fileID: 61895824}
-  continueButton: {fileID: 934213541}
+  skipButtonCanvas: {fileID: 934213547}
   blackScreen: {fileID: 650734648}
+  skipDelay: 5
+  skipFadeDuration: 1
   fadeDuration: 1
   nextSceneName: MapTutorial
 --- !u!64 &721089456
@@ -7972,13 +7974,14 @@ GameObject:
   - component: {fileID: 934213544}
   - component: {fileID: 934213543}
   - component: {fileID: 934213546}
+  - component: {fileID: 934213547}
   m_Layer: 5
   m_Name: SkipButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &934213542
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7988,7 +7991,7 @@ RectTransform:
   m_GameObject: {fileID: 934213541}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0.00012207033}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.4737, y: 1.4737, z: 1.4737}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1034309721}
@@ -8045,8 +8048,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 719624584}
-        m_TargetAssemblyTypeName: SkipCutscenButton, Assembly-CSharp
-        m_MethodName: OnContinuePressed
+        m_TargetAssemblyTypeName: SkipCutsceneButton, Assembly-CSharp
+        m_MethodName: OnSkipPressed
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -8069,7 +8072,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.6075471, g: 0.6075471, b: 0.6075471, a: 1}
+  m_Color: {r: 0.6075471, g: 0.6075471, b: 0.6075471, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -8113,6 +8116,18 @@ MonoBehaviour:
   glowFadeSpeed: 7
   scaleAmount: 1.05
   transitionSpeed: 5
+--- !u!225 &934213547
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 934213541}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!64 &936103192
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -14352,8 +14367,8 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 934213542}
   - {fileID: 1952176675}
+  - {fileID: 934213542}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
