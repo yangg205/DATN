@@ -2,6 +2,7 @@
 using UnityEngine.Localization.Settings;
 using UnityEngine.Localization.Tables;
 using System;
+using System.Threading.Tasks; // Cho Task
 using System.Collections.Generic; // Thêm để dùng List
 
 public enum QuestType
@@ -36,6 +37,11 @@ public class QuestData : ScriptableObject
     public string targetNPCID;    // Với FindNPC
     public string targetItemID;   // Với CollectItem
     public int requiredItemCount = 1;
+
+    [Header("Quest Unlock Dependencies")]
+    [Tooltip("Quest này chỉ mở khóa khi quest này hoàn thành.")]
+    public string prerequisiteQuestName; // Tên (hoặc ID) của quest phải hoàn thành trước
+
 
     [Header("Quest Location (Waypoint)")]
     [Tooltip("Chỉ định nếu nhiệm vụ có một vị trí cụ thể (dùng waypoint).")]
@@ -107,59 +113,43 @@ public class QuestData : ScriptableObject
         };
     }
 
-    public string GetQuestNameLocalized()
+    // Async versions: gọi LocalizationManager async lấy chuỗi đã bản địa hóa
+    public Task<string> GetQuestNameLocalizedAsync()
     {
-        return GetLocalizedString("NhiemVu", questName);
+        return LocalizationManager.Instance.GetLocalizedStringAsync("NhiemVu", questName);
     }
 
-    public string GetDescriptionLocalized()
+    public Task<string> GetDescriptionLocalizedAsync()
     {
-        return GetLocalizedString("NhiemVu", description);
+        return LocalizationManager.Instance.GetLocalizedStringAsync("NhiemVu", description);
     }
 
-    public string GetTargetNPCNameLocalized()
+    public Task<string> GetTargetNPCNameLocalizedAsync()
     {
-        if (string.IsNullOrEmpty(targetNPCID)) return "";
-        return GetLocalizedString("NPC_Names", targetNPCID);
+        if (string.IsNullOrEmpty(targetNPCID))
+            return Task.FromResult("");
+        return LocalizationManager.Instance.GetLocalizedStringAsync("NPC_Names", targetNPCID);
     }
 
-    public string GetTargetItemNameLocalized()
+    public Task<string> GetTargetItemNameLocalizedAsync()
     {
-        if (string.IsNullOrEmpty(targetItemID)) return "";
-        return GetLocalizedString("Item_Names", targetItemID);
+        if (string.IsNullOrEmpty(targetItemID))
+            return Task.FromResult("");
+        return LocalizationManager.Instance.GetLocalizedStringAsync("Item_Names", targetItemID);
     }
 
-    public string GetGiverNPCNameLocalized()
+    public Task<string> GetGiverNPCNameLocalizedAsync()
     {
-        if (string.IsNullOrEmpty(giverNPCID)) return "";
-        return GetLocalizedString("NPC_Names", giverNPCID);
+        if (string.IsNullOrEmpty(giverNPCID))
+            return Task.FromResult("");
+        return LocalizationManager.Instance.GetLocalizedStringAsync("NPC_Names", giverNPCID);
     }
 
-    // --- Phương thức để lấy tên vật phẩm thưởng đã bản địa hóa ---
-    public string GetRewardItemNameLocalized()
+    public Task<string> GetRewardItemNameLocalizedAsync()
     {
-        if (string.IsNullOrEmpty(rewardItemID)) return "";
-        return GetLocalizedString("Item_Names", rewardItemID); // Giả định có bảng "Item_Names"
+        if (string.IsNullOrEmpty(rewardItemID))
+            return Task.FromResult("");
+        return LocalizationManager.Instance.GetLocalizedStringAsync("Item_Names", rewardItemID);
     }
-    // -------------------------------------------------------------
 
-    private string GetLocalizedString(string tableName, string key)
-    {
-        var table = LocalizationSettings.StringDatabase.GetTable(tableName);
-        if (table == null)
-        {
-            Debug.LogError($"⚠️ Localization Table '{tableName}' not found.");
-            return $"[TABLE NOT FOUND: {tableName}]";
-        }
-
-        key = key.Trim();
-        var entry = table.GetEntry(key);
-        if (entry == null)
-        {
-            Debug.LogError($"❌ Localization Key '{key}' not found in table '{tableName}'.");
-            return $"[MISSING KEY: {key}]";
-        }
-
-        return entry.GetLocalizedString();
-    }
 }

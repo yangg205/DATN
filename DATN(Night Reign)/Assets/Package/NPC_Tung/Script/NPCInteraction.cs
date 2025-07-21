@@ -2,8 +2,9 @@
 using UnityEngine.UI;
 using TMPro;
 using System;
-using UnityEngine.Localization.Settings;
-using UnityEngine.Localization.Tables;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Linq;
 
 public class NPCInteraction : MonoBehaviour
 {
@@ -13,59 +14,52 @@ public class NPCInteraction : MonoBehaviour
     [SerializeField] private Button _declineButton;
     [SerializeField] private Button _claimRewardButton;
     [SerializeField] private Button _continueButton;
+    [SerializeField] private TextMeshProUGUI panelpress;
 
-    [Header("Quest")]
-    public QuestManager questManager;
-    [SerializeField] private QuestData _questToGive;
-    [SerializeField] private QuestData _nextQuestAfterCompletion;
-
-    [Header("Dialogue")]
-    public DialogueManager dialogueManager;
+    [Header("References")]
+    [SerializeField] private QuestManager questManager;
+    [SerializeField] private DialogueManager dialogueManager;
+    [SerializeField] private string npcID; // ID của NPC này, trùng với quest.giverNPCID
 
     [Header("Default Dialogues")]
     [TextArea(3, 5)][SerializeField] private string[] defaultGreetingDialogueKeys;
-    [SerializeField] private AudioClip[] defaultGreetingVoiceClips;
-    [TextArea(3, 3)][SerializeField] private string[] noRelevantQuestDialogueKeys;
-    [SerializeField] private AudioClip[] noRelevantQuestVoiceClips;
+    [SerializeField] private AudioClip[] defaultGreetingVoiceClipsEN;
+    [SerializeField] private AudioClip[] defaultGreetingVoiceClipsVI;
+
+    [TextArea(3, 5)][SerializeField] private string[] noRelevantQuestDialogueKeys;
+    [SerializeField] private AudioClip[] noRelevantQuestVoiceClipsEN;
+    [SerializeField] private AudioClip[] noRelevantQuestVoiceClipsVI;
 
     private bool isPlayerInRange = false;
-    private string _npcID;
-    private bool _shouldContinueAfterComplete = false;
-    private QuestData _lastCompletedQuest = null;
+    private QuestManager.CurrentQuestStatus lastCompletedQuestStatus = null;
+    private bool isWaitingForContinueDialogue = false;
 
-    void Start()
+    private void Start()
     {
-        
-        if (!questManager || !dialogueManager || !TryGetComponent(out NPCIdentity npcIdentity))
+        if (!questManager || !dialogueManager)
         {
-            Debug.LogError("Missing required components.");
+            Debug.LogError("Assign QuestManager and DialogueManager in inspector!");
             enabled = false;
             return;
         }
 
-        _npcID = npcIdentity.npcID;
+        _acceptButton.onClick.AddListener(OnAcceptButtonPressed);
+        _declineButton.onClick.AddListener(OnDeclineButtonPressed);
+        _claimRewardButton.onClick.AddListener(OnClaimRewardButtonPressed);
+        _continueButton.onClick.AddListener(OnContinueButtonPressed);
 
-        _acceptButton?.onClick.AddListener(AcceptCurrentQuest);
-        _declineButton?.onClick.AddListener(DeclineQuest);
-        _claimRewardButton?.onClick.AddListener(ClaimReward);
-        _continueButton?.GetComponent<Button>()?.onClick.AddListener(() => dialogueManager.DisplayNextSentence());
-
-        _questUI?.SetActive(false);
+        _questUI.SetActive(false);
         HideAllActionButtons();
+        panelpress.gameObject.SetActive(false);
     }
 
-    void Update()
+    private void Update()
     {
-        
-        if (isPlayerInRange && Input.GetKeyDown(KeyCode.C))
+        if (isPlayerInRange && Input.GetKeyDown(KeyCode.C) && !isWaitingForContinueDialogue)
         {
-            _continueButton.gameObject.SetLocalizationKey("btn_next");
-            _claimRewardButton.gameObject.SetLocalizationKey("btn_claim");
             HandleInteraction();
-            
-
         }
-        if (Input.GetKeyDown(KeyCode.T))
+        if (Input.GetKeyDown(KeyCode.Q))
         {
             questManager.ReportKill();
         }
@@ -73,280 +67,244 @@ public class NPCInteraction : MonoBehaviour
 
     private void HandleInteraction()
     {
-        _questUI?.SetActive(true);
+        _questUI.SetActive(true);
         MouseManager.Instance.ShowCursorAndDisableInput();
+        panelpress.gameObject.SetActive(false);
 
-        if (_shouldContinueAfterComplete && _lastCompletedQuest != null)
+        if (isWaitingForContinueDialogue && lastCompletedQuestStatus != null)
         {
-            HideAllActionButtons();
             ContinueAfterCompleteDialogue();
             return;
         }
 
-        QuestData currentQuestToManage = GetQuestToOfferOrManage();
-        QuestData findNPCQuest = GetFindNPCQuestIfTarget();
-
-        if (findNPCQuest != null)
+        List<QuestData> relatedQuests = new List<QuestData>();
+        foreach (var quest in questManager.questDatabase.quests)
         {
-            questManager.DisplayQuestOfferUI(findNPCQuest);
-            var status = questManager.GetQuestStatus(findNPCQuest);
-            int previousProgress = status?.currentProgress ?? 0;
-            bool wasObjectiveMet = status?.isObjectiveMet ?? false;
-
-            questManager.TryCompleteQuestByTalk();
-
-            int updatedProgress = status?.currentProgress ?? 0;
-            bool isObjectiveMet = status?.isObjectiveMet ?? false;
-
-            if (updatedProgress > previousProgress || (!wasObjectiveMet && isObjectiveMet))
-            {
-                dialogueManager.StartDialogue(
-                    findNPCQuest.GetDialogueKeys(QuestDialogueType.ObjectiveMet),
-                    findNPCQuest.GetDialogueVoiceClips(QuestDialogueType.ObjectiveMet),
-                    OnDialogueCompleted);
-            }
-            else
-            {
-                dialogueManager.StartDialogue(noRelevantQuestDialogueKeys, noRelevantQuestVoiceClips, OnDialogueCompleted);
-            }
-            return;
+            if (quest.giverNPCID == npcID)
+                relatedQuests.Add(quest);
         }
 
-        if (currentQuestToManage != null)
+        QuestData questToOffer = null;
+        QuestData questInProgress = null;
+        QuestData questCompletedAwaitingClaim = null;
+        QuestData lastCompletedQuest = null;
+
+        foreach (var quest in relatedQuests)
         {
-            questManager.DisplayQuestOfferUI(currentQuestToManage);
-            var status = questManager.GetQuestStatus(currentQuestToManage);
-            bool isAccepted = status != null;
-            bool isObjectiveMet = status?.isObjectiveMet ?? false;
-            bool isCompleted = status?.isCompleted ?? false;
+            var status = questManager.GetQuestStatus(quest);
 
-            if (!isAccepted)
+            if (status == null)
             {
-                ShowDefaultUI();
-                dialogueManager.StartDialogue(
-                    currentQuestToManage.GetDialogueKeys(QuestDialogueType.BeforeComplete),
-                    currentQuestToManage.GetDialogueVoiceClips(QuestDialogueType.BeforeComplete),
-                    OnDialogueCompleted);
-            }
-            else if (!isObjectiveMet)
-            {
-                HideAllActionButtons();
-                dialogueManager.StartDialogue(
-                    currentQuestToManage.GetDialogueKeys(QuestDialogueType.ObjectiveMet),
-                    currentQuestToManage.GetDialogueVoiceClips(QuestDialogueType.ObjectiveMet),
-                    OnDialogueCompleted);
-            }
-            else if (!isCompleted)
-            {
-                ShowClaimRewardUI();
-                string[] keys = currentQuestToManage.GetDialogueKeys(QuestDialogueType.AfterComplete);
-                AudioClip[] clips = currentQuestToManage.GetDialogueVoiceClips(QuestDialogueType.AfterComplete);
-
-                if (keys != null && keys.Length > 0)
+                if (questManager.IsQuestUnlocked(quest))
                 {
-                    dialogueManager.StartDialogue(new string[] { keys[0] }, new AudioClip[] { clips[0] }, OnDialogueCompleted);
-                }
-                else
-                {
-                    MouseManager.Instance.HideCursorAndEnableInput();
+                    questToOffer = quest;
+                    break;
                 }
             }
             else
             {
-                _questToGive = null;
-                dialogueManager.StartDialogue(noRelevantQuestDialogueKeys, noRelevantQuestVoiceClips, OnDialogueCompleted);
+                if (status.isObjectiveMet && !status.isCompleted)
+                {
+                    questCompletedAwaitingClaim = quest;
+                    break;
+                }
+                else if (!status.isObjectiveMet)
+                {
+                    questInProgress = quest;
+                }
+                else if (status.isCompleted)
+                {
+                    lastCompletedQuest = quest;
+                }
+            }
+        }
+
+        // Logic mới theo yêu cầu
+        if (questCompletedAwaitingClaim != null)
+        {
+            ShowClaimRewardUI();
+            // Chỉ nói câu đầu tiên của AfterComplete khi chưa nhận thưởng
+            string[] firstLineOnly = new string[] { questCompletedAwaitingClaim.keydialogueAfterComplete[0] };
+            StartQuestDialogue(questCompletedAwaitingClaim, firstLineOnly,
+                              questCompletedAwaitingClaim.voiceAfterComplete_EN.Take(1).ToArray(),
+                              questCompletedAwaitingClaim.voiceAfterComplete_VI.Take(1).ToArray());
+            return;
+        }
+        else if (lastCompletedQuest != null)
+        {
+            // Nếu đã nhận thưởng, nói từ câu thứ 2 đến hết AfterComplete
+            if (lastCompletedQuest.keydialogueAfterComplete.Length > 1)
+            {
+                string[] remainingLines = new string[lastCompletedQuest.keydialogueAfterComplete.Length - 1];
+                Array.Copy(lastCompletedQuest.keydialogueAfterComplete, 1, remainingLines, 0, remainingLines.Length);
+
+                AudioClip[] remainingClipsEN = new AudioClip[lastCompletedQuest.voiceAfterComplete_EN.Length - 1];
+                Array.Copy(lastCompletedQuest.voiceAfterComplete_EN, 1, remainingClipsEN, 0, remainingClipsEN.Length);
+
+                AudioClip[] remainingClipsVI = new AudioClip[lastCompletedQuest.voiceAfterComplete_VI.Length - 1];
+                Array.Copy(lastCompletedQuest.voiceAfterComplete_VI, 1, remainingClipsVI, 0, remainingClipsVI.Length);
+
+                StartQuestDialogue(lastCompletedQuest, remainingLines, remainingClipsEN, remainingClipsVI);
+
+                // Kiểm tra quest tiếp theo có phải FindNPC không
+                if (questManager.IsNextQuestFindNPC())
+                {
+                    // Tự động nhận quest FindNPC tiếp theo
+                    questManager.SetCurrentQuestIndex(questManager._currentQuestIndex + 1);
+                    questManager.AcceptQuest();
+                }
             }
             return;
         }
+        else if (questToOffer != null)
+        {
+            ShowDefaultUI();
+            StartQuestDialogue(questToOffer, QuestDialogueType.BeforeComplete);
+            return;
+        }
+        else if (questInProgress != null)
+        {
+            HideAllActionButtons();
+            StartQuestDialogue(questInProgress, QuestDialogueType.InProgress);
+            return;
+        }
+        else
+        {
+            dialogueManager.StartDialogue(
+                defaultGreetingDialogueKeys,
+                defaultGreetingVoiceClipsEN,
+                defaultGreetingVoiceClipsVI,
+                OnDialogueCompleted);
+        }
+    }
 
-        dialogueManager.StartDialogue(defaultGreetingDialogueKeys, defaultGreetingVoiceClips, OnDialogueCompleted);
+    // Thêm phương thức mới để bắt đầu thoại với mảng keys và clips tùy chỉnh
+    private void StartQuestDialogue(QuestData quest, string[] customKeys, AudioClip[] customClipsEN, AudioClip[] customClipsVI)
+    {
+        dialogueManager.StartDialogue(customKeys, customClipsEN, customClipsVI, OnDialogueCompleted);
+    }
+
+    private void StartQuestDialogue(QuestData quest, QuestDialogueType dialogueType)
+    {
+        var keys = quest.GetDialogueKeys(dialogueType);
+        var clipsEN = quest.GetDialogueVoiceClips(dialogueType);
+        var clipsVI = quest.GetDialogueVoiceClips(dialogueType);
+
+        dialogueManager.StartDialogue(keys, clipsEN, clipsVI, OnDialogueCompleted);
+    }
+
+    private void OnAcceptButtonPressed()
+    {
+        for (int i = 0; i < questManager.questDatabase.quests.Length; i++)
+        {
+            var quest = questManager.questDatabase.quests[i];
+            if (quest.giverNPCID == npcID && !questManager.IsQuestAccepted(quest) && questManager.IsQuestUnlocked(quest))
+            {
+                questManager.SetCurrentQuestIndex(i);
+                questManager.AcceptQuest();
+                break;
+            }
+        }
+        _questUI.SetActive(false);
+        HideAllActionButtons();
+        MouseManager.Instance.HideCursorAndEnableInput();
+    }
+
+    private void OnDeclineButtonPressed()
+    {
+        _questUI.SetActive(false);
+        HideAllActionButtons();
+        MouseManager.Instance.HideCursorAndEnableInput();
+    }
+
+    private void OnClaimRewardButtonPressed()
+    {
+        for (int i = 0; i < questManager.questDatabase.quests.Length; i++)
+        {
+            var quest = questManager.questDatabase.quests[i];
+            if (quest.giverNPCID == npcID && questManager.IsQuestAccepted(quest) && questManager.IsQuestObjectiveMet(quest) && !questManager.IsQuestTrulyCompleted(quest))
+            {
+                questManager.SetCurrentQuestIndex(i);
+                questManager.ClaimReward();
+                lastCompletedQuestStatus = questManager.GetQuestStatus(quest);
+                isWaitingForContinueDialogue = true;
+
+                // Không cần kiểm tra quest tiếp theo ở đây nữa vì đã xử lý trong CompleteQuest
+                break;
+            }
+        }
+        HideAllActionButtons();
+    }
+
+    private void OnContinueButtonPressed()
+    {
+        dialogueManager.DisplayNextSentence();
     }
 
     private void ContinueAfterCompleteDialogue()
     {
-        if (_lastCompletedQuest == null)
-        {
-            _shouldContinueAfterComplete = false;
-            return;
-        }
-
-        string[] keys = _lastCompletedQuest.GetDialogueKeys(QuestDialogueType.AfterComplete);
-        AudioClip[] clips = _lastCompletedQuest.GetDialogueVoiceClips(QuestDialogueType.AfterComplete);
-
-        if (keys != null && keys.Length > 1)
-        {
-            string[] remainingKeys = new string[keys.Length - 1];
-            AudioClip[] remainingClips = new AudioClip[clips.Length - 1];
-            Array.Copy(keys, 1, remainingKeys, 0, remainingKeys.Length);
-            Array.Copy(clips, 1, remainingClips, 0, remainingClips.Length);
-
-            dialogueManager.StartDialogue(remainingKeys, remainingClips, () =>
-            {
-                _shouldContinueAfterComplete = false;
-                _lastCompletedQuest = null;
-
-                // Tự động nhận nhiệm vụ tiếp theo nếu có
-                if (_nextQuestAfterCompletion != null && !questManager.IsQuestTrulyCompleted(_nextQuestAfterCompletion))
-                {
-                    _questToGive = _nextQuestAfterCompletion;
-                    questManager.AcceptQuest();
-                    HandleInteraction(); // Hiển thị thông tin nhiệm vụ mới
-                }
-                else
-                {
-                    _questToGive = null;
-                    HandleInteraction();
-                }
-            });
-        }
-        else
-        {
-            _shouldContinueAfterComplete = false;
-            _lastCompletedQuest = null;
-
-            // Tự động nhận nhiệm vụ tiếp theo nếu có
-            if (_nextQuestAfterCompletion != null && !questManager.IsQuestTrulyCompleted(_nextQuestAfterCompletion))
-            {
-                _questToGive = _nextQuestAfterCompletion;
-                questManager.AcceptQuest();
-                HandleInteraction(); // Hiển thị thông tin nhiệm vụ mới
-            }
-            else
-            {
-                _questToGive = null;
-                HandleInteraction();
-            }
-        }
-    }
-
-    public void ClaimReward()
-    {
-        var q = questManager.GetCurrentQuest();
-        if (q == null || !(questManager.GetQuestStatus(q)?.isObjectiveMet ?? false))
-        {
-            return;
-        }
-
-        questManager.CompleteQuest();
-        _lastCompletedQuest = q;
-
-        _questUI?.SetActive(true);
-        HideAllActionButtons();
-        MouseManager.Instance.ShowCursorAndDisableInput();
-
-        string[] keys = q.GetDialogueKeys(QuestDialogueType.AfterComplete);
-        AudioClip[] clips = q.GetDialogueVoiceClips(QuestDialogueType.AfterComplete);
-
-        if (keys != null && keys.Length > 0)
-        {
-            dialogueManager.StartDialogue(keys, clips, () =>
-            {
-                // Sau khi hết thoại, kiểm tra và nhận nhiệm vụ tiếp theo
-                if (_nextQuestAfterCompletion != null && !questManager.IsQuestTrulyCompleted(_nextQuestAfterCompletion))
-                {
-                    _questToGive = _nextQuestAfterCompletion;
-                    questManager.AcceptQuest();
-                }
-                OnDialogueCompleted();
-            });
-        }
-        else
-        {
-            OnDialogueCompleted();
-        }
-    }
-    public void AcceptCurrentQuest()
-    {
-        var q = questManager.GetCurrentQuest();
-        if (q == null || q != _questToGive) return;
-
-        questManager.AcceptQuest();
-
-        // Cập nhật UI ngay lập tức
-        UIManager.Instance?.UpdateQuestProgressText(q.GetQuestNameLocalized());
-        UIManager.Instance?.UpdateCurrentQuestObjective(q.GetDescriptionLocalized());
-
-        dialogueManager.StartDialogue(
-            q.GetDialogueKeys(QuestDialogueType.ObjectiveMet),
-            q.GetDialogueVoiceClips(QuestDialogueType.ObjectiveMet),
-            OnDialogueCompleted
-        );
-
-        HideAllActionButtons();
+        // Xử lý tiếp đoạn thoại sau khi claim reward
+        isWaitingForContinueDialogue = false;
+        lastCompletedQuestStatus = null;
+        _questUI.SetActive(false);
         MouseManager.Instance.HideCursorAndEnableInput();
-    }
-
-    public void DeclineQuest()
-    {
-        var q = questManager.GetCurrentQuest();
-        if (q == null || q != _questToGive) return;
-
-        questManager.DeclineQuest();
-        dialogueManager.StartDialogue(noRelevantQuestDialogueKeys, noRelevantQuestVoiceClips, OnDialogueCompleted);
-
-        HideAllActionButtons();
-        MouseManager.Instance.HideCursorAndEnableInput();
-    }
-
-    private QuestData GetQuestToOfferOrManage()
-    {
-        var currentActiveQuest = questManager.GetCurrentQuest();
-        if (currentActiveQuest != null && !questManager.IsQuestTrulyCompleted(currentActiveQuest))
-        {
-            if (currentActiveQuest.questType == QuestType.FindNPC && currentActiveQuest.targetNPCID == _npcID)
-                return currentActiveQuest;
-
-            if (_questToGive != null && _questToGive == currentActiveQuest)
-                return _questToGive;
-        }
-
-        if (_questToGive != null && !questManager.IsQuestTrulyCompleted(_questToGive))
-        {
-            return _questToGive;
-        }
-
-        return null;
-    }
-
-    private QuestData GetFindNPCQuestIfTarget()
-    {
-        QuestData q = questManager?.GetCurrentQuest();
-        return q != null && q.questType == QuestType.FindNPC && q.targetNPCID == _npcID && !questManager.IsQuestTrulyCompleted(q) ? q : null;
-    }
-
-    private void ShowDefaultUI()
-    {
-        _acceptButton?.gameObject.SetActive(true);
-        _declineButton?.gameObject.SetActive(true);
-        _claimRewardButton?.gameObject.SetActive(false);
-        if (_continueButton != null) _continueButton.gameObject.SetActive(false);
-    }
-
-    private void ShowClaimRewardUI()
-    {
-        _acceptButton?.gameObject.SetActive(false);
-        _declineButton?.gameObject.SetActive(false);
-        _claimRewardButton?.gameObject.SetActive(true);
-        if (_continueButton != null) _continueButton.gameObject.SetActive(false);
-    }
-
-    private void HideAllActionButtons()
-    {
-        _acceptButton?.gameObject.SetActive(false);
-        _declineButton?.gameObject.SetActive(false);
-        _claimRewardButton?.gameObject.SetActive(false);
-        if (_continueButton != null) _continueButton.gameObject.SetActive(false);
     }
 
     private void OnDialogueCompleted()
     {
-        if (_continueButton != null) _continueButton.gameObject.SetActive(false);
-        MouseManager.Instance.HideCursorAndEnableInput();
+        if (!isWaitingForContinueDialogue)
+        {
+            _questUI.SetActive(false);
+            HideAllActionButtons();
+            MouseManager.Instance.HideCursorAndEnableInput();
+        }
+    }
+
+    private void ShowDefaultUI()
+    {
+        _acceptButton.gameObject.SetActive(true);
+        _declineButton.gameObject.SetActive(true);
+        _claimRewardButton.gameObject.SetActive(false);
+    }
+
+    private void ShowClaimRewardUI()
+    {
+        _acceptButton.gameObject.SetActive(false);
+        _declineButton.gameObject.SetActive(false);
+        _claimRewardButton.gameObject.SetActive(true);
+    }
+
+    private void HideAllActionButtons()
+    {
+        _acceptButton.gameObject.SetActive(false);
+        _declineButton.gameObject.SetActive(false);
+        _claimRewardButton.gameObject.SetActive(false);
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player")) isPlayerInRange = true;
+        if (other.CompareTag("Player"))
+        {
+            isPlayerInRange = true;
+
+            QuestData currentQuest = questManager.GetCurrentQuest();
+
+            if (currentQuest != null)
+            {
+                bool foundTarget = currentQuest.questType == QuestType.FindNPC &&
+                                   Vector3.Distance(currentQuest.questLocation, transform.position) < 2f;
+
+                bool isGiver = currentQuest.giverNPCID == npcID;
+
+                if (foundTarget || isGiver)
+                {
+                    questManager.TryCompleteQuestByTalk();
+                }
+            }
+
+            // Hiện panel bất kể nhiệm vụ có hay không
+            panelpress.gameObject?.SetActive(true);
+        }
     }
 
     private void OnTriggerExit(Collider other)
@@ -354,12 +312,11 @@ public class NPCInteraction : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerInRange = false;
-            _questUI?.SetActive(false);
-            dialogueManager?.EndDialogue();
+            _questUI.SetActive(false);
+            panelpress.gameObject?.SetActive(false);
+            HideAllActionButtons();
+            dialogueManager.EndDialogue();
             MouseManager.Instance.HideCursorAndEnableInput();
-
-            _shouldContinueAfterComplete = false;
-            _lastCompletedQuest = null;
         }
     }
 }

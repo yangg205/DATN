@@ -1,84 +1,140 @@
 ﻿using UnityEngine;
 using TMPro;
 using System.Collections;
-using System; // For Action
-using System.Collections.Generic; // Thêm để dùng Queue
-using UnityEngine.Localization.Settings;
-using UnityEngine.Localization.Tables;
-using UnityEngine.UI; // Để sử dụng Button
+using System;
+using System.Collections.Generic;
+using UnityEngine.Localization.Settings; // Vẫn cần UnityEngine.Localization.Locale cho kiểu dữ liệu
+using System.Threading.Tasks;
 
 public class DialogueManager : MonoBehaviour
 {
     public static DialogueManager Instance { get; private set; }
 
     [Header("UI Components")]
-    public GameObject dialogueUI; // Panel chứa toàn bộ UI thoại
+    public GameObject dialogueUI;
     public TextMeshProUGUI dialogueText;
-    //public TextMeshProUGUI speakerNameText; // Trường cho tên người nói (vẫn giữ để hiển thị giá trị cố định)
-    public GameObject nextButton; // Nút để chuyển câu thoại
     public bool IsDialogueActive => isDialogueActive;
+
     [Header("Typewriter Settings")]
-    public float letterDelay = 0.03f; // Tốc độ gõ chữ
+    public float letterDelay = 0.03f;
 
     [Header("Audio Settings")]
     [SerializeField] private AudioSource dialogueAudioSource;
     [SerializeField] private AudioClip typewriterSound;
     [SerializeField] private AudioClip nextDialogueSound;
 
-    private Queue<string> currentDialogueLines; // Hàng đợi cho nội dung thoại đã localize
-    private Queue<AudioClip> currentVoiceClips; // Hàng đợi cho voice clips
+    // Lưu trữ các key gốc và voice clips để có thể tái tạo hàng đợi khi chuyển ngữ
+    private List<string> _originalDialogueKeys;
+    private List<AudioClip> _originalVoiceClipsEN;
+    private List<AudioClip> _originalVoiceClipsVI;
+
+    // Theo dõi chỉ số của câu thoại hiện tại trong danh sách gốc
+    private int _currentDialogueIndex = -1;
+
+    // Hàng đợi cho nội dung thoại và voice clips ĐÃ ĐƯỢC DỊCH
+    private Queue<string> currentDialogueLines;
+    private Queue<AudioClip> currentVoiceClips;
 
     private bool isDialogueActive = false;
-    private bool isTyping = false; // Cờ để kiểm tra đang gõ chữ
+    private bool isTyping = false;
     private Coroutine typingCoroutine;
     private Action _onDialogueEndCallback;
-    private string currentFullSentence; // Lưu trữ câu đầy đủ (vẫn giữ nhưng không dùng để skip)
+    private string currentFullSentence; // Lưu trữ câu đầy đủ (đã localize) đang được gõ/hiển thị
 
     void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            // DontDestroyOnLoad(gameObject); // Giữ nếu bạn muốn nó tồn tại qua các cảnh
+            // Nếu bạn muốn DialogueManager tồn tại giữa các cảnh, hãy uncomment dòng dưới
+            // DontDestroyOnLoad(gameObject); 
         }
         else
         {
             Destroy(gameObject);
         }
 
-        // Khởi tạo các hàng đợi
         currentDialogueLines = new Queue<string>();
         currentVoiceClips = new Queue<AudioClip>();
 
-        // Kiểm tra các tham chiếu UI
+        _originalDialogueKeys = new List<string>();
+        _originalVoiceClipsEN = new List<AudioClip>();
+        _originalVoiceClipsVI = new List<AudioClip>();
+
+        // Kiểm tra các thành phần UI đã được gán chưa
         if (dialogueUI == null) Debug.LogError("Dialogue UI (Panel) is not assigned in DialogueManager!");
         if (dialogueText == null) Debug.LogError("Dialogue Text (TextMeshProUGUI) is not assigned in DialogueManager!");
-        if (nextButton == null) Debug.LogError("Next Button (GameObject) is not assigned!");
 
-        // Kiểm tra và tự động thêm AudioSource nếu chưa có
+        // Đảm bảo có AudioSource
         if (dialogueAudioSource == null)
         {
             dialogueAudioSource = gameObject.AddComponent<AudioSource>();
             Debug.LogWarning("Dialogue Audio Source was not assigned. Automatically added one to DialogueManager GameObject.");
         }
 
-        // Gán sự kiện click cho nút Next/Continue
-        Button nextBtnComponent = nextButton?.GetComponent<Button>();
-        if (nextBtnComponent != null)
+        dialogueUI?.SetActive(false);
+    }
+
+    private void OnEnable()
+    {
+        // Đăng ký lắng nghe sự kiện thay đổi ngôn ngữ từ LocalizationManager của bạn
+        if (LocalizationManager.Instance != null)
         {
-            nextBtnComponent.onClick.AddListener(DisplayNextSentence);
+            LocalizationManager.OnLanguageChanged += OnLanguageChangedHandler;
         }
         else
         {
-            Debug.LogError("Next Button does not have a Button component!");
+            Debug.LogWarning("LocalizationManager.Instance not found. Language change events will not be handled correctly.");
         }
-
-        dialogueUI?.SetActive(false);
-        nextButton?.SetActive(false);
     }
 
-    // Hàm StartDialogue mới, KHÔNG NHẬN speakerNameKeys
-    public void StartDialogue(string[] dialogueKeys, AudioClip[] voiceClips, Action onDialogueEnd = null)
+    private void OnDisable()
+    {
+        // Hủy đăng ký khi đối tượng bị vô hiệu hóa để tránh lỗi
+        if (LocalizationManager.Instance != null)
+        {
+            LocalizationManager.OnLanguageChanged -= OnLanguageChangedHandler;
+        }
+    }
+
+    // Phương thức này được gọi khi ngôn ngữ thay đổi
+    // Sửa lại OnLanguageChangedHandler để thay đổi ngay lập tức
+    private async void OnLanguageChangedHandler()
+    {
+        if (!isDialogueActive || _originalDialogueKeys.Count == 0 || _currentDialogueIndex < 0) return;
+
+        StopTypingEffect();
+        if (dialogueAudioSource != null && dialogueAudioSource.isPlaying)
+        {
+            dialogueAudioSource.Stop();
+        }
+
+        // Lấy locale mới
+        UnityEngine.Localization.Locale currentLocale = LocalizationManager.Instance.GetCurrentLocale();
+        bool isVI = currentLocale.Identifier.Code.StartsWith("vi", StringComparison.OrdinalIgnoreCase);
+
+        // Dịch lại câu hiện tại ngay lập tức
+        string currentKey = _originalDialogueKeys[_currentDialogueIndex];
+        string localizedLine = await LocalizationManager.Instance.GetLocalizedStringAsync("NhiemVu", currentKey);
+
+        // Lấy voice clip mới
+        AudioClip voiceClip = isVI ?
+            (_currentDialogueIndex < _originalVoiceClipsVI.Count ? _originalVoiceClipsVI[_currentDialogueIndex] : null) :
+            (_currentDialogueIndex < _originalVoiceClipsEN.Count ? _originalVoiceClipsEN[_currentDialogueIndex] : null);
+
+        // Cập nhật ngay lập tức
+        currentFullSentence = localizedLine;
+        dialogueText.text = localizedLine;
+
+        // Phát voice clip mới nếu có
+        if (voiceClip != null && dialogueAudioSource != null)
+        {
+            dialogueAudioSource.clip = voiceClip;
+            dialogueAudioSource.Play();
+        }
+    }
+    // Bắt đầu một đoạn hội thoại mới
+    public async void StartDialogue(string[] dialogueKeys, AudioClip[] voiceClipsEN, AudioClip[] voiceClipsVI, Action onDialogueEnd = null)
     {
         if (dialogueKeys == null || dialogueKeys.Length == 0)
         {
@@ -86,136 +142,152 @@ public class DialogueManager : MonoBehaviour
             return;
         }
 
-        currentDialogueLines.Clear();
-        currentVoiceClips.Clear();
+        StopTypingEffect();
+        if (dialogueAudioSource != null) dialogueAudioSource.Stop();
 
-        // Đổ dữ liệu vào hàng đợi
-        for (int i = 0; i < dialogueKeys.Length; i++)
-        {
-            string localizedLine = GetLocalizedDialogueString(dialogueKeys[i]);
-            AudioClip voiceClip = (voiceClips != null && i < voiceClips.Length) ? voiceClips[i] : null;
+        _originalDialogueKeys.Clear();
+        _originalVoiceClipsEN.Clear();
+        _originalVoiceClipsVI.Clear();
+        _currentDialogueIndex = -1; // Reset index khi bắt đầu thoại mới
 
-            currentDialogueLines.Enqueue(localizedLine);
-            currentVoiceClips.Enqueue(voiceClip);
-        }
+        _originalDialogueKeys.AddRange(dialogueKeys);
+        if (voiceClipsEN != null) _originalVoiceClipsEN.AddRange(voiceClipsEN);
+        if (voiceClipsVI != null) _originalVoiceClipsVI.AddRange(voiceClipsVI);
 
         _onDialogueEndCallback = onDialogueEnd;
         dialogueUI.SetActive(true);
         isDialogueActive = true;
         dialogueText.text = "";
-        nextButton?.SetActive(true);
 
-        DisplayNextSentence(); // Bắt đầu hiển thị câu thoại đầu tiên
+        // Lấy locale hiện tại thông qua phương thức GetCurrentLocale() của LocalizationManager của bạn
+        UnityEngine.Localization.Locale currentLocale = LocalizationManager.Instance.GetCurrentLocale();
+        // Điền hàng đợi lần đầu tiên với ngôn ngữ hiện tại
+        await RePopulateQueuesFromOriginalData(currentLocale);
+
+        DisplayNextSentence();
     }
 
-    // Hàm DisplayNextSentence đã sửa đổi: Bất cứ khi nào chuyển câu, đều gõ chữ
-    public void DisplayNextSentence()
-{
-    // Nếu không còn câu thoại nào thì kết thúc
-    if (currentDialogueLines.Count == 0 && !isTyping)
+    // Tái tạo hàng đợi thoại và voice clips từ dữ liệu gốc, sử dụng ngôn ngữ đích
+    private async Task RePopulateQueuesFromOriginalData(UnityEngine.Localization.Locale targetLocale)
     {
-        EndDialogue();
-        return;
-    }
+        currentDialogueLines.Clear();
+        currentVoiceClips.Clear();
 
-    // Nếu đang gõ chữ (typingCoroutine đang chạy), tức người chơi bấm next giữa chừng:
-    if (isTyping)
-    {
-        // Ngắt hiệu ứng gõ chữ hiện tại
-        if (typingCoroutine != null)
+        // Xác định xem ngôn ngữ đích có phải là tiếng Việt không
+        bool isVI = targetLocale.Identifier.Code.StartsWith("vi", StringComparison.OrdinalIgnoreCase);
+
+        for (int i = 0; i < _originalDialogueKeys.Count; i++)
         {
-            StopCoroutine(typingCoroutine);
+            // GỌI HÀM CỦA BẠN: Sử dụng LocalizationManager.Instance.GetLocalizedStringAsync
+            // để lấy chuỗi đã được dịch từ String Table
+            string localizedLine = await LocalizationManager.Instance.GetLocalizedStringAsync("NhiemVu", _originalDialogueKeys[i]);
+            currentDialogueLines.Enqueue(localizedLine);
+
+            AudioClip voiceClip = GetVoiceClipForIndex(i, isVI);
+            currentVoiceClips.Enqueue(voiceClip);
+        }
+    }
+
+    // Lấy voice clip tương ứng với ngôn ngữ và chỉ số
+    private AudioClip GetVoiceClipForIndex(int index, bool isVI)
+    {
+        List<AudioClip> targetVoiceList = isVI ? _originalVoiceClipsVI : _originalVoiceClipsEN;
+
+        if (index >= 0 && index < targetVoiceList.Count)
+        {
+            return targetVoiceList[index];
+        }
+        return null;
+    }
+
+    // Hiển thị câu thoại tiếp theo
+    public void DisplayNextSentence()
+    {
+        if (isTyping) // Nếu đang gõ, hiển thị toàn bộ câu ngay lập tức
+        {
+            StopTypingEffect();
+            dialogueText.text = currentFullSentence;
+
+            if (dialogueAudioSource != null && dialogueAudioSource.isPlaying)
+            {
+                dialogueAudioSource.Stop();
+            }
+
+            isTyping = false;
+            return;
         }
 
-        // Hiện luôn toàn bộ câu thoại hiện tại
-        dialogueText.text = currentFullSentence;
+        if (currentDialogueLines.Count == 0) // Hết thoại
+        {
+            EndDialogue();
+            return;
+        }
 
-        // Dừng voice clip đang phát
+        // Dừng bất kỳ voice clip nào đang phát trước khi chuyển câu mới
         if (dialogueAudioSource != null && dialogueAudioSource.isPlaying)
         {
             dialogueAudioSource.Stop();
         }
 
-        // Đánh dấu không còn đang gõ nữa để lần bấm next sau sẽ sang câu mới
-        isTyping = false;
+        // Phát âm thanh chuyển câu nếu không phải câu đầu tiên
+        if (dialogueAudioSource != null && nextDialogueSound != null && _currentDialogueIndex != -1)
+        {
+            dialogueAudioSource.PlayOneShot(nextDialogueSound);
+        }
 
-        // Trả về, không chuyển câu mới ngay lúc này, người chơi cần bấm next lần nữa để chuyển
-        return;
+        // Lấy câu thoại và voice clip tiếp theo từ hàng đợi (loại bỏ khỏi hàng đợi)
+        string lineToDisplay = currentDialogueLines.Dequeue();
+        AudioClip voiceClip = currentVoiceClips.Dequeue();
+
+        currentFullSentence = lineToDisplay; // Cập nhật câu đầy đủ hiện tại
+        _currentDialogueIndex++; // Tăng chỉ số sau khi dequeue
+
+        // Bắt đầu hiệu ứng gõ chữ cho câu thoại mới
+        typingCoroutine = StartCoroutine(TypeLine(lineToDisplay, voiceClip));
     }
 
-    // Đến đây có nghĩa là không đang gõ, và còn câu thoại mới cần hiện
-
-    // Nếu có voice đang phát thì ngắt luôn
-    if (dialogueAudioSource != null && dialogueAudioSource.isPlaying)
-    {
-        dialogueAudioSource.Stop();
-    }
-
-    // Phát âm thanh chuyển câu (chỉ khi không phải câu đầu)
-    if (dialogueAudioSource != null && nextDialogueSound != null && !string.IsNullOrEmpty(dialogueText.text))
-    {
-        dialogueAudioSource.PlayOneShot(nextDialogueSound);
-    }
-
-    // Lấy câu thoại tiếp theo
-    string lineToDisplay = currentDialogueLines.Dequeue();
-    AudioClip voiceClip = currentVoiceClips.Dequeue();
-
-    currentFullSentence = lineToDisplay;
-
-    // Bắt đầu hiệu ứng gõ chữ cho câu thoại mới
-    typingCoroutine = StartCoroutine(TypeLine(lineToDisplay, voiceClip));
-}
-
-
-
+    // Coroutine để gõ từng chữ một và phát âm thanh
     private IEnumerator TypeLine(string line, AudioClip voiceClip)
     {
         isTyping = true;
-        currentFullSentence = line; // Lưu trữ câu đầy đủ
-        dialogueText.text = ""; // Xóa text hiện tại để bắt đầu gõ lại
+        dialogueText.text = ""; // Xóa text hiện tại trước khi gõ lại
 
-        // Dừng mọi âm thanh đang phát trên AudioSource để tránh chồng chéo
         if (dialogueAudioSource != null)
         {
-            dialogueAudioSource.Stop();
+            dialogueAudioSource.Stop(); // Đảm bảo không có âm thanh nào đang chạy
         }
 
-        // Ưu tiên phát lồng tiếng (nếu có)
         if (dialogueAudioSource != null && voiceClip != null)
         {
             dialogueAudioSource.clip = voiceClip;
-            dialogueAudioSource.loop = false; // Lồng tiếng không lặp
+            dialogueAudioSource.loop = false;
             dialogueAudioSource.Play();
 
-            // Chạy hiệu ứng gõ chữ ngay cả khi có lồng tiếng
             foreach (char c in line)
             {
                 dialogueText.text += c;
                 yield return new WaitForSeconds(letterDelay);
             }
         }
-        // Nếu không có lồng tiếng, phát âm thanh gõ máy chữ (nếu có)
         else if (dialogueAudioSource != null && typewriterSound != null)
         {
             dialogueAudioSource.clip = typewriterSound;
-            dialogueAudioSource.loop = true; // Âm thanh gõ máy chữ lặp lại
+            dialogueAudioSource.loop = true;
             dialogueAudioSource.Play();
 
-            // Hiệu ứng gõ chữ
             foreach (char c in line)
             {
                 dialogueText.text += c;
                 yield return new WaitForSeconds(letterDelay);
             }
 
-            // Dừng âm thanh gõ máy chữ khi gõ xong
+            // Dừng âm thanh máy đánh chữ khi hoàn tất gõ (nếu không có voice clip)
             if (dialogueAudioSource != null && dialogueAudioSource.isPlaying)
             {
                 dialogueAudioSource.Stop();
             }
         }
-        else // Không có cả voice clip lẫn typewriter sound, vẫn gõ chữ (nhưng không có âm thanh)
+        else // Trường hợp không có cả voice clip và typewriter sound
         {
             foreach (char c in line)
             {
@@ -224,55 +296,44 @@ public class DialogueManager : MonoBehaviour
             }
         }
 
-        isTyping = false; // Đảm bảo cờ isTyping là false sau khi gõ xong
+        isTyping = false;
     }
 
-
-    public void EndDialogue()
+    // Dừng hiệu ứng gõ chữ
+    private void StopTypingEffect()
     {
-        isTyping = false;
         if (typingCoroutine != null)
         {
             StopCoroutine(typingCoroutine);
             typingCoroutine = null;
         }
+        isTyping = false;
+    }
+
+    // Kết thúc đoạn hội thoại
+    public void EndDialogue()
+    {
+        StopTypingEffect();
 
         dialogueUI?.SetActive(false);
-        nextButton?.SetActive(false);
         dialogueText.text = "";
-        currentDialogueLines.Clear(); // Xóa hàng đợi
+
+        // Xóa tất cả dữ liệu thoại và reset trạng thái
+        currentDialogueLines.Clear();
         currentVoiceClips.Clear();
+        _originalDialogueKeys.Clear();
+        _originalVoiceClipsEN.Clear();
+        _originalVoiceClipsVI.Clear();
+        _currentDialogueIndex = -1; // Reset index
+        isDialogueActive = false;
 
         if (dialogueAudioSource != null)
         {
-            dialogueAudioSource.Stop(); // Đảm bảo dừng mọi âm thanh
+            dialogueAudioSource.Stop();
         }
 
-        _onDialogueEndCallback?.Invoke(); // Gọi callback
+        // Kích hoạt callback nếu có và xóa nó
+        _onDialogueEndCallback?.Invoke();
         _onDialogueEndCallback = null;
-    }
-
-    private string GetLocalizedDialogueString(string key)
-    {
-        if (string.IsNullOrEmpty(key))
-            return "[EMPTY KEY]";
-
-        key = key.Trim();
-
-        StringTable stringTable = LocalizationSettings.StringDatabase.GetTable("NhiemVu");
-        if (stringTable == null)
-        {
-            Debug.LogError($"Localization StringTable 'NhiemVu' not found! (Check Package Manager & Localization Settings for key: {key})");
-            return $"ERROR: Table Missing - {key}";
-        }
-
-        var entry = stringTable.GetEntry(key);
-        if (entry == null)
-        {
-            Debug.LogError($"❌ Key '{key}' không có trong bảng 'NhiemVu'");
-            return $"MISSING KEY: {key}";
-        }
-
-        return entry.GetLocalizedString();
     }
 }

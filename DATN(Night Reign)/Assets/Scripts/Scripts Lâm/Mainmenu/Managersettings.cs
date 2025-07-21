@@ -136,7 +136,7 @@ public class SettingsManager : MonoBehaviour
         // Gọi đổi ngôn ngữ nếu có
         if (localizationManager != null)
         {
-            localizationManager.SetLanguage(tempLanguageIndex);
+            localizationManager.ChangeLanguageImmediate(tempLanguageIndex);
         }
 
         Debug.Log("Settings Applied");

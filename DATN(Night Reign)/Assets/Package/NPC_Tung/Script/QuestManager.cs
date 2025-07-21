@@ -3,6 +3,7 @@ using UnityEngine;
 using System;
 using UnityEngine.Localization.Settings;
 using UnityEngine.Localization.Tables;
+using System.Threading.Tasks;
 
 public class QuestManager : MonoBehaviour
 {
@@ -20,9 +21,8 @@ public class QuestManager : MonoBehaviour
 
     [SerializeField] private Dictionary<QuestData, CurrentQuestStatus> _activeQuests = new();
 
-    private int _currentQuestIndex = 0;
+    public int _currentQuestIndex = 0;
 
-    // Quản lý trạng thái thoại AfterComplete đang chạy
     private bool _isPlayingAfterCompleteDialogue = false;
     public bool IsPlayingAfterCompleteDialogue => _isPlayingAfterCompleteDialogue;
 
@@ -63,15 +63,6 @@ public class QuestManager : MonoBehaviour
             Instance = this;
     }
 
-    private string GetLocalizedString(string tableName, string key, params object[] args)
-    {
-        var table = LocalizationSettings.StringDatabase.GetTable(tableName);
-        if (table == null) return $"[TABLE NOT FOUND: {tableName}]";
-
-        var entry = table.GetEntry(key);
-        return entry?.GetLocalizedString(args) ?? $"[MISSING KEY: {key}]";
-    }
-
     public QuestData GetCurrentQuest()
     {
         if (questDatabase?.quests == null || _currentQuestIndex >= questDatabase.quests.Length)
@@ -80,7 +71,7 @@ public class QuestManager : MonoBehaviour
         return questDatabase.quests[_currentQuestIndex];
     }
 
-    public void AcceptQuest()
+    public async void AcceptQuest()
     {
         var quest = GetCurrentQuest();
         if (quest == null || _activeQuests.ContainsKey(quest)) return;
@@ -93,14 +84,15 @@ public class QuestManager : MonoBehaviour
         {
             string id = $"QuestWaypoint_{quest.name}_{Guid.NewGuid()}";
             status.waypointId = id;
-            var wp = new Waypoint(id, quest.GetQuestNameLocalized(), quest.questLocation, WaypointType.QuestLocation, quest.questLocationIcon);
+            string questNameLocalized = await quest.GetQuestNameLocalizedAsync();
+            var wp = new Waypoint(id, questNameLocalized, quest.questLocation, WaypointType.QuestLocation, quest.questLocationIcon);
             WaypointManager.Instance.AddWaypoint(wp, true);
         }
 
         if (UIManager.Instance != null)
         {
-            UIManager.Instance.UpdateQuestProgressText(quest.GetQuestNameLocalized());
-            UIManager.Instance.UpdateCurrentQuestObjective(quest.GetDescriptionLocalized());
+            UIManager.Instance.UpdateQuestProgressText(await quest.GetQuestNameLocalizedAsync());
+            UIManager.Instance.UpdateCurrentQuestObjective(await quest.GetDescriptionLocalizedAsync());
 
             switch (quest.questType)
             {
@@ -114,18 +106,18 @@ public class QuestManager : MonoBehaviour
                     UIManager.Instance.UpdateQuestProgress(0, 1);
                     break;
             }
-            UIManager.Instance.SetReturnToNPCInfo("", false);
+            UIManager.Instance.SetReturnToNPCInfo(await LocalizationManager.Instance.GetLocalizedStringAsync("NhiemVu", "Empty_Return_Info_Key"), false);
         }
 
         HideQuestUI();
     }
 
-    private void UpdateUIOnQuestAccept(QuestData quest)
+    private async void UpdateUIOnQuestAccept(QuestData quest)
     {
         if (UIManager.Instance == null) return;
 
-        UIManager.Instance.UpdateQuestProgressText(quest.GetQuestNameLocalized());
-        UIManager.Instance.UpdateCurrentQuestObjective(quest.GetDescriptionLocalized());
+        UIManager.Instance.UpdateQuestProgressText(await quest.GetQuestNameLocalizedAsync());
+        UIManager.Instance.UpdateCurrentQuestObjective(await quest.GetDescriptionLocalizedAsync());
 
         int required = 0;
         switch (quest.questType)
@@ -141,12 +133,9 @@ public class QuestManager : MonoBehaviour
                 break;
         }
         UIManager.Instance.UpdateQuestProgress(0, required);
-        UIManager.Instance.SetReturnToNPCInfo("", false);
+        UIManager.Instance.SetReturnToNPCInfo(await LocalizationManager.Instance.GetLocalizedStringAsync("NhiemVu", "Empty_Return_Info_Key"), false);
     }
 
-    /// <summary>
-    /// Ghi nhận 1 kill cho quest KillEnemies
-    /// </summary>
     public void ReportKill()
     {
         var quest = GetCurrentQuest();
@@ -155,6 +144,8 @@ public class QuestManager : MonoBehaviour
         if (quest == null || status == null || status.isCompleted || quest.questType != QuestType.KillEnemies) return;
 
         status.currentProgress++;
+        Debug.Log($"ReportKill called: {status.currentProgress}/{status.GetRequiredProgress()}"); // 👈 Dòng này
+
         UIManager.Instance?.UpdateQuestProgress(status.currentProgress, status.GetRequiredProgress());
 
         if (status.currentProgress >= status.GetRequiredProgress())
@@ -163,9 +154,7 @@ public class QuestManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Kiểm tra tiến độ thu thập item cho quest CollectItem
-    /// </summary>
+
     public void CheckItemCollectionProgress()
     {
         var quest = GetCurrentQuest();
@@ -188,10 +177,7 @@ public class QuestManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Cố gắng hoàn thành quest bằng cách nói chuyện với NPC cho quest FindNPC
-    /// </summary>
-    public void TryCompleteQuestByTalk()
+    public async void TryCompleteQuestByTalk()
     {
         var quest = GetCurrentQuest();
         var status = GetQuestStatus(quest);
@@ -203,23 +189,23 @@ public class QuestManager : MonoBehaviour
         if (status.currentProgress >= status.GetRequiredProgress())
         {
             status.isObjectiveMet = true;
-            UIManager.Instance?.UpdateCurrentQuestObjective(GetLocalizedString("NhiemVu", "Objective_Status_Completed_FindNPC"));
+            UIManager.Instance?.UpdateCurrentQuestObjective(await LocalizationManager.Instance.GetLocalizedStringAsync("NhiemVu", "Objective_Status_Completed_FindNPC_Key"));
             UIManager.Instance?.HideQuestProgress();
-            UIManager.Instance?.SetReturnToNPCInfo(quest.GetGiverNPCNameLocalized(), true);
-            UIManager.Instance?.ShowNotice(GetLocalizedString("NhiemVu", "Quest_Objective_Met_Notice"), 2.5f);
+            UIManager.Instance?.SetReturnToNPCInfo(await quest.GetGiverNPCNameLocalizedAsync(), true);
+            UIManager.Instance?.ShowNotice(await LocalizationManager.Instance.GetLocalizedStringAsync("NhiemVu", "Quest_Objective_Met_Notice_Key"), 2.5f);
 
             RemoveWaypoint(status);
             CreateReturnWaypoint(status, quest);
         }
     }
 
-    private void MarkObjectiveMet(CurrentQuestStatus status, QuestData quest)
+    private async void MarkObjectiveMet(CurrentQuestStatus status, QuestData quest)
     {
         status.isObjectiveMet = true;
 
-        UIManager.Instance?.UpdateCurrentQuestObjective(GetLocalizedString("NhiemVu", "Objective_Status_Completed"));
-        UIManager.Instance?.SetReturnToNPCInfo(quest.GetGiverNPCNameLocalized(), true);
-        UIManager.Instance?.ShowNotice(GetLocalizedString("NhiemVu", "Quest_Objective_Met_Notice"), 2.5f);
+        UIManager.Instance?.UpdateCurrentQuestObjective(await LocalizationManager.Instance.GetLocalizedStringAsync("NhiemVu", "Objective_Status_Completed_Key"));
+        UIManager.Instance?.SetReturnToNPCInfo(await quest.GetGiverNPCNameLocalizedAsync(), true);
+        UIManager.Instance?.ShowNotice(await LocalizationManager.Instance.GetLocalizedStringAsync("NhiemVu", "Quest_Objective_Met_Notice_Key"), 2.5f);
 
         RemoveWaypoint(status);
         CreateReturnWaypoint(status, quest);
@@ -234,20 +220,29 @@ public class QuestManager : MonoBehaviour
         }
     }
 
-    private void CreateReturnWaypoint(CurrentQuestStatus status, QuestData quest)
+    private async void CreateReturnWaypoint(CurrentQuestStatus status, QuestData quest)
     {
         if (WaypointManager.Instance != null && !status.isCompleted)
         {
             string returnWaypointId = $"ReturnToNPC_{quest.giverNPCID}_{quest.name}";
-            var returnWp = new Waypoint(returnWaypointId, GetLocalizedString("NhiemVu", "ReturnToNPC_Prefix", quest.GetGiverNPCNameLocalized()), quest.giverNPCTransform, WaypointType.QuestLocation, null);
+            string returnToNPCName = await quest.GetGiverNPCNameLocalizedAsync();
+            var returnWp = new Waypoint(returnWaypointId, await LocalizationManager.Instance.GetLocalizedStringAsync("NhiemVu", "ReturnToNPC_Prefix_Key", returnToNPCName), quest.giverNPCTransform, WaypointType.QuestLocation, null);
             WaypointManager.Instance.AddWaypoint(returnWp, true);
             status.waypointId = returnWaypointId;
         }
     }
 
-    /// <summary>
-    /// Hoàn thành nhiệm vụ, trả thưởng, xóa waypoint, cập nhật trạng thái.
-    /// </summary>
+    // Thêm phương thức này để kiểm tra quest tiếp theo có phải là FindNPC không
+    public bool IsNextQuestFindNPC()
+    {
+        if (questDatabase == null || questDatabase.quests == null) return false;
+        if (_currentQuestIndex + 1 >= questDatabase.quests.Length) return false;
+
+        return questDatabase.quests[_currentQuestIndex + 1].questType == QuestType.FindNPC;
+    }
+
+    // Sửa lại phương thức CompleteQuest
+    // Sửa lại phương thức CompleteQuest
     public void CompleteQuest()
     {
         var quest = GetCurrentQuest();
@@ -272,10 +267,21 @@ public class QuestManager : MonoBehaviour
             WaypointManager.Instance?.RemoveWaypoint(status.waypointId);
 
         _activeQuests.Remove(quest);
+
+        // Luôn tăng currentQuestIndex, không phân biệt loại quest
         _currentQuestIndex++;
 
-        // KHÔNG TẮT UI Ở ĐÂY THEO YÊU CẦU
+        // Nếu quest tiếp theo là FindNPC, tự động nhận
+        if (IsNextQuestFindNPC())
+        {
+            var nextQuest = questDatabase.quests[_currentQuestIndex];
+            if (nextQuest != null)
+            {
+                AcceptQuest();
+            }
+        }
     }
+
 
     public void ClaimReward(Action onCompleteCallback = null)
     {
@@ -291,15 +297,25 @@ public class QuestManager : MonoBehaviour
         HideAllActionButtons();
 
         string[] afterCompleteKeys = quest.GetDialogueKeys(QuestDialogueType.AfterComplete);
-        AudioClip[] afterCompleteClips = quest.GetDialogueVoiceClips(QuestDialogueType.AfterComplete);
 
-        DialogueManager.Instance.StartDialogue(afterCompleteKeys, afterCompleteClips, () =>
-        {
-            _isPlayingAfterCompleteDialogue = false;
-            onCompleteCallback?.Invoke();
-            HideQuestUI();
-            MouseManager.Instance.HideCursorAndEnableInput();
-        });
+        // SỬA LỖI TẠI ĐÂY:
+        // Gọi GetDialogueVoiceClips hai lần để truyền mảng cho cả EN và VI.
+        // QuestData của bạn tự động chọn đúng mảng dựa trên ngôn ngữ hiện tại,
+        // nên cả hai tham số này sẽ nhận được cùng một mảng (mảng của ngôn ngữ hiện tại).
+        AudioClip[] afterCompleteClipsEN = quest.GetDialogueVoiceClips(QuestDialogueType.AfterComplete); // Mảng cho EN
+        AudioClip[] afterCompleteClipsVI = quest.GetDialogueVoiceClips(QuestDialogueType.AfterComplete); // Mảng cho VI
+
+        DialogueManager.Instance.StartDialogue(
+            afterCompleteKeys,
+            afterCompleteClipsEN,  // Tham số voiceClipsEN
+            afterCompleteClipsVI,  // Tham số voiceClipsVI
+            () => // Tham số Action onDialogueEnd (biểu thức lambda của bạn)
+            {
+                _isPlayingAfterCompleteDialogue = false;
+                onCompleteCallback?.Invoke();
+                //HideQuestUI();
+                MouseManager.Instance.HideCursorAndEnableInput(); // Đảm bảo bạn có lớp MouseManager
+            });
     }
 
     private void OnAfterCompleteDialogueFinished()
@@ -358,9 +374,9 @@ public class QuestManager : MonoBehaviour
         if (_questUI != null)
         {
             _questUI.SetActive(true);
-            _acceptButton?.SetActive(false);
-            _declineButton?.SetActive(false);
-            _claimRewardButton?.SetActive(false);
+            _acceptButton?.gameObject.SetActive(false);
+            _declineButton?.gameObject.SetActive(false);
+            _claimRewardButton?.gameObject.SetActive(false);
 
             var status = GetQuestStatus(quest);
 
@@ -368,20 +384,25 @@ public class QuestManager : MonoBehaviour
             {
                 if (status.isObjectiveMet && !status.isCompleted)
                 {
-                    _claimRewardButton?.SetActive(true);
+                    _claimRewardButton?.gameObject.SetActive(true);
                 }
                 else if (!status.isObjectiveMet && !status.isCompleted)
                 {
-                    _acceptButton?.SetActive(false);
-                    _declineButton?.SetActive(false);
-                    _claimRewardButton?.SetActive(false);
+                    _acceptButton?.gameObject.SetActive(false);
+                    _declineButton?.gameObject.SetActive(false);
+                    _claimRewardButton?.gameObject.SetActive(false);
                 }
             }
             else
             {
-                _acceptButton?.SetActive(true);
-                _declineButton?.SetActive(true);
+                _acceptButton?.gameObject.SetActive(true);
+                _declineButton?.gameObject.SetActive(true);
             }
+        }
+        if (!IsQuestUnlocked(quest))
+        {
+            UIManager.Instance?.ShowNotice("Nhiệm vụ này chưa thể nhận. Hãy hoàn thành nhiệm vụ trước đó!", 2.5f);
+            return;
         }
     }
 
@@ -392,30 +413,52 @@ public class QuestManager : MonoBehaviour
     }
 
     public bool IsQuestCurrentlyActive(QuestData quest) => _activeQuests.ContainsKey(quest);
+    public bool IsQuestUnlocked(QuestData quest)
+    {
+        if (string.IsNullOrEmpty(quest.prerequisiteQuestName)) return true; // Không có điều kiện -> unlocked
+
+        foreach (var completed in _activeQuests)
+        {
+            if (completed.Key.questName == quest.prerequisiteQuestName && completed.Value.isCompleted)
+                return true;
+        }
+
+        return false; // Chưa hoàn thành prerequisite
+    }
 
     public void HideQuestUI()
     {
         if (_isPlayingAfterCompleteDialogue)
         {
-            // Tuyệt đối KHÔNG được tắt UI khi đang chạy AfterComplete thoại
             return;
         }
 
         _questUI?.SetActive(false);
-        _acceptButton?.SetActive(false);
-        _declineButton?.SetActive(false);
-        _claimRewardButton?.SetActive(false);
+        _acceptButton?.gameObject.SetActive(false);
+        _declineButton?.gameObject.SetActive(false);
+        _claimRewardButton?.gameObject.SetActive(false);
     }
 
     public void HideAllActionButtons()
     {
-        _acceptButton?.SetActive(false);
-        _declineButton?.SetActive(false);
-        _claimRewardButton?.SetActive(false);
+        _acceptButton?.gameObject.SetActive(false);
+        _declineButton?.gameObject.SetActive(false);
+        _claimRewardButton?.gameObject.SetActive(false);
     }
 
     public void OnAcceptButtonPress() => AcceptQuest();
     public void OnDeclineButtonPress() => DeclineQuest();
     public void OnClaimRewardButtonPress() => ClaimReward();
+    public void SetCurrentQuestIndex(int index)
+    {
+        if (index >= 0 && index < (questDatabase?.quests?.Length ?? 0))
+        {
+            _currentQuestIndex = index;
+        }
+        else
+        {
+            Debug.LogWarning("SetCurrentQuestIndex: Index out of range!");
+        }
+    }
 
 }

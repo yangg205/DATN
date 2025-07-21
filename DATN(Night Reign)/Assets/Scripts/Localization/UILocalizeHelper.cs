@@ -64,17 +64,9 @@ public static class UILocalizeExtensions
     /// <summary>
     /// Gán văn bản localized vào TextMeshProUGUI.
     /// </summary>
-    private static void ApplyLocalization(TextMeshProUGUI tmpText, StringTable table, string key)
+    private static async void ApplyLocalization(TextMeshProUGUI tmpText, StringTable table, string key)
     {
-        var entry = table.GetEntry(key);
-        if (entry != null)
-        {
-            tmpText.text = entry.GetLocalizedString();
-        }
-        else
-        {
-            Debug.LogWarning($"Key '{key}' not found in table '{table.TableCollectionName}'.");
-            tmpText.text = $"[MISSING:{key}]";
-        }
+        string localized = await LocalizationManager.Instance.GetLocalizedStringAsync(table.TableCollectionName, key);
+        tmpText.text = localized;
     }
 }
