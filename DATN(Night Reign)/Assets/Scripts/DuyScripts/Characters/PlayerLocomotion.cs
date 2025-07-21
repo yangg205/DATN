@@ -37,7 +37,7 @@ namespace ND
 
         private void Awake()
         {
-            cameraHandler = FindObjectOfType<CameraHandler>();
+            cameraHandler = FindFirstObjectByType<CameraHandler>();
         }
         void Start()
         {
