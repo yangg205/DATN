@@ -108,7 +108,7 @@ public class desertBoss : MonoBehaviour
     {
         if (isPhase2 && distance > meleeRange)
         {
-            return Random.Range(3, 4);
+            return Random.Range(3, 5);
         }
 
         // random melee attacks
