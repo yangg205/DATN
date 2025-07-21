@@ -22,23 +22,27 @@ public class PanelShowEffect : MonoBehaviour
 
         panel.anchoredPosition = startPos;
         panel.localScale = startScale;
-        canvasGroup.alpha = 0;
-        canvasGroup.interactable = false;
-        canvasGroup.blocksRaycasts = false;
+        // canvasGroup.alpha = 0;
+        // canvasGroup.interactable = false;
+        // canvasGroup.blocksRaycasts = false;
+        canvasGroup.DOFade(1, duration);
+
+        canvasGroup.interactable = true;
+        canvasGroup.blocksRaycasts = true;
     }
     public void OnClickOpenPanel()
     {
-        menuPanel.Show();
+        //menuPanel.Show();
         buttonToHide.SetActive(false);      // Ẩn nút sau khi bấm
     }
 
     public void Show()
     {
-        canvasGroup.DOFade(1, duration);
+        //canvasGroup.DOFade(1, duration);
         panel.DOAnchorPos(endPos, duration).SetEase(Ease.OutCubic);
         panel.DOScale(endScale, duration).SetEase(Ease.OutBack);
 
-        canvasGroup.interactable = true;
-        canvasGroup.blocksRaycasts = true;
+        // canvasGroup.interactable = true;
+        // canvasGroup.blocksRaycasts = true;
     }
 }

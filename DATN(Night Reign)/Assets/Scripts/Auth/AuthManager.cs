@@ -5,6 +5,9 @@ using UnityEngine.SceneManagement;
 
 public class AuthManager : MonoBehaviour
 {
+    [SerializeField] GameObject loginButton;
+    [SerializeField] GameObject registerButton;
+
     [SerializeField] GameObject loginPanel;
     [SerializeField] GameObject registerPanel;
     [SerializeField] GameObject otpPanel;
@@ -26,6 +29,8 @@ public class AuthManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        loginButton.SetActive(true);
+        registerButton.SetActive(true);
         loginPanel.SetActive(false);
         registerPanel.SetActive(false);
         otpPanel.SetActive(false);
@@ -57,6 +62,8 @@ public class AuthManager : MonoBehaviour
         loginPanel.SetActive(true);
         otpPanel.SetActive(false);
         registerPanel.SetActive(false);
+        SetButtonsVisible(false);
+
 
     }
     public void OnClickShowRegisterInner()
@@ -64,18 +71,23 @@ public class AuthManager : MonoBehaviour
         registerPanel.SetActive(true);
         otpPanel.SetActive(false);
         loginPanel.SetActive(false);
+        SetButtonsVisible(false);
+
     }
     public void OnClickShowOtpInner()
     {
         otpPanel.SetActive(true);
         loginPanel.SetActive(false);
         registerPanel.SetActive(false);
+        SetButtonsVisible(false);
     }
     public void OnClickExit()
     {
         loginPanel.SetActive(false);
         registerPanel.SetActive(false);
         otpPanel.SetActive(false);
+        SetButtonsVisible(true);
+
     }
     public async void OnClickSubmitLogin()
     {
@@ -162,5 +174,12 @@ public class AuthManager : MonoBehaviour
             isEmailLoaded = false;
         }
     }
+
+    void SetButtonsVisible(bool visible)
+    {
+        loginButton.SetActive(visible);
+        registerButton.SetActive(visible);
+    }
+
 }
 
