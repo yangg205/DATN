@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class desertBoss : MonoBehaviour
 {
+    [Header("Fire attack")]
+    [SerializeField] private Transform fireSpawnPoint;
+    [SerializeField] private ParticleSystem fireBreathVFX;
+    [SerializeField] private Collider fireBreathCollider;
+
     private Animator animator;
     private Transform targetPlayer;
 
@@ -40,6 +45,10 @@ public class desertBoss : MonoBehaviour
             }
         }
 
+        fireBreathVFX = fireSpawnPoint.GetComponentInChildren<ParticleSystem>();
+        StopFireBreath();
+
+
         currentHP = maxHP;
 
         animator = GetComponentInChildren<Animator>();
@@ -57,7 +66,7 @@ public class desertBoss : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.T))
         {
-            TakeDamage(100);
+            TakeDamage(500);
         }
     }
 
@@ -115,9 +124,34 @@ public class desertBoss : MonoBehaviour
         return Random.Range(1, 4); // 1 to 3
     }
 
+
+    //play fire vfx
+    public void ActionFlame()
+    {
+        if (fireBreathVFX && !fireBreathVFX.isPlaying)
+            fireBreathVFX.Play();
+    }
+
+    //on collider
+    private void StartFireBreath()
+    {
+        if (fireBreathCollider)
+            fireBreathCollider.enabled = true;
+    }
+
+    //off collider & fire vfx
+    private void StopFireBreath()
+    {
+        if (fireBreathVFX && fireBreathVFX.isPlaying)
+            fireBreathVFX.Stop();
+
+        if (fireBreathCollider)
+            fireBreathCollider.enabled = false;
+    }
+
     private IEnumerator AttackCooldown()
     {
-        float cooldown = Random.Range(3f, 5f);
+        float cooldown = Random.Range(4f, 6f);
         yield return new WaitForSeconds(cooldown);
     }
     private void LookAtPlayer()
@@ -149,7 +183,7 @@ public class desertBoss : MonoBehaviour
     private void Die()
     {
         isDead = true;
-        animator.SetBool("isDead", true);
+        animator.SetTrigger("isDead");
         // Disable collider, disable attack, etc.
     }
 
