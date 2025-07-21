@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class Fullsreen : MonoBehaviour
 {
     public TMP_Dropdown fpsDropdown;
-    public TMP_Dropdown resolutionDropdown;
+    //public TMP_Dropdown resolutionDropdown;
     public Toggle fullscreenToggle;
 
     private Resolution[] availableResolutions;
@@ -35,7 +35,7 @@ public class Fullsreen : MonoBehaviour
     void SetupResolutionDropdown()
     {
         availableResolutions = Screen.resolutions;
-        resolutionDropdown.ClearOptions();
+        //resolutionDropdown.ClearOptions();
         List<string> options = new List<string>();
 
         for (int i = 0; i < availableResolutions.Length; i++)
@@ -55,9 +55,9 @@ public class Fullsreen : MonoBehaviour
             }
         }
 
-        resolutionDropdown.AddOptions(options);
-        resolutionDropdown.value = PlayerPrefs.GetInt("ResolutionIndex", currentResolutionIndex);
-        resolutionDropdown.onValueChanged.AddListener(OnResolutionChanged);
+        //resolutionDropdown.AddOptions(options);
+        //resolutionDropdown.value = PlayerPrefs.GetInt("ResolutionIndex", currentResolutionIndex);
+        //resolutionDropdown.onValueChanged.AddListener(OnResolutionChanged);
     }
 
     void SetupFullscreenToggle()
