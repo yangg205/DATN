@@ -69,7 +69,15 @@ public class DragonUsurper : MonoBehaviour
         }
 
         if (waypoints != null && waypoints.Length > 0)
+        {
+            Debug.Log("Waypoints initialized: " + waypoints.Length);
             StartCoroutine(StateMachine());
+            //Debug.Log("StateMachine run ");
+        }
+        else
+        {
+            Debug.LogWarning("Waypoints are not initialized or empty!");
+        }
     }
 
     private void Update()
@@ -142,8 +150,14 @@ public class DragonUsurper : MonoBehaviour
 
     private void PickRandomWaypoint()
     {
-        if (waypoints == null || waypoints.Length == 0) return;
+        if (waypoints == null || waypoints.Length == 0)
+        {
+            Debug.LogWarning("No waypoints available to pick!");
+            return;
+        }
+
         currentWaypointTarget = waypoints[Random.Range(0, waypoints.Length)];
+        Debug.Log("Picked waypoint: " + currentWaypointTarget.name);
     }
 
 
@@ -214,11 +228,14 @@ public class DragonUsurper : MonoBehaviour
             if (DistanceToPlayer() > attackRange + 20f)
             {
                 yield return IdleState(3f);
+
             }
             else
             {
                 yield return CircleState(circleDuration);
+
                 yield return AttackState(attackDuration);
+
             }
         }
     }

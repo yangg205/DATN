@@ -57,10 +57,10 @@ public class NightMare : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        /*if (Input.GetKeyDown(KeyCode.E))
         {
             TakeDamage(15);
-        }
+        }*/
 
         if (isDead) return;
 
