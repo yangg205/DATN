@@ -5,7 +5,7 @@ using UnityEngine.Localization.Tables;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-public static class UILocalizeExtensions 
+public static class UILocalizeExtensions_lam
 {
     
 

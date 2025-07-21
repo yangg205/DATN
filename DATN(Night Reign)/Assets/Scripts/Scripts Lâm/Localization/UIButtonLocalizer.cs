@@ -11,10 +11,5 @@ public class UIButtonLocalizer : MonoBehaviour
 
     private void Start()
     {
-        buttonContinue.SetLocalizationKey("btn_continue");
-        buttonNewgame.SetLocalizationKey("btn_newgame");
-        buttonRank.SetLocalizationKey("btn_rank");
-        buttonSettings.SetLocalizationKey("btn_settings");
-        buttonExit.SetLocalizationKey("btn_exit");
     }
 }
