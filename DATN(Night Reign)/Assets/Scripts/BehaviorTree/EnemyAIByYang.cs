@@ -3,14 +3,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Pathfinding;
-using UnityEngine.UI;
 
 public class EnemyAIByYang : MonoBehaviour
 {
+    [Header("Item Drop")]
+    public GameObject itemDropPrefab;
+    public Transform dropPoint;
+
     [Header("Target & Detection")]
     public Transform targetPlayer;
     public float detectionRange = 15f;
-    public float engageRange = 10f;
+    [SerializeField] private float endReachedDistance = 7f;
+    [SerializeField] private float engageRange = 14f;
     public float approachDistance = 10f;
     public float meleeAttackRange = 6f;
 
@@ -41,7 +45,9 @@ public class EnemyAIByYang : MonoBehaviour
     private float _lastDodgeTime;
 
     [Header("Damage & Hitboxes")]
-    public GameObject meleeAttackHitbox;
+    //public GameObject meleeAttackHitbox;
+    [SerializeField] private List<GameObject> meleeAttackHitboxes = new List<GameObject>();
+
     public float meleeDamage = 50f;
 
     private Node _rootNode;
@@ -107,16 +113,17 @@ public class EnemyAIByYang : MonoBehaviour
 
         baseMovementSpeed = movementSpeed;
 
+        if (meleeAttackHitboxes != null)
+        {
+            foreach (var hitbox in meleeAttackHitboxes)
+                hitbox.SetActive(false);
+        }
 
         spawnTime = Time.time;
 
-        _aiPath.endReachedDistance = engageRange * 0.5f;
+        _aiPath.endReachedDistance = endReachedDistance;
         _aiPath.slowdownDistance = engageRange;
 
-        if (meleeAttackHitbox != null)
-        {
-            meleeAttackHitbox.SetActive(false);
-        }
 
         SetupBehaviorTree();
 
@@ -163,7 +170,7 @@ public class EnemyAIByYang : MonoBehaviour
         }
 
         float distToPlayer = targetPlayer != null ? Vector3.Distance(transform.position, targetPlayer.position) : -1f;
-        Debug.Log($"Phase: {currentPhase}, IsEnraged: {_isEnraged}, IsFleeing: {_isCurrentlyFleeing}, DistanceToPlayer: {distToPlayer}, AIPathStopped: {_aiPath.isStopped}");
+        //Debug.Log($"Phase: {currentPhase}, IsEnraged: {_isEnraged}, IsFleeing: {_isCurrentlyFleeing}, DistanceToPlayer: {distToPlayer}, AIPathStopped: {_aiPath.isStopped}");
 
         if (_rootNode != null)
         {
@@ -203,14 +210,18 @@ public class EnemyAIByYang : MonoBehaviour
         }
     }
 
-    public void TakeDamage(float damage)
+    public void TakeDamage(float damageAmount)
     {
-        currentHealth -= damage;
+        currentHealth -= damageAmount;
 
         if (vfxHitEffect != null)
         {
             vfxHitEffect.Play();
         }
+
+        DamagePopup popup = DamagePopupPool.Instance.GetFromPool();
+        popup.transform.position = transform.position + Vector3.up * 2f;
+        popup.Setup(damageAmount);
 
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
@@ -226,14 +237,17 @@ public class EnemyAIByYang : MonoBehaviour
 
     private void Die()
     {
-        Debug.Log("Boss has been defeated!");
         _animator?.SetTrigger("Die");
         _aiPath.isStopped = true;
         enabled = false;
 
+        StartCoroutine(DeathCoroutine());
+        Debug.Log("spider drop item");
+
         if (EnemyAIManager.Instance != null)
         {
             EnemyAIManager.Instance.UnregisterEnemy(this);
+            Debug.Log("spider die");
         }
     }
 
@@ -423,18 +437,18 @@ public class EnemyAIByYang : MonoBehaviour
 
         if (_aiPath.pathPending)
         {
-            Debug.Log("[MoveTowardsPlayer] Path pending... RUNNING.");
+            //Debug.Log("[MoveTowardsPlayer] Path pending... RUNNING.");
             return NodeState.RUNNING;
         }
 
         if (_aiPath.hasPath && !_aiPath.isStopped)
         {
-            Debug.Log("[MoveTowardsPlayer] Moving towards player... RUNNING.");
+            //Debug.Log("[MoveTowardsPlayer] Moving towards player... RUNNING.");
             return NodeState.RUNNING;
         }
 
         _seeker.StartPath(_aiPath.position, targetPlayer.position, null);
-        Debug.LogWarning("[MoveTowardsPlayer] Failed to find path, requesting new path. RUNNING.");
+        //Debug.LogWarning("[MoveTowardsPlayer] Failed to find path, requesting new path. RUNNING.");
         return NodeState.RUNNING;
     }
 
@@ -633,22 +647,19 @@ public class EnemyAIByYang : MonoBehaviour
         Debug.Log("Animation Event: Die animation ended. Boss fully dead.");
     }
 
-    public void ActivateMeleeAttackHitbox()
+    public void ActivateMeleeAttackHitbox(int index)
     {
-        if (meleeAttackHitbox != null)
+        if (meleeAttackHitboxes != null)
         {
-            meleeAttackHitbox.SetActive(true);
-            Debug.Log("Animation Event: Melee Attack Hitbox Activated!");
+            if (index >= 0 && index < meleeAttackHitboxes.Count)
+                meleeAttackHitboxes[index].SetActive(true);
         }
     }
 
     public void DeactivateMeleeAttackHitbox()
     {
-        if (meleeAttackHitbox != null)
-        {
-            meleeAttackHitbox.SetActive(false);
-            Debug.Log("Animation Event: Melee Attack Hitbox Deactivated!");
-        }
+        foreach (var hitbox in meleeAttackHitboxes)
+            hitbox.SetActive(false);
     }
 
     private void SetupBehaviorTree()
@@ -765,6 +776,20 @@ public class EnemyAIByYang : MonoBehaviour
         {
             sfxDead.PlayOneShot(sfxDead.clip);
         }
+    }
+
+
+    IEnumerator DeathCoroutine()
+    {
+        yield return new WaitForSeconds(2f);
+
+        // Rơi item
+        if (itemDropPrefab != null)
+        {
+            Vector3 dropPosition = dropPoint != null ? dropPoint.position : transform.position;
+            Instantiate(itemDropPrefab, dropPosition, Quaternion.identity);
+        }
+
     }
 
 }

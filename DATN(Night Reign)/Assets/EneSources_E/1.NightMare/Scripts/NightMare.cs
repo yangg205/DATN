@@ -21,11 +21,11 @@ public class NightMare : MonoBehaviour
     public LayerMask playerLayer;
 
     private Transform player;
-    [Header("UI")]
-    public Image healthFill;
 
-    [Header("Damage Popup")]
-    public GameObject damagePopupPrefab;
+    [Header("Item Drop")]
+    public GameObject itemDropPrefab;
+
+    public Transform dropPoint; 
 
     [Header("VFX")]
     public ParticleSystem vfxDead;
@@ -38,7 +38,7 @@ public class NightMare : MonoBehaviour
 
     public SkinnedMeshRenderer bodyRenderer;           
 
-    public bool isDead = false;
+    public bool isDead;
     public bool isTakingDamage = false;
 
     public int minAttackDamage = 3;
@@ -46,6 +46,7 @@ public class NightMare : MonoBehaviour
 
     void Start()
     {
+        isDead = false;
         player = GameObject.FindGameObjectWithTag("Player").transform;
         if (player != null)
         {
@@ -56,22 +57,10 @@ public class NightMare : MonoBehaviour
 
     void Update()
     {
-        if (healthFill != null)
+        if (Input.GetKeyDown(KeyCode.E))
         {
-            healthFill.fillAmount = HP / maxHP;
+            TakeDamage(15);
         }
-
-        //===test 
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            TakeDamage(20);
-            
-        }
-        //if (Input.GetKeyDown(KeyCode.I))
-        //{
-        //    TakeIceDamageNightMare(5);
-        //}
-
 
         if (isDead) return;
 
@@ -87,11 +76,11 @@ public class NightMare : MonoBehaviour
         AIPath aiPath = GetComponent<AIPath>();
 
         // Hiện damage popup
-        if (damagePopupPrefab != null)
-        {
-            GameObject popup = Instantiate(damagePopupPrefab, transform.position + Vector3.up * 2f, Quaternion.identity);
-            popup.GetComponent<DamagePopup>().Setup(damageAmount);
-        }
+       
+            DamagePopup popup = DamagePopupPool.Instance.GetFromPool();
+            popup.transform.position = transform.position + Vector3.up * 2f;
+            popup.Setup(damageAmount);
+       
 
         if (HP <= 0)
         {
@@ -113,11 +102,14 @@ public class NightMare : MonoBehaviour
             GetComponent<Collider>().enabled = false;
             GetComponent<Rigidbody>().isKinematic = true;
 
+            StartCoroutine(DeathCoroutine());
+
             // 💥 Nếu enemy này đang bị lock-on thì thoát lock-on
             if (ND.CameraHandler.singleton != null &&
                 ND.CameraHandler.singleton.currentLockOnTarget == this)
             {
-                ND.InputHandler inputHandler = FindObjectOfType<ND.InputHandler>();
+                //ND.InputHandler inputHandler = FindObjectOfType<ND.InputHandler>();
+                ND.InputHandler inputHandler = FindAnyObjectByType<ND.InputHandler>();
 
                 // Tắt lock-on mode
                 if (inputHandler != null)
@@ -132,8 +124,6 @@ public class NightMare : MonoBehaviour
             {
                 playerStats.GainEXP(expReward);
             }
-
-            Destroy(gameObject, 7f);
 
         }
         else
@@ -150,18 +140,18 @@ public class NightMare : MonoBehaviour
     }
     public void TakeIceDamageNightMare(int damageAmount)       //dành cho char có skill đóng băng
     { 
-        if (isDead) return;
+        if (!isDead) return;
         HP -= damageAmount;
         HP = Mathf.Clamp(HP, 0, maxHP);
 
         AIPath aiPath = GetComponent<AIPath>();
 
         // Hiện damage popup
-        if (damagePopupPrefab != null)
-        {
-            GameObject popup = Instantiate(damagePopupPrefab, transform.position + Vector3.up * 2f, Quaternion.identity);
-            popup.GetComponent<DamagePopup>().Setup(damageAmount);
-        }
+        
+            DamagePopup popup = DamagePopupPool.Instance.GetFromPool();
+            popup.transform.position = transform.position + Vector3.up * 2f;
+            popup.Setup(damageAmount);
+        
 
         // Nếu chết
         if (HP <= 0)
@@ -183,7 +173,9 @@ public class NightMare : MonoBehaviour
             animator.SetTrigger("die");
             GetComponent<Collider>().enabled = false;
             GetComponent<Rigidbody>().isKinematic = true;
-            Destroy(gameObject, 7f);
+
+            StartCoroutine(DeathCoroutine());
+
 
         }
         else
@@ -268,6 +260,18 @@ public class NightMare : MonoBehaviour
         isTakingDamage = false;
     }
 
+    IEnumerator DeathCoroutine()
+    {
+        yield return new WaitForSeconds(1f);
 
-  
+        // Rơi item
+        if (itemDropPrefab != null)
+        {
+            Vector3 dropPosition = dropPoint != null ? dropPoint.position : transform.position;
+            Instantiate(itemDropPrefab, dropPosition, Quaternion.identity);
+        }
+
+        Destroy(gameObject, 7f);
+    }
+
 }

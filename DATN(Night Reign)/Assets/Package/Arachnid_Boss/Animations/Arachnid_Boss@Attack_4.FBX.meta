@@ -359,15 +359,43 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.8613446
-        functionName: OnMeleeAttackAnimationEnd
+      - time: 0.20000002
+        functionName: Play2AttacklSFX
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.20000002
-        functionName: Play2AttacklSFX
+      - time: 0.20316277
+        functionName: ActivateMeleeAttackHitbox
+        data: 
+        objectReferenceParameter: {instanceID: 0}
+        floatParameter: 0
+        intParameter: 4
+        messageOptions: 0
+      - time: 0.29848233
+        functionName: DeactivateMeleeAttackHitbox
+        data: 
+        objectReferenceParameter: {instanceID: 0}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.4030354
+        functionName: ActivateMeleeAttackHitbox
+        data: 
+        objectReferenceParameter: {instanceID: 0}
+        floatParameter: 0
+        intParameter: 5
+        messageOptions: 0
+      - time: 0.5008433
+        functionName: DeactivateMeleeAttackHitbox
+        data: 
+        objectReferenceParameter: {instanceID: 0}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.8613446
+        functionName: OnMeleeAttackAnimationEnd
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0

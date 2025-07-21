@@ -1,11 +1,8 @@
 ﻿using ND;
 using Pathfinding;
 using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
+
 
 public class DragonSoulEater : MonoBehaviour
 {
@@ -13,20 +10,22 @@ public class DragonSoulEater : MonoBehaviour
     public float maxHP = 100f;
     public Animator animator;
 
+    [Header("Item Drop")]
+    public GameObject itemDropPrefab;
+
+    public Transform dropPoint;
+
     public int expReward = 25;
     public PlayerStats playerStats;
-
 
     public Transform attackPoint;
     public float attackRange = 1.5f;
     public LayerMask playerLayer;
 
     private Transform player;
-    [Header("UI")]
-    public Image healthFill;
 
-    [Header("Damage Popup")]
-    public GameObject damagePopupPrefab;
+    [Header("VFX")]
+    public ParticleSystem vfxDead;
 
     [Header("Freeze Effect")]
     public Material iceMaterial;             
@@ -55,19 +54,10 @@ public class DragonSoulEater : MonoBehaviour
 
     void Update()
     {
-        if (healthFill != null)
+        /*if (Input.GetKeyDown(KeyCode.R))
         {
-            healthFill.fillAmount = HP / maxHP;
-        }
-        //===test 
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            TakeDamage(20);
-        }if (Input.GetKeyDown(KeyCode.I))
-            {
-                TakeIceDamageSoulEater(1);
-             }
-
+            TakeDamage(15);
+        }*/
 
         if (isDead) return;
 
@@ -82,32 +72,38 @@ public class DragonSoulEater : MonoBehaviour
 
         AIPath aiPath = GetComponent<AIPath>();
 
-        // Hiện damage popup
-        if (damagePopupPrefab != null)
-        {
-            GameObject popup = Instantiate(damagePopupPrefab, transform.position + Vector3.up * 2f, Quaternion.identity);
-            popup.GetComponent<DamagePopup>().Setup(damageAmount);
-        }
+        //damage popup
+        DamagePopup popup = DamagePopupPool.Instance.GetFromPool();
+        popup.transform.position = transform.position + Vector3.up * 2f;
+        popup.Setup(damageAmount);
 
         if (HP <= 0)
         {
             isDead = true;
-            questManager.ReportKill();
             if (aiPath != null)
             {
                 aiPath.canMove = false;
                 aiPath.canSearch = false;
             }
 
+            if (vfxDead != null)
+            {
+                vfxDead.Play();
+            }
+
             AudioManager_Enemy.instance.Play("DragonDeath");
             animator.SetTrigger("die");
             GetComponent<Collider>().enabled = false;
             GetComponent<Rigidbody>().isKinematic = true;
+
+            StartCoroutine(DeathCoroutine());
+
+            questManager.ReportKill();
             // 💥 Nếu enemy này đang bị lock-on thì thoát lock-on
             if (ND.CameraHandler.singleton != null &&
                 ND.CameraHandler.singleton.currentLockOnTarget == this)
             {
-                ND.InputHandler inputHandler = FindObjectOfType<ND.InputHandler>();
+                ND.InputHandler inputHandler = FindAnyObjectByType<ND.InputHandler>();
 
                 // Tắt lock-on mode
                 if (inputHandler != null)
@@ -118,12 +114,12 @@ public class DragonSoulEater : MonoBehaviour
                 // Reset camera
                 ND.CameraHandler.singleton.ClearLockOnTargets();
             }
+            
 
             if (playerStats != null)
             {
                 playerStats.GainEXP(expReward);
             }
-            Destroy(gameObject, 7f);
 
         }
         else
@@ -146,12 +142,9 @@ public class DragonSoulEater : MonoBehaviour
 
         AIPath aiPath = GetComponent<AIPath>();
 
-        // Hiện damage popup
-        if (damagePopupPrefab != null)
-        {
-            GameObject popup = Instantiate(damagePopupPrefab, transform.position + Vector3.up * 2f, Quaternion.identity);
-            popup.GetComponent<DamagePopup>().Setup(damageAmount);
-        }
+        DamagePopup popup = DamagePopupPool.Instance.GetFromPool();
+        popup.transform.position = transform.position + Vector3.up * 2f;
+        popup.Setup(damageAmount);
 
         // Nếu chết
         if (HP <= 0)
@@ -164,12 +157,17 @@ public class DragonSoulEater : MonoBehaviour
                 aiPath.canSearch = false;
             }
 
+            if (vfxDead != null)
+            {
+                vfxDead.Play();
+            }
             AudioManager_Enemy.instance.Play("DragonDeath");
             animator.SetTrigger("die");
             GetComponent<Collider>().enabled = false;
             GetComponent<Rigidbody>().isKinematic = true;
 
-            Destroy(gameObject, 7f);
+            StartCoroutine(DeathCoroutine());
+
 
         }
         else
@@ -253,6 +251,18 @@ public class DragonSoulEater : MonoBehaviour
         isTakingDamage = false;
     }
 
+    IEnumerator DeathCoroutine()
+    {
+        yield return new WaitForSeconds(1f);
 
+        // Rơi item
+        if (itemDropPrefab != null)
+        {
+            Vector3 dropPosition = dropPoint != null ? dropPoint.position : transform.position;
+            Instantiate(itemDropPrefab, dropPosition, Quaternion.identity);
+        }
+
+        Destroy(gameObject, 7f);
+    }
 
 }

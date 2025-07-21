@@ -1,14 +1,29 @@
-using ND;
+﻿using ND;
+using server.model;
 using UnityEngine;
 
 public class Hit : MonoBehaviour
 {
+    public PlayerStats playerStats;
+
+    private void Start()
+    {
+        playerStats = FindAnyObjectByType<PlayerStats>();
+    }
     private void OnTriggerEnter(Collider other)
     {
-        // Check if the collider belongs to an enemy
-        if (other.gameObject.CompareTag("Player"))
+        if (other.CompareTag("Player"))
         {
-            Debug.Log("dang gay dame cho player");
+            PlayerStats targetStats = other.GetComponent<PlayerStats>();
+            if (targetStats != null)
+            {
+                targetStats.TakeDamage(9);
+                Debug.Log("đang gây damage cho player");
+            }
+            else
+            {
+                Debug.LogWarning("Player không có PlayerStats component!");
+            }
         }
     }
 }

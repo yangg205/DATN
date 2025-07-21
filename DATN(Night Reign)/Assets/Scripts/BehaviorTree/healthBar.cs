@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class healthBar : MonoBehaviour
@@ -7,6 +8,9 @@ public class healthBar : MonoBehaviour
 
     public Slider healthSlider;
     public Slider easeHealthSlider;
+
+    public TextMeshProUGUI hpText;
+
 
     public Image fillImage;
     public Color normalColor = Color.red;
@@ -29,6 +33,8 @@ public class healthBar : MonoBehaviour
         {
             easeHealthSlider.value = Mathf.Lerp(easeHealthSlider.value, enemyAIByYang.currentHealth, lerpSpeed);
         }
+
+        hpText.text = $"{enemyAIByYang.currentHealth}";
 
         // Đổi màu nếu Enraged
         if (enemyAIByYang != null && fillImage != null)
