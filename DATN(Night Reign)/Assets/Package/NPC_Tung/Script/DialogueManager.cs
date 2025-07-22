@@ -101,8 +101,9 @@ public class DialogueManager : MonoBehaviour
     // Sửa lại OnLanguageChangedHandler để thay đổi ngay lập tức
     private async void OnLanguageChangedHandler()
     {
-        if (!isDialogueActive || _originalDialogueKeys.Count == 0 || _currentDialogueIndex < 0) return;
+        if (!isDialogueActive || _originalDialogueKeys.Count == 0) return;
 
+        // Dừng hiệu ứng gõ chữ và âm thanh hiện tại
         StopTypingEffect();
         if (dialogueAudioSource != null && dialogueAudioSource.isPlaying)
         {
@@ -111,27 +112,14 @@ public class DialogueManager : MonoBehaviour
 
         // Lấy locale mới
         UnityEngine.Localization.Locale currentLocale = LocalizationManager.Instance.GetCurrentLocale();
-        bool isVI = currentLocale.Identifier.Code.StartsWith("vi", StringComparison.OrdinalIgnoreCase);
 
-        // Dịch lại câu hiện tại ngay lập tức
-        string currentKey = _originalDialogueKeys[_currentDialogueIndex];
-        string localizedLine = await LocalizationManager.Instance.GetLocalizedStringAsync("NhiemVu", currentKey);
+        // Tái tạo hàng đợi với ngôn ngữ mới
+        await RePopulateQueuesFromOriginalData(currentLocale);
 
-        // Lấy voice clip mới
-        AudioClip voiceClip = isVI ?
-            (_currentDialogueIndex < _originalVoiceClipsVI.Count ? _originalVoiceClipsVI[_currentDialogueIndex] : null) :
-            (_currentDialogueIndex < _originalVoiceClipsEN.Count ? _originalVoiceClipsEN[_currentDialogueIndex] : null);
-
-        // Cập nhật ngay lập tức
-        currentFullSentence = localizedLine;
-        dialogueText.text = localizedLine;
-
-        // Phát voice clip mới nếu có
-        if (voiceClip != null && dialogueAudioSource != null)
-        {
-            dialogueAudioSource.clip = voiceClip;
-            dialogueAudioSource.Play();
-        }
+        // Reset về câu đầu tiên của đoạn thoại
+        _currentDialogueIndex = -1; // Reset để bắt đầu lại từ đầu
+        dialogueText.text = ""; // Xóa văn bản hiện tại
+        DisplayNextSentence(); // Bắt đầu lại đoạn thoại với ngôn ngữ mới
     }
     // Bắt đầu một đoạn hội thoại mới
     public async void StartDialogue(string[] dialogueKeys, AudioClip[] voiceClipsEN, AudioClip[] voiceClipsVI, Action onDialogueEnd = null)

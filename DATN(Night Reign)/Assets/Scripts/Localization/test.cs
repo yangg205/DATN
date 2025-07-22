@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Localization.Settings;
 
 public class test : MonoBehaviour
 {
@@ -13,6 +14,11 @@ public class test : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        localizationManager.ChangeLanguageImmediate(testInt);
+        if (Input.GetKeyDown(KeyCode.Alpha1)) testInt = 0;
+        if (Input.GetKeyDown(KeyCode.Alpha2)) testInt = 1;
+        if (localizationManager != null && testInt >= 0 && testInt < LocalizationSettings.AvailableLocales.Locales.Count)
+        {
+            localizationManager.ChangeLanguageImmediate(testInt);
+        }
     }
 }

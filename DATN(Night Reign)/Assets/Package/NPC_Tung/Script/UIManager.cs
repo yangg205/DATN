@@ -1,8 +1,6 @@
-﻿// UIManager.cs (GIỮ NGUYÊN CẤU TRÚC VÀ LOGIC CỦA BẠN, CÓ BỔ SUNG NHỎ ĐÃ THẢO LUẬN)
-using UnityEngine;
+﻿using UnityEngine;
 using TMPro;
 using System.Collections;
-using UnityEngine.Localization.Tables;
 using UnityEngine.UI;
 using UnityEngine.Localization.Settings;
 
@@ -13,7 +11,6 @@ public class UIManager : MonoBehaviour
     [Header("Quest Reward UI")]
     [SerializeField] private GameObject rewardPopup;
     [SerializeField] private TextMeshProUGUI coinText;
-    // Có thể thêm [SerializeField] private TextMeshProUGUI expText; nếu bạn muốn hiển thị EXP riêng
 
     [Header("Player Stats UI")]
     [SerializeField] private Slider expSlider;
@@ -24,11 +21,10 @@ public class UIManager : MonoBehaviour
     [Header("Quest Notice Text (hiện trong Box)")]
     [SerializeField] private TextMeshProUGUI questNoticeText;
 
-    // ĐÃ XÓA: [Header("Return to NPC Text")] và returnToNPCNameText
-    // Thay vào đó, thông tin này sẽ được quản lý nội bộ và thêm vào combinedQuestInfoText
-
     private Coroutine noticeCoroutine;
 
+    private string _currentQuestTitleKey = "";
+    private string _currentObjectiveKey = "";
     private string _currentQuestTitle = "";
     private string _currentObjectiveText = "";
 
@@ -36,7 +32,7 @@ public class UIManager : MonoBehaviour
     private int _totalProgressCount = 0;
     private float _currentWaypointDistance = -1f;
 
-    // THÊM VÀO: Biến để lưu trữ tên NPC cần quay lại
+    private string _returnToNPCGiverNameKey = "";
     private string _returnToNPCGiverName = "";
     private bool _showReturnToNPC = false;
 
@@ -45,7 +41,6 @@ public class UIManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            // DontDestroyOnLoad(gameObject); // Có thể giữ UIManager qua các cảnh nếu cần
             Debug.Log("✅ UIManager Instance đã sẵn sàng.");
         }
         else
@@ -61,7 +56,7 @@ public class UIManager : MonoBehaviour
         {
             WaypointManager.Instance.OnActiveWaypointChanged += UpdateActiveWaypointDistance;
             Debug.Log("UIManager đã đăng ký sự kiện OnActiveWaypointChanged từ WaypointManager.");
-            UpdateActiveWaypointDistance(WaypointManager.Instance.GetActiveWaypoint()); // Cập nhật khoảng cách ban đầu nếu có waypoint
+            UpdateActiveWaypointDistance(WaypointManager.Instance.GetActiveWaypoint());
         }
         else
         {
@@ -79,8 +74,9 @@ public class UIManager : MonoBehaviour
             combinedQuestInfoText.gameObject.SetActive(false);
         }
 
-        // Đảm bảo ẩn thông tin "Quay lại gặp NPC" khi khởi tạo
-        SetReturnToNPCInfo("", false); // Đã đổi tên hàm
+        SetReturnToNPCInfo("", false);
+
+        LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
     }
 
     private void OnDestroy()
@@ -90,28 +86,40 @@ public class UIManager : MonoBehaviour
             WaypointManager.Instance.OnActiveWaypointChanged -= UpdateActiveWaypointDistance;
             Debug.Log("UIManager đã hủy đăng ký sự kiện OnActiveWaypointChanged.");
         }
+
+        LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
+    }
+
+    private async void OnLocaleChanged(UnityEngine.Localization.Locale newLocale)
+    {
+        await RefreshCombinedQuestInfoUIAsync();
+        Debug.Log($"[UIManager] Ngôn ngữ đã thay đổi thành: {newLocale.Identifier.Code}. Đang làm mới UI.");
     }
 
     private void Update()
     {
-        // Logic cập nhật khoảng cách trong Update() là để khoảng cách được refresh liên tục.
         if (WaypointManager.Instance != null && WaypointManager.Instance.GetActiveWaypoint() != null)
         {
             float newDistance = WaypointManager.Instance.GetDistanceToActiveWaypoint();
-            if (Mathf.Abs(newDistance - _currentWaypointDistance) > 0.5f) // Chỉ cập nhật nếu có thay đổi đáng kể
+            if (Mathf.Abs(newDistance - _currentWaypointDistance) > 0.5f)
             {
                 _currentWaypointDistance = newDistance;
-                RefreshCombinedQuestInfoUI();
+                StartCoroutine(UpdateUIAsync());
             }
         }
-        else if (_currentWaypointDistance != -1f) // Nếu không còn waypoint nhưng vẫn hiển thị khoảng cách cũ
+        else if (_currentWaypointDistance != -1f)
         {
             _currentWaypointDistance = -1f;
-            RefreshCombinedQuestInfoUI();
+            StartCoroutine(UpdateUIAsync());
         }
     }
 
-    public void ShowNotice(string message, float duration = 2.5f)
+    private IEnumerator UpdateUIAsync()
+    {
+        yield return RefreshCombinedQuestInfoUIAsync();
+    }
+
+    public async void ShowNotice(string messageKey, float duration = 2.5f)
     {
         if (questNoticeText == null)
         {
@@ -122,6 +130,8 @@ public class UIManager : MonoBehaviour
         if (noticeCoroutine != null)
             StopCoroutine(noticeCoroutine);
 
+        // Lấy chuỗi bản địa hóa trước khi chạy coroutine
+        string message = await LocalizationManager.Instance.GetLocalizedStringAsync("NhiemVu", messageKey);
         noticeCoroutine = StartCoroutine(ShowNoticeCoroutine(message, duration));
     }
 
@@ -132,7 +142,7 @@ public class UIManager : MonoBehaviour
         questNoticeText.text = "";
     }
 
-    public void ShowRewardPopup(int coin, int exp) // Thêm exp vào đây vì bạn có rewardExp trong QuestData
+    public void ShowRewardPopup(int coin, int exp)
     {
         if (rewardPopup == null || coinText == null)
         {
@@ -140,7 +150,7 @@ public class UIManager : MonoBehaviour
             return;
         }
 
-        coinText.text = $"Coin: {coin}\nExp: {exp}"; // Hiển thị cả Coin và Exp
+        coinText.text = $"Coin: {coin}\nExp: {exp}";
         rewardPopup.SetActive(true);
         StartCoroutine(HideRewardPopupAfterDelay(2f));
     }
@@ -152,19 +162,18 @@ public class UIManager : MonoBehaviour
             rewardPopup.SetActive(false);
     }
 
-    public void UpdateQuestProgressText(string localizedQuestName)
+    public void UpdateQuestProgressText(string localizedQuestNameKey)
     {
-        _currentQuestTitle = localizedQuestName;
-        Debug.Log($"[UIManager] UpdateQuestProgressText (Set Localized Title): {_currentQuestTitle}");
-        RefreshCombinedQuestInfoUI();
-        if (combinedQuestInfoText != null) combinedQuestInfoText.color = Color.white;
+        _currentQuestTitleKey = localizedQuestNameKey;
+        Debug.Log($"[UIManager] UpdateQuestProgressText (Set Key): {_currentQuestTitleKey}");
+        StartCoroutine(UpdateUIAsync());
     }
 
-    public void UpdateCurrentQuestObjective(string localizedObjectiveDescription)
+    public void UpdateCurrentQuestObjective(string localizedObjectiveKey)
     {
-        _currentObjectiveText = localizedObjectiveDescription;
-        Debug.Log($"[UIManager] UpdateCurrentQuestObjective (Set Localized Objective): {_currentObjectiveText}");
-        RefreshCombinedQuestInfoUI();
+        _currentObjectiveKey = localizedObjectiveKey;
+        Debug.Log($"[UIManager] UpdateCurrentQuestObjective (Set Key): {_currentObjectiveKey}");
+        StartCoroutine(UpdateUIAsync());
     }
 
     public void UpdateQuestProgress(int current, int total)
@@ -172,9 +181,9 @@ public class UIManager : MonoBehaviour
         _currentProgressCount = current;
         _totalProgressCount = total;
         Debug.Log($"[UIManager] UpdateQuestProgress (Set Progress): {current}/{total}");
-        RefreshCombinedQuestInfoUI();
+        StartCoroutine(UpdateUIAsync());
 
-        if (current >= total && total > 0) // Chỉ đổi màu khi có tiến độ và đã đạt mục tiêu
+        if (current >= total && total > 0)
         {
             if (combinedQuestInfoText != null) combinedQuestInfoText.color = Color.yellow;
         }
@@ -184,27 +193,27 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Đặt thông tin tên NPC cần quay lại và trạng thái hiển thị.
-    /// Thông tin này sẽ được thêm vào combinedQuestInfoText.
-    /// </summary>
-    /// <param name="npcName">Tên của NPC cần quay lại gặp.</param>
-    /// <param name="show">True nếu thông tin này nên được hiển thị trong combinedQuestInfoText.</param>
-    public void SetReturnToNPCInfo(string npcName, bool show)
+    public void SetReturnToNPCInfo(string npcNameKey, bool show)
     {
-        _returnToNPCGiverName = npcName;
+        _returnToNPCGiverNameKey = npcNameKey;
         _showReturnToNPC = show;
-        RefreshCombinedQuestInfoUI(); // Kích hoạt refresh UI để hiển thị/ẩn thông tin
+        StartCoroutine(UpdateUIAsync());
+        Debug.Log($"[UIManager] SetReturnToNPCInfo: Key={npcNameKey}, Show={show}");
     }
 
     public void HideQuestProgress()
     {
+        _currentQuestTitleKey = "";
+        _currentObjectiveKey = "";
         _currentQuestTitle = "";
         _currentObjectiveText = "";
-
         _currentProgressCount = 0;
         _totalProgressCount = 0;
         _currentWaypointDistance = -1f;
+        _returnToNPCGiverNameKey = "";
+        _returnToNPCGiverName = "";
+        _showReturnToNPC = false;
+
         Debug.Log("[UIManager] HideQuestProgress: All quest info cleared.");
 
         if (combinedQuestInfoText != null)
@@ -212,7 +221,6 @@ public class UIManager : MonoBehaviour
             combinedQuestInfoText.text = "";
             combinedQuestInfoText.gameObject.SetActive(false);
         }
-        SetReturnToNPCInfo("", false); // Ẩn luôn thông tin NPC khi ẩn progress
     }
 
     public void UpdateExpSlider(float currentExp, float maxExp)
@@ -229,18 +237,15 @@ public class UIManager : MonoBehaviour
 
     private void UpdateActiveWaypointDistance(Waypoint activeWaypoint)
     {
-        // Khi waypoint active thay đổi (có thể là null), chỉ cần gọi RefreshCombinedQuestInfoUI
-        // vì biến _currentWaypointDistance sẽ được cập nhật trong hàm Update() chính
-        // hoặc được reset về -1f nếu activeWaypoint là null.
-        // Hơn nữa, RefreshCombinedQuestInfoUI sẽ kiểm tra _currentWaypointDistance >= 0 để hiển thị.
         if (activeWaypoint == null)
         {
-            Debug.Log("[UIManager] UpdateActiveWaypointDistance: Active waypoint is NULL. UI will reflect this on next refresh.");
+            _currentWaypointDistance = -1f;
+            Debug.Log("[UIManager] UpdateActiveWaypointDistance: Active waypoint is NULL.");
         }
-        RefreshCombinedQuestInfoUI(); // Kích hoạt UI refresh khi waypoint thay đổi
+        StartCoroutine(UpdateUIAsync());
     }
 
-    public void RefreshCombinedQuestInfoUI()
+    public async System.Threading.Tasks.Task RefreshCombinedQuestInfoUIAsync()
     {
         if (combinedQuestInfoText == null)
         {
@@ -250,70 +255,48 @@ public class UIManager : MonoBehaviour
 
         System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
-        // Chỉ hiển thị nếu có tên nhiệm vụ
-        if (!string.IsNullOrEmpty(_currentQuestTitle))
+        if (!string.IsNullOrEmpty(_currentQuestTitleKey))
         {
+            _currentQuestTitle = await LocalizationManager.Instance.GetLocalizedStringAsync("NhiemVu", _currentQuestTitleKey);
             sb.AppendLine($"<b>{_currentQuestTitle}</b>");
 
-            if (!string.IsNullOrEmpty(_currentObjectiveText))
+            if (!string.IsNullOrEmpty(_currentObjectiveKey))
             {
+                _currentObjectiveText = await LocalizationManager.Instance.GetLocalizedStringAsync("NhiemVu", _currentObjectiveKey);
                 sb.AppendLine(_currentObjectiveText);
             }
 
-            // Chỉ hiển thị tiến độ số nếu _totalProgressCount > 0
             if (_totalProgressCount > 0)
             {
-                string localizedProgressLabel = GetLocalizedString("NhiemVu", "Quest_Progress");
-                sb.AppendLine($"{localizedProgressLabel}: {_currentProgressCount}/{_totalProgressCount}");
+                string progressLabel = await LocalizationManager.Instance.GetLocalizedStringAsync("NhiemVu", "Quest_Progress");
+                sb.AppendLine($"{progressLabel}: {_currentProgressCount}/{_totalProgressCount}");
             }
 
-            // Chỉ hiển thị khoảng cách nếu có waypoint và khoảng cách hợp lệ
             if (_currentWaypointDistance >= 0 && WaypointManager.Instance.GetActiveWaypoint() != null)
             {
-                string localizedDistanceLabel = GetLocalizedString("NhiemVu", "Quest/Distance");
-                sb.AppendLine($"{localizedDistanceLabel}: {Mathf.RoundToInt(_currentWaypointDistance)}m");
+                string distanceLabel = await LocalizationManager.Instance.GetLocalizedStringAsync("NhiemVu", "Quest/Distance");
+                sb.AppendLine($"{distanceLabel}: {Mathf.RoundToInt(_currentWaypointDistance)}m");
             }
 
-            // THÊM VÀO: Logic để hiển thị "Quay lại gặp NPC" vào combinedQuestInfoText
-            if (_showReturnToNPC && !string.IsNullOrEmpty(_returnToNPCGiverName))
+            if (_showReturnToNPC && !string.IsNullOrEmpty(_returnToNPCGiverNameKey))
             {
-                string returnText = GetLocalizedString("NhiemVu", "ReturnToNPC_Prefix"); // Ví dụ: "Quay lại gặp:"
+                string returnText = await LocalizationManager.Instance.GetLocalizedStringAsync("NhiemVu", "ReturnToNPC_Prefix");
+                _returnToNPCGiverName = await LocalizationManager.Instance.GetLocalizedStringAsync("NPC_Names", _returnToNPCGiverNameKey);
                 sb.AppendLine($"{returnText} <b>{_returnToNPCGiverName}</b>");
             }
         }
 
         combinedQuestInfoText.text = sb.ToString();
-        combinedQuestInfoText.gameObject.SetActive(!string.IsNullOrEmpty(combinedQuestInfoText.text)); // Ẩn/hiện panel
+        combinedQuestInfoText.gameObject.SetActive(!string.IsNullOrEmpty(combinedQuestInfoText.text));
 
-        Debug.Log($"--- [UIManager] RefreshCombinedQuestInfoUI Output ---\n" +
-                  $"Title: '{_currentQuestTitle}'\n" +
-                  $"Objective: '{_currentObjectiveText}'\n" +
+        Debug.Log($"--- [UIManager] RefreshCombinedQuestInfoUIAsync Output ---\n" +
+                  $"Title Key: '{_currentQuestTitleKey}' (Text: '{_currentQuestTitle}')\n" +
+                  $"Objective Key: '{_currentObjectiveKey}' (Text: '{_currentObjectiveText}')\n" +
                   $"Progress: {_currentProgressCount}/{_totalProgressCount}\n" +
                   $"Distance: {_currentWaypointDistance}\n" +
-                  $"Return to NPC: {_showReturnToNPC} - {_returnToNPCGiverName}\n" + // Thêm log cho dễ debug
-                  $"Final Text Set to UI:\n" +
-                  $"'{combinedQuestInfoText.text}'\n" +
+                  $"Return to NPC: {_showReturnToNPC} - Key: '{_returnToNPCGiverNameKey}' (Text: '{_returnToNPCGiverName}')\n" +
+                  $"Final Text Set to UI:\n'{combinedQuestInfoText.text}'\n" +
                   $"UI Active: {combinedQuestInfoText.gameObject.activeSelf}\n" +
                   $"--------------------------------------------------");
-    }
-
-    public string GetLocalizedString(string tableName, string key)
-    {
-        StringTable table = LocalizationSettings.StringDatabase.GetTable(tableName);
-        if (table == null)
-        {
-            Debug.LogError($"❌ Bảng '{tableName}' không tồn tại. (UIManager)");
-            return $"[TABLE NOT FOUND: {tableName}]";
-        }
-        key = key.Trim();
-        var entry = table.GetEntry(key);
-        if (entry == null)
-        {
-            Debug.LogError($"❌ Key '{key}' không có trong bảng '{tableName}' (UIManager)");
-            return $"[MISSING KEY: {key}]";
-        }
-
-        string localizedString = entry.GetLocalizedString();
-        return localizedString;
     }
 }

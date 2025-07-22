@@ -90,11 +90,9 @@ public class QuestManager : MonoBehaviour
             ), true);
         }
 
-        // Update UI
+        // Update and show quest UI
         await UpdateQuestUI(quest);
-
-        // Hide UI after accepting
-        HideQuestUI();
+        ShowQuestUI(); // Hiển thị giao diện chi tiết nhiệm vụ
     }
 
     private async Task UpdateQuestUI(QuestData quest)

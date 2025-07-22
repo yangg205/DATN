@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UnityEngine.Localization.Settings;
+using UnityEngine.Localization;
 
 public class NPCInteraction : MonoBehaviour
 {
@@ -51,6 +53,10 @@ public class NPCInteraction : MonoBehaviour
         {
             HandleInteraction();
             MouseManager.Instance?.ShowCursorAndDisableInput();
+        }
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            questManager.ReportKill();
         }
     }
 
@@ -104,6 +110,7 @@ public class NPCInteraction : MonoBehaviour
         if (questCompletedAwaitingClaim != null)
         {
             // Case 1: Quest ready to claim - show first line of AfterComplete
+            ShowQuestUI(); // Hiển thị quest UI
             ShowClaimRewardUI();
             string[] firstLine = new string[] { questCompletedAwaitingClaim.keydialogueAfterComplete[0] };
             AudioClip[] firstClipEN = new AudioClip[] { questCompletedAwaitingClaim.voiceAfterComplete_EN[0] };
@@ -130,7 +137,7 @@ public class NPCInteraction : MonoBehaviour
         {
             // Case 4: Quest in progress
             HideAllActionButtons();
-            StartQuestDialogue(questInProgress, QuestDialogueType.InProgress);
+            StartQuestDialogue(questInProgress, QuestDialogueType.ObjectiveMet); // Sử dụng ObjectiveMet thay vì InProgress
         }
         else
         {
@@ -273,4 +280,5 @@ public class NPCInteraction : MonoBehaviour
             MouseManager.Instance?.HideCursorAndEnableInput();
         }
     }
+
 }
