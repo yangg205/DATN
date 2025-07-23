@@ -1,15 +1,17 @@
-﻿using server.model;
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
 public class desertBoss : MonoBehaviour
 {
     [Header("Fire attack")]
-    [SerializeField] private Transform fireSpawnPoint;
     [SerializeField] private ParticleSystem fireBreathVFX;
+    [SerializeField] private Transform fireSpawnPoint;
     [SerializeField] private Collider fireBreathCollider;
 
-    private Animator animator;
+
+
+
+    public Animator animator;
     private Transform targetPlayer;
 
     public float detectRange = 15f;
@@ -46,12 +48,10 @@ public class desertBoss : MonoBehaviour
         }
 
         fireBreathVFX = fireSpawnPoint.GetComponentInChildren<ParticleSystem>();
-        StopFireBreath();
 
 
         currentHP = maxHP;
 
-        animator = GetComponentInChildren<Animator>();
 
         animator.SetTrigger("isEmerging");
         StartCoroutine(AIBehavior());
@@ -66,7 +66,7 @@ public class desertBoss : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.T))
         {
-            TakeDamage(500);
+            animator.SetInteger("doAttackType", 4);
         }
     }
 
@@ -125,30 +125,6 @@ public class desertBoss : MonoBehaviour
     }
 
 
-    //play fire vfx
-    public void ActionFlame()
-    {
-        if (fireBreathVFX && !fireBreathVFX.isPlaying)
-            fireBreathVFX.Play();
-    }
-
-    //on collider
-    private void StartFireBreath()
-    {
-        if (fireBreathCollider)
-            fireBreathCollider.enabled = true;
-    }
-
-    //off collider & fire vfx
-    private void StopFireBreath()
-    {
-        if (fireBreathVFX && fireBreathVFX.isPlaying)
-            fireBreathVFX.Stop();
-
-        if (fireBreathCollider)
-            fireBreathCollider.enabled = false;
-    }
-
     private IEnumerator AttackCooldown()
     {
         float cooldown = Random.Range(4f, 6f);
@@ -166,6 +142,23 @@ public class desertBoss : MonoBehaviour
         }
     }
 
+    // Gọi khi animation bắt đầu phun lửa (qua Animation Event)
+    public void StartFireDesertBoss()
+    {
+        if (fireBreathVFX && !fireBreathVFX.isPlaying)
+            fireBreathVFX.Play();
+
+        if (fireBreathCollider)
+            fireBreathCollider.enabled = true;
+    }
+    public void StopFireDesertBoss()
+    {
+        if (fireBreathVFX && fireBreathVFX.isPlaying)
+            fireBreathVFX.Stop();
+
+        if (fireBreathCollider)
+            fireBreathCollider.enabled = false;
+    }
 
     public void TakeDamage(int amount)
     {
