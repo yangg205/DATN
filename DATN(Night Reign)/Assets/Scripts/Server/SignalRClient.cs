@@ -10,7 +10,7 @@ public class SignalRClient : MonoBehaviour
 {
     private static SignalRClient instance; // Đảm bảo chỉ có 1 SignalRClient duy nhất
     private HubConnection _connection;
-    private const string HubUrl = "https://datn-be-1-xbft.onrender.com/gamehub";
+    private const string HubUrl = "https://datn-be-oygi.onrender.com/gamehub";
     private void Awake()
     {
         if (instance != null && instance != this)
