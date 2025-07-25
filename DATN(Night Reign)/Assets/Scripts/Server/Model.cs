@@ -39,12 +39,6 @@ namespace server.model
         public double Position_z { get; set; }
         public DateTime? Datesave { get; set; } = DateTime.Now;
     }
-    public class Ranking
-    {
-        public string PlayerName { get; set; }
-        public int Total_point { get; set; }
-        public int Rank { get; set; }
-    }
     public class PlayerCharacterSkillPoint
     {
         public int PlayerCharacterId { get; set; }
@@ -132,5 +126,12 @@ namespace server.model
         public string Message { get; set; } = string.Empty;
         public decimal NewPlayerTotalMoney { get; set; } // Số Total_Money mới của Player
         public decimal NewPlayerTotalCoin { get; set; } // Số Total_Coin mới của Player_Character
+    }
+
+    public class Ranking
+    {
+        public string playerName { get; set; }
+        public int total_point { get; set; }
+        public int rank {  get; set; }
     }
 }
