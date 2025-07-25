@@ -43,6 +43,8 @@ public class DragonSoulEater : MonoBehaviour
     public float maxAttackDamage = 15f;
     public QuestManager questManager;
 
+    //duy
+    public int soulsAward = 50;
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
@@ -122,6 +124,7 @@ public class DragonSoulEater : MonoBehaviour
             if (playerStats != null)
             {
                 playerStats.GainEXP(expReward);
+                AwardSoulReward();
             }
             Destroy(gameObject, 7f);
 
@@ -185,6 +188,7 @@ public class DragonSoulEater : MonoBehaviour
 
     public void DealDamage()
     {
+
         float damage = Random.Range(minAttackDamage, maxAttackDamage);
 
         Collider[] hitPlayers = Physics.OverlapSphere(attackPoint.position, attackRange, playerLayer);
@@ -253,6 +257,18 @@ public class DragonSoulEater : MonoBehaviour
         isTakingDamage = false;
     }
 
+    public void AwardSoulReward()
+    {
+        SoulCountBar soulCountBar = FindObjectOfType<SoulCountBar>();
 
+        if (playerStats != null)
+        {
+            playerStats.AddSouls(soulsAward);
 
+            if (soulCountBar != null)
+            {
+                soulCountBar.SetSoulCountText(playerStats.soulCount);
+            }
+        }
+    }    
 }

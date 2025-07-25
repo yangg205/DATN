@@ -53,15 +53,46 @@ namespace ND
         public void PlayTargetAnimation(string targetAnim, bool isInteracting)
         {
             anim.applyRootMotion = isInteracting;
+            anim.SetBool("canRotate", false);
             anim.SetBool("isInteracting", isInteracting);
             anim.CrossFade(targetAnim, 0.2f);
         }
 
-        public void CanRotate() => canRotate = true;
-        public void StopRotation() => canRotate = false;
+        public void CanRotate() => anim.SetBool("canRotate", true);
+        public void StopRotation() => anim.SetBool("canRotate", false);
 
         public void EnableCombo() => anim.SetBool("canDoCombo", true);
         public void DisableCombo() => anim.SetBool("canDoCombo", false);
+
+        public void EnableIsInvulnerable()
+        {
+            anim.SetBool("isInvulnerable", true);
+        }
+
+        public void DisableIsInvulnerable()
+        {
+            anim.SetBool("isInvulnerable", false);
+        }
+        public void EnableParry()
+        {
+            PlayerManager playerManager = GetComponentInParent<PlayerManager>();
+            if (playerManager != null)
+            {
+                Debug.Log("Parry ENABLED");
+                playerManager.isParrying = true;
+            }
+        }
+
+        public void DisableParry()
+        {
+            Debug.Log("Parry DISABLED");
+
+            PlayerManager playerManager = GetComponentInParent<PlayerManager>();
+            if (playerManager != null)
+            {
+                playerManager.isParrying = false;
+            }
+        }
 
         private void OnAnimatorMove()
         {

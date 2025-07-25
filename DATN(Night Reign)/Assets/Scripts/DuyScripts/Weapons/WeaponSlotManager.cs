@@ -23,6 +23,10 @@ namespace ND
 
         PlayerEffectManager playerEffectManager;
 
+        public GameObject arrowPrefab;
+        private Transform arrowSpawnPoint;
+
+
         private void Awake()
         {
             animator = GetComponent<Animator>();
@@ -54,7 +58,12 @@ namespace ND
             {
                 leftHandSlot.currentWeapon = weaponItem;
                 leftHandSlot.LoadWeaponModel(weaponItem);
-                LoadLeftWeaponDamageCollider();
+
+                if (weaponItem != null && !weaponItem.isBow)
+                {
+                    LoadLeftWeaponDamageCollider();
+                }
+
                 quickSlotsUI.UpdateWeaponQuickSlotsUI(true, weaponItem);
 
                 #region Handle Left Weapon Idle Animations
@@ -93,9 +102,23 @@ namespace ND
                     }
                     #endregion
                 }
+
                 rightHandSlot.currentWeapon = weaponItem;
                 rightHandSlot.LoadWeaponModel(weaponItem);
-                LoadRightWeaponDamageCollider();
+
+                if (weaponItem.isBow)
+                {
+                    arrowSpawnPoint = rightHandSlot.currentWeaponModel.transform.Find("ArrowSpawn");
+                    if (arrowSpawnPoint == null)
+                    {
+                        Debug.LogWarning("ArrowSpawn point not found in bow model!");
+                    }
+                }
+                else
+                {
+                    LoadRightWeaponDamageCollider(); // Chỉ gọi khi không phải cung
+                }
+
                 quickSlotsUI.UpdateWeaponQuickSlotsUI(false, weaponItem);
             }
         }
@@ -116,27 +139,26 @@ namespace ND
 
         public void OpenRightDamageCollider()
         {
-            rightHandDamageCollider.EnableDamageCollider();
-            Debug.Log("Opening Right Damage Collider");
-            playerEffectManager?.PlayWeaponFX(false); // ← Bật trail
+             rightHandDamageCollider.EnableDamageCollider();
+             playerEffectManager?.PlayWeaponFX(false); // ← Bật trail
         }
 
         public void OpenLeftDamageCollider()
         {
-            leftHandDamageCollider.EnableDamageCollider();
-            playerEffectManager?.PlayWeaponFX(true);  // ← Bật trail
+             leftHandDamageCollider.EnableDamageCollider();
+             playerEffectManager?.PlayWeaponFX(true);
         }
 
         public void CloseRightHandDamageCollider()
         {
-            rightHandDamageCollider.DisableDamageCollider();
-            playerEffectManager?.StopWeaponFX(false); // ← Tắt trail
+             rightHandDamageCollider.DisableDamageCollider();
+             playerEffectManager?.StopWeaponFX(false);
         }
 
         public void CloseLeftHandDamageCollider()
         {
-            leftHandDamageCollider.DisableDamageCollider();
-            playerEffectManager?.StopWeaponFX(true); // ← Tắt trail
+              leftHandDamageCollider.DisableDamageCollider();
+              playerEffectManager?.StopWeaponFX(true);
         }
         #endregion
 
@@ -150,13 +172,8 @@ namespace ND
         {
             playerStats.TakeStaminaDamage(Mathf.RoundToInt(attackingWeapon.baseStamina * attackingWeapon.heavyAttackMultiplier));
         }
-
-        public GameObject GetRightHandWeaponModel()
-        {
-            if (rightHandSlot != null && rightHandSlot.currentWeaponModel != null)
-                return rightHandSlot.currentWeaponModel;
-            return null;
-        }
         #endregion
+
+
     }
 }

@@ -1,10 +1,15 @@
-﻿using TMPro;
+﻿using System.Security.Cryptography;
+using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem.Processors;
 
 namespace ND
 {
     public class PlayerStats : MonoBehaviour
     {
+        public float staminaRegenerationAmount = 10;
+        public float staminaRegenTimer = 0;
+
         public float baseAttackSpeed = 1f;
         public float currentAttackSpeed = 1f;
 
@@ -20,17 +25,29 @@ namespace ND
         public int currentEXP = 0;
         public int expToNextLevel = 100;
 
+        public int focusLevel = 10;
+        public float maxFocusPoint;
+        public float currentFocusPoint;
+
+        public int soulCount = 0;
+
         public HealthBar healthBar;
         public StaminaBar staminaBar;
+        public FocusPointBar focusPointBar;
         public ExpBar expBar;
         public TextMeshProUGUI levelText;
 
+        PlayerManager playerManager;
         AnimatorHandler animatorHandler;
+
+        public bool isDead;
 
         private void Awake()
         {
+            playerManager = GetComponent<PlayerManager>();
             healthBar = FindFirstObjectByType<HealthBar>();
             staminaBar = FindFirstObjectByType<StaminaBar>();
+            focusPointBar = FindFirstObjectByType<FocusPointBar>();
             expBar = FindFirstObjectByType<ExpBar>();
             animatorHandler = GetComponentInChildren<AnimatorHandler>();
         }
@@ -40,10 +57,17 @@ namespace ND
             maxHealth = SetMaxHealthFromHealthLevel();
             currentHealth = maxHealth;
             healthBar.SetMaxHealth(maxHealth);
+            healthBar.SetCurrentHealth(currentHealth);
 
             maxStamina = SetMaxStaminaFromStaminaLevel();
             currentStamina = maxStamina;
-            staminaBar.SetMaxStamina((int)maxStamina);
+            staminaBar.SetMaxStamina(maxStamina);
+            staminaBar.SetCurrentStamina(currentStamina);
+
+            maxFocusPoint = SetMaxFocusPointFromFocusLevel();
+            currentFocusPoint = maxFocusPoint;  
+            focusPointBar.SetMaxFocusPoint(maxFocusPoint);
+            focusPointBar.SetCurrentFocusPoint(currentFocusPoint);
 
             expBar.SetMaxEXP(expToNextLevel);
             UpdateLevelText();
@@ -51,18 +75,32 @@ namespace ND
 
         private int SetMaxHealthFromHealthLevel()
         {
-            return healthLevel * 10;
+            maxHealth = healthLevel * 10;
+            return maxHealth;
         }
 
-        private int SetMaxStaminaFromStaminaLevel()
+        private float SetMaxStaminaFromStaminaLevel()
         {
-            return staminaLevel * 10;
+            maxStamina = staminaLevel * 10;
+            return maxStamina;
+        }
+
+        private float SetMaxFocusPointFromFocusLevel()
+        {
+            maxFocusPoint = focusLevel * 10;
+            return maxFocusPoint;
         }
 
         public void TakeDamage(int damage)
         {
+            if (playerManager.isInvulnerable)
+                return;
+
+            if(isDead)
+                return;
+
             currentHealth -= damage;
-            healthBar.SetCurrenHealth(currentHealth);
+            healthBar.SetCurrentHealth(currentHealth);
 
             animatorHandler.PlayTargetAnimation("DamageHit", true);
 
@@ -70,15 +108,15 @@ namespace ND
             {
                 currentHealth = 0;
                 animatorHandler.PlayTargetAnimation("Dead", true);
-                // handle dead
+                isDead = true;
             }
         }
 
-        public void TakeStaminaDamage(int damage)
+        public void TakeStaminaDamage(float damage)
         {
             currentStamina -= damage;
             currentStamina = Mathf.Clamp(currentStamina, 0, maxStamina);
-            staminaBar.SetCurrenStamina(Mathf.RoundToInt(currentStamina));
+            staminaBar.SetCurrentStamina(Mathf.RoundToInt(currentStamina));
         }
 
         public void GainEXP(int amount)
@@ -113,5 +151,51 @@ namespace ND
                 levelText.text = "Level: " + playerLevel;
             }
         }
+
+        public void RegenerateStamina()
+        {
+            if(playerManager.isInteracting)
+            {
+                staminaRegenTimer = 0;
+            }
+            else
+            {
+                staminaRegenTimer += Time.deltaTime;
+                if (currentStamina < maxStamina && staminaRegenTimer > 1f)
+                {
+                    currentStamina += staminaRegenerationAmount * Time.deltaTime;
+                    staminaBar.SetCurrentStamina(Mathf.RoundToInt(currentStamina));
+                }
+            }
+        }
+
+        public void HealPlayer(int healAmount)
+        {
+            currentHealth = currentHealth + healAmount;
+
+            if(currentHealth > maxHealth)
+            {
+                currentHealth = maxHealth;
+            }
+
+            healthBar.SetCurrentHealth(currentHealth);
+        }
+
+        public void DeductFocusPoint(int focusPoint)
+        {
+            currentFocusPoint = currentFocusPoint - focusPoint;
+            
+            if(currentFocusPoint < 0)
+            {
+                currentFocusPoint = 0;
+            }
+
+            focusPointBar.SetCurrentFocusPoint(currentFocusPoint);
+        }
+
+        public void AddSouls(int souls)
+        {
+            soulCount = soulCount + souls;
+        }    
     }
 }

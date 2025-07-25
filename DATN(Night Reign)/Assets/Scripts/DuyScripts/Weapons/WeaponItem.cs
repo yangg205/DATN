@@ -9,6 +9,11 @@ namespace ND
         [Header("Model")]
         public GameObject modelPrefab;
         public bool isUnarmed;
+        public bool isBow;
+
+        [Header("Bow and Arrow")]
+        public GameObject arrowPrefab;         // Prefab mũi tên
+        public Transform arrowSpawnPoint;     // Điểm spawn mũi tên (trong prefab của cung)
 
         [Header("Idle Animations")]
         public string right_hand_idle;
@@ -37,6 +42,12 @@ namespace ND
         public int baseStamina = 10;
         public float lightAttackMultiplier = 1.0f;
         public float heavyAttackMultiplier = 1.5f;
+
+        [Header("Weapon Type")]
+        public bool isSpellCaster;
+        public bool isFaithCaster;
+        public bool isPyroCaster;
+        public bool isMeleeWeapon;
     }
 }
 

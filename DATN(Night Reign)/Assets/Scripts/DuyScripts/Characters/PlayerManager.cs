@@ -8,11 +8,15 @@ namespace ND
     {
         InputHandler inputHandler;
         Animator anim;
+        AnimatorHandler animatorHandler;
         CameraHandler cameraHandler;
         PlayerLocomotion playerLocomotion;
         InteractableUI interactableUI;
+        PlayerStats playerStats;
         public GameObject interactableUIGameObject;
         public GameObject itemInteractableGameObject;
+
+        public bool isParrying = false;
 
         public bool isInteracting;
 
@@ -20,19 +24,23 @@ namespace ND
         public bool isSprinting;
         public bool isInAir;
         public bool isGrounded;
+        public bool isInvulnerable;
         public bool canDoCombo;
 
         private void Awake()
         {
             cameraHandler = FindFirstObjectByType<CameraHandler>();
+            inputHandler = GetComponent<InputHandler>();
+            animatorHandler = GetComponentInChildren<AnimatorHandler>();
+            anim = GetComponentInChildren<Animator>();
+            playerLocomotion = GetComponent<PlayerLocomotion>();
+            playerStats = GetComponent<PlayerStats>();
+            interactableUI = FindFirstObjectByType<InteractableUI>();
         }
 
         void Start()
         {
-            inputHandler = GetComponent<InputHandler>();
-            anim = GetComponentInChildren<Animator>();
-            playerLocomotion = GetComponent<PlayerLocomotion>();
-            interactableUI = FindFirstObjectByType<InteractableUI>();
+            
         }
 
         void Update()
@@ -40,11 +48,15 @@ namespace ND
             float delta = Time.deltaTime;
             isInteracting = anim.GetBool("isInteracting");
             canDoCombo = anim.GetBool("canDoCombo");
+            isInvulnerable = anim.GetBool("isInvulnerable");
             anim.SetBool("isInAir", isInAir);
+            anim.SetBool("isDead", playerStats.isDead);
 
             inputHandler.TickInput(delta);
+            animatorHandler.canRotate = anim.GetBool("canRotate");
             playerLocomotion.HandleRollingAndSprinting(delta);
             playerLocomotion.HandleJumping();
+            playerStats.RegenerateStamina();
 
             CheckForInteractableObject();
         }
@@ -54,6 +66,7 @@ namespace ND
             float delta = Time.fixedDeltaTime;
             playerLocomotion.HandleMovement(delta);
             playerLocomotion.HandleFalling(delta, playerLocomotion.moveDirection);
+            playerLocomotion.HandleRotation(delta);
         }
 
         private void LateUpdate()
