@@ -28,4 +28,18 @@ public class SimpleInventory : MonoBehaviour
     {
         return items.TryGetValue(itemID, out int count) ? count : 0;
     }
+    public void RemoveItem(string itemID, int amount)
+    {
+        if (items.ContainsKey(itemID))
+        {
+            items[itemID] -= amount;
+            if (items[itemID] <= 0)
+                items.Remove(itemID);
+            Debug.Log($"Đã xóa {amount}x {itemID} khỏi túi đồ.");
+        }
+        else
+        {
+            Debug.LogWarning($"Không có {itemID} trong túi đồ để xóa.");
+        }
+    }
 }

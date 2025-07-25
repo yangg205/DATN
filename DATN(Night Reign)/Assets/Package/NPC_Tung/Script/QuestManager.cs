@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Linq;
 using System;
 using UnityEngine.SocialPlatforms;
@@ -98,23 +97,25 @@ public class QuestManager : MonoBehaviour
     private IEnumerator InitializeQuestUICoroutine()
     {
         yield return new WaitForEndOfFrame();
-        if (activeQuests.Count > 0)
+        var currentQuest = GetCurrentQuest();
+        if (currentQuest != null && IsQuestUnlocked(currentQuest))
         {
-            var activeQuest = GetActiveQuest();
-            if (activeQuest != null)
+            yield return StartCoroutine(UpdateQuestUICoroutine(currentQuest));
+            if (uiManager != null)
             {
-                yield return StartCoroutine(UpdateQuestUICoroutine(activeQuest));
-                if (uiManager != null)
-                {
-                    uiManager.SetQuestAccepted(true);
-                    yield return StartCoroutine(uiManager.RefreshCombinedQuestInfoUICoroutine());
-                }
-                Debug.Log($"[QuestManager] UI updated for quest {activeQuest.questName} in coroutine.");
+                uiManager.SetQuestAccepted(activeQuests.ContainsKey(currentQuest));
+                yield return StartCoroutine(uiManager.RefreshCombinedQuestInfoUICoroutine());
             }
+            Debug.Log($"[QuestManager] UI updated for quest {currentQuest.questName}, isAccepted={activeQuests.ContainsKey(currentQuest)}");
         }
         else
         {
-            Debug.Log("[QuestManager] No active quests to initialize UI.");
+            Debug.Log("[QuestManager] No valid quest to initialize UI.");
+            if (uiManager != null)
+            {
+                uiManager.HideQuestProgress();
+                uiManager.SetQuestAccepted(false);
+            }
         }
     }
 
@@ -167,36 +168,25 @@ public class QuestManager : MonoBehaviour
         SaveQuestProgress();
     }
 
-    private async Task AddWaypointAsync(QuestData quest, CurrentQuestStatus questStatus)
-    {
-        try
-        {
-            string questName = await quest.GetQuestNameLocalizedAsync();
-            if (waypointManager != null)
-            {
-                waypointManager.AddWaypoint(new Waypoint(
-                    questStatus.waypointId,
-                    questName,
-                    quest.questLocation,
-                    WaypointType.QuestLocation,
-                    quest.questLocationIcon
-                ), true);
-                Debug.Log($"[QuestManager] Added waypoint {questStatus.waypointId} for quest {quest.questName}");
-            }
-            else
-            {
-                Debug.LogWarning("[QuestManager] WaypointManager is null, cannot add waypoint.");
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"[QuestManager] Error adding waypoint for quest {quest.questName}: {ex.Message}");
-        }
-    }
-
     private IEnumerator AddWaypointCoroutine(QuestData quest, CurrentQuestStatus questStatus)
     {
-        yield return AddWaypointAsync(quest, questStatus);
+        string questName = quest.questName; // Giả sử questName không cần localize
+        if (waypointManager != null)
+        {
+            waypointManager.AddWaypoint(new Waypoint(
+                questStatus.waypointId,
+                questName,
+                quest.questLocation,
+                WaypointType.QuestLocation,
+                quest.questLocationIcon
+            ), true);
+            Debug.Log($"[QuestManager] Added waypoint {questStatus.waypointId} for quest {quest.questName}");
+        }
+        else
+        {
+            Debug.LogWarning("[QuestManager] WaypointManager is null, cannot add waypoint.");
+        }
+        yield return null;
     }
 
     private void SaveQuestProgress()
@@ -302,7 +292,7 @@ public class QuestManager : MonoBehaviour
         return currentQuestIndex;
     }
 
-    public async void AcceptQuest(QuestData quest)
+    public void AcceptQuest(QuestData quest)
     {
         if (quest == null || activeQuests.ContainsKey(quest) || quest.isQuestCompleted)
         {
@@ -328,20 +318,18 @@ public class QuestManager : MonoBehaviour
             StartCoroutine(AddWaypointCoroutine(quest, status));
         }
 
-        try
+        StartCoroutine(AcceptQuestCoroutine(quest));
+    }
+
+    private IEnumerator AcceptQuestCoroutine(QuestData quest)
+    {
+        yield return StartCoroutine(UpdateQuestUICoroutine(quest));
+        if (uiManager != null)
         {
-            await UpdateQuestUI(quest);
-            if (uiManager != null)
-            {
-                uiManager.SetQuestAccepted(true);
-                await uiManager.RefreshCombinedQuestInfoUIAsync();
-            }
-            Debug.Log($"[QuestManager] Accepted quest: {quest.questName}, _isQuestAccepted={uiManager?._isQuestAccepted}, _currentQuestTitleKey={uiManager?._currentQuestTitleKey}, _currentProgressCount={uiManager?._currentProgressCount}/{uiManager?._totalProgressCount}");
+            uiManager.SetQuestAccepted(true);
+            yield return StartCoroutine(uiManager.RefreshCombinedQuestInfoUICoroutine());
         }
-        catch (Exception ex)
-        {
-            Debug.LogError($"[QuestManager] Error accepting quest {quest.questName}: {ex.Message}");
-        }
+        Debug.Log($"[QuestManager] Accepted quest: {quest.questName}, _isQuestAccepted={uiManager?._isQuestAccepted}, _currentQuestTitleKey={uiManager?._currentQuestTitleKey}, _currentProgressCount={uiManager?._currentProgressCount}/{uiManager?._totalProgressCount}");
 
         for (int i = 0; i < questDatabase.quests.Length; i++)
         {
@@ -355,31 +343,6 @@ public class QuestManager : MonoBehaviour
         }
     }
 
-    private async Task UpdateQuestUI(QuestData quest)
-    {
-        if (uiManager == null)
-        {
-            Debug.LogWarning("[QuestManager] UIManager is null, cannot update quest UI");
-            return;
-        }
-
-        try
-        {
-            uiManager.UpdateQuestProgressText(quest.questName);
-            uiManager.UpdateCurrentQuestObjective(quest.description);
-            var status = GetQuestStatus(quest);
-            int totalProgress = quest.questType == QuestType.FindNPC ? 1 : (quest.questType == QuestType.CollectItem ? quest.requiredItemCount : quest.requiredKills);
-            uiManager.UpdateQuestProgress(status?.currentProgress ?? 0, totalProgress);
-            uiManager.SetQuestAccepted(true);
-            await uiManager.RefreshCombinedQuestInfoUIAsync();
-            Debug.Log($"[QuestManager] Updated UI for quest {quest.questName}: _currentQuestTitleKey={quest.questName}, _currentObjectiveKey={quest.description}, _currentProgressCount={uiManager?._currentProgressCount}/{uiManager?._totalProgressCount}, _isQuestAccepted={uiManager?._isQuestAccepted}");
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"[QuestManager] Error updating quest UI for {quest.questName}: {ex.Message}");
-        }
-    }
-
     private IEnumerator UpdateQuestUICoroutine(QuestData quest)
     {
         if (uiManager == null)
@@ -388,26 +351,14 @@ public class QuestManager : MonoBehaviour
             yield break;
         }
 
-        // Tách logic cập nhật UI ra khỏi try-catch để sử dụng yield
         uiManager.UpdateQuestProgressText(quest.questName);
         uiManager.UpdateCurrentQuestObjective(quest.description);
         var status = GetQuestStatus(quest);
         int totalProgress = quest.questType == QuestType.FindNPC ? 1 : (quest.questType == QuestType.CollectItem ? quest.requiredItemCount : quest.requiredKills);
         uiManager.UpdateQuestProgress(status?.currentProgress ?? 0, totalProgress);
-        uiManager.SetQuestAccepted(true);
-
-        try
-        {
-            // Không có yield trong try-catch
-            Debug.Log($"[QuestManager] Preparing to update UI for quest {quest.questName}: _currentQuestTitleKey={quest.questName}, _currentObjectiveKey={quest.description}, _currentProgressCount={uiManager?._currentProgressCount}/{uiManager?._totalProgressCount}, _isQuestAccepted={uiManager?._isQuestAccepted}");
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"[QuestManager] Error updating quest UI for {quest.questName}: {ex.Message}");
-        }
-
-        // Di chuyển yield ra ngoài try-catch
+        uiManager.SetQuestAccepted(activeQuests.ContainsKey(quest));
         yield return StartCoroutine(uiManager.RefreshCombinedQuestInfoUICoroutine());
+        Debug.Log($"[QuestManager] Updated UI for quest {quest.questName}: _currentQuestTitleKey={quest.questName}, _currentObjectiveKey={quest.description}, _currentProgressCount={uiManager?._currentProgressCount}/{uiManager?._totalProgressCount}, _isQuestAccepted={uiManager?._isQuestAccepted}");
     }
 
     public void ReportKill()
@@ -447,7 +398,7 @@ public class QuestManager : MonoBehaviour
         Debug.Log($"[QuestManager] Checked item collection for quest {quest.questName}. Progress: {count}/{quest.requiredItemCount}, _currentProgressCount={uiManager?._currentProgressCount}/{uiManager?._totalProgressCount}");
     }
 
-    public async void OnInteractWithNPC(string npcId)
+    public void OnInteractWithNPC(string npcId)
     {
         var quest = GetCurrentQuest();
         var status = GetQuestStatus(quest);
@@ -457,7 +408,7 @@ public class QuestManager : MonoBehaviour
         if (quest.targetNPCID == npcId)
         {
             Debug.Log($"[QuestManager] Interacted with target NPC {npcId} for quest {quest.questName}");
-            await CompleteFindNPCQuest(quest, status, npcId);
+            StartCoroutine(CompleteFindNPCQuestCoroutine(quest, status, npcId));
         }
         else
         {
@@ -465,93 +416,56 @@ public class QuestManager : MonoBehaviour
         }
     }
 
-    private async Task CompleteFindNPCQuest(QuestData quest, CurrentQuestStatus status, string npcId)
+    private IEnumerator CompleteFindNPCQuestCoroutine(QuestData quest, CurrentQuestStatus status, string npcId)
     {
-        if (quest == null || status == null || status.isCompleted || quest.questType != QuestType.FindNPC) return;
+        if (quest == null || status == null || status.isCompleted || quest.questType != QuestType.FindNPC) yield break;
 
-        try
+        status.currentProgress = 1;
+        status.isObjectiveMet = true;
+        status.isCompleted = true;
+        quest.isQuestCompleted = true;
+        SaveQuestCompletionStatus(quest);
+
+        if (uiManager != null)
         {
-            status.currentProgress = 1;
-            status.isObjectiveMet = true;
-            status.isCompleted = true;
-            quest.isQuestCompleted = true;
-            SaveQuestCompletionStatus(quest);
-
-            if (uiManager != null)
-            {
-                uiManager.UpdateQuestProgressText(quest.questName);
-                uiManager.UpdateQuestProgress(1, 1);
-                uiManager.ShowNotice("Quest_Completed_Notice_Key", 2.5f);
-                uiManager.SetReturnToNPCInfo("", false);
-                uiManager.SetQuestAccepted(false);
-                await uiManager.RefreshCombinedQuestInfoUIAsync();
-            }
-
-            if (!string.IsNullOrEmpty(status.waypointId))
-                waypointManager?.RemoveWaypoint(status.waypointId);
-
-            activeQuests.Remove(quest);
-            SaveQuestProgress();
-            UpdateQuestIndex();
-
-            playerStats.currentEXP += quest.rewardExp;
-            if (!string.IsNullOrEmpty(quest.rewardItemID))
-                SimpleInventory.Instance?.AddItem(quest.rewardItemID, quest.rewardItemCount);
-
-            uiManager?.ShowRewardPopup(quest.rewardCoin, quest.rewardExp);
-
-            Debug.Log($"[QuestManager] Completed FindNPC quest {quest.questName}. _isQuestAccepted={uiManager?._isQuestAccepted}, _currentQuestTitleKey={uiManager?._currentQuestTitleKey}, _currentProgressCount={uiManager?._currentProgressCount}/{uiManager?._totalProgressCount}");
-
-            await OfferNextQuestIfGiver(npcId);
+            uiManager.UpdateQuestProgressText(quest.questName);
+            uiManager.UpdateQuestProgress(1, 1);
+            uiManager.ShowNotice("Quest_Completed_Notice_Key", 2.5f);
+            uiManager.SetReturnToNPCInfo("", false);
+            uiManager.SetQuestAccepted(false);
+            yield return StartCoroutine(uiManager.RefreshCombinedQuestInfoUICoroutine());
         }
-        catch (Exception ex)
+
+        if (!string.IsNullOrEmpty(status.waypointId))
+            waypointManager?.RemoveWaypoint(status.waypointId);
+
+        activeQuests.Remove(quest);
+        SaveQuestProgress();
+        UpdateQuestIndex(); // Cập nhật currentQuestIndex để lấy nhiệm vụ mới
+
+        playerStats.currentEXP += quest.rewardExp;
+        if (!string.IsNullOrEmpty(quest.rewardItemID))
+            SimpleInventory.Instance?.AddItem(quest.rewardItemID, quest.rewardItemCount);
+
+        uiManager?.ShowRewardPopup(quest.rewardCoin, quest.rewardExp);
+
+        Debug.Log($"[QuestManager] Completed FindNPC quest {quest.questName}. _isQuestAccepted={uiManager?._isQuestAccepted}, _currentQuestTitleKey={uiManager?._currentQuestTitleKey}, _currentProgressCount={uiManager?._currentProgressCount}/{uiManager?._totalProgressCount}");
+
+        // Thông báo cho NPC giao nhiệm vụ rằng nhiệm vụ đã hoàn thành
+        if (quest.giverNPCID != npcId)
         {
-            Debug.LogError($"[QuestManager] Error completing FindNPC quest {quest.questName}: {ex.Message}");
+            Debug.Log($"[QuestManager] Notifying giver NPC {quest.giverNPCID} that quest {quest.questName} is completed");
+            yield return StartCoroutine(OfferNextQuestIfGiverCoroutine(quest.giverNPCID));
         }
+
+        // Cung cấp nhiệm vụ mới từ NPC mục tiêu nếu có
+        yield return StartCoroutine(OfferNextQuestIfGiverCoroutine(npcId));
     }
 
-    private async Task OfferNextQuestIfGiver(string npcId)
+    private IEnumerator OfferNextQuestIfGiverCoroutine(string npcId)
     {
         var nextQuest = GetCurrentQuest();
-        if (nextQuest != null && nextQuest.giverNPCID == npcId && IsQuestUnlocked(nextQuest) && !nextQuest.isQuestCompleted)
-        {
-            Debug.Log($"[QuestManager] Offering next quest {nextQuest.questName} by NPC {npcId}");
-            try
-            {
-                if (nextQuest.questType == QuestType.FindNPC)
-                {
-                    AcceptQuest(nextQuest);
-                    await UpdateQuestUI(nextQuest);
-                    if (uiManager != null)
-                    {
-                        await uiManager.RefreshCombinedQuestInfoUIAsync();
-                    }
-                    Debug.Log($"[QuestManager] Automatically accepted FindNPC quest {nextQuest.questName} without dialogue");
-                }
-                else
-                {
-                    DialogueManager.Instance.StartQuestDialogue(nextQuest, QuestDialogueType.BeforeComplete, async () =>
-                    {
-                        HideQuestUI();
-                        MouseManager.Instance?.HideCursorAndEnableInput();
-                        Debug.Log($"[QuestManager] Completed BeforeComplete dialogue for quest {nextQuest.questName}");
-                        if (uiManager != null)
-                        {
-                            await uiManager.RefreshCombinedQuestInfoUIAsync();
-                        }
-                    }, nextQuest.GetDialogueKeys(QuestDialogueType.BeforeComplete), nextQuest.voiceBeforeComplete_EN, nextQuest.voiceBeforeComplete_VI);
-                    ShowQuestUI();
-                    acceptButton?.SetActive(true);
-                    declineButton?.SetActive(true);
-                    claimRewardButton?.SetActive(false);
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[QuestManager] Error offering next quest {nextQuest.questName}: {ex.Message}");
-            }
-        }
-        else
+        if (nextQuest == null || !IsQuestUnlocked(nextQuest) || nextQuest.isQuestCompleted)
         {
             Debug.Log($"[QuestManager] No valid next quest for NPC {npcId}, hiding UI");
             if (uiManager != null)
@@ -559,6 +473,55 @@ public class QuestManager : MonoBehaviour
                 uiManager.HideQuestProgress();
                 uiManager.SetQuestAccepted(false);
             }
+            HideQuestUI();
+            MouseManager.Instance?.HideCursorAndEnableInput();
+            yield break;
+        }
+
+        Debug.Log($"[QuestManager] Offering next quest {nextQuest.questName} for NPC {npcId}, giverNPCID={nextQuest.giverNPCID}");
+        yield return StartCoroutine(UpdateQuestUICoroutine(nextQuest));
+        if (uiManager != null)
+        {
+            uiManager.SetQuestAccepted(false);
+            yield return StartCoroutine(uiManager.RefreshCombinedQuestInfoUICoroutine());
+        }
+
+        if (nextQuest.giverNPCID == npcId)
+        {
+            var beforeCompleteKeys = nextQuest.GetDialogueKeys(QuestDialogueType.BeforeComplete);
+            if (beforeCompleteKeys == null || beforeCompleteKeys.Length == 0)
+            {
+                Debug.Log($"[QuestManager] No BeforeComplete dialogue for {nextQuest.questName}, auto-accepting");
+                AcceptQuest(nextQuest);
+                yield return StartCoroutine(UpdateQuestUICoroutine(nextQuest));
+                if (uiManager != null)
+                {
+                    yield return StartCoroutine(uiManager.RefreshCombinedQuestInfoUICoroutine());
+                }
+            }
+            else
+            {
+                Debug.Log($"[QuestManager] Starting BeforeComplete dialogue for {nextQuest.questName} with {beforeCompleteKeys.Length} lines: {string.Join(", ", beforeCompleteKeys)}");
+                DialogueManager.Instance?.StartQuestDialogue(nextQuest, QuestDialogueType.BeforeComplete, () =>
+                {
+                    HideQuestUI();
+                    MouseManager.Instance?.HideCursorAndEnableInput();
+                    Debug.Log($"[QuestManager] Completed BeforeComplete dialogue for quest {nextQuest.questName}");
+                    if (nextQuest.questType == QuestType.FindNPC)
+                    {
+                        AcceptQuest(nextQuest); // Tự động nhận quest FindNPC sau khi hoàn thành dialogue
+                        StartCoroutine(UpdateQuestUICoroutine(nextQuest));
+                    }
+                }, beforeCompleteKeys, nextQuest.voiceBeforeComplete_EN, nextQuest.voiceBeforeComplete_VI);
+                ShowQuestUI();
+                acceptButton?.SetActive(true);
+                declineButton?.SetActive(true);
+                claimRewardButton?.SetActive(false);
+            }
+        }
+        else
+        {
+            Debug.Log($"[QuestManager] NPC {npcId} is not the giver for next quest {nextQuest.questName}, UI updated");
             HideQuestUI();
             MouseManager.Instance?.HideCursorAndEnableInput();
         }
@@ -631,13 +594,18 @@ public class QuestManager : MonoBehaviour
         Debug.Log($"[QuestManager] Completed quest {quest.questName}, _isQuestAccepted={uiManager?._isQuestAccepted}, _currentQuestTitleKey={uiManager?._currentQuestTitleKey}, _currentProgressCount={uiManager?._currentProgressCount}/{uiManager?._totalProgressCount}");
     }
 
-    public async Task ClaimReward(QuestData quest)
+    public void ClaimReward(QuestData quest)
+    {
+        StartCoroutine(ClaimRewardCoroutine(quest));
+    }
+
+    public IEnumerator ClaimRewardCoroutine(QuestData quest)
     {
         var status = GetQuestStatus(quest);
         if (quest == null || status == null || !status.isObjectiveMet || status.isCompleted)
         {
             Debug.LogWarning($"[QuestManager] Cannot claim reward for quest {(quest != null ? quest.questName : "null")}");
-            return;
+            yield break;
         }
 
         CompleteQuest(quest);
@@ -652,12 +620,12 @@ public class QuestManager : MonoBehaviour
             ShowQuestUI();
             HideAllActionButtons();
 
-            DialogueManager.Instance.StartQuestDialogue(quest, QuestDialogueType.AfterComplete, async () =>
+            DialogueManager.Instance?.StartQuestDialogue(quest, QuestDialogueType.AfterComplete, () =>
             {
                 isPlayingAfterCompleteDialogue = false;
                 HideQuestUI();
                 MouseManager.Instance?.HideCursorAndEnableInput();
-                await OfferNextQuestIfGiver(quest.giverNPCID);
+                StartCoroutine(OfferNextQuestIfGiverCoroutine(quest.giverNPCID));
             }, afterCompleteKeys, afterCompleteClipsEN, afterCompleteClipsVI);
         }
         else
@@ -665,7 +633,7 @@ public class QuestManager : MonoBehaviour
             isPlayingAfterCompleteDialogue = false;
             HideQuestUI();
             MouseManager.Instance?.HideCursorAndEnableInput();
-            await OfferNextQuestIfGiver(quest.giverNPCID);
+            yield return StartCoroutine(OfferNextQuestIfGiverCoroutine(quest.giverNPCID));
         }
     }
 

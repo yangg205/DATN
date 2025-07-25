@@ -118,7 +118,7 @@ public class DialogueManager : MonoBehaviour
 
     public async void StartQuestDialogue(QuestData quest, QuestDialogueType dialogueType, Action onDialogueEnd = null, string[] keys = null, AudioClip[] voiceClipsEN = null, AudioClip[] voiceClipsVI = null)
     {
-        string[] dialogueKeys = keys ?? (quest != null ? quest.GetDialogueKeys(dialogueType) : Array.Empty<string>());
+        string[] dialogueKeys = keys ?? (quest != null ? quest.GetDialogueKeys(dialogueType) : defaultDialogueKeys);
         AudioClip[] clipsEN = voiceClipsEN ?? (quest != null ? dialogueType switch
         {
             QuestDialogueType.BeforeComplete => quest.voiceBeforeComplete_EN,
@@ -126,7 +126,7 @@ public class DialogueManager : MonoBehaviour
             QuestDialogueType.ObjectiveMet => quest.voiceObjectiveMet_EN,
             QuestDialogueType.InProgress => Array.Empty<AudioClip>(),
             _ => Array.Empty<AudioClip>(),
-        } : Array.Empty<AudioClip>());
+        } : defaultVoiceClipsEN);
         AudioClip[] clipsVI = voiceClipsVI ?? (quest != null ? dialogueType switch
         {
             QuestDialogueType.BeforeComplete => quest.voiceBeforeComplete_VI,
@@ -134,18 +134,26 @@ public class DialogueManager : MonoBehaviour
             QuestDialogueType.ObjectiveMet => quest.voiceObjectiveMet_VI,
             QuestDialogueType.InProgress => Array.Empty<AudioClip>(),
             _ => Array.Empty<AudioClip>(),
-        } : Array.Empty<AudioClip>());
+        } : defaultVoiceClipsVI);
 
         if (dialogueKeys == null || dialogueKeys.Length == 0)
         {
-            Debug.LogWarning($"[DialogueManager] No dialogue keys provided for {dialogueType} in QuestData: {(quest != null ? quest.questName : "null")}");
-            dialogueKeys = defaultDialogueKeys; // Sử dụng hội thoại mặc định nếu không có khóa
+            Debug.LogWarning($"[DialogueManager] No dialogue keys provided for {dialogueType} in QuestData: {(quest != null ? quest.questName : "null")}. Using defaultDialogueKeys.");
+            dialogueKeys = defaultDialogueKeys;
+        }
+
+        if (dialogueKeys == null || dialogueKeys.Length == 0)
+        {
+            Debug.LogError($"[DialogueManager] No valid dialogue keys available for {dialogueType}. Ending dialogue.");
+            EndDialogue();
+            onDialogueEnd?.Invoke();
+            return;
         }
 
         Debug.Log($"[DialogueManager] Starting dialogue for {dialogueType} with {dialogueKeys.Length} keys: {string.Join(", ", dialogueKeys)}");
-        if (dialogueKeys.Length <= 2)
+        if (dialogueKeys.Length <= 1)
         {
-            Debug.LogWarning($"[DialogueManager] Only {dialogueKeys.Length} dialogue keys provided. Consider adding more for longer dialogue.");
+            Debug.LogWarning($"[DialogueManager] Only {dialogueKeys.Length} dialogue key(s) provided. Consider adding more for longer dialogue.");
         }
 
         StopTypingEffect();
@@ -167,9 +175,17 @@ public class DialogueManager : MonoBehaviour
 
         var currentLocale = LocalizationManager.Instance.GetCurrentLocale();
         await RePopulateQueuesFromOriginalData(currentLocale);
+        if (currentDialogueLines.Count == 0)
+        {
+            Debug.LogError($"[DialogueManager] Failed to populate dialogue queue for {dialogueType}. Ending dialogue.");
+            EndDialogue();
+            onDialogueEnd?.Invoke();
+            return;
+        }
+
+        Debug.Log($"[DialogueManager] Dialogue queue populated with {currentDialogueLines.Count} lines. Starting first sentence.");
         DisplayNextSentence();
     }
-
     private async Task RePopulateQueuesFromOriginalData(UnityEngine.Localization.Locale targetLocale, int startIndex = 0)
     {
         currentDialogueLines.Clear();
@@ -187,7 +203,7 @@ public class DialogueManager : MonoBehaviour
                 localizedLine = await LocalizationManager.Instance.GetLocalizedStringAsync("NhiemVu", key);
                 if (string.IsNullOrEmpty(localizedLine))
                 {
-                    Debug.LogWarning($"[DialogueManager] Localized string for key {key} is empty or null!");
+                    Debug.LogWarning($"[DialogueManager] Localized string for key {key} is empty or null, using fallback: [Missing: {key}]");
                     localizedLine = $"[Missing: {key}]";
                 }
             }
@@ -200,7 +216,7 @@ public class DialogueManager : MonoBehaviour
             Debug.Log($"[DialogueManager] Enqueued line {i}: {localizedLine}");
 
             AudioClip voiceClip = GetVoiceClipForIndex(i, isVI);
-            currentVoiceClips.Enqueue(voiceClip);
+            currentVoiceClips.Enqueue(voiceClip ?? null);
             Debug.Log($"[DialogueManager] Enqueued voice clip {i}: {(voiceClip != null ? voiceClip.name : "null")}");
         }
 
@@ -208,6 +224,14 @@ public class DialogueManager : MonoBehaviour
         if (currentDialogueLines.Count == 0)
         {
             Debug.LogError("[DialogueManager] No lines enqueued! Check QuestData dialogue keys or localization table 'NhiemVu'.");
+        }
+        else if (currentDialogueLines.Count != _originalDialogueKeys.Count - startIndex)
+        {
+            Debug.LogError($"[DialogueManager] Mismatch in dialogue lines count. Expected: {_originalDialogueKeys.Count - startIndex}, Got: {currentDialogueLines.Count}");
+        }
+        if (currentVoiceClips.Count != currentDialogueLines.Count)
+        {
+            Debug.LogError($"[DialogueManager] Mismatch in voice clips count. Dialogue lines: {currentDialogueLines.Count}, Voice clips: {currentVoiceClips.Count}");
         }
     }
 
@@ -224,41 +248,37 @@ public class DialogueManager : MonoBehaviour
 
     public void DisplayNextSentence()
     {
-        Debug.Log($"[DialogueManager] DisplayNextSentence called. isTyping: {isTyping}, currentDialogueLines.Count: {currentDialogueLines.Count}");
+        Debug.Log($"[DialogueManager] DisplayNextSentence called. isTyping: {isTyping}, currentDialogueLines.Count: {currentDialogueLines.Count}, _currentDialogueIndex: {_currentDialogueIndex}");
 
         if (isTyping)
         {
-            //DisplayFullCurrentSentence(); // Gọi hàm riêng đã có
-            StopTypingEffect(); // Đảm bảo coroutine cũ được dừng
-            dialogueText.text = currentFullSentence; // Hiển thị toàn bộ
-            //Debug.Log($"{currentFullSentence}");
+            Debug.Log("[DialogueManager] Still typing, stopping typing effect and showing full sentence");
+            StopTypingEffect();
+            dialogueText.text = currentFullSentence;
+            dialogueText.ForceMeshUpdate();
             isTyping = false;
-            return;
+            return; // Chờ nhấn tiếp theo để chuyển sang câu mới
         }
-
 
         if (currentDialogueLines.Count == 0)
         {
             Debug.LogWarning($"[DialogueManager] Dialogue queue is empty (index {_currentDialogueIndex}). Ending dialogue.");
             EndDialogue();
-            MouseManager.Instance?.HideCursorAndEnableInput();
             return;
-
         }
 
         if (dialogueAudioSource != null && dialogueAudioSource.isPlaying)
             dialogueAudioSource.Stop();
 
-        if (dialogueAudioSource != null && nextDialogueSound != null && _currentDialogueIndex != -1)
+        if (dialogueAudioSource != null && nextDialogueSound != null && _currentDialogueIndex >= 0)
             dialogueAudioSource.PlayOneShot(nextDialogueSound);
 
         string lineToDisplay = currentDialogueLines.Dequeue();
-        currentFullSentence = lineToDisplay;
-        AudioClip voiceClip = currentVoiceClips.Dequeue();
+        AudioClip voiceClip = currentVoiceClips.Count > 0 ? currentVoiceClips.Dequeue() : null;
 
         currentFullSentence = lineToDisplay;
         _currentDialogueIndex++;
-        Debug.Log($"[DialogueManager] Dequeued sentence {_currentDialogueIndex}: '{lineToDisplay}' (remaining lines: {currentDialogueLines.Count})");
+        Debug.Log($"[DialogueManager] Dequeued sentence {_currentDialogueIndex}: '{lineToDisplay}' (remaining lines: {currentDialogueLines.Count}, remaining clips: {currentVoiceClips.Count})");
 
         dialogueText.text = "";
         dialogueText.ForceMeshUpdate();
@@ -295,26 +315,23 @@ public class DialogueManager : MonoBehaviour
         }
 
         dialogueText.text = "";
-
         Debug.Log($"[DialogueManager] Starting to type: {line}");
 
         foreach (char c in line)
         {
-            dialogueText.text += c;
-            dialogueText.ForceMeshUpdate();
-
-            // Nếu user vừa nhấn tiếp, ta sẽ hiển thị toàn bộ luôn
             if (!isTyping)
             {
                 Debug.Log("[DialogueManager] Typing interrupted – showing full sentence");
                 dialogueText.text = line;
+                dialogueText.ForceMeshUpdate();
                 break;
             }
 
+            dialogueText.text += c;
+            dialogueText.ForceMeshUpdate();
             yield return new WaitForSeconds(letterDelay);
         }
 
-        // Dừng âm thanh typewriter
         if (dialogueAudioSource != null && dialogueAudioSource.loop && dialogueAudioSource.isPlaying)
         {
             dialogueAudioSource.Stop();
@@ -343,8 +360,9 @@ public class DialogueManager : MonoBehaviour
 
     public void EndDialogue()
     {
+        Debug.Log($"[DialogueManager] EndDialogue called. Current lines remaining: {currentDialogueLines.Count}, _currentDialogueIndex: {_currentDialogueIndex}, isDialogueActive: {isDialogueActive}");
+
         StopTypingEffect();
-        MouseManager.Instance?.HideCursorAndEnableInput();
         dialogueUI?.SetActive(false);
         dialogueText.text = "";
 
@@ -362,8 +380,8 @@ public class DialogueManager : MonoBehaviour
         }
 
         var callback = _onDialogueEndCallback;
-        _onDialogueEndCallback = null; // ✨ NGẮT callback trước khi gọi
-        callback?.Invoke();            // 🛡️ Không còn gây vòng lặp
+        _onDialogueEndCallback = null;
+        callback?.Invoke();
         Debug.Log("[DialogueManager] Dialogue ended");
     }
 
