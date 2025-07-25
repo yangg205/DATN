@@ -24,6 +24,7 @@ namespace ND
         public bool jump_input;
         public bool inventory_input;
         public bool lockOn_input;
+        public bool parry_input;
         public bool right_Stick_Right_Input;
         public bool right_Stick_Left_Input;
         public bool skill_input;
@@ -49,9 +50,11 @@ namespace ND
         PlayerAttacker playerAttacker;
         PlayerInventory playerInventory;
         PlayerManager playerManager;
+        PlayerStats playerStats;
         WeaponSlotManager weaponSlotManager;
         UIManager uiManager;
         CameraHandler cameraHandler;
+        AnimatorHandler animatorHandler;
 
         Vector2 movementInput;
         Vector2 cameraInput;
@@ -60,12 +63,14 @@ namespace ND
         {
             if (isInputDisabled)
                 return;
-            playerAttacker = GetComponent<PlayerAttacker>();
+            playerAttacker = GetComponentInChildren<PlayerAttacker>();
             playerInventory = GetComponent<PlayerInventory>();
             playerManager = GetComponent<PlayerManager>();
+            playerStats = GetComponent<PlayerStats>();
             weaponSlotManager = GetComponentInChildren<WeaponSlotManager>();
             uiManager = FindFirstObjectByType<UIManager>();
             cameraHandler = FindFirstObjectByType<CameraHandler>();
+            animatorHandler = GetComponentInChildren<AnimatorHandler>();
 
             //thu cuoi
             mountSystem = GetComponent<MountSystem>();
@@ -82,8 +87,11 @@ namespace ND
                 inputActions.PlayerActions.LightAttack.performed += i => lightAttack_input = true;
                 inputActions.PlayerActions.HeavyAttack.performed += i => heavyAttack_input = true;
                 inputActions.PlayerActions.Interact.performed += i => interact_input = true;
+                inputActions.PlayerActions.Roll.performed += i => roll_input = true;
+                inputActions.PlayerActions.Roll.canceled += i => roll_input = false;
                 inputActions.PlayerActions.Jump.performed += i => jump_input = true;
                 inputActions.PlayerActions.LockOn.performed += i => lockOn_input = true;
+                inputActions.PlayerActions.Parry.performed += i => parry_input = true;
                 inputActions.PlayerQuickSlots.DPadRight.performed += i => d_Pad_Right = true;
                 inputActions.PlayerQuickSlots.DPadLeft.performed += i => d_Pad_Left = true;
 
@@ -130,9 +138,9 @@ namespace ND
             HandleTwoHandInput();
             HandleSkillInput();
             HandleAttackSpeedBoostInput();
+            HandleParryInput();
             //thu cuoi
             HandleMountInput();
-
         }
 
         private void HandleMoveInput(float delta)
@@ -150,17 +158,27 @@ namespace ND
         private void HandleRollInput(float delta)
         {
             roll_input = inputActions.PlayerActions.Roll.phase == UnityEngine.InputSystem.InputActionPhase.Performed;
-            sprintFlag = roll_input;
 
             if (roll_input)
             {
                 rollInputTimer += delta;
+
+                if(playerStats.currentStamina <= 0)
+                {
+                    roll_input = false;
+                    sprintFlag = false;
+                }   
+                
+                if(moveAmount > 0.5f && playerStats.currentStamina > 0)
+                {
+                    sprintFlag = true;
+                }    
             }
             else
             {
+                sprintFlag = false;
                 if (rollInputTimer > 0 && rollInputTimer < 0.5f)
                 {
-                    sprintFlag = false;
                     rollFlag = true;
                 }
 
@@ -172,24 +190,14 @@ namespace ND
         {
             if (lightAttack_input)
             {
-                if (playerManager.canDoCombo) // ← Combo lần 2
-                {
-                    playerManager.canDoCombo = false;
-                    playerAttacker.HandleWeaponCombo(playerInventory.rightWeapon);
-                }
-                else // ← Đánh lần đầu
-                {
-                    playerAttacker.HandleLightAttack(playerInventory.rightWeapon);
-                }
-
-                lightAttack_input = false; // ← Reset flag
+                playerAttacker.HandleLightAction();
             }
 
             if (heavyAttack_input)
             {
                 playerAttacker.HandleHeavyAttack(playerInventory.rightWeapon);
                 heavyAttack_input = false;
-            }
+            }  
         }
 
         private void HandleQuickSlotsInput()
@@ -285,6 +293,15 @@ namespace ND
             {
                 mount_input = false;
                 mountSystem.TryMountOrDismount();
+            }
+        }
+
+        private void HandleParryInput()
+        {
+            if (parry_input)
+            {
+                parry_input = false;
+                playerAttacker.HandleParry();
             }
         }
     }

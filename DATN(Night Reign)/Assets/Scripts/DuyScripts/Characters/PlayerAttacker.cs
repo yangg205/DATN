@@ -30,15 +30,16 @@ namespace ND
         private float boostCooldown = 20f;
         private float lastBoostTime = -Mathf.Infinity;
 
+
         private void Awake()
         {
-            playerStats = GetComponent<PlayerStats>();
-            animatorHandler = GetComponentInChildren<AnimatorHandler>();
-            weaponSlotManager = GetComponentInChildren<WeaponSlotManager>();
-            inputHandler = GetComponent<InputHandler>();
-            playerInventory = GetComponent<PlayerInventory>();
-            playerManager = GetComponent<PlayerManager>();
-            playerEffectManager = GetComponentInChildren<PlayerEffectManager>();
+            playerStats = GetComponentInParent<PlayerStats>();
+            animatorHandler = GetComponent<AnimatorHandler>();
+            weaponSlotManager = GetComponent<WeaponSlotManager>();
+            inputHandler = GetComponentInParent<InputHandler>();
+            playerInventory = GetComponentInParent<PlayerInventory>();
+            playerManager = GetComponentInParent<PlayerManager>();
+            playerEffectManager = GetComponentInParent<PlayerEffectManager>();
             skillFX = GetComponentInChildren<SkillFXController>();
         }
 
@@ -55,6 +56,10 @@ namespace ND
         public void HandleWeaponCombo(WeaponItem weapon)
         {
             if (inputHandler.isInputDisabled) return;
+
+            if (playerStats.currentStamina <= 0)
+                return;
+
             if (animatorHandler.anim.GetBool("canDoCombo") == false) return;
 
             animatorHandler.anim.SetBool("canDoCombo", false);
@@ -92,6 +97,10 @@ namespace ND
         public void HandleLightAttack(WeaponItem weapon)
         {
             if (inputHandler.isInputDisabled) return;
+
+            if (playerStats.currentStamina <= 0)
+                return;
+
             if (weapon == null || animatorHandler.anim.GetBool("isInteracting")) return;
 
             comboResetTimer = 0f;
@@ -142,6 +151,10 @@ namespace ND
         public void HandleHeavyAttack(WeaponItem weapon)
         {
             if (inputHandler.isInputDisabled) return;
+
+            if (playerStats.currentStamina <= 0)
+                return;
+
             if (weapon == null || animatorHandler.anim.GetBool("isInteracting")) return;
             if (inputHandler.twoHandFlag) return;
 
@@ -156,6 +169,71 @@ namespace ND
             animatorHandler.PlayTargetAnimation(animName, true);
             lastAttack = animName;
         }
+
+        #region Input Actions
+        public void HandleLightAction()
+        {
+            if(playerInventory.rightWeapon.isMeleeWeapon)
+            {
+                PerformLightMeleeAction();
+            }
+            else if(playerInventory.rightWeapon.isSpellCaster || playerInventory.rightWeapon.isFaithCaster || playerInventory.rightWeapon.isPyroCaster)
+            {
+                PerformLightMagicAction(playerInventory.rightWeapon);
+            }
+
+            if (playerManager.canDoCombo) // ← Combo lần 2
+            {
+                playerManager.canDoCombo = false;
+                HandleWeaponCombo(playerInventory.rightWeapon);
+            }
+            else // ← Đánh lần đầu
+            {
+                HandleLightAttack(playerInventory.rightWeapon);
+            }
+
+            inputHandler.lightAttack_input = false; // ← Reset flag
+        }
+        #endregion
+
+        #region Attack Actions
+
+        public void PerformLightMeleeAction()
+        {
+
+        }
+
+        public void PerformLightMagicAction(WeaponItem weapon)
+        {
+            if (playerManager.isInteracting)
+                return;
+
+            if(weapon.isFaithCaster)
+            {
+                if(playerInventory.currentSpell != null && playerInventory.currentSpell.isFaithSpell)
+                {
+                    if(playerStats.currentFocusPoint >= playerInventory.currentSpell.focusPointCost)
+                    {
+                        playerInventory.currentSpell.AttemptToCastSpell(animatorHandler, playerStats);
+                    }
+                    else
+                    {
+/*                        animatorHandler.PlayTargetAnimation("Joke", true);
+*/                    }    
+                }
+            }
+        }
+
+        public void PerformLightPyroAction()
+        {
+
+        }
+
+        public void SuccessfullyCastSpell()
+        {
+            playerInventory.currentSpell.SuccessfullyCastSpell(animatorHandler, playerStats);
+        }
+        #endregion
 
         public void ResetCombos()
         {
@@ -201,9 +279,9 @@ namespace ND
             yield return new WaitForSeconds(0.4f);
 
             animatorHandler.PlayTargetAnimation(weapon.skill_Attack_02, true);
-            weaponSlotManager.OpenRightDamageCollider();
+            weaponSlotManager.OpenLeftDamageCollider();
             yield return new WaitForSeconds(0.6f);
-            weaponSlotManager.CloseRightHandDamageCollider();
+            weaponSlotManager.CloseLeftHandDamageCollider();
 
             playerManager.isInteracting = false;
         }
@@ -245,5 +323,19 @@ namespace ND
             playerManager.isInteracting = false;
         }
         #endregion
+
+        public void HandleParry()
+        {
+            if (inputHandler.isInputDisabled || playerManager.isInteracting) return;
+
+            animatorHandler.PlayTargetAnimation("Parry", true); // ← đổi tên clip đúng
+                                                                // KHÔNG cần coroutine nữa vì đã dùng event để quản lý bật/tắt parry
+        }
+
+        private IEnumerator ResetParry()
+        {
+            yield return new WaitForSeconds(0.8f); // Thời gian parry active (tùy chỉnh)
+            playerManager.isParrying = false;
+        }
     }
 }
