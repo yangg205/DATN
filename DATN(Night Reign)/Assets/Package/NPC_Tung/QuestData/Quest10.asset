@@ -12,17 +12,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c93b2c574055c9540934f0b3c4b91d4d, type: 3}
   m_Name: Quest10
   m_EditorClassIdentifier: 
-  questName: "T\u1EC9nh Th\u1EE9c"
-  giverNPCID: Grusk
-  description: 
-  questType: 0
+  questName: Quest_Title/Q010_FindEryn
+  giverNPCID: Flamekeeper
+  description: Quest_Objective/Q010_Main
+  questType: 1
   requiredKills: 0
-  targetNPCID: 
+  targetNPCID: Eryn
   targetItemID: 
   requiredItemCount: 1
-  rewardSoul: 0
+  prerequisiteQuestName: Quest_Title/Q009_DefeatTyrant
+  isQuestCompleted: 0
+  hasQuestLocation: 0
+  questLocation: {x: 0, y: 0, z: 0}
+  giverNPCTransform: {x: 0, y: 0, z: 0}
+  questLocationIcon: {fileID: 0}
+  rewardCoin: 0
   rewardExp: 0
-  dialogueBeforeComplete:
-  - 
-  - 
-  dialogueAfterComplete: []
+  rewardItemID: 
+  rewardItemCount: 1
+  keydialogueBeforeComplete: []
+  keydialogueAfterComplete: []
+  keydialogueObjectiveMet: []
+  voiceBeforeComplete_EN: []
+  voiceAfterComplete_EN: []
+  voiceObjectiveMet_EN: []
+  voiceBeforeComplete_VI: []
+  voiceAfterComplete_VI: []
+  voiceObjectiveMet_VI: []

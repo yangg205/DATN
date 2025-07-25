@@ -14,6 +14,8 @@ public class LocalizationManager : MonoBehaviour
 
     private bool isInitialized = false;
     private bool isChangingLanguage = false; // Cờ để ngăn chặn lặp vô hạn
+    private float lastChangeTime = -1f; // Thời gian cuối cùng thay đổi ngôn ngữ
+    private const float debounceTime = 1f; // Thời gian debounce (1 giây)
     public static LocalizationManager Instance { get; private set; }
     public static event Action OnLanguageChanged; // Sự kiện tùy chỉnh
 
@@ -36,7 +38,6 @@ public class LocalizationManager : MonoBehaviour
 
     private async void Start()
     {
-        // Đảm bảo LocalizationSettings được khởi tạo
         await LocalizationSettings.InitializationOperation.Task;
         if (!LocalizationSettings.InitializationOperation.IsDone)
         {
@@ -53,7 +54,7 @@ public class LocalizationManager : MonoBehaviour
 
     private void OnDropdownValueChanged(int index)
     {
-        if (!isChangingLanguage) // Chỉ xử lý nếu không đang thay đổi ngôn ngữ
+        if (!isChangingLanguage && Time.time - lastChangeTime >= debounceTime)
         {
             ChangeLanguageImmediate(index);
         }
@@ -82,8 +83,8 @@ public class LocalizationManager : MonoBehaviour
         int savedLangIndex = PlayerPrefs.GetInt("Language", 0);
         savedLangIndex = Mathf.Clamp(savedLangIndex, 0, LocalizationSettings.AvailableLocales.Locales.Count - 1);
 
-        isChangingLanguage = true; // Ngăn chặn sự kiện khi đặt giá trị ban đầu
-        languageDropdown.value = savedLangIndex; // Sử dụng value thay vì SetValueWithoutNotify
+        isChangingLanguage = true;
+        languageDropdown.value = savedLangIndex;
         isChangingLanguage = false;
 
         LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.Locales[savedLangIndex];
@@ -95,14 +96,15 @@ public class LocalizationManager : MonoBehaviour
 
     public async void ChangeLanguageImmediate(int index)
     {
-        if (!isInitialized || isChangingLanguage)
+        if (!isInitialized || isChangingLanguage || Time.time - lastChangeTime < debounceTime)
         {
-            Debug.LogWarning($"⚠️ LocalizationManager chưa được khởi tạo hoặc đang thay đổi ngôn ngữ! (index: {index}, isInitialized: {isInitialized}, isChangingLanguage: {isChangingLanguage})");
+            Debug.LogWarning($"⚠️ LocalizationManager chưa được khởi tạo, đang thay đổi, hoặc debounce chưa hết! (index: {index}, isInitialized: {isInitialized}, isChangingLanguage: {isChangingLanguage}, TimeSinceLastChange: {Time.time - lastChangeTime})");
             return;
         }
 
         Debug.Log($"[LocalizationManager] Bắt đầu thay đổi ngôn ngữ với index: {index}");
-        isChangingLanguage = true; // Đặt cờ để ngăn chặn lặp
+        isChangingLanguage = true;
+        lastChangeTime = Time.time;
 
         index = Mathf.Clamp(index, 0, LocalizationSettings.AvailableLocales.Locales.Count - 1);
         PlayerPrefs.SetInt("Language", index);
@@ -110,13 +112,12 @@ public class LocalizationManager : MonoBehaviour
         var locale = LocalizationSettings.AvailableLocales.Locales[index];
         if (LocalizationSettings.SelectedLocale != locale)
         {
-            await LocalizationSettings.InitializationOperation.Task; // Đảm bảo khởi tạo
+            await LocalizationSettings.InitializationOperation.Task;
             LocalizationSettings.SelectedLocale = locale;
-            _tableCache.Clear(); // Xóa cache để tải lại bảng với locale mới
+            _tableCache.Clear(); // Xóa cache để tải lại bảng mới
             Debug.Log($"[LocalizationManager] Đã thay đổi ngôn ngữ thành: {locale.Identifier.Code}");
 
-            // Đồng bộ giá trị dropdown với locale mới
-            isChangingLanguage = true; // Ngăn chặn sự kiện khi thay đổi dropdown
+            isChangingLanguage = true;
             languageDropdown.value = index;
             isChangingLanguage = false;
 
@@ -128,7 +129,7 @@ public class LocalizationManager : MonoBehaviour
             Debug.Log($"[LocalizationManager] Không thay đổi ngôn ngữ vì locale hiện tại ({LocalizationSettings.SelectedLocale.Identifier.Code}) trùng với locale mới ({locale.Identifier.Code})");
         }
 
-        isChangingLanguage = false; // Đặt lại cờ sau khi hoàn tất
+        isChangingLanguage = false;
         Debug.Log($"[LocalizationManager] Hoàn tất thay đổi ngôn ngữ với index: {index}");
     }
 
@@ -151,7 +152,6 @@ public class LocalizationManager : MonoBehaviour
         if (string.IsNullOrEmpty(key)) return "[EMPTY_KEY]";
         key = key.Trim();
 
-        // Đảm bảo hệ thống localization đã sẵn sàng
         await LocalizationSettings.InitializationOperation.Task;
 
         StringTable table;
@@ -162,18 +162,18 @@ public class LocalizationManager : MonoBehaviour
             table = tableHandle.Result;
             if (table == null)
             {
-                Debug.LogError($"Không tìm thấy bảng: {tableName}");
+                Debug.LogError($"[LocalizationManager] Không tìm thấy bảng: {tableName} cho locale: {LocalizationSettings.SelectedLocale.Identifier.Code}. Kiểm tra Localization Settings!");
                 return $"[MISSING_TABLE:{tableName}]";
             }
-            _tableCache[tableName] = table; // Cập nhật cache với bảng mới
+            _tableCache[tableName] = table;
             Debug.Log($"[LocalizationManager] Đã tải bảng: {tableName} cho locale: {LocalizationSettings.SelectedLocale.Identifier.Code}");
         }
 
         var entry = table.GetEntry(key);
         if (entry == null)
         {
-            Debug.LogWarning($"Key '{key}' không tìm thấy trong bảng '{tableName}' cho locale: {LocalizationSettings.SelectedLocale.Identifier.Code}");
-            return key; // Trả về key thay vì [MISSING:<key>] để kiểm tra
+            Debug.LogWarning($"[LocalizationManager] Key '{key}' không tìm thấy trong bảng '{tableName}' cho locale: {LocalizationSettings.SelectedLocale.Identifier.Code}");
+            return key; // Trả về key để kiểm tra
         }
 
         try
@@ -182,8 +182,8 @@ public class LocalizationManager : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Debug.LogError($"Lỗi khi lấy chuỗi cho key '{key}' trong bảng '{tableName}': {ex.Message}");
-            return key; // Trả về key làm fallback
+            Debug.LogError($"[LocalizationManager] Lỗi khi lấy chuỗi cho key '{key}' trong bảng '{tableName}': {ex.Message}");
+            return key;
         }
     }
 }

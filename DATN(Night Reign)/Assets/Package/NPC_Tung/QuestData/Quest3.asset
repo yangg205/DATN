@@ -21,6 +21,7 @@ MonoBehaviour:
   targetItemID: Shadow Fangs
   requiredItemCount: 5
   prerequisiteQuestName: Quest_Title/Q002_FindKael
+  isQuestCompleted: 0
   hasQuestLocation: 1
   questLocation: {x: -161.2, y: -6.1, z: 133}
   giverNPCTransform: {x: -161.2, y: -6.1, z: 133}
@@ -36,7 +37,8 @@ MonoBehaviour:
   keydialogueAfterComplete:
   - Dialogue/Player_Q003_Completion
   - Dialogue/Kael_Q003_NextSteps
-  keydialogueObjectiveMet: []
+  keydialogueObjectiveMet:
+  - Quest_Objective/Q003_Main
   voiceBeforeComplete_EN:
   - {fileID: 8300000, guid: 320a7b5016c8f794f979ef2add142a35, type: 3}
   - {fileID: 8300000, guid: 7101e9504f051f649a2b7460aebf40d8, type: 3}

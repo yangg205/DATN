@@ -18,21 +18,26 @@ MonoBehaviour:
   questType: 0
   requiredKills: 1
   targetNPCID: 
-  targetItemID: Dawn Shard
+  targetItemID: 
   requiredItemCount: 1
+  prerequisiteQuestName: Quest_Title/Q003_KaelsSurvivalLesson
+  isQuestCompleted: 0
   hasQuestLocation: 1
   questLocation: {x: -47.7, y: -7.5, z: 133}
   giverNPCTransform: {x: -47.7, y: -7.5, z: 133}
   questLocationIcon: {fileID: 21300000, guid: 34a32c830edc1e447b2e44cc600cbfe8, type: 3}
   rewardCoin: 500
   rewardExp: 200
+  rewardItemID: 
+  rewardItemCount: 1
   keydialogueBeforeComplete:
   - Dialogue/Flamekeeper_Q004_Intro
   - Dialogue/Player_Q004_Resolve
   keydialogueAfterComplete:
   - Dialogue/Flamekeeper_Q004_Completion
   - Dialogue/Flamekeeper_Ch2_NextShard
-  keydialogueObjectiveMet: []
+  keydialogueObjectiveMet:
+  - Quest_Objective/Q004_Main
   voiceBeforeComplete_EN:
   - {fileID: 8300000, guid: ea8623f267fa8804f9f455f2e8ac580b, type: 3}
   - {fileID: 8300000, guid: 7efb477296ce98f41b2189b6acfad00f, type: 3}

@@ -21,6 +21,7 @@ MonoBehaviour:
   targetItemID: Snow Crystals
   requiredItemCount: 3
   prerequisiteQuestName: Quest_Title/Q005_FindGrusk
+  isQuestCompleted: 0
   hasQuestLocation: 0
   questLocation: {x: 0, y: 0, z: 0}
   giverNPCTransform: {x: 0, y: 0, z: 0}
@@ -34,7 +35,8 @@ MonoBehaviour:
   keydialogueAfterComplete:
   - Dialogue/Player_Q006_Completion
   - Dialogue/Grusk_Q006_PrepareMedicine
-  keydialogueObjectiveMet: []
+  keydialogueObjectiveMet:
+  - Quest_Objective/Q006_Main
   voiceBeforeComplete_EN: []
   voiceAfterComplete_EN: []
   voiceObjectiveMet_EN: []

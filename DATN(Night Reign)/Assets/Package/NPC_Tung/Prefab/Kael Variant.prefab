@@ -68,6 +68,11 @@ PrefabInstance:
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 8029364616530215202, guid: 643313eb5404dd04db9bf7e86a4f328b,
+        type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -84,7 +89,38 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 5310740238221620813}
+    - targetCorrespondingSourceObject: {fileID: 6335491642843535569, guid: 643313eb5404dd04db9bf7e86a4f328b,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6539901358885967361}
   m_SourcePrefab: {fileID: 100100000, guid: 643313eb5404dd04db9bf7e86a4f328b, type: 3}
+--- !u!1 &6247026560634201290 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6335491642843535569, guid: 643313eb5404dd04db9bf7e86a4f328b,
+    type: 3}
+  m_PrefabInstance: {fileID: 98469624679316507}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &6539901358885967361
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6247026560634201290}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 0
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7129960001282832736 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7183066868034946427, guid: 643313eb5404dd04db9bf7e86a4f328b,
@@ -120,11 +156,17 @@ MonoBehaviour:
   acceptButton: {fileID: 0}
   declineButton: {fileID: 0}
   claimRewardButton: {fileID: 0}
+  continueButton: {fileID: 0}
+  panelPressText: {fileID: 0}
   questManager: {fileID: 0}
   dialogueManager: {fileID: 0}
-  defaultGreetingDialogue: []
-  questAlreadyAcceptedDialogue: []
-  noRelevantQuestDialogue: []
+  npcID: 
+  defaultGreetingDialogueKeys: []
+  defaultGreetingVoiceClipsEN: []
+  defaultGreetingVoiceClipsVI: []
+  noRelevantQuestDialogueKeys: []
+  noRelevantQuestVoiceClipsEN: []
+  noRelevantQuestVoiceClipsVI: []
 --- !u!65 &5310740238221620813
 BoxCollider:
   m_ObjectHideFlags: 0

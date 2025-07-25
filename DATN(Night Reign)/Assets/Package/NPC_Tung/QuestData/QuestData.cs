@@ -41,7 +41,7 @@ public class QuestData : ScriptableObject
     [Header("Quest Unlock Dependencies")]
     [Tooltip("Quest này chỉ mở khóa khi quest này hoàn thành.")]
     public string prerequisiteQuestName; // Tên (hoặc ID) của quest phải hoàn thành trước
-
+    public bool isQuestCompleted;
 
     [Header("Quest Location (Waypoint)")]
     [Tooltip("Chỉ định nếu nhiệm vụ có một vị trí cụ thể (dùng waypoint).")]
