@@ -42,6 +42,7 @@ public class NPCInteraction : MonoBehaviour
         InitializeUIElements();
         LocalizationSettings.SelectedLocaleChanged += OnLanguageChangedHandler;
         Debug.Log($"[NPCInteraction] Initialized for NPC {npcID}");
+        questManager.ResetAllQuests();//không muốn reset thì cmd nó lại
         // Removed ResetAllQuests call to prevent unintended quest resets
     }
 
