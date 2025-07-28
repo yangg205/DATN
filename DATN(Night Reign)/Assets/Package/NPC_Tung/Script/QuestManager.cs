@@ -373,6 +373,8 @@ public class QuestManager : MonoBehaviour
         {
             status.isObjectiveMet = true;
             uiManager?.SetReturnToNPCInfo(quest.giverNPCID, true);
+            // Update waypoint to point to giverNPCTransform
+            UpdateWaypointToGiverNPC(quest, status);
         }
         uiManager?.UpdateQuestProgress(status.currentProgress, status.GetRequiredProgress());
         SaveQuestProgress();
@@ -392,12 +394,45 @@ public class QuestManager : MonoBehaviour
         {
             status.isObjectiveMet = true;
             uiManager?.SetReturnToNPCInfo(quest.giverNPCID, true);
+            // Update waypoint to point to giverNPCTransform
+            UpdateWaypointToGiverNPC(quest, status);
         }
         uiManager?.UpdateQuestProgress(count, quest.requiredItemCount);
         SaveQuestProgress();
         Debug.Log($"[QuestManager] Checked item collection for quest {quest.questName}. Progress: {count}/{quest.requiredItemCount}, _currentProgressCount={uiManager?._currentProgressCount}/{uiManager?._totalProgressCount}");
     }
+    private void UpdateWaypointToGiverNPC(QuestData quest, CurrentQuestStatus questStatus)
+    {
+        if (quest == null || questStatus == null || waypointManager == null) return;
 
+        // Remove existing waypoint if it exists
+        if (!string.IsNullOrEmpty(questStatus.waypointId))
+        {
+            waypointManager.RemoveWaypoint(questStatus.waypointId);
+            Debug.Log($"[QuestManager] Removed previous waypoint {questStatus.waypointId} for quest {quest.questName}");
+        }
+
+        // Set new waypoint to giverNPCTransform
+        if (quest.hasQuestLocation)
+        {
+            string waypointId = $"QuestWaypoint_Return_{quest.questName}_{System.Guid.NewGuid()}";
+            questStatus.waypointId = waypointId;
+            waypointManager.AddWaypoint(new Waypoint(
+                waypointId,
+                quest.questName,
+                quest.giverNPCTransform, // Use giverNPCTransform for return location
+                WaypointType.QuestLocation,
+                quest.questLocationIcon
+            ), true);
+            Debug.Log($"[QuestManager] Added waypoint {waypointId} for quest {quest.questName} at giverNPCTransform {quest.giverNPCTransform}");
+        }
+        else
+        {
+            Debug.Log($"[QuestManager] Quest {quest.questName} has no quest location, skipping waypoint update.");
+        }
+
+        SaveQuestProgress();
+    }
     public void OnInteractWithNPC(string npcId)
     {
         var quest = GetCurrentQuest();

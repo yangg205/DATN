@@ -40,12 +40,10 @@ public class DragonSoulEater : MonoBehaviour
 
     public float minAttackDamage = 5f;
     public float maxAttackDamage = 15f;
-    public QuestManager questManager;
 
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
-        questManager = FindObjectOfType<QuestManager>();
         if (player != null)
         {
             playerStats = player.GetComponent<PlayerStats>();
@@ -98,7 +96,6 @@ public class DragonSoulEater : MonoBehaviour
 
             StartCoroutine(DeathCoroutine());
 
-            questManager.ReportKill();
             // 💥 Nếu enemy này đang bị lock-on thì thoát lock-on
             if (ND.CameraHandler.singleton != null &&
                 ND.CameraHandler.singleton.currentLockOnTarget == this)
@@ -262,7 +259,7 @@ public class DragonSoulEater : MonoBehaviour
             Instantiate(itemDropPrefab, dropPosition, Quaternion.identity);
         }
 
-        Destroy(gameObject, 7f);
+        Destroy(gameObject, 2f);
     }
 
 }
