@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class desertBoss : MonoBehaviour
@@ -8,7 +9,8 @@ public class desertBoss : MonoBehaviour
     [SerializeField] private Transform fireSpawnPoint;
     [SerializeField] private Collider fireBreathCollider;
 
-
+    [SerializeField] private GameObject meleeAttackHitboxeR;
+    [SerializeField] private GameObject meleeAttackHitboxeL;
 
 
     public Animator animator;
@@ -46,6 +48,9 @@ public class desertBoss : MonoBehaviour
                 Debug.LogWarning("Player object with 'Player' tag not found. Please assign targetPlayer manually or ensure Player has the correct tag.");
             }
         }
+
+        meleeAttackHitboxeR.SetActive(false);
+        meleeAttackHitboxeL.SetActive(false);
 
         fireBreathVFX = fireSpawnPoint.GetComponentInChildren<ParticleSystem>();
 
@@ -181,16 +186,45 @@ public class desertBoss : MonoBehaviour
     }
 
 
-    private void OnDrawGizmosSelected()
+    //private void OnDrawGizmosSelected()
+    //{
+    //    Vector3 origin = rangeOrigin != null ? rangeOrigin.position : transform.position;
+
+    //    Gizmos.color = Color.yellow;
+    //    Gizmos.DrawWireSphere(origin, detectRange);
+
+    //    Gizmos.color = Color.red;
+    //    Gizmos.DrawWireSphere(origin, meleeRange);
+    //}
+    public void startHitBoxR()
     {
-        Vector3 origin = rangeOrigin != null ? rangeOrigin.position : transform.position;
-
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(origin, detectRange);
-
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(origin, meleeRange);
+        meleeAttackHitboxeR.SetActive(true);
+    }
+    public void startHitBoxL()
+    {
+        meleeAttackHitboxeL.SetActive(true);
     }
 
+    public void endHitBoxR()
+    {
+        meleeAttackHitboxeR.SetActive(false);
+    }
 
+    public void endHitBoxL()
+    {
+        meleeAttackHitboxeL.SetActive(false);
+    }
+
+    //====2hand
+    public void startHitBoxRL()
+    {
+        meleeAttackHitboxeR.SetActive(true);
+        meleeAttackHitboxeL.SetActive(true);
+    }
+
+    public void endHitBoxRL()
+    {
+        meleeAttackHitboxeR.SetActive(false);
+        meleeAttackHitboxeL.SetActive(false);
+    }
 }
