@@ -73,11 +73,10 @@ public class desertBoss : MonoBehaviour
             if (playerObj != null)
             {
                 targetPlayer = playerObj.transform;
-                Debug.Log("Found Player with tag 'Player'.");
             }
             else
             {
-                Debug.LogWarning("Player object with 'Player' tag not found. Please assign targetPlayer manually or ensure Player has the correct tag.");
+                Debug.LogWarning("ko tim thay taf Player");
             }
         }
 
@@ -114,10 +113,10 @@ public class desertBoss : MonoBehaviour
             LookAtPlayer(); 
         }
 
-        if(Input.GetKeyDown(KeyCode.E))
-        {
-            TakeDamage(450);
-        }
+        //if(Input.GetKeyDown(KeyCode.E))
+        //{
+        //    TakeDamage(450);
+        //}
     }
 
     private IEnumerator AIBehavior()
