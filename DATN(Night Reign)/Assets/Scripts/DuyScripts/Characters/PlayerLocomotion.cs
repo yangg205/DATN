@@ -36,6 +36,9 @@ namespace ND
         [SerializeField] int backstepStaminaCost = 12;
         [SerializeField] int sprintStaminaCost = 1;
 
+        [Header("Jump Stats")]
+        [SerializeField] float jumpForce = 5f;
+
         private void Awake()
         {
             cameraHandler = FindObjectOfType<CameraHandler>();
@@ -247,13 +250,9 @@ namespace ND
 
         public void HandleJumping()
         {
-            if (inputHandler.isInputDisabled) return; // ← thêm dòng này
-
-            if (playerManager.isInteracting)
-                return;
-
-            if (playerStats.currentStamina <= 0)
-                return;
+            if (inputHandler.isInputDisabled) return;
+            if (playerManager.isInteracting) return;
+            if (playerStats.currentStamina <= 0) return;
 
             if (inputHandler.jump_input)
             {
@@ -261,12 +260,23 @@ namespace ND
                 {
                     moveDirection = cameraObject.forward * inputHandler.vertical;
                     moveDirection += cameraObject.right * inputHandler.horizontal;
-                    animatorHandler.PlayTargetAnimation("Jump", true);
                     moveDirection.y = 0;
                     myTransform.rotation = Quaternion.LookRotation(moveDirection);
                 }
+
+                // Bắt đầu nhảy: tắt root motion thủ công
+                animatorHandler.anim.applyRootMotion = false;
+
+                animatorHandler.PlayTargetAnimation("Jump", true); // Không cần thêm overload
+
+                playerStats.TakeStaminaDamage(rollStaminaCost);
+
+                // Thêm lực nhảy
+                rigidbody.velocity = new Vector3(rigidbody.velocity.x, 0, rigidbody.velocity.z);
+                rigidbody.AddForce(Vector3.up * 8f, ForceMode.Impulse);
             }
         }
+    }
 /*        private bool UseStamina(int amount)
         {
             if (playerStats.currentStamina < amount)
@@ -276,4 +286,3 @@ namespace ND
             return true;
         }*/
     }
-}

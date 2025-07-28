@@ -89,6 +89,12 @@ namespace ND
                     animatorHandler.PlayTargetAnimation(weapon.Oh_Light_Attack_4, true);
                     lastAttack = weapon.Oh_Light_Attack_4;
                 }
+                // Heavy Combo (chỉ 1 bước: 1 -> 2)
+                else if (lastAttack == weapon.Oh_Heavy_Attack_1)
+                {
+                    animatorHandler.PlayTargetAnimation(weapon.Oh_Heavy_Attack_2, true);
+                    lastAttack = weapon.Oh_Heavy_Attack_2;
+                }
             }
 
         }
@@ -151,23 +157,17 @@ namespace ND
         public void HandleHeavyAttack(WeaponItem weapon)
         {
             if (inputHandler.isInputDisabled) return;
-
-            if (playerStats.currentStamina <= 0)
-                return;
-
+            if (playerStats.currentStamina <= 0) return;
             if (weapon == null || animatorHandler.anim.GetBool("isInteracting")) return;
             if (inputHandler.twoHandFlag) return;
 
             comboResetTimer = 0f;
             weaponSlotManager.attackingWeapon = weapon;
 
-            string animName;
-
-            heavyComboStep = (heavyComboStep % 2) + 1;
-            animName = heavyComboStep == 1 ? weapon.Oh_Heavy_Attack_1 : weapon.Oh_Heavy_Attack_2;
-
+            string animName = weapon.Oh_Heavy_Attack_1;
             animatorHandler.PlayTargetAnimation(animName, true);
             lastAttack = animName;
+
         }
 
         #region Input Actions
