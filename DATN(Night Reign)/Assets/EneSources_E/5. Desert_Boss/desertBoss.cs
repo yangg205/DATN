@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class desertBoss : MonoBehaviour
 {
@@ -11,6 +13,21 @@ public class desertBoss : MonoBehaviour
 
     [SerializeField] private GameObject meleeAttackHitboxeR;
     [SerializeField] private GameObject meleeAttackHitboxeL;
+
+
+    [Header("SFX")]
+    public AudioSource sfxGrowl;
+    public AudioSource sfxHitBox;
+    public AudioSource sfxHitBox1;
+    public AudioSource sfxHurt;
+    public AudioSource sfxDead;
+
+    [Header("UI")]
+    public Slider healthSlider;
+    public Slider easeHealthSlider;
+
+    public TextMeshProUGUI hpText;
+    private float lerpSpeed = 0.05f;
 
 
     public Animator animator;
@@ -33,6 +50,21 @@ public class desertBoss : MonoBehaviour
     private bool isShouting = false;
     private float attackWindupTime = 0.3f;
 
+    void Awake()
+    {
+        GameObject healthSliderObj = GameObject.Find("HealthBarSaMac");
+        if (healthSliderObj != null)
+            healthSlider = healthSliderObj.GetComponent<Slider>();
+
+        GameObject easeSliderObj = GameObject.Find("EaseHealthBarSaMac");
+        if (easeSliderObj != null)
+            easeHealthSlider = easeSliderObj.GetComponent<Slider>();
+
+        GameObject hpTextObj = GameObject.Find("HPTextSaMac");
+        if (hpTextObj != null)
+            hpText = hpTextObj.GetComponent<TextMeshProUGUI>();
+    }
+
     private void Start()
     {
         if (targetPlayer == null)
@@ -49,6 +81,7 @@ public class desertBoss : MonoBehaviour
             }
         }
 
+
         meleeAttackHitboxeR.SetActive(false);
         meleeAttackHitboxeL.SetActive(false);
 
@@ -64,14 +97,26 @@ public class desertBoss : MonoBehaviour
 
     private void Update()
     {
+        if (healthSlider.value != currentHP)
+        {
+            healthSlider.value = currentHP;
+        }
+
+        if (healthSlider.value != easeHealthSlider.value)
+        {
+            easeHealthSlider.value = Mathf.Lerp(easeHealthSlider.value, currentHP, lerpSpeed);
+        }
+
+        hpText.text = $"{currentHP}";
+
         if (!isDead && !isAttacking && !isShouting)
         {
             LookAtPlayer(); 
         }
 
-        if (Input.GetKeyDown(KeyCode.T))
+        if(Input.GetKeyDown(KeyCode.E))
         {
-            animator.SetInteger("doAttackType", 4);
+            TakeDamage(450);
         }
     }
 
@@ -171,6 +216,7 @@ public class desertBoss : MonoBehaviour
 
         currentHP -= amount;
         animator.SetTrigger("takeHit");
+        sfxHurt.PlayOneShot(sfxHurt.clip);
 
         if (currentHP <= 0)
         {
@@ -226,5 +272,35 @@ public class desertBoss : MonoBehaviour
     {
         meleeAttackHitboxeR.SetActive(false);
         meleeAttackHitboxeL.SetActive(false);
+    }
+
+    public void PlayGrowlSFXSaMac()
+    {
+        if (sfxGrowl != null && !sfxGrowl.isPlaying)
+        {
+            sfxGrowl.PlayOneShot(sfxGrowl.clip);
+        }
+    }
+    public void PlayHitBoxSFXSaMac()
+    {
+        if (sfxHitBox != null && !sfxHitBox.isPlaying)
+        {
+            sfxHitBox.PlayOneShot(sfxHitBox.clip);
+        }
+    }
+
+    public void PlayHitBox1SFXSaMac()
+    {
+        if (sfxHitBox1 != null && !sfxHitBox1.isPlaying)
+        {
+            sfxHitBox1.PlayOneShot(sfxHitBox1.clip);
+        }
+    }
+    public void PlayDeadSFXSaMac()
+    {
+        if (sfxDead != null && !sfxDead.isPlaying)
+        {
+            sfxDead.PlayOneShot(sfxDead.clip);
+        }
     }
 }
