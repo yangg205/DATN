@@ -7,9 +7,6 @@ namespace ND
 {
     public class InputHandler : MonoBehaviour
     {
-        //thu cuoi
-        MountSystem mountSystem;
-
         public float horizontal;
         public float vertical;
         public float moveAmount;
@@ -29,10 +26,6 @@ namespace ND
         public bool right_Stick_Left_Input;
         public bool skill_input;
         public bool attackSpeedBoost_input;
-        public bool isInputDisabled = false;
-
-        //thu cuoi
-        public bool mount_input;
 
         public bool d_Pad_Up;
         public bool d_Pad_Down;
@@ -61,8 +54,6 @@ namespace ND
 
         private void Awake()
         {
-            if (isInputDisabled)
-                return;
             playerAttacker = GetComponentInChildren<PlayerAttacker>();
             playerInventory = GetComponent<PlayerInventory>();
             playerManager = GetComponent<PlayerManager>();
@@ -71,9 +62,6 @@ namespace ND
             uiManager = FindFirstObjectByType<UIManager>();
             cameraHandler = FindFirstObjectByType<CameraHandler>();
             animatorHandler = GetComponentInChildren<AnimatorHandler>();
-
-            //thu cuoi
-            mountSystem = GetComponent<MountSystem>();
         }
 
         public void OnEnable()
@@ -115,9 +103,6 @@ namespace ND
                 inputActions.PlayerActions.TwoHand.performed += i => twoHand_input = true;
                 inputActions.PlayerActions.Skill.performed += i => skill_input = true;
                 inputActions.PlayerActions.BoostAttackSpeed.performed += i => attackSpeedBoost_input = true;
-
-                //thu cuoi
-                inputActions.PlayerActions.Mount.performed += i => mount_input = true;
             }
 
             inputActions.Enable();
@@ -131,6 +116,8 @@ namespace ND
         public void TickInput(float delta)
         {
             HandleMoveInput(delta);
+            if (inventoryFlag)
+                return; // Bỏ qua các input khác nếu inventory đang mở
             HandleRollInput(delta);
             HandleAttackInput(delta);
             HandleQuickSlotsInput();
@@ -139,15 +126,10 @@ namespace ND
             HandleSkillInput();
             HandleAttackSpeedBoostInput();
             HandleParryInput();
-            //thu cuoi
-            HandleMountInput();
         }
 
         private void HandleMoveInput(float delta)
         {
-            /*if (isInputDisabled)
-                return;*/
-
             horizontal = movementInput.x;
             vertical = movementInput.y;
             moveAmount = Mathf.Clamp01(Mathf.Abs(horizontal) + Mathf.Abs(vertical));
@@ -188,9 +170,11 @@ namespace ND
 
         private void HandleAttackInput(float delta)
         {
+
             if (lightAttack_input)
             {
                 playerAttacker.HandleLightAction();
+                lightAttack_input = false;
             }
 
             if (heavyAttack_input)
@@ -283,16 +267,6 @@ namespace ND
             {
                 attackSpeedBoost_input = false;
                 playerAttacker.TryUseAttackSpeedBoost();
-            }
-        }
-
-        //thu cuoi
-        private void HandleMountInput()
-        {
-            if (mount_input)
-            {
-                mount_input = false;
-                mountSystem.TryMountOrDismount();
             }
         }
 

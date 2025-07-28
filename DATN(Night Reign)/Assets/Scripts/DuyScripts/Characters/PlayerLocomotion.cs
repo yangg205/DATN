@@ -69,8 +69,6 @@ namespace ND
 
         public void HandleRotation(float delta)
         {
-            if (inputHandler.isInputDisabled) return; // ← thêm dòng này
-
             if(animatorHandler.canRotate)
             {
                 if (inputHandler.lockOnFlag)
@@ -123,11 +121,7 @@ namespace ND
 
         public void HandleMovement(float delta)
         {
-            if (inputHandler.isInputDisabled)
-            {
-                animatorHandler.UpdateAnimatorValues(0f, 0f, false);
-                return;
-            }
+            animatorHandler.UpdateAnimatorValues(0f, 0f, false);
 
             if (inputHandler.rollFlag || playerManager.isInteracting)
                 return;
@@ -167,7 +161,6 @@ namespace ND
 
         public void HandleRollingAndSprinting(float delta)
         {
-            if (inputHandler.isInputDisabled) return;
             if (animatorHandler.anim.GetBool("isInteracting"))
                 return;
 
@@ -196,8 +189,6 @@ namespace ND
 
         public void HandleFalling(float delta, Vector3 moveDirection)
         {
-            if (inputHandler.isInputDisabled) return; // ← thêm dòng này
-
             playerManager.isGrounded = false;
             RaycastHit hit;
             Vector3 origin = myTransform.position;
@@ -250,7 +241,6 @@ namespace ND
 
         public void HandleJumping()
         {
-            if (inputHandler.isInputDisabled) return;
             if (playerManager.isInteracting) return;
             if (playerStats.currentStamina <= 0) return;
 

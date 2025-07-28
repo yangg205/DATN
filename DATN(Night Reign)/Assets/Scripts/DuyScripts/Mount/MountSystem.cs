@@ -73,8 +73,8 @@ public class MountSystem : MonoBehaviour
             mountController.enabled = true;
 
         if (inputHandler != null)
-            inputHandler.isInputDisabled = true;
-
+/*            inputHandler.isInputDisabled = true;
+*/
         if (animatorHandler != null)
         {
             animatorHandler.UpdateAnimatorValues(0f, 0f, false);
@@ -105,8 +105,8 @@ public class MountSystem : MonoBehaviour
         if (mountController != null)
             mountController.enabled = false;
 
-        if (inputHandler != null)
-            inputHandler.isInputDisabled = false;
+/*        if (inputHandler != null)
+            inputHandler.isInputDisabled = false;*/
 
         if (animatorHandler != null)
             animatorHandler.PlayTargetAnimation("Empty", false);

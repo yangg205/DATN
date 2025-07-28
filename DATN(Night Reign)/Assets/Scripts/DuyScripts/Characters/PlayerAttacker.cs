@@ -55,7 +55,8 @@ namespace ND
 
         public void HandleWeaponCombo(WeaponItem weapon)
         {
-            if (inputHandler.isInputDisabled) return;
+            if (weapon == null || weapon.isUnarmed)
+                return;
 
             if (playerStats.currentStamina <= 0)
                 return;
@@ -102,7 +103,9 @@ namespace ND
         #region Combo Attacks
         public void HandleLightAttack(WeaponItem weapon)
         {
-            if (inputHandler.isInputDisabled) return;
+
+            if (weapon == null || weapon.isUnarmed)
+                return;
 
             if (playerStats.currentStamina <= 0)
                 return;
@@ -156,7 +159,8 @@ namespace ND
 
         public void HandleHeavyAttack(WeaponItem weapon)
         {
-            if (inputHandler.isInputDisabled) return;
+            if (weapon == null || weapon.isUnarmed)
+                return;
             if (playerStats.currentStamina <= 0) return;
             if (weapon == null || animatorHandler.anim.GetBool("isInteracting")) return;
             if (inputHandler.twoHandFlag) return;
@@ -246,8 +250,6 @@ namespace ND
         #region Skill (Q)
         public void TryUseSkill()
         {
-            if (inputHandler.isInputDisabled) return;
-
             if (Time.time >= lastSkillTime + skillCooldown)
             {
                 lastSkillTime = Time.time;
@@ -326,7 +328,7 @@ namespace ND
 
         public void HandleParry()
         {
-            if (inputHandler.isInputDisabled || playerManager.isInteracting) return;
+            if (playerManager.isInteracting) return;
 
             animatorHandler.PlayTargetAnimation("Parry", true); // ← đổi tên clip đúng
                                                                 // KHÔNG cần coroutine nữa vì đã dùng event để quản lý bật/tắt parry
