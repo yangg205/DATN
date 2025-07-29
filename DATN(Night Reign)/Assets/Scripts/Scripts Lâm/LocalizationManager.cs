@@ -114,7 +114,8 @@ public class LocalizationManager : MonoBehaviour
         {
             await LocalizationSettings.InitializationOperation.Task;
             LocalizationSettings.SelectedLocale = locale;
-            _tableCache.Clear(); // Xóa cache để tải lại bảng mới
+            _tableCache.Clear();
+            UILocalizeExtensions.ClearCache(); // Xóa cache của UILocalizeExtensions
             Debug.Log($"[LocalizationManager] Đã thay đổi ngôn ngữ thành: {locale.Identifier.Code}");
 
             isChangingLanguage = true;
@@ -124,15 +125,10 @@ public class LocalizationManager : MonoBehaviour
             OnLanguageChanged?.Invoke();
             RefreshAllLocalizedUI();
         }
-        else
-        {
-            Debug.Log($"[LocalizationManager] Không thay đổi ngôn ngữ vì locale hiện tại ({LocalizationSettings.SelectedLocale.Identifier.Code}) trùng với locale mới ({locale.Identifier.Code})");
-        }
 
         isChangingLanguage = false;
         Debug.Log($"[LocalizationManager] Hoàn tất thay đổi ngôn ngữ với index: {index}");
     }
-
     private void RefreshAllLocalizedUI()
     {
         foreach (var locStr in FindObjectsOfType<LocalizeStringEvent>(true))

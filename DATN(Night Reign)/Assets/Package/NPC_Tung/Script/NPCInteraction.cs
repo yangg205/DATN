@@ -35,15 +35,14 @@ public class NPCInteraction : MonoBehaviour
     private QuestData currentQuestData;
     private QuestDialogueType currentDialogueType;
     private static NPCInteraction activeNPC;
-
     private void Start()
     {
+
         InitializeUIButtons();
         InitializeUIElements();
         LocalizationSettings.SelectedLocaleChanged += OnLanguageChangedHandler;
         Debug.Log($"[NPCInteraction] Initialized for NPC {npcID}");
         questManager.ResetAllQuests();//không muốn reset thì cmd nó lại
-        // Removed ResetAllQuests call to prevent unintended quest resets
     }
 
     private void OnDestroy()
@@ -143,6 +142,7 @@ public class NPCInteraction : MonoBehaviour
         {
             ShowNoRelevantQuestDialogue();
         }
+
     }
 
     private List<QuestData> GetRelatedQuests()

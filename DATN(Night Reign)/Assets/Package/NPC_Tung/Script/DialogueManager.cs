@@ -383,6 +383,7 @@ public class DialogueManager : MonoBehaviour
         _onDialogueEndCallback = null;
         callback?.Invoke();
         Debug.Log("[DialogueManager] Dialogue ended");
+        MouseManager.Instance.HideCursorAndEnableInput();
     }
 
     public void DisplayFullCurrentSentence()

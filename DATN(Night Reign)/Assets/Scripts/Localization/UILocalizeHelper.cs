@@ -7,13 +7,15 @@ using System.Threading.Tasks;
 
 public static class UILocalizeExtensions
 {
-    // Cache bảng localization
     private static readonly Dictionary<string, StringTable> cachedTables = new();
 
-    /// <summary>
-    /// Gán khóa localization cho GameObject có TMP_Text (hoặc con của nó).
-    /// </summary>
-    public static async void SetLocalizationKey(this GameObject obj, string key, string tableName = "UI_Texts")
+    public static void ClearCache()
+    {
+        cachedTables.Clear();
+        Debug.Log("[UILocalizeExtensions] Đã xóa cache bảng localization.");
+    }
+
+    public static async Task SetLocalizationKey(this GameObject obj, string key, string tableName = "UI_Texts")
     {
         if (obj == null)
         {
@@ -35,11 +37,9 @@ public static class UILocalizeExtensions
             return;
         }
 
-        // Ensure Localization system is initialized
         if (!LocalizationSettings.InitializationOperation.IsDone)
             await LocalizationSettings.InitializationOperation.Task;
 
-        // Use cached table if available
         if (!cachedTables.TryGetValue(tableName, out var table))
         {
             var handle = LocalizationSettings.StringDatabase.GetTableAsync(tableName);
@@ -58,15 +58,13 @@ public static class UILocalizeExtensions
             }
         }
 
-        ApplyLocalization(tmpText, table, key);
+        await ApplyLocalization(tmpText, table, key);
     }
 
-    /// <summary>
-    /// Gán văn bản localized vào TextMeshProUGUI.
-    /// </summary>
-    private static async void ApplyLocalization(TextMeshProUGUI tmpText, StringTable table, string key)
+    private static async Task ApplyLocalization(TextMeshProUGUI tmpText, StringTable table, string key)
     {
         string localized = await LocalizationManager.Instance.GetLocalizedStringAsync(table.TableCollectionName, key);
+        Debug.Log($"[UILocalizeExtensions] Applying localized text for key '{key}': '{localized}' to '{tmpText.gameObject.name}'");
         tmpText.text = localized;
     }
 }
