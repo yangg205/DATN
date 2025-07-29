@@ -1,47 +1,79 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
+using TMPro;
 using UnityEngine.UI;
 
 public class ButtonGlowAlpha : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    [Header("Glow Image")]
-    public RawImage glowImage; 
+    [Header("Text Settings")]
+    public TMP_Text text;
+    public Color normalColor = Color.white;
+    public Color hoverColor = Color.yellow;
 
-    [Header("Alpha Settings")]
-    public float enterAlpha = 1f;
-    public float exitAlpha = 0f;
-    public float fadeSpeed = 10f;
+    [Header("Glow Settings")]
+    public RawImage glowImage; // ảnh phát sáng bên dưới text
+    public float glowFadeSpeed = 5f;
+    private Color glowColorTransparent;
+    private Color glowColorVisible;
 
-    private float targetAlpha;
+    [Header("Scale Settings")]
+    public float scaleAmount = 1.05f;
+    public float transitionSpeed = 5f;
 
-    void Awake()
+    private Vector3 originalScale;
+    private bool isHovered = false;
+
+    void Start()
     {
+        originalScale = transform.localScale;
+
+        if (text != null)
+            text.color = normalColor;
+
         if (glowImage != null)
         {
-            Color c = glowImage.color;
-            c.a = 0f; // start alpha = 0
-            glowImage.color = c;
+            glowColorVisible = glowImage.color;
+            glowColorTransparent = new Color(glowColorVisible.r, glowColorVisible.g, glowColorVisible.b, 0);
+            glowImage.color = glowColorTransparent;
         }
-        targetAlpha = 0f;
+    }
+    void Update()
+    {
+        // Smooth scale
+        Vector3 targetScale = isHovered ? originalScale * scaleAmount : originalScale;
+        transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.unscaledDeltaTime * transitionSpeed);
+
+        // Smooth glow alpha
+        if (glowImage != null)
+        {
+            Color targetColor = isHovered ? glowColorVisible : glowColorTransparent;
+            glowImage.color = Color.Lerp(glowImage.color, targetColor, Time.unscaledDeltaTime * glowFadeSpeed);
+        }
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        targetAlpha = enterAlpha;
+        isHovered = true;
+        if (text != null)
+            text.color = hoverColor;
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        targetAlpha = exitAlpha;
+        isHovered = false;
+        if (text != null)
+            text.color = normalColor;
     }
 
-    void Update()
+    void OnDisable()
     {
+        isHovered = false;
+        transform.localScale = originalScale;
+
+        if (text != null)
+            text.color = normalColor;
+
         if (glowImage != null)
-        {
-            Color c = glowImage.color;
-            c.a = Mathf.Lerp(c.a, targetAlpha, Time.deltaTime * fadeSpeed);
-            glowImage.color = c;
-        }
+            glowImage.color = glowColorTransparent;
     }
 }
