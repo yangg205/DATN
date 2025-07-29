@@ -55,7 +55,8 @@ namespace ND
 
         public void HandleWeaponCombo(WeaponItem weapon)
         {
-            if (inputHandler.isInputDisabled) return;
+            if (weapon == null || weapon.isUnarmed)
+                return;
 
             if (playerStats.currentStamina <= 0)
                 return;
@@ -89,6 +90,12 @@ namespace ND
                     animatorHandler.PlayTargetAnimation(weapon.Oh_Light_Attack_4, true);
                     lastAttack = weapon.Oh_Light_Attack_4;
                 }
+                // Heavy Combo (chỉ 1 bước: 1 -> 2)
+                else if (lastAttack == weapon.Oh_Heavy_Attack_1)
+                {
+                    animatorHandler.PlayTargetAnimation(weapon.Oh_Heavy_Attack_2, true);
+                    lastAttack = weapon.Oh_Heavy_Attack_2;
+                }
             }
 
         }
@@ -96,7 +103,9 @@ namespace ND
         #region Combo Attacks
         public void HandleLightAttack(WeaponItem weapon)
         {
-            if (inputHandler.isInputDisabled) return;
+
+            if (weapon == null || weapon.isUnarmed)
+                return;
 
             if (playerStats.currentStamina <= 0)
                 return;
@@ -150,24 +159,19 @@ namespace ND
 
         public void HandleHeavyAttack(WeaponItem weapon)
         {
-            if (inputHandler.isInputDisabled) return;
-
-            if (playerStats.currentStamina <= 0)
+            if (weapon == null || weapon.isUnarmed)
                 return;
-
+            if (playerStats.currentStamina <= 0) return;
             if (weapon == null || animatorHandler.anim.GetBool("isInteracting")) return;
             if (inputHandler.twoHandFlag) return;
 
             comboResetTimer = 0f;
             weaponSlotManager.attackingWeapon = weapon;
 
-            string animName;
-
-            heavyComboStep = (heavyComboStep % 2) + 1;
-            animName = heavyComboStep == 1 ? weapon.Oh_Heavy_Attack_1 : weapon.Oh_Heavy_Attack_2;
-
+            string animName = weapon.Oh_Heavy_Attack_1;
             animatorHandler.PlayTargetAnimation(animName, true);
             lastAttack = animName;
+
         }
 
         #region Input Actions
@@ -246,8 +250,6 @@ namespace ND
         #region Skill (Q)
         public void TryUseSkill()
         {
-            if (inputHandler.isInputDisabled) return;
-
             if (Time.time >= lastSkillTime + skillCooldown)
             {
                 lastSkillTime = Time.time;
@@ -326,7 +328,7 @@ namespace ND
 
         public void HandleParry()
         {
-            if (inputHandler.isInputDisabled || playerManager.isInteracting) return;
+            if (playerManager.isInteracting) return;
 
             animatorHandler.PlayTargetAnimation("Parry", true); // ← đổi tên clip đúng
                                                                 // KHÔNG cần coroutine nữa vì đã dùng event để quản lý bật/tắt parry

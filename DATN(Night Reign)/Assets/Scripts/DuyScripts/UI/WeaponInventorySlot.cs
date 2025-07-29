@@ -58,7 +58,7 @@ namespace ND
                 playerInventory.weaponsInventory.Remove(item);
 
             }
-            else if(uiManager.rightHandSlot02Selected)
+            else if(uiManager.leftHandSlot02Selected)
             {
                 playerInventory.weaponsInventory.Add(playerInventory.weaponInLeftHandSlots[1]);
                 playerInventory.weaponInLeftHandSlots[1] = item;

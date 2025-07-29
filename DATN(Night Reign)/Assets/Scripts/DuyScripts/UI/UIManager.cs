@@ -5,8 +5,8 @@ namespace ND
 {
     public class UIManager : MonoBehaviour
     {
-/*        private MouseManager mouseManager;
-*/        public PlayerInventory playerInventory;
+        private MouseManager mouseManager;
+        public PlayerInventory playerInventory;
         public EquipmentWindowUI equipmentWindowUI;
 
         [Header("HUD Windows")]
@@ -30,7 +30,7 @@ namespace ND
 
         private void Awake()
         {
-//            mouseManager = MouseManager.Instance;//
+            mouseManager = MouseManager.Instance;
         }
 
         private void Start()
@@ -62,13 +62,13 @@ namespace ND
 
         public void OpenSelectWindow()
         {
-/*            mouseManager.UnlockCursor();*/
+            mouseManager.UnlockCursor();
             selectWindow.SetActive(true);
         }
 
         public void CloseSelectWindow()
         {
-/*            mouseManager.LockCursor();*/
+            mouseManager.LockCursor();
             selectWindow.SetActive(false);
         }
 

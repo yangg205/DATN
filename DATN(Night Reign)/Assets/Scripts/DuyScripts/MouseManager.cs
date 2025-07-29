@@ -33,12 +33,10 @@ public class MouseManager : MonoBehaviour
     public void ShowCursorAndDisableInput()
     {
         UnlockCursor();
-        FindObjectOfType<InputHandler>().isInputDisabled = true;
     }
 
     public void HideCursorAndEnableInput()
     {
         LockCursor();
-        FindObjectOfType<InputHandler>().isInputDisabled = false;
     }
 }

@@ -294,15 +294,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Mount"",
-                    ""type"": ""Button"",
-                    ""id"": ""1bc1fbcc-545b-46ed-be88-55d369d48f2a"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""Parry"",
                     ""type"": ""Button"",
                     ""id"": ""d001f0c3-6925-4c80-a0f5-3f90180d7287"",
@@ -520,17 +511,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""fd383413-3e52-4956-860c-a69448b9d3b6"",
-                    ""path"": ""<Keyboard>/e"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Mount"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""26f8673d-ccb3-45a4-b76a-392748358820"",
                     ""path"": ""<Keyboard>/z"",
                     ""interactions"": """",
@@ -717,7 +697,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_PlayerActions_Skill = m_PlayerActions.FindAction("Skill", throwIfNotFound: true);
         m_PlayerActions_TwoHand = m_PlayerActions.FindAction("Two Hand", throwIfNotFound: true);
         m_PlayerActions_BoostAttackSpeed = m_PlayerActions.FindAction("BoostAttackSpeed", throwIfNotFound: true);
-        m_PlayerActions_Mount = m_PlayerActions.FindAction("Mount", throwIfNotFound: true);
         m_PlayerActions_Parry = m_PlayerActions.FindAction("Parry", throwIfNotFound: true);
         m_PlayerActions_Aim = m_PlayerActions.FindAction("Aim", throwIfNotFound: true);
         m_PlayerActions_FireArrow = m_PlayerActions.FindAction("Fire Arrow", throwIfNotFound: true);
@@ -875,7 +854,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_PlayerActions_Skill;
     private readonly InputAction m_PlayerActions_TwoHand;
     private readonly InputAction m_PlayerActions_BoostAttackSpeed;
-    private readonly InputAction m_PlayerActions_Mount;
     private readonly InputAction m_PlayerActions_Parry;
     private readonly InputAction m_PlayerActions_Aim;
     private readonly InputAction m_PlayerActions_FireArrow;
@@ -893,7 +871,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         public InputAction @Skill => m_Wrapper.m_PlayerActions_Skill;
         public InputAction @TwoHand => m_Wrapper.m_PlayerActions_TwoHand;
         public InputAction @BoostAttackSpeed => m_Wrapper.m_PlayerActions_BoostAttackSpeed;
-        public InputAction @Mount => m_Wrapper.m_PlayerActions_Mount;
         public InputAction @Parry => m_Wrapper.m_PlayerActions_Parry;
         public InputAction @Aim => m_Wrapper.m_PlayerActions_Aim;
         public InputAction @FireArrow => m_Wrapper.m_PlayerActions_FireArrow;
@@ -936,9 +913,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @BoostAttackSpeed.started += instance.OnBoostAttackSpeed;
             @BoostAttackSpeed.performed += instance.OnBoostAttackSpeed;
             @BoostAttackSpeed.canceled += instance.OnBoostAttackSpeed;
-            @Mount.started += instance.OnMount;
-            @Mount.performed += instance.OnMount;
-            @Mount.canceled += instance.OnMount;
             @Parry.started += instance.OnParry;
             @Parry.performed += instance.OnParry;
             @Parry.canceled += instance.OnParry;
@@ -982,9 +956,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @BoostAttackSpeed.started -= instance.OnBoostAttackSpeed;
             @BoostAttackSpeed.performed -= instance.OnBoostAttackSpeed;
             @BoostAttackSpeed.canceled -= instance.OnBoostAttackSpeed;
-            @Mount.started -= instance.OnMount;
-            @Mount.performed -= instance.OnMount;
-            @Mount.canceled -= instance.OnMount;
             @Parry.started -= instance.OnParry;
             @Parry.performed -= instance.OnParry;
             @Parry.canceled -= instance.OnParry;
@@ -1100,7 +1071,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         void OnSkill(InputAction.CallbackContext context);
         void OnTwoHand(InputAction.CallbackContext context);
         void OnBoostAttackSpeed(InputAction.CallbackContext context);
-        void OnMount(InputAction.CallbackContext context);
         void OnParry(InputAction.CallbackContext context);
         void OnAim(InputAction.CallbackContext context);
         void OnFireArrow(InputAction.CallbackContext context);

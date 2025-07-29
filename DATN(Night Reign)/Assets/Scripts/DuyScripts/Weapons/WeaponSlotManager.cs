@@ -139,13 +139,17 @@ namespace ND
 
         public void OpenRightDamageCollider()
         {
-             rightHandDamageCollider.EnableDamageCollider();
+            if (attackingWeapon == null || attackingWeapon.isUnarmed || rightHandDamageCollider == null)
+                return;
+            rightHandDamageCollider.EnableDamageCollider();
              playerEffectManager?.PlayWeaponFX(false); // ← Bật trail
         }
 
         public void OpenLeftDamageCollider()
         {
-             leftHandDamageCollider.EnableDamageCollider();
+            if (attackingWeapon == null || attackingWeapon.isUnarmed || leftHandDamageCollider == null)
+                return;
+            leftHandDamageCollider.EnableDamageCollider();
              playerEffectManager?.PlayWeaponFX(true);
         }
 
@@ -165,11 +169,15 @@ namespace ND
         #region Handle Weapon Stamina Drain
         public void DrainStaminaLightAttack()
         {
+            if (attackingWeapon == null || attackingWeapon.isUnarmed)
+                return;
             playerStats.TakeStaminaDamage(Mathf.RoundToInt(attackingWeapon.baseStamina * attackingWeapon.lightAttackMultiplier));
         }
 
         public void DrainStaminaHeavyAttack()
         {
+            if (attackingWeapon == null || attackingWeapon.isUnarmed)
+                return;
             playerStats.TakeStaminaDamage(Mathf.RoundToInt(attackingWeapon.baseStamina * attackingWeapon.heavyAttackMultiplier));
         }
         #endregion
