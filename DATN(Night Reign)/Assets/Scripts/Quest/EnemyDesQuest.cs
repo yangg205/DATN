@@ -1,8 +1,12 @@
+using BehaviorDesigner.Runtime.Tasks.Unity.UnityGameObject;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class EnemyDesQuest : MonoBehaviour
 {
+    [SerializeField] private int coin;
+    [SerializeField] private TextMeshProUGUI cointext;
     private QuestManager quest;
 
     void Start()
@@ -20,5 +24,6 @@ public class EnemyDesQuest : MonoBehaviour
         {
             quest.ReportKill();
         }
+
     }
 }
