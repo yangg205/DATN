@@ -250,15 +250,25 @@ public class DragonSoulEater : MonoBehaviour
 
     IEnumerator DeathCoroutine()
     {
+        // Đợi 1 giây trước khi xử lý death
         yield return new WaitForSeconds(1f);
 
-        // Rơi item
+        // Kiểm tra và rơi item
         if (itemDropPrefab != null)
         {
-            Vector3 dropPosition = dropPoint != null ? dropPoint.position : transform.position;
-            Instantiate(itemDropPrefab, dropPosition, Quaternion.identity);
+            Vector3 dropPosition = dropPoint != null ? dropPoint.position : transform.position + Vector3.up * 0.5f;
+
+            GameObject droppedItem = Instantiate(itemDropPrefab, dropPosition, Quaternion.identity);
+            droppedItem.name = "Dropped_Weapon_Item";
+
+            Debug.Log("Item dropped at: " + dropPosition);
+        }
+        else
+        {
+            Debug.LogWarning("No itemDropPrefab assigned on " + gameObject.name);
         }
 
+        // Hủy enemy sau 2 giây
         Destroy(gameObject, 2f);
     }
 

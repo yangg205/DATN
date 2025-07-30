@@ -79,6 +79,14 @@ namespace ND
                     }
 
                     break;
+                case "BossTutorial":
+                    EnemyAIByYang enemyAIByYang = collision.GetComponent<EnemyAIByYang>();
+                    if(enemyAIByYang != null)
+                    {
+                        enemyAIByYang.TakeDamage(currentWeaponDamage);
+                    }    
+                    break;
+
                 // Thêm các tag khác tại đây
                 default:
                     // Không làm gì nếu tag không khớp

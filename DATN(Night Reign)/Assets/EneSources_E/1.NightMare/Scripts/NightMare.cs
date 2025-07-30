@@ -70,6 +70,7 @@ public class NightMare : MonoBehaviour
     public void TakeDamage(int damageAmount)
     {
         if (isDead) return;
+        Debug.LogError("deaddddddddddddddddddd"+isDead);
         HP -= damageAmount;
         HP = Mathf.Clamp(HP, 0, maxHP);
 

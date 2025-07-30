@@ -1,4 +1,4 @@
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using UnityEngine;
 
 namespace ND
@@ -85,6 +85,38 @@ namespace ND
             rightHandSlot02Selected = false;
             leftHandSlot01Selected = false;
             leftHandSlot02Selected = false;
+        }
+
+        public void OpenInventoryWindow()
+        {
+            CloseEquipmentWindow(); // Ẩn Equipment nếu đang mở
+            weaponInventoryWindow.SetActive(true);
+        }
+
+        public void CloseInventoryWindow()
+        {
+            weaponInventoryWindow.SetActive(false);
+        }
+
+        public void OpenEquipmentWindow()
+        {
+            CloseInventoryWindow(); // Ẩn Inventory nếu đang mở
+            equipmentScreenWindow.SetActive(true);
+        }
+
+        public void CloseEquipmentWindow()
+        {
+            equipmentScreenWindow.SetActive(false);
+        }
+
+        public void OnInventoryTabSelected()
+        {
+            OpenInventoryWindow();
+        }
+
+        public void OnEquipmentTabSelected()
+        {
+            OpenEquipmentWindow();
         }
     }
 }

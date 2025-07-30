@@ -15,7 +15,7 @@ public class ToggleNR : MonoBehaviour
         }
         else
         {
-            Debug.LogError($"{GO} is not assigned in Toggle");
+            Debug.Log($"{GO} is not assigned in Toggle");
         }
 
         // Kiểm tra xem có EventSystem trong scene không
