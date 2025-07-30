@@ -35,7 +35,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 100, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3255474974336501931
 CanvasRenderer:
@@ -111,7 +111,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 56.4, y: 0}
+  m_AnchoredPosition: {x: 30, y: -30.199997}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3405599401774074370
@@ -208,13 +208,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d16900cc55491e24b959901d09cb6988, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  text: {fileID: 2397918058410395928}
-  normalColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  hoverColor: {r: 1, g: 0.84313726, b: 0, a: 1}
+  text: {fileID: 0}
+  textColor: {r: 1, g: 1, b: 1, a: 1}
   glowImage: {fileID: 2508098175145904487}
-  glowFadeSpeed: 5
+  glowSpeed: 2
+  minAlpha: 0.1
+  maxAlpha: 1
   scaleAmount: 1.05
-  transitionSpeed: 5
+  scaleSpeed: 2
 --- !u!114 &6217900729795666157
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -496,7 +497,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -1.8}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 100, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8767994308928725382
 CanvasRenderer:
@@ -519,7 +520,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.67295593, g: 0.647503, b: 0.41266158, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 40, z: 0, w: 40}
   m_Maskable: 1
@@ -852,7 +853,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 100, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7452210711434222349
 CanvasRenderer:
@@ -1061,7 +1062,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -0.4}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 100, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &55480185753612833
 CanvasRenderer:
@@ -1084,7 +1085,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.67295593, g: 0.647503, b: 0.41266158, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 40, z: 0, w: 40}
   m_Maskable: 1
@@ -1377,7 +1378,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -51.7, y: 0}
+  m_AnchoredPosition: {x: -30, y: -30.2}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1612709494141792483
@@ -1474,13 +1475,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d16900cc55491e24b959901d09cb6988, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  text: {fileID: 4998572911917658697}
-  normalColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  hoverColor: {r: 1, g: 0.84313726, b: 0, a: 1}
+  text: {fileID: 0}
+  textColor: {r: 1, g: 1, b: 1, a: 1}
   glowImage: {fileID: 1609047844886818558}
-  glowFadeSpeed: 5
+  glowSpeed: 2
+  minAlpha: 0.1
+  maxAlpha: 1
   scaleAmount: 1.05
-  transitionSpeed: 5
+  scaleSpeed: 2
 --- !u!114 &7951978898260230555
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1605,7 +1607,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0.4}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 100, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7775833930094544589
 CanvasRenderer:
@@ -1628,7 +1630,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.67295593, g: 0.647503, b: 0.41266158, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 40, z: 0, w: 40}
   m_Maskable: 1
@@ -1677,7 +1679,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -1}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 100, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8235689314391970750
 CanvasRenderer:
@@ -1700,7 +1702,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.67295593, g: 0.647503, b: 0.41266158, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 40, z: 0, w: 40}
   m_Maskable: 1
@@ -1761,6 +1763,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Save
+      objectReference: {fileID: 0}
+    - target: {fileID: 3858921334554451083, guid: 08c08da653b2a994ab9a45782055cb9c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4727334728046341263, guid: 08c08da653b2a994ab9a45782055cb9c,
         type: 3}
@@ -1899,6 +1906,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 6953578425297433787}
+    - targetCorrespondingSourceObject: {fileID: 3858921334554451083, guid: 08c08da653b2a994ab9a45782055cb9c,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3767182865745957049}
   m_SourcePrefab: {fileID: 100100000, guid: 08c08da653b2a994ab9a45782055cb9c, type: 3}
 --- !u!1 &2516482726785157269 stripped
 GameObject:
@@ -1920,6 +1931,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hoverSound: {fileID: 0}
   clickSound: {fileID: 0}
+--- !u!114 &3767182865745957049
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2516482726785157269}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b81c57469319f6439a8a23e7202c7ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: {fileID: 0}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  hoverColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  glowImage: {fileID: 5745108503314917054}
+  glowFadeSpeed: 5
+  scaleAmount: 1.05
+  transitionSpeed: 5
 --- !u!224 &6267654795972393105 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4727334728046341263, guid: 08c08da653b2a994ab9a45782055cb9c,
@@ -2146,6 +2176,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1866480781206356086}
+    - targetCorrespondingSourceObject: {fileID: 3858921334554451083, guid: 08c08da653b2a994ab9a45782055cb9c,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4884406979719292810}
   m_SourcePrefab: {fileID: 100100000, guid: 08c08da653b2a994ab9a45782055cb9c, type: 3}
 --- !u!1 &3387885910302310057 stripped
 GameObject:
@@ -2167,6 +2201,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hoverSound: {fileID: 0}
   clickSound: {fileID: 0}
+--- !u!114 &4884406979719292810
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3387885910302310057}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b81c57469319f6439a8a23e7202c7ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: {fileID: 0}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  hoverColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  glowImage: {fileID: 8319848255896390011}
+  glowFadeSpeed: 5
+  scaleAmount: 1.05
+  transitionSpeed: 5
 --- !u!114 &5934757168716013787 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5248359294743642873, guid: 08c08da653b2a994ab9a45782055cb9c,
@@ -2915,6 +2968,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Settings
       objectReference: {fileID: 0}
+    - target: {fileID: 3858921334554451083, guid: 08c08da653b2a994ab9a45782055cb9c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4727334728046341263, guid: 08c08da653b2a994ab9a45782055cb9c,
         type: 3}
       propertyPath: m_Pivot.x
@@ -3052,6 +3110,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 5154970964273768613}
+    - targetCorrespondingSourceObject: {fileID: 3858921334554451083, guid: 08c08da653b2a994ab9a45782055cb9c,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7820833932072001510}
   m_SourcePrefab: {fileID: 100100000, guid: 08c08da653b2a994ab9a45782055cb9c, type: 3}
 --- !u!224 &3515039849421367177 stripped
 RectTransform:
@@ -3079,6 +3141,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hoverSound: {fileID: 0}
   clickSound: {fileID: 0}
+--- !u!114 &7820833932072001510
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4958629764702197645}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b81c57469319f6439a8a23e7202c7ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: {fileID: 0}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  hoverColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  glowImage: {fileID: 2968994438104602431}
+  glowFadeSpeed: 5
+  scaleAmount: 1.05
+  transitionSpeed: 5
 --- !u!1001 &8929270317909445452
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3294,6 +3375,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 4897602387216886312}
+    - targetCorrespondingSourceObject: {fileID: 3858921334554451083, guid: 08c08da653b2a994ab9a45782055cb9c,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6445201176712956893}
   m_SourcePrefab: {fileID: 100100000, guid: 08c08da653b2a994ab9a45782055cb9c, type: 3}
 --- !u!114 &3692616290829994421 stripped
 MonoBehaviour:
@@ -3333,6 +3418,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hoverSound: {fileID: 0}
   clickSound: {fileID: 0}
+--- !u!114 &6445201176712956893
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5649344109960615879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b81c57469319f6439a8a23e7202c7ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  text: {fileID: 0}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  hoverColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  glowImage: {fileID: 327791553790220342}
+  glowFadeSpeed: 5
+  scaleAmount: 1.05
+  transitionSpeed: 5
 --- !u!1001 &9201228974087963985
 PrefabInstance:
   m_ObjectHideFlags: 0
