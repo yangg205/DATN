@@ -83,21 +83,7 @@ namespace ND
                 inputActions.PlayerQuickSlots.DPadRight.performed += i => d_Pad_Right = true;
                 inputActions.PlayerQuickSlots.DPadLeft.performed += i => d_Pad_Left = true;
 
-                inputActions.PlayerActions.Inventory.started += i =>
-                {
-                    inventoryFlag = true;
-                    uiManager.OpenSelectWindow();
-                    uiManager.UpdateUI();
-                    uiManager.hudWindow.SetActive(false);
-                };
-
-                inputActions.PlayerActions.Inventory.canceled += i =>
-                {
-                    inventoryFlag = false;
-                    uiManager.CloseSelectWindow();
-                    uiManager.CloseAllInventoryWindows();
-                    uiManager.hudWindow.SetActive(true);
-                };
+                inputActions.PlayerActions.Inventory.performed += i => HandleInventoryInput();
                 inputActions.PlayerMovement.LockOnTargetRight.performed += i => right_Stick_Right_Input = true;
                 inputActions.PlayerMovement.LockOnTargetLeft.performed += i => right_Stick_Left_Input = true;
                 inputActions.PlayerActions.TwoHand.performed += i => twoHand_input = true;
@@ -127,8 +113,37 @@ namespace ND
             HandleAttackSpeedBoostInput();
             HandleParryInput();
         }
+        private void HandleInventoryInput()
+        {
+            // Nếu đang mở panel (inventoryFlag == true) → tắt hết
+            if (inventoryFlag)
+            {
+                inventoryFlag = false;
+                uiManager.CloseSelectWindow();
+                uiManager.CloseAllInventoryWindows();
+                uiManager.hudWindow.SetActive(true);
 
-        private void HandleMoveInput(float delta)
+                if (CameraHandler.singleton != null)
+                    CameraHandler.singleton.canRotate = true;
+
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+            else
+            {
+                inventoryFlag = true;
+                uiManager.OpenSelectWindow();
+                uiManager.UpdateUI();
+                uiManager.hudWindow.SetActive(false);
+
+                if (CameraHandler.singleton != null)
+                    CameraHandler.singleton.canRotate = false;
+
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
+        }
+            private void HandleMoveInput(float delta)
         {
             horizontal = movementInput.x;
             vertical = movementInput.y;

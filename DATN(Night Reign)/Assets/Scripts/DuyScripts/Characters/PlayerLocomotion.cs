@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 namespace ND
 {
@@ -37,7 +38,24 @@ namespace ND
         [SerializeField] int sprintStaminaCost = 1;
 
         [Header("Jump Stats")]
-        [SerializeField] float jumpForce = 5f;
+        public float jumpForce = 250f;
+        public bool jumpForceApplied;
+
+        private void FixedUpdate()
+        {
+            if (jumpForceApplied)
+            {
+                StartCoroutine(JumpCo());
+                rigidbody.AddForce(transform.up * jumpForce);
+
+            }
+        }
+
+        private IEnumerator JumpCo()
+        {
+            yield return new WaitForSeconds(0.35f);
+            jumpForceApplied = false;
+        }
 
         private void Awake()
         {
@@ -241,6 +259,7 @@ namespace ND
 
         public void HandleJumping()
         {
+            jumpForceApplied = true;
             if (playerManager.isInteracting) return;
             if (playerStats.currentStamina <= 0) return;
 
@@ -255,15 +274,11 @@ namespace ND
                 }
 
                 // Bắt đầu nhảy: tắt root motion thủ công
-                animatorHandler.anim.applyRootMotion = false;
+ /*               animatorHandler.anim.applyRootMotion = false;*/
 
                 animatorHandler.PlayTargetAnimation("Jump", true); // Không cần thêm overload
 
                 playerStats.TakeStaminaDamage(rollStaminaCost);
-
-                // Thêm lực nhảy
-                rigidbody.velocity = new Vector3(rigidbody.velocity.x, 0, rigidbody.velocity.z);
-                rigidbody.AddForce(Vector3.up * 8f, ForceMode.Impulse);
             }
         }
     }
