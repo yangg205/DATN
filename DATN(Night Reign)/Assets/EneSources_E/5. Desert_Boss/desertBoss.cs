@@ -1,15 +1,36 @@
-﻿using server.model;
-using System.Collections;
+﻿using System.Collections;
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class desertBoss : MonoBehaviour
 {
     [Header("Fire attack")]
-    [SerializeField] private Transform fireSpawnPoint;
     [SerializeField] private ParticleSystem fireBreathVFX;
+    [SerializeField] private Transform fireSpawnPoint;
     [SerializeField] private Collider fireBreathCollider;
 
-    private Animator animator;
+    [SerializeField] private GameObject meleeAttackHitboxeR;
+    [SerializeField] private GameObject meleeAttackHitboxeL;
+
+
+    [Header("SFX")]
+    public AudioSource sfxGrowl;
+    public AudioSource sfxHitBox;
+    public AudioSource sfxHitBox1;
+    public AudioSource sfxHurt;
+    public AudioSource sfxDead;
+
+    [Header("UI")]
+    public Slider healthSlider;
+    public Slider easeHealthSlider;
+
+    public TextMeshProUGUI hpText;
+    private float lerpSpeed = 0.05f;
+
+
+    public Animator animator;
     private Transform targetPlayer;
 
     public float detectRange = 15f;
@@ -29,6 +50,21 @@ public class desertBoss : MonoBehaviour
     private bool isShouting = false;
     private float attackWindupTime = 0.3f;
 
+    void Awake()
+    {
+        GameObject healthSliderObj = GameObject.Find("HealthBarSaMac");
+        if (healthSliderObj != null)
+            healthSlider = healthSliderObj.GetComponent<Slider>();
+
+        GameObject easeSliderObj = GameObject.Find("EaseHealthBarSaMac");
+        if (easeSliderObj != null)
+            easeHealthSlider = easeSliderObj.GetComponent<Slider>();
+
+        GameObject hpTextObj = GameObject.Find("HPTextSaMac");
+        if (hpTextObj != null)
+            hpText = hpTextObj.GetComponent<TextMeshProUGUI>();
+    }
+
     private void Start()
     {
         if (targetPlayer == null)
@@ -37,21 +73,22 @@ public class desertBoss : MonoBehaviour
             if (playerObj != null)
             {
                 targetPlayer = playerObj.transform;
-                Debug.Log("Found Player with tag 'Player'.");
             }
             else
             {
-                Debug.LogWarning("Player object with 'Player' tag not found. Please assign targetPlayer manually or ensure Player has the correct tag.");
+                Debug.LogWarning("ko tim thay taf Player");
             }
         }
 
+
+        meleeAttackHitboxeR.SetActive(false);
+        meleeAttackHitboxeL.SetActive(false);
+
         fireBreathVFX = fireSpawnPoint.GetComponentInChildren<ParticleSystem>();
-        StopFireBreath();
 
 
         currentHP = maxHP;
 
-        animator = GetComponentInChildren<Animator>();
 
         animator.SetTrigger("isEmerging");
         StartCoroutine(AIBehavior());
@@ -59,15 +96,27 @@ public class desertBoss : MonoBehaviour
 
     private void Update()
     {
+        if (healthSlider.value != currentHP)
+        {
+            healthSlider.value = currentHP;
+        }
+
+        if (healthSlider.value != easeHealthSlider.value)
+        {
+            easeHealthSlider.value = Mathf.Lerp(easeHealthSlider.value, currentHP, lerpSpeed);
+        }
+
+        hpText.text = $"{currentHP}";
+
         if (!isDead && !isAttacking && !isShouting)
         {
             LookAtPlayer(); 
         }
 
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            TakeDamage(500);
-        }
+        //if(Input.GetKeyDown(KeyCode.E))
+        //{
+        //    TakeDamage(450);
+        //}
     }
 
     private IEnumerator AIBehavior()
@@ -125,30 +174,6 @@ public class desertBoss : MonoBehaviour
     }
 
 
-    //play fire vfx
-    public void ActionFlame()
-    {
-        if (fireBreathVFX && !fireBreathVFX.isPlaying)
-            fireBreathVFX.Play();
-    }
-
-    //on collider
-    private void StartFireBreath()
-    {
-        if (fireBreathCollider)
-            fireBreathCollider.enabled = true;
-    }
-
-    //off collider & fire vfx
-    private void StopFireBreath()
-    {
-        if (fireBreathVFX && fireBreathVFX.isPlaying)
-            fireBreathVFX.Stop();
-
-        if (fireBreathCollider)
-            fireBreathCollider.enabled = false;
-    }
-
     private IEnumerator AttackCooldown()
     {
         float cooldown = Random.Range(4f, 6f);
@@ -166,6 +191,23 @@ public class desertBoss : MonoBehaviour
         }
     }
 
+    // Gọi khi animation bắt đầu phun lửa (qua Animation Event)
+    public void StartFireDesertBoss()
+    {
+        if (fireBreathVFX && !fireBreathVFX.isPlaying)
+            fireBreathVFX.Play();
+
+        if (fireBreathCollider)
+            fireBreathCollider.enabled = true;
+    }
+    public void StopFireDesertBoss()
+    {
+        if (fireBreathVFX && fireBreathVFX.isPlaying)
+            fireBreathVFX.Stop();
+
+        if (fireBreathCollider)
+            fireBreathCollider.enabled = false;
+    }
 
     public void TakeDamage(int amount)
     {
@@ -173,6 +215,7 @@ public class desertBoss : MonoBehaviour
 
         currentHP -= amount;
         animator.SetTrigger("takeHit");
+        sfxHurt.PlayOneShot(sfxHurt.clip);
 
         if (currentHP <= 0)
         {
@@ -188,16 +231,75 @@ public class desertBoss : MonoBehaviour
     }
 
 
-    private void OnDrawGizmosSelected()
+    //private void OnDrawGizmosSelected()
+    //{
+    //    Vector3 origin = rangeOrigin != null ? rangeOrigin.position : transform.position;
+
+    //    Gizmos.color = Color.yellow;
+    //    Gizmos.DrawWireSphere(origin, detectRange);
+
+    //    Gizmos.color = Color.red;
+    //    Gizmos.DrawWireSphere(origin, meleeRange);
+    //}
+    public void startHitBoxR()
     {
-        Vector3 origin = rangeOrigin != null ? rangeOrigin.position : transform.position;
-
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(origin, detectRange);
-
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(origin, meleeRange);
+        meleeAttackHitboxeR.SetActive(true);
+    }
+    public void startHitBoxL()
+    {
+        meleeAttackHitboxeL.SetActive(true);
     }
 
+    public void endHitBoxR()
+    {
+        meleeAttackHitboxeR.SetActive(false);
+    }
 
+    public void endHitBoxL()
+    {
+        meleeAttackHitboxeL.SetActive(false);
+    }
+
+    //====2hand
+    public void startHitBoxRL()
+    {
+        meleeAttackHitboxeR.SetActive(true);
+        meleeAttackHitboxeL.SetActive(true);
+    }
+
+    public void endHitBoxRL()
+    {
+        meleeAttackHitboxeR.SetActive(false);
+        meleeAttackHitboxeL.SetActive(false);
+    }
+
+    public void PlayGrowlSFXSaMac()
+    {
+        if (sfxGrowl != null && !sfxGrowl.isPlaying)
+        {
+            sfxGrowl.PlayOneShot(sfxGrowl.clip);
+        }
+    }
+    public void PlayHitBoxSFXSaMac()
+    {
+        if (sfxHitBox != null && !sfxHitBox.isPlaying)
+        {
+            sfxHitBox.PlayOneShot(sfxHitBox.clip);
+        }
+    }
+
+    public void PlayHitBox1SFXSaMac()
+    {
+        if (sfxHitBox1 != null && !sfxHitBox1.isPlaying)
+        {
+            sfxHitBox1.PlayOneShot(sfxHitBox1.clip);
+        }
+    }
+    public void PlayDeadSFXSaMac()
+    {
+        if (sfxDead != null && !sfxDead.isPlaying)
+        {
+            sfxDead.PlayOneShot(sfxDead.clip);
+        }
+    }
 }

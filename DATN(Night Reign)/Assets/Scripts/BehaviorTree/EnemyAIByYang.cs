@@ -145,10 +145,10 @@ public class EnemyAIByYang : MonoBehaviour
     {
         Tick();
 
-        if (Input.GetKeyDown(KeyCode.T))
+       /* if (Input.GetKeyDown(KeyCode.T))
         {
             TakeDamage(100);
-        }
+        }*/
     }
 
     public void Tick()
