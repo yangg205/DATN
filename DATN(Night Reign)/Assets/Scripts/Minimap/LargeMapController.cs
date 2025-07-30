@@ -170,7 +170,7 @@ public class LargeMapController : MonoBehaviour
             Debug.Log($"[LargeMapController] Before toggle: largeMapPanel.activeSelf = {largeMapPanel.activeSelf}"); // Thêm dòng này
             bool isActive = !largeMapPanel.activeSelf;
             largeMapPanel.SetActive(isActive);
-
+            MouseManager.Instance.ShowCursorAndDisableInput();
             // Bật/tắt camera chỉ khi panel được bật/tắt
             if (largeMapCamera != null)
             {
@@ -185,11 +185,13 @@ public class LargeMapController : MonoBehaviour
             if (isActive)
             {
                 // Luôn tính lại Bounds và Setup Camera mỗi khi mở map
+                MouseManager.Instance.HideCursorAndEnableInput();
                 CalculateTerrainsBounds();
                 SetupLargeMapCamera();
                 UpdatePlayerIconPositionAndRotation();
                 UpdateWaypointUIsOnLargeMap();
                 Debug.Log("[LargeMapController] Large map toggled ON.");
+
             }
             else
             {
