@@ -3,11 +3,22 @@ using UnityEngine.EventSystems;
 
 public class PauseManager : MonoBehaviour
 {
+    [Header("UI References")]
     public GameObject pauseMenuUI;
     public GameObject settingsPanel;
     public GameObject saveConfirmPanel;
 
     private bool isPaused = false;
+
+    void Start()
+    {
+        // Ẩn chuột và khóa khi bắt đầu game
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+
+        if (pauseMenuUI != null)
+            pauseMenuUI.SetActive(false);
+    }
 
     void Update()
     {
@@ -16,7 +27,7 @@ public class PauseManager : MonoBehaviour
             if (!isPaused)
                 Pause();
             else
-                Resume();
+                Resume(); // Bấm ESC lần 2 cũng sẽ ẩn chuột ở đây
         }
     }
 
@@ -24,15 +35,17 @@ public class PauseManager : MonoBehaviour
     {
         Time.timeScale = 0f;
         isPaused = true;
+
         pauseMenuUI.SetActive(true);
 
-        // Đảm bảo panel luôn nằm trên cùng
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+
         BringToFront(pauseMenuUI);
 
         if (settingsPanel != null) settingsPanel.SetActive(false);
         if (saveConfirmPanel != null) saveConfirmPanel.SetActive(false);
 
-        // Reset selected UI element (fix hover bug)
         EventSystem.current.SetSelectedGameObject(null);
     }
 
@@ -40,7 +53,12 @@ public class PauseManager : MonoBehaviour
     {
         Time.timeScale = 1f;
         isPaused = false;
+
         pauseMenuUI.SetActive(false);
+
+        // Ẩn chuột bất kể gọi từ ESC hay Resume button
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     public void QuitGame()
@@ -56,15 +74,13 @@ public class PauseManager : MonoBehaviour
 
     private void BringToFront(GameObject uiElement)
     {
-        // Đưa transform lên cuối để luôn render trên cùng
         uiElement.transform.SetAsLastSibling();
 
-        // Nếu có Canvas riêng, tăng Sorting Order
         Canvas canvas = uiElement.GetComponent<Canvas>();
         if (canvas != null)
         {
             canvas.overrideSorting = true;
-            canvas.sortingOrder = 999; // số lớn để luôn trên cùng
+            canvas.sortingOrder = 999;
         }
     }
 }
