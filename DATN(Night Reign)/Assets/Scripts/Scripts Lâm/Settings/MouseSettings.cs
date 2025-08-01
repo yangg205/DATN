@@ -14,26 +14,25 @@ public class MouseSettings : MonoBehaviour
 
     void Start()
     {
-        // Đặt giới hạn giá trị slider
+        // Thiết lập giới hạn slider
         mouseSlider.minValue = 0.1f;
         mouseSlider.maxValue = 10f;
 
+        // Gắn listener trước
+        mouseSlider.onValueChanged.AddListener(OnMouseSensitivityChanged);
+
         // Load từ PlayerPrefs hoặc dùng mặc định
         float savedSensitivity = PlayerPrefs.GetFloat("MouseSensitivity", defaultSensitivity);
+
+        // Gán giá trị sau để tự trigger OnMouseSensitivityChanged và cập nhật text
         mouseSlider.value = savedSensitivity;
-        currentMouseSensitivity = savedSensitivity;
-
-        UpdateMouseValue(savedSensitivity);
-
-        // Bắt sự kiện thay đổi slider
-        mouseSlider.onValueChanged.AddListener(OnMouseSensitivityChanged);
     }
 
     void OnMouseSensitivityChanged(float value)
     {
         currentMouseSensitivity = value;
         UpdateMouseValue(value);
-        // KHÔNG lưu ở đây nữa, chỉ lưu khi bấm Apply
+        // Không lưu ở đây, chỉ lưu khi nhấn Apply
     }
 
     void UpdateMouseValue(float value)
@@ -42,9 +41,10 @@ public class MouseSettings : MonoBehaviour
             mouseValueText.text = value.ToString("F2");
     }
 
-    // Gọi từ ApplyButton
+    // Gọi từ nút Apply
     public void ApplyMouseSensitivity()
     {
         PlayerPrefs.SetFloat("MouseSensitivity", currentMouseSensitivity);
+        PlayerPrefs.Save(); // Lưu ngay lập tức (tùy chọn)
     }
 }
