@@ -198,6 +198,19 @@ namespace ND
 
             inputHandler.lightAttack_input = false; // ← Reset flag
         }
+
+        public void HandleLTAction()
+        {
+            if (playerInventory.leftWeapon.isShieldWeapon)
+            {
+                PerformWeaponArt(inputHandler.twoHandFlag);
+
+            }
+            else if (playerInventory.leftWeapon.isMeleeWeapon)
+            {
+
+            }    
+        }    
         #endregion
 
         #region Attack Actions
@@ -232,6 +245,22 @@ namespace ND
         {
 
         }
+
+        public void PerformWeaponArt(bool isTwoHanding)
+        {
+            if (playerManager.isInteracting)
+                return;    
+
+            if(isTwoHanding)
+            {
+
+            }   
+            else
+            {
+                animatorHandler.PlayTargetAnimation(playerInventory.leftWeapon.weapon_Art, true);
+
+            }
+        }    
 
         public void SuccessfullyCastSpell()
         {

@@ -73,25 +73,14 @@ namespace ND
         {
             anim.SetBool("isInvulnerable", false);
         }
-        public void EnableParry()
+        public void EnableIsParry()
         {
-            PlayerManager playerManager = GetComponentInParent<PlayerManager>();
-            if (playerManager != null)
-            {
-                Debug.Log("Parry ENABLED");
-                playerManager.isParrying = true;
-            }
+            playerManager.isParrying = true;
         }
 
-        public void DisableParry()
+        public void DisableIsParry()
         {
-            Debug.Log("Parry DISABLED");
-
-            PlayerManager playerManager = GetComponentInParent<PlayerManager>();
-            if (playerManager != null)
-            {
-                playerManager.isParrying = false;
-            }
+            playerManager.isParrying = false;
         }
 
         private void OnAnimatorMove()

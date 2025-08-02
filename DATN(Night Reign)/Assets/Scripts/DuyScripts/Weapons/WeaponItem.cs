@@ -32,6 +32,9 @@ namespace ND
         public string Oh_Heavy_Attack_1;
         public string Oh_Heavy_Attack_2;
 
+        [Header("Weapon Art")]
+        public string weapon_Art;
+
         [Header("Skill Animations")]
         public string skill_Charge;         // Animation khi gồng (Q)
         public string skill_Attack_01;      // Animation đòn 1
@@ -48,6 +51,7 @@ namespace ND
         public bool isFaithCaster;
         public bool isPyroCaster;
         public bool isMeleeWeapon;
+        public bool isShieldWeapon;
     }
 }
 

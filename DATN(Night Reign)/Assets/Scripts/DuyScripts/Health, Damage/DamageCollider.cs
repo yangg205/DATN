@@ -5,7 +5,6 @@ namespace ND
     public class DamageCollider : MonoBehaviour
     {
         Collider damageCollider;
-
         public int currentWeaponDamage = 25;
 
         private void Awake()
@@ -28,68 +27,67 @@ namespace ND
 
         private void OnTriggerEnter(Collider collision)
         {
-            // Nếu chạm vào khiên (shield) đang parry
-            if (collision.CompareTag("Shield"))
+            // Check nếu đối tượng có thể parry (PlayerManager)
+            PlayerManager playerManager = collision.GetComponent<PlayerManager>();
+            if (playerManager != null && playerManager.isParrying)
             {
-                PlayerManager player = collision.GetComponentInParent<PlayerManager>();
-                if (player != null && player.isParrying)
-                {
-                    Debug.Log("Attack was parried!");
-                    // Bị đỡ – KHÔNG gây damage
-                    // Bạn có thể phản đòn tại đây nếu muốn
-                    return;
-                }
+                AnimatorHandler animHandler = playerManager.GetComponentInChildren<AnimatorHandler>();
+                animHandler?.PlayTargetAnimation("Parry", true);
+                return; // Đỡ đòn thành công, không nhận damage
             }
-                if (collision.tag == "Hittable")
+
+            // ===== PLAYER =====
+            if (collision.CompareTag("Player"))
             {
                 PlayerStats playerStats = collision.GetComponent<PlayerStats>();
-
                 if (playerStats != null)
                 {
                     playerStats.TakeDamage(currentWeaponDamage);
                 }
+                return;
             }
 
-            //Duyen
+            // ===== HITTABLE =====
+            if (collision.CompareTag("Hittable"))
+            {
+                PlayerStats playerStats = collision.GetComponent<PlayerStats>();
+                if (playerStats != null)
+                {
+                    playerStats.TakeDamage(currentWeaponDamage);
+                }
+                return;
+            }
+
+            // ===== ENEMIES =====
             switch (collision.tag)
             {
                 case "DragonSoulEater":
                     DragonSoulEater enemyStats = collision.GetComponent<DragonSoulEater>();
                     if (enemyStats != null)
-                    {
                         enemyStats.TakeDamage(currentWeaponDamage);
-                    }
                     break;
 
                 case "DragonNightMare":
-                    DragonTerrorBringer anotherStats = collision.GetComponent<DragonTerrorBringer>();
-                    if (anotherStats != null)
+                    DragonTerrorBringer terrorBringer = collision.GetComponent<DragonTerrorBringer>();
+                    if (terrorBringer != null)
                     {
-                        anotherStats.TakeDamage(currentWeaponDamage);
+                        terrorBringer.TakeDamage(currentWeaponDamage);
                     }
                     else
                     {
-                        NightMare anotherStatss = collision.GetComponent<NightMare>();
-                        {
-                            if (anotherStatss != null)
-                            {
-                                anotherStatss.TakeDamage(currentWeaponDamage);
-                            }
-                        }
+                        NightMare nightmare = collision.GetComponent<NightMare>();
+                        if (nightmare != null)
+                            nightmare.TakeDamage(currentWeaponDamage);
                     }
-
                     break;
+
                 case "BossTutorial":
-                    EnemyAIByYang enemyAIByYang = collision.GetComponent<EnemyAIByYang>();
-                    if(enemyAIByYang != null)
-                    {
-                        enemyAIByYang.TakeDamage(currentWeaponDamage);
-                    }    
+                    EnemyAIByYang boss = collision.GetComponent<EnemyAIByYang>();
+                    if (boss != null)
+                        boss.TakeDamage(currentWeaponDamage);
                     break;
 
-                // Thêm các tag khác tại đây
                 default:
-                    // Không làm gì nếu tag không khớp
                     break;
             }
         }

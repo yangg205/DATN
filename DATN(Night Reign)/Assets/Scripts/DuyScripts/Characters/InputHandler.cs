@@ -111,7 +111,6 @@ namespace ND
             HandleTwoHandInput();
             HandleSkillInput();
             HandleAttackSpeedBoostInput();
-            HandleParryInput();
         }
         private void HandleInventoryInput()
         {
@@ -197,6 +196,18 @@ namespace ND
                 playerAttacker.HandleHeavyAttack(playerInventory.rightWeapon);
                 heavyAttack_input = false;
             }  
+
+            if(parry_input)
+            {
+                if(twoHandFlag)
+                {
+
+                }   
+                else
+                {
+                    playerAttacker.HandleLTAction();
+                }    
+            }    
         }
 
         private void HandleQuickSlotsInput()
@@ -282,15 +293,6 @@ namespace ND
             {
                 attackSpeedBoost_input = false;
                 playerAttacker.TryUseAttackSpeedBoost();
-            }
-        }
-
-        private void HandleParryInput()
-        {
-            if (parry_input)
-            {
-                parry_input = false;
-                playerAttacker.HandleParry();
             }
         }
     }
