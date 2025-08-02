@@ -6091,7 +6091,7 @@ MonoBehaviour:
   skipDelay: 5
   skipFadeDuration: 1
   fadeDuration: 1
-  nextSceneName: MapTutorial
+  nextSceneName: SceneMergeDat 2
 --- !u!64 &721089456
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -8110,12 +8110,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   text: {fileID: 705292405}
-  normalColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  hoverColor: {r: 1, g: 0.84313726, b: 0, a: 1}
+  textColor: {r: 1, g: 1, b: 1, a: 1}
   glowImage: {fileID: 1034309722}
-  glowFadeSpeed: 7
+  glowSpeed: 2
+  minAlpha: 0.1
+  maxAlpha: 1
   scaleAmount: 1.05
-  transitionSpeed: 5
+  scaleSpeed: 2
 --- !u!225 &934213547
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -25459,14 +25460,29 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3094696731124690775, guid: b7a7cbe1cae956146b8cb391e061982d,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3482848304959940626, guid: b7a7cbe1cae956146b8cb391e061982d,
         type: 3}
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3671321050638535310, guid: b7a7cbe1cae956146b8cb391e061982d,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3819595748707487814, guid: b7a7cbe1cae956146b8cb391e061982d,
         type: 3}
       propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4418068019789224861, guid: b7a7cbe1cae956146b8cb391e061982d,
+        type: 3}
+      propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4796472465235842250, guid: b7a7cbe1cae956146b8cb391e061982d,
@@ -25534,6 +25550,11 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: 42.3
       objectReference: {fileID: 0}
+    - target: {fileID: 5557626538279804430, guid: b7a7cbe1cae956146b8cb391e061982d,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6467678663532029777, guid: b7a7cbe1cae956146b8cb391e061982d,
         type: 3}
       propertyPath: m_IsActive
@@ -25552,6 +25573,16 @@ PrefabInstance:
     - target: {fileID: 7493744823905286634, guid: b7a7cbe1cae956146b8cb391e061982d,
         type: 3}
       propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842281932340372193, guid: b7a7cbe1cae956146b8cb391e061982d,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8075883264788974510, guid: b7a7cbe1cae956146b8cb391e061982d,
+        type: 3}
+      propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8846871267915803618, guid: b7a7cbe1cae956146b8cb391e061982d,
@@ -25766,6 +25797,8 @@ PrefabInstance:
     - {fileID: 4495578620477119086, guid: 7342e883bbcc52a4d923131014cb319f, type: 3}
     - {fileID: 352843801975728154, guid: 7342e883bbcc52a4d923131014cb319f, type: 3}
     - {fileID: 7567277266350545913, guid: 7342e883bbcc52a4d923131014cb319f, type: 3}
+    - {fileID: 1811290276392640108, guid: 7342e883bbcc52a4d923131014cb319f, type: 3}
+    - {fileID: 8304765405265616693, guid: 7342e883bbcc52a4d923131014cb319f, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7342e883bbcc52a4d923131014cb319f, type: 3}

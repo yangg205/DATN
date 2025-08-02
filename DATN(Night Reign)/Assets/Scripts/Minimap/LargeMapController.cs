@@ -75,6 +75,7 @@ public class LargeMapController : MonoBehaviour
 
         if (largeMapPanel != null && largeMapPanel.activeSelf)
         {
+
             HandleWaypointCreationInput();
             UpdatePlayerIconPositionAndRotation(); // Cập nhật vị trí icon người chơi
             UpdateWaypointUIsOnLargeMap(); // Cập nhật Waypoint UI khi bản đồ lớn đang mở
@@ -185,7 +186,6 @@ public class LargeMapController : MonoBehaviour
             if (isActive)
             {
                 // Luôn tính lại Bounds và Setup Camera mỗi khi mở map
-                MouseManager.Instance.HideCursorAndEnableInput();
                 CalculateTerrainsBounds();
                 SetupLargeMapCamera();
                 UpdatePlayerIconPositionAndRotation();
@@ -195,6 +195,7 @@ public class LargeMapController : MonoBehaviour
             }
             else
             {
+                MouseManager.Instance.HideCursorAndEnableInput();
                 Debug.Log("[LargeMapController] Large map toggled OFF. WaypointManager informed.");
             }
 

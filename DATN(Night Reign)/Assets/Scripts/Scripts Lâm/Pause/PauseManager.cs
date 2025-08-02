@@ -39,6 +39,7 @@ public class PauseManager : MonoBehaviour
     public void Resume()
     {
         Time.timeScale = 1f;
+        MouseManager.Instance.HideCursorAndEnableInput();
         isPaused = false;
         pauseMenuUI.SetActive(false);
     }
