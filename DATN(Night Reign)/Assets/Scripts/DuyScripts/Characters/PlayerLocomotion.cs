@@ -235,6 +235,13 @@ namespace ND
 
                 if (playerManager.isInAir)
                 {
+                    // TÍNH SÁT THƯƠNG KHI RƠI CAO
+                    if (inAirTimer > 0.7f)
+                    {
+                        float fallDamage = Mathf.RoundToInt((inAirTimer - 0.7f) * 20f);
+                        playerStats.TakeDamage((int)fallDamage);
+                    }
+
                     animatorHandler.PlayTargetAnimation(inAirTimer > 0.5f ? "Land" : "Empty", true);
                     inAirTimer = 0;
                     playerManager.isInAir = false;

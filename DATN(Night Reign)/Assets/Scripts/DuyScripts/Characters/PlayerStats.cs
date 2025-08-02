@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Collections;
+using System.Security.Cryptography;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem.Processors;
@@ -93,22 +94,23 @@ namespace ND
 
         public void TakeDamage(int damage)
         {
-            if (playerManager.isInvulnerable)
-                return;
-
-            if(isDead)
+            if (playerManager.isInvulnerable || isDead)
                 return;
 
             currentHealth -= damage;
             healthBar.SetCurrentHealth(currentHealth);
-
-            animatorHandler.PlayTargetAnimation("DamageHit", true);
 
             if (currentHealth <= 0)
             {
                 currentHealth = 0;
                 animatorHandler.PlayTargetAnimation("Dead", true);
                 isDead = true;
+
+                StartCoroutine(DeathCoroutine()); // Gọi coroutine destroy
+            }
+            else
+            {
+                animatorHandler.PlayTargetAnimation("DamageHit", true);
             }
         }
 
@@ -154,7 +156,7 @@ namespace ND
 
         public void RegenerateStamina()
         {
-            if(playerManager.isInteracting)
+            if(playerManager.isInteracting || playerManager.isSprinting)
             {
                 staminaRegenTimer = 0;
             }
@@ -196,6 +198,16 @@ namespace ND
         public void AddSouls(int souls)
         {
             soulCount = soulCount + souls;
-        }    
+        }
+
+        private IEnumerator DeathCoroutine()
+        {
+            yield return new WaitForSeconds(3f); // Chờ 3 giây cho animation "Dead" chạy
+
+            // Gọi notify cho các hệ thống khác nếu cần (UI, GameManager, Enemy AI...)
+            // Ví dụ: GameManager.Instance.OnPlayerDeath();
+
+            Destroy(gameObject); // Xoá Player sau khi chết
+        }
     }
 }

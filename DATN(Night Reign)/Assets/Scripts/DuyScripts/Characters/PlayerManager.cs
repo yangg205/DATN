@@ -16,8 +16,6 @@ namespace ND
         public GameObject interactableUIGameObject;
         public GameObject itemInteractableGameObject;
 
-        public bool isParrying = false;
-
         public bool isInteracting;
 
         [Header("Player Flags")]
@@ -26,6 +24,7 @@ namespace ND
         public bool isGrounded;
         public bool isInvulnerable;
         public bool canDoCombo;
+        public bool isParrying;
 
         private void Awake()
         {
@@ -74,6 +73,7 @@ namespace ND
             inputHandler.rollFlag = false;
             inputHandler.lightAttack_input = false;
             inputHandler.heavyAttack_input = false;
+            inputHandler.parry_input = false;
             inputHandler.d_Pad_Up = false;
             inputHandler.d_Pad_Down = false;
             inputHandler.d_Pad_Left = false;
