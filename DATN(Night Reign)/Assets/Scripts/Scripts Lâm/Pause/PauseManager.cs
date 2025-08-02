@@ -12,7 +12,7 @@ public class PauseManager : MonoBehaviour
 
     void Start()
     {
-        // Ẩn chuột và khóa khi bắt đầu game
+        // Ẩn chuột và khóa khi bắt đầu
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
 
@@ -27,7 +27,7 @@ public class PauseManager : MonoBehaviour
             if (!isPaused)
                 Pause();
             else
-                Resume(); // Bấm ESC lần 2 cũng sẽ ẩn chuột ở đây
+                Resume();
         }
     }
 
@@ -36,8 +36,11 @@ public class PauseManager : MonoBehaviour
         Time.timeScale = 0f;
         isPaused = true;
 
-        pauseMenuUI.SetActive(true);
+        // Dừng logic điều khiển khác
+        PlayerPause.IsPaused = true;
+        EnemyPause.IsPaused = true;
 
+        pauseMenuUI.SetActive(true);
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
@@ -54,9 +57,10 @@ public class PauseManager : MonoBehaviour
         Time.timeScale = 1f;
         isPaused = false;
 
-        pauseMenuUI.SetActive(false);
+        PlayerPause.IsPaused = false;
+        EnemyPause.IsPaused = false;
 
-        // Ẩn chuột bất kể gọi từ ESC hay Resume button
+        pauseMenuUI.SetActive(false);
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
     }
