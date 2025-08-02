@@ -24,6 +24,9 @@ public class DragonSoulEater : MonoBehaviour
 
     private Transform player;
 
+    [Header("Soul Reward")]
+    public int soulsReward = 50;
+
     [Header("VFX")]
     public ParticleSystem vfxDead;
 
@@ -48,6 +51,7 @@ public class DragonSoulEater : MonoBehaviour
         {
             playerStats = player.GetComponent<PlayerStats>();
         }
+
     }
 
     void Update()
@@ -111,13 +115,18 @@ public class DragonSoulEater : MonoBehaviour
                 // Reset camera
                 ND.CameraHandler.singleton.ClearLockOnTargets();
             }
-            
 
+            SoulCountBar soulCountBar = FindObjectOfType<SoulCountBar>();
             if (playerStats != null)
             {
                 playerStats.GainEXP(expReward);
-            }
+                playerStats.AddSouls(soulsReward); // <-- Dòng này để cộng soul dựa trên giá trị của từng enemy
 
+                if (soulCountBar != null)
+                {
+                    soulCountBar.SetSoulCountText(playerStats.soulCount);
+                }
+            }
         }
         else
         {
