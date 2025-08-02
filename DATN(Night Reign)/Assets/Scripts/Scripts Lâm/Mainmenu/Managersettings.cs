@@ -16,17 +16,19 @@ public class SettingsManager : MonoBehaviour
     public Slider mouseSlider;
     public TextMeshProUGUI mouseValueText;
 
+    [Header("Music & SFX Text")]
+    public TextMeshProUGUI musicValueText;
+    public TextMeshProUGUI effectsValueText;
+
     [Header("Language")]
     public TMP_Dropdown languageDropdown;
 
-    // Danh sách độ phân giải cố định
     private readonly Resolution[] customResolutions = new Resolution[]
     {
         new Resolution { width = 1280, height = 720, refreshRate = 60 },
         new Resolution { width = 1920, height = 1080, refreshRate = 60 }
     };
 
-    // Biến tạm (thay đổi trong Settings Menu nhưng chưa lưu)
     private float tempMusicVolume;
     private float tempEffectsVolume;
     private bool tempFullscreen;
@@ -35,7 +37,7 @@ public class SettingsManager : MonoBehaviour
     private float tempMouseSensitivity;
     private int tempLanguageIndex;
 
-    // Biến để khôi phục nếu Cancel
+    private float savedMouseSensitivity;
     private int savedLanguageIndex;
 
     private float defaultMouseSensitivity = 5.0f;
@@ -49,7 +51,6 @@ public class SettingsManager : MonoBehaviour
     private void InitResolutionDropdown()
     {
         resolutionDropdown.ClearOptions();
-
         var options = new System.Collections.Generic.List<string>();
         foreach (var res in customResolutions)
         {
@@ -69,11 +70,10 @@ public class SettingsManager : MonoBehaviour
         tempMouseSensitivity = PlayerPrefs.GetFloat("MouseSensitivity", defaultMouseSensitivity);
         tempLanguageIndex = PlayerPrefs.GetInt("LanguageIndex", 0);
 
+        savedMouseSensitivity = tempMouseSensitivity;
         savedLanguageIndex = tempLanguageIndex;
 
         // Gán vào UI
-        musicSlider.value = tempMusicVolume;
-        effectsSlider.value = tempEffectsVolume;
         fullscreenToggle.isOn = tempFullscreen;
         resolutionDropdown.value = tempResolutionIndex;
         resolutionDropdown.RefreshShownValue();
@@ -88,18 +88,41 @@ public class SettingsManager : MonoBehaviour
             }
         }
 
+        // Music slider
+        musicSlider.minValue = 0f;
+        musicSlider.maxValue = 1f;
+        musicSlider.value = tempMusicVolume;
+        musicSlider.onValueChanged.RemoveAllListeners();
+        musicSlider.onValueChanged.AddListener((value) =>
+        {
+            tempMusicVolume = value;
+            UpdateMusicValueText(value);
+        });
+        UpdateMusicValueText(tempMusicVolume);
+
+        // Effects slider
+        effectsSlider.minValue = 0f;
+        effectsSlider.maxValue = 1f;
+        effectsSlider.value = tempEffectsVolume;
+        effectsSlider.onValueChanged.RemoveAllListeners();
+        effectsSlider.onValueChanged.AddListener((value) =>
+        {
+            tempEffectsVolume = value;
+            UpdateEffectsValueText(value);
+        });
+        UpdateEffectsValueText(tempEffectsVolume);
+
         // Mouse sensitivity
         mouseSlider.minValue = 0.1f;
         mouseSlider.maxValue = 10f;
         mouseSlider.value = tempMouseSensitivity;
-        UpdateMouseValueText(tempMouseSensitivity);
-
         mouseSlider.onValueChanged.RemoveAllListeners();
         mouseSlider.onValueChanged.AddListener((value) =>
         {
             tempMouseSensitivity = value;
             UpdateMouseValueText(value);
         });
+        UpdateMouseValueText(tempMouseSensitivity);
 
         // Language
         languageDropdown.value = tempLanguageIndex;
@@ -143,6 +166,7 @@ public class SettingsManager : MonoBehaviour
         PlayerPrefs.SetInt("LanguageIndex", tempLanguageIndex);
         PlayerPrefs.Save();
 
+        savedMouseSensitivity = tempMouseSensitivity;
         savedLanguageIndex = tempLanguageIndex;
 
         Debug.Log("Settings Applied");
@@ -150,14 +174,21 @@ public class SettingsManager : MonoBehaviour
 
     public void CancelSettings()
     {
-        // Khôi phục ngôn ngữ và các cài đặt gốc
+        // Khôi phục ngôn ngữ
         tempLanguageIndex = savedLanguageIndex;
         if (LocalizationSettings.AvailableLocales.Locales.Count > savedLanguageIndex)
         {
             LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.Locales[savedLanguageIndex];
         }
 
-        LoadSettings(); // Khôi phục UI
+        // Khôi phục chuột
+        tempMouseSensitivity = savedMouseSensitivity;
+        mouseSlider.value = tempMouseSensitivity;
+        UpdateMouseValueText(tempMouseSensitivity);
+
+        // Khôi phục các thiết lập còn lại
+        LoadSettings();
+
         Debug.Log("Settings Cancelled");
     }
 
@@ -165,5 +196,17 @@ public class SettingsManager : MonoBehaviour
     {
         if (mouseValueText != null)
             mouseValueText.text = value.ToString("F2");
+    }
+
+    private void UpdateMusicValueText(float value)
+    {
+        if (musicValueText != null)
+            musicValueText.text = Mathf.RoundToInt(value * 100).ToString();
+    }
+
+    private void UpdateEffectsValueText(float value)
+    {
+        if (effectsValueText != null)
+            effectsValueText.text = Mathf.RoundToInt(value * 100).ToString();
     }
 }

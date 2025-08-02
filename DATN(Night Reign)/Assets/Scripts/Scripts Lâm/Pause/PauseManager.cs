@@ -3,11 +3,22 @@ using UnityEngine.EventSystems;
 
 public class PauseManager : MonoBehaviour
 {
+    [Header("UI References")]
     public GameObject pauseMenuUI;
     public GameObject settingsPanel;
     public GameObject saveConfirmPanel;
 
     private bool isPaused = false;
+
+    void Start()
+    {
+        // Ẩn chuột và khóa khi bắt đầu
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+
+        if (pauseMenuUI != null)
+            pauseMenuUI.SetActive(false);
+    }
 
     void Update()
     {
@@ -24,15 +35,20 @@ public class PauseManager : MonoBehaviour
     {
         Time.timeScale = 0f;
         isPaused = true;
-        pauseMenuUI.SetActive(true);
 
-        // Đảm bảo panel luôn nằm trên cùng
+        // Dừng logic điều khiển khác
+        PlayerPause.IsPaused = true;
+        EnemyPause.IsPaused = true;
+
+        pauseMenuUI.SetActive(true);
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+
         BringToFront(pauseMenuUI);
 
         if (settingsPanel != null) settingsPanel.SetActive(false);
         if (saveConfirmPanel != null) saveConfirmPanel.SetActive(false);
 
-        // Reset selected UI element (fix hover bug)
         EventSystem.current.SetSelectedGameObject(null);
     }
 
@@ -41,7 +57,13 @@ public class PauseManager : MonoBehaviour
         Time.timeScale = 1f;
         MouseManager.Instance.HideCursorAndEnableInput();
         isPaused = false;
+
+        PlayerPause.IsPaused = false;
+        EnemyPause.IsPaused = false;
+
         pauseMenuUI.SetActive(false);
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     public void QuitGame()
@@ -57,15 +79,13 @@ public class PauseManager : MonoBehaviour
 
     private void BringToFront(GameObject uiElement)
     {
-        // Đưa transform lên cuối để luôn render trên cùng
         uiElement.transform.SetAsLastSibling();
 
-        // Nếu có Canvas riêng, tăng Sorting Order
         Canvas canvas = uiElement.GetComponent<Canvas>();
         if (canvas != null)
         {
             canvas.overrideSorting = true;
-            canvas.sortingOrder = 999; // số lớn để luôn trên cùng
+            canvas.sortingOrder = 999;
         }
     }
 }

@@ -2,26 +2,26 @@
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class CharacterHoverOutline : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class CharacterHoverImage : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    public Outline outline;
+    [Header("Hover Image")]
+    public RawImage hoverImage;
 
     void Awake()
     {
-        outline = GetComponent<Outline>();
-        if (outline != null)
-            outline.enabled = false; // Ẩn mặc định
+        if (hoverImage != null)
+            hoverImage.enabled = false; // Ẩn mặc định
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (outline != null)
-            outline.enabled = true; // Hiện khi hover
+        if (hoverImage != null)
+            hoverImage.enabled = true; // Hiện ảnh khi hover
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        if (outline != null)
-            outline.enabled = false; // Ẩn khi rời chuột
+        if (hoverImage != null)
+            hoverImage.enabled = false; // Ẩn ảnh khi rời chuột
     }
 }
