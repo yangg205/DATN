@@ -12,7 +12,6 @@ public class PauseManager : MonoBehaviour
 
     void Start()
     {
-        // Ẩn chuột và khóa khi bắt đầu
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
 
@@ -33,43 +32,42 @@ public class PauseManager : MonoBehaviour
 
     public void Pause()
     {
-        Time.timeScale = 0f;
+        //Time.timeScale = 0f;
         isPaused = true;
 
-        // Dừng logic điều khiển khác
         PlayerPause.IsPaused = true;
         EnemyPause.IsPaused = true;
 
         pauseMenuUI.SetActive(true);
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
+        MouseManager.Instance.ShowCursorAndDisableInput();
 
         BringToFront(pauseMenuUI);
 
         if (settingsPanel != null) settingsPanel.SetActive(false);
         if (saveConfirmPanel != null) saveConfirmPanel.SetActive(false);
 
+        // Đảm bảo EventSystem có thể chọn button
         EventSystem.current.SetSelectedGameObject(null);
+        var firstButton = pauseMenuUI.GetComponentInChildren<UnityEngine.UI.Button>();
+        if (firstButton != null)
+            EventSystem.current.SetSelectedGameObject(firstButton.gameObject);
     }
 
     public void Resume()
     {
-        Time.timeScale = 1f;
-        MouseManager.Instance.HideCursorAndEnableInput();
+        //Time.timeScale = 1f;
         isPaused = false;
 
         PlayerPause.IsPaused = false;
         EnemyPause.IsPaused = false;
 
         pauseMenuUI.SetActive(false);
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
+        MouseManager.Instance.HideCursorAndEnableInput();
     }
 
     public void QuitGame()
     {
         Debug.Log("Quitting game...");
-
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else

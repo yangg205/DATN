@@ -6,6 +6,8 @@ namespace ND
 {
     public class PlayerInventory : MonoBehaviour
     {
+        public List<GameObject> miscInventory = new List<GameObject>();
+
         WeaponSlotManager weaponSlotManager;
 
         public SpellItem currentSpell;
