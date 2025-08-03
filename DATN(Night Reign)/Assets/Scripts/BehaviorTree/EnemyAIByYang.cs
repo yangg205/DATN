@@ -78,6 +78,7 @@ public class EnemyAIByYang : MonoBehaviour
     private bool _playerDodgedBossSkill = false;
     public bool IsEnraged => _isEnraged;
 
+    public static bool IsPaused = false;
 
     void Awake()
     {
@@ -143,6 +144,8 @@ public class EnemyAIByYang : MonoBehaviour
 
     private void Update()
     {
+        if(IsPaused) return;
+
         Tick();
 
        /* if (Input.GetKeyDown(KeyCode.T))

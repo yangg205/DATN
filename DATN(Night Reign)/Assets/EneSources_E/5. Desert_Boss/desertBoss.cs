@@ -50,6 +50,8 @@ public class desertBoss : MonoBehaviour
     private bool isShouting = false;
     private float attackWindupTime = 0.3f;
 
+    public static bool IsPaused = false;
+
     void Awake()
     {
         GameObject healthSliderObj = GameObject.Find("HealthBarSaMac");
@@ -96,6 +98,8 @@ public class desertBoss : MonoBehaviour
 
     private void Update()
     {
+        if(IsPaused) return;
+
         if (healthSlider.value != currentHP)
         {
             healthSlider.value = currentHP;

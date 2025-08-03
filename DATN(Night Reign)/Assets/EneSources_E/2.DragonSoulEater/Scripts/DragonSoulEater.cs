@@ -42,6 +42,8 @@ public class DragonSoulEater : MonoBehaviour
     public float maxAttackDamage = 15f;
     public QuestManager questManager;
 
+    public static bool IsPaused = false;
+
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
@@ -58,6 +60,8 @@ public class DragonSoulEater : MonoBehaviour
         {
             TakeDamage(15);
         }*/
+
+        if(IsPaused) return;
 
         if (isDead) return;
 
