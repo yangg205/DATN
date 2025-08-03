@@ -48,7 +48,7 @@ GameObject:
   - component: {fileID: 1237087366057114915}
   - component: {fileID: 197621399689941129}
   - component: {fileID: 7808348894588340680}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: DragonSoulEater_Blue
   m_TagString: DragonSoulEater
   m_Icon: {fileID: 0}
@@ -127,7 +127,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 983970137812721851}
   serializedVersion: 4
-  m_Mass: 4
+  m_Mass: 4000
   m_Drag: 0
   m_AngularDrag: 50
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -177,8 +177,8 @@ MonoBehaviour:
   bodyRenderer: {fileID: 2747715081455283824}
   isDead: 0
   isTakingDamage: 0
-  minAttackDamage: 5
-  maxAttackDamage: 15
+  minAttackDamage: 2
+  maxAttackDamage: 5
   questManager: {fileID: 0}
 --- !u!114 &1237087366057114915
 MonoBehaviour:
