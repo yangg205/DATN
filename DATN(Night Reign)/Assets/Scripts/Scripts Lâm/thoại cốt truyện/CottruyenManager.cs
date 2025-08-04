@@ -28,7 +28,7 @@ public class DialogueQueueManager : MonoBehaviour
     public PlayableDirector cutsceneTimeline;
 
     [Header("Scene To Load After Cutscene")]
-    public string nextSceneName = "Map_SaMac";
+    public string nextSceneName = "SceneMergeDat 2";
 
     [Header("Voice Settings")]
     public AudioSource voiceSource;
