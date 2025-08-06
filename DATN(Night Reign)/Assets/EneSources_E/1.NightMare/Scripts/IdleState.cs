@@ -36,8 +36,11 @@ public class IdleState : StateMachineBehaviour
             return;
         }
 
-        float distance = Vector3.Distance(player.position, animator.transform.position);
-        if (distance < chaseRange)
+        float distanceToPlayer = Vector3.Distance(player.position, animator.transform.position);
+        Vector3 dirToPlayer = (player.position - animator.transform.position).normalized;
+        float angleToPlayer = Vector3.Angle(animator.transform.forward, dirToPlayer);
+
+        if (angleToPlayer <= 80f && distanceToPlayer < chaseRange)
             animator.SetBool("isChasing", true);
     }
 

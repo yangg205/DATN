@@ -46,6 +46,7 @@ public class DragonUsurper : MonoBehaviour
     private Transform[] waypoints;
     [SerializeField] private Collider fireBreathCollider;
 
+    public static bool IsPaused = false;
 
     private void Start()
     {
@@ -82,6 +83,8 @@ public class DragonUsurper : MonoBehaviour
 
     private void Update()
     {
+        if(IsPaused) return;
+
         if (healthSlider.value != HP)
         {
             healthSlider.value = HP;

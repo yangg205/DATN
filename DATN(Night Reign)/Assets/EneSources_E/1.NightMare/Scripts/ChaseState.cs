@@ -42,18 +42,22 @@ public class ChaseState : StateMachineBehaviour
             return;
         }
 
-        float distance = Vector3.Distance(animator.transform.position, player.position);
-        if (distance > chaseRange)
+        Vector3 dirToPlayer = (player.position - animator.transform.position).normalized;
+        float angleToPlayer = Vector3.Angle(animator.transform.forward, dirToPlayer);
+        float distanceToPlayer = Vector3.Distance(animator.transform.position, player.position);
+
+        if (distanceToPlayer > chaseRange || angleToPlayer > 80f)
         {
             animator.SetBool("isChasing", false);
             animator.SetBool("isPatrolling", true);
             return;
         }
-        if (distance < attackRange)
+        if (angleToPlayer <= 80f && distanceToPlayer < attackRange)
         {
             animator.SetBool("isAttacking", true);
             return;
         }
+
 
         pathTimer += Time.deltaTime;
         if (pathTimer >= pathUpdateInterval)

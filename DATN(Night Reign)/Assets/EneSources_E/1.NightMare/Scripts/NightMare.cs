@@ -43,7 +43,8 @@ public class NightMare : MonoBehaviour
 
     public int minAttackDamage = 3;
     public int maxAttackDamage = 5;
-
+    
+    public static bool IsPaused = false;
     void Start()
     {
         isDead = false;
@@ -61,6 +62,8 @@ public class NightMare : MonoBehaviour
         {
             TakeDamage(15);
         }*/
+
+        if(IsPaused) return;
 
         if (isDead) return;
 

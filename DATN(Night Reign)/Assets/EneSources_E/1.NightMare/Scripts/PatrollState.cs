@@ -126,8 +126,16 @@ public class PatrollState : StateMachineBehaviour
 
         timer += Time.deltaTime;
 
-        if (player && Vector3.Distance(animator.transform.position, player.position) < chaseRange)
-            animator.SetBool("isChasing", true);
+        if (player)
+        {
+            Vector3 dirToPlayer = (player.position - animator.transform.position).normalized;
+            float angleToPlayer = Vector3.Angle(animator.transform.forward, dirToPlayer);
+            float distanceToPlayer = Vector3.Distance(animator.transform.position, player.position);
+
+            if (angleToPlayer <= 80f && distanceToPlayer < chaseRange)
+                animator.SetBool("isChasing", true);
+        }
+
 
         if (path == null) return;
 
