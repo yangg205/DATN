@@ -4,6 +4,7 @@ public enum WaypointType
 {
     CustomMarker,
     QuestLocation,
+    Checkpoint,
 }
 
 public class Waypoint
