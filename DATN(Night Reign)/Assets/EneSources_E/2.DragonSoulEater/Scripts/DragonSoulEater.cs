@@ -52,20 +52,28 @@ public class DragonSoulEater : MonoBehaviour
         {
             playerStats = player.GetComponent<PlayerStats>();
         }
+        animator.SetTrigger("sleep");
     }
 
     void Update()
     {
-        /*if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.R))
         {
-            TakeDamage(15);
-        }*/
+            soulEaterStun();
+        }
 
-        if(IsPaused) return;
+        if (IsPaused) return;
 
         if (isDead) return;
 
         if (player == null) return;
+    }
+
+    public void soulEaterStun()
+    {
+        StartCoroutine(DamageStunCoroutine());
+        //AudioManager_Enemy.instance.Play("");
+        animator.SetTrigger("stun");
     }
 
     public void TakeDamage(int damageAmount)

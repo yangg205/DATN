@@ -132,7 +132,7 @@ public class PatrollState : StateMachineBehaviour
             float angleToPlayer = Vector3.Angle(animator.transform.forward, dirToPlayer);
             float distanceToPlayer = Vector3.Distance(animator.transform.position, player.position);
 
-            if (angleToPlayer <= 80f && distanceToPlayer < chaseRange)
+            if (angleToPlayer <= 130f && distanceToPlayer < chaseRange)
                 animator.SetBool("isChasing", true);
         }
 
