@@ -62,6 +62,15 @@ namespace ND
         private void Start()
         {
             environmentLayer = LayerMask.NameToLayer("Environment");
+            LoadMouseSensitivity();
+        }
+        //Clam
+        // 📌 Load sensitivity từ PlayerPrefs
+        public void LoadMouseSensitivity()
+        {
+            float sensitivity = PlayerPrefs.GetFloat("MouseSensitivity", 5.0f);
+            lookSpeed = sensitivity * 0.02f;
+            pivotSpeed = sensitivity * 0.02f;
         }
 
         public void FollowTarget(float delta)

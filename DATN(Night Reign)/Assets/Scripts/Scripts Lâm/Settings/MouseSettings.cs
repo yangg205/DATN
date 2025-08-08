@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using ND; // 📌 Namespace của CameraHandler
 
 public class MouseSettings : MonoBehaviour
 {
@@ -14,26 +15,33 @@ public class MouseSettings : MonoBehaviour
 
     void Start()
     {
-        // Đặt giới hạn giá trị slider
-        mouseSlider.minValue = 0.1f;
+        mouseSlider.minValue = 0f;
         mouseSlider.maxValue = 10f;
 
-        // Load từ PlayerPrefs hoặc dùng mặc định
         float savedSensitivity = PlayerPrefs.GetFloat("MouseSensitivity", defaultSensitivity);
         mouseSlider.value = savedSensitivity;
         currentMouseSensitivity = savedSensitivity;
 
         UpdateMouseValue(savedSensitivity);
 
-        // Bắt sự kiện thay đổi slider
+        // Lắng nghe thay đổi slider
         mouseSlider.onValueChanged.AddListener(OnMouseSensitivityChanged);
+
+        // Cập nhật ngay lookSpeed & pivotSpeed khi mở menu
+        ApplyToCameraHandler(savedSensitivity);
     }
 
     void OnMouseSensitivityChanged(float value)
     {
         currentMouseSensitivity = value;
         UpdateMouseValue(value);
-        // KHÔNG lưu ở đây nữa, chỉ lưu khi bấm Apply
+
+        // Lưu ngay lập tức
+        PlayerPrefs.SetFloat("MouseSensitivity", currentMouseSensitivity);
+        PlayerPrefs.Save();
+
+        // Cập nhật CameraHandler
+        ApplyToCameraHandler(value);
     }
 
     void UpdateMouseValue(float value)
@@ -42,9 +50,22 @@ public class MouseSettings : MonoBehaviour
             mouseValueText.text = value.ToString("F2");
     }
 
-    // Gọi từ ApplyButton
-    public void ApplyMouseSensitivity()
+    void ApplyToCameraHandler(float sensitivity)
     {
-        PlayerPrefs.SetFloat("MouseSensitivity", currentMouseSensitivity);
+        if (CameraHandler.singleton != null)
+        {
+            CameraHandler.singleton.lookSpeed = sensitivity * 0.02f;
+            CameraHandler.singleton.pivotSpeed = sensitivity * 0.02f;
+        }
+        else
+        {
+            Debug.LogWarning("Không tìm thấy CameraHandler trong scene!");
+        }
+    }
+
+    // Cho script khác gọi để lấy giá trị
+    public static float GetSavedSensitivity()
+    {
+        return PlayerPrefs.GetFloat("MouseSensitivity", 5.0f);
     }
 }
