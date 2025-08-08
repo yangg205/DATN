@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 
 [RequireComponent(typeof(RectTransform))]
@@ -18,6 +17,18 @@ public class ResolutionDropdownManager : MonoBehaviour
     {
         SetupResolutionDropdown();
         AdjustDropdownLayout();
+
+        // Load lại độ phân giải đã lưu (nếu có)
+        if (PlayerPrefs.HasKey("ResolutionIndex"))
+        {
+            int savedIndex = PlayerPrefs.GetInt("ResolutionIndex");
+            SetResolution(savedIndex);
+            resolutionDropdown.value = savedIndex;
+            resolutionDropdown.RefreshShownValue();
+        }
+
+        // Gắn sự kiện khi đổi dropdown
+        resolutionDropdown.onValueChanged.AddListener(SetResolution);
     }
 
     private void SetupResolutionDropdown()
@@ -32,7 +43,6 @@ public class ResolutionDropdownManager : MonoBehaviour
             string option = $"{filteredResolutions[i].width} x {filteredResolutions[i].height}";
             options.Add(option);
 
-            // Nếu khớp độ phân giải hiện tại của máy
             if (Screen.currentResolution.width == filteredResolutions[i].width &&
                 Screen.currentResolution.height == filteredResolutions[i].height)
             {
@@ -45,12 +55,9 @@ public class ResolutionDropdownManager : MonoBehaviour
         resolutionDropdown.RefreshShownValue();
     }
 
-    // Tự động canh giữa và chỉnh layout hiển thị dropdown
     private void AdjustDropdownLayout()
     {
         RectTransform rect = resolutionDropdown.GetComponent<RectTransform>();
-        //rect.sizeDelta = new Vector2(220, 30); // chiều rộng, chiều cao dropdown
-        //rect.anchoredPosition = new Vector2(0, rect.anchoredPosition.y); // canh giữa theo chiều ngang
         rect.anchorMin = new Vector2(0.5f, rect.anchorMin.y);
         rect.anchorMax = new Vector2(0.5f, rect.anchorMax.y);
         rect.pivot = new Vector2(0.5f, 0.5f);
@@ -60,5 +67,9 @@ public class ResolutionDropdownManager : MonoBehaviour
     {
         Resolution res = filteredResolutions[index];
         Screen.SetResolution(res.width, res.height, Screen.fullScreen);
+
+        // Lưu lại
+        PlayerPrefs.SetInt("ResolutionIndex", index);
+        PlayerPrefs.Save();
     }
 }
