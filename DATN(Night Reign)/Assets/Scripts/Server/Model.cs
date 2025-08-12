@@ -134,4 +134,17 @@ namespace server.model
         public int total_point { get; set; }
         public int rank {  get; set; }
     }
+    public class Battle
+    {
+        public string text { get; set; }
+        public int point { get; set; }
+    }
+    public class BattleRq
+    {
+        public int Player_Characters_id { get; set; }
+        public int Boss_id { get; set; }
+        public int Death { get; set; }
+        public double maxtime { get; set; }
+        public double realtime { get; set; }
+    }
 }
