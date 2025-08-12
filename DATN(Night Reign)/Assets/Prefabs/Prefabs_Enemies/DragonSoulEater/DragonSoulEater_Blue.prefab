@@ -72,6 +72,7 @@ Transform:
   - {fileID: 8578814148721439035}
   - {fileID: 7256554198003924534}
   - {fileID: 8469099288214012254}
+  - {fileID: 4717494543887356940}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!95 &3854826361488099466
@@ -170,6 +171,7 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 1
+  soulsReward: 50
   vfxDead: {fileID: 2013514250003992076}
   iceMaterial: {fileID: 2100000, guid: 9fca7ea8014af5244aa081ccdc46d112, type: 2}
   originalMaterial: {fileID: 2100000, guid: 5fcde950c31077243850f23d14ba9a5a, type: 2}
@@ -179,7 +181,6 @@ MonoBehaviour:
   isTakingDamage: 0
   minAttackDamage: 2
   maxAttackDamage: 5
-  questManager: {fileID: 0}
 --- !u!114 &1237087366057114915
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1396,6 +1397,59 @@ Transform:
   - {fileID: 8089087635577424707}
   m_Father: {fileID: 8578814148721439035}
   m_LocalEulerAnglesHint: {x: 9.367968e-16, y: -180, z: 39.582893}
+--- !u!1 &4030942142053888988
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4717494543887356940}
+  - component: {fileID: 2692412107510113974}
+  m_Layer: 6
+  m_Name: Back Stab Collider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4717494543887356940
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4030942142053888988}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 2.34, z: -2.42}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2122478552522060171}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &2692412107510113974
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4030942142053888988}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 2.5212126, y: 1.935772, z: 0.15305996}
+  m_Center: {x: 0.034508407, y: 0.46788588, z: 0.54431677}
 --- !u!1 &4032579043526166231
 GameObject:
   m_ObjectHideFlags: 0
