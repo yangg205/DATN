@@ -4,8 +4,8 @@ namespace ND
 {
     public class WeaponSlotManager : MonoBehaviour
     {
-        WeaponHolderSlot leftHandSlot;
-        WeaponHolderSlot rightHandSlot;
+        public WeaponHolderSlot leftHandSlot;
+        public WeaponHolderSlot rightHandSlot;
         WeaponHolderSlot backSlot;
 
         DamageCollider leftHandDamageCollider;

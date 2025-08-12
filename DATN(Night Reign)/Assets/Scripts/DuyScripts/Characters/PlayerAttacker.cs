@@ -14,6 +14,8 @@ namespace ND
         PlayerEffectManager playerEffectManager;
         public string lastAttack;
 
+        LayerMask backStabLayer = 1 << 19;
+
         private SkillFXController skillFX;
 
         public int CurrentLightComboStep => lightComboStep;
@@ -267,6 +269,16 @@ namespace ND
             playerInventory.currentSpell.SuccessfullyCastSpell(animatorHandler, playerStats);
         }
         #endregion
+
+        public void AttemptBackStabOrRiposte()
+        {
+            RaycastHit hit;
+
+            if (Physics.Raycast(inputHandler.criticalAttackRayCastStartPoint.position, transform.TransformDirection(Vector3.forward), out hit, 0.5f, backStabLayer))
+            {
+
+            }
+        }  
 
         public void ResetCombos()
         {
