@@ -13,4 +13,7 @@ public class BossBlackboard : MonoBehaviour
     public float attackCooldown;
     public float timeSinceLastAttack;
     public Animator animator;
+
+    public bool hasTarget = false;
+
 }

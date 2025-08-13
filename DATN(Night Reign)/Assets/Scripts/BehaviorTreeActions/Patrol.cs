@@ -11,8 +11,12 @@ public class Patrol : Action
 
     public float arriveThreshold = 1.5f;
 
+    float timer;
+
     public override void OnStart()
     {
+        timer = 0; 
+
         movement = GetComponent<BossMovementAStar>();
         blackboard = GetComponent<BossBlackboard>();
 
@@ -25,7 +29,16 @@ public class Patrol : Action
 
     public override TaskStatus OnUpdate()
     {
-        if (waypoints.Length == 0) return TaskStatus.Failure;
+
+        timer += Time.deltaTime;
+
+        if (waypoints.Length == 0)
+        {
+            if (timer > 4f) return TaskStatus.Failure;
+            return TaskStatus.Running;
+        }
+
+
 
         movement.MoveTo(waypoints[currentIndex].position);
 

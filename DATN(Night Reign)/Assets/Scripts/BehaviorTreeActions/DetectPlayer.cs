@@ -14,6 +14,11 @@ public class DetectPlayer : Conditional
         if (hits.Length > 0)
         {
             playerTransform.Value = hits[0].transform;
+
+            var blackboard = GetComponent<BossBlackboard>();
+            blackboard.player = hits[0].transform;
+            blackboard.hasTarget = true;
+
             Debug.Log("[DetectPlayer] Player detected.");
             return TaskStatus.Success;
         }
