@@ -24,9 +24,6 @@ public class DragonSoulEater : MonoBehaviour
 
     private Transform player;
 
-    [Header("Soul Reward")]
-    public int soulsReward = 50;
-
     [Header("VFX")]
     public ParticleSystem vfxDead;
 
@@ -43,31 +40,40 @@ public class DragonSoulEater : MonoBehaviour
 
     public float minAttackDamage = 5f;
     public float maxAttackDamage = 15f;
+    public QuestManager questManager;
 
     public static bool IsPaused = false;
 
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
+        questManager = FindObjectOfType<QuestManager>();
         if (player != null)
         {
             playerStats = player.GetComponent<PlayerStats>();
         }
-
+        animator.SetTrigger("sleep");
     }
 
     void Update()
     {
-        /*if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.R))
         {
-            TakeDamage(15);
-        }*/
+            soulEaterStun();
+        }
 
-        if(IsPaused) return;
+        if (IsPaused) return;
 
         if (isDead) return;
 
         if (player == null) return;
+    }
+
+    public void soulEaterStun()
+    {
+        StartCoroutine(DamageStunCoroutine());
+        //AudioManager_Enemy.instance.Play("");
+        animator.SetTrigger("stun");
     }
 
     public void TakeDamage(int damageAmount)
@@ -104,6 +110,7 @@ public class DragonSoulEater : MonoBehaviour
 
             StartCoroutine(DeathCoroutine());
 
+            questManager.ReportKill();
             // 💥 Nếu enemy này đang bị lock-on thì thoát lock-on
             if (ND.CameraHandler.singleton != null &&
                 ND.CameraHandler.singleton.currentLockOnTarget == this)
@@ -119,18 +126,13 @@ public class DragonSoulEater : MonoBehaviour
                 // Reset camera
                 ND.CameraHandler.singleton.ClearLockOnTargets();
             }
+            
 
-            SoulCountBar soulCountBar = FindObjectOfType<SoulCountBar>();
             if (playerStats != null)
             {
                 playerStats.GainEXP(expReward);
-                playerStats.AddSouls(soulsReward); // <-- Dòng này để cộng soul dựa trên giá trị của từng enemy
-
-                if (soulCountBar != null)
-                {
-                    soulCountBar.SetSoulCountText(playerStats.soulCount);
-                }
             }
+
         }
         else
         {
@@ -263,26 +265,16 @@ public class DragonSoulEater : MonoBehaviour
 
     IEnumerator DeathCoroutine()
     {
-        // Đợi 1 giây trước khi xử lý death
         yield return new WaitForSeconds(1f);
 
-        // Kiểm tra và rơi item
+        // Rơi item
         if (itemDropPrefab != null)
         {
-            Vector3 dropPosition = dropPoint != null ? dropPoint.position : transform.position + Vector3.up * 0.5f;
-
-            GameObject droppedItem = Instantiate(itemDropPrefab, dropPosition, Quaternion.identity);
-            droppedItem.name = "Dropped_Weapon_Item";
-
-            Debug.Log("Item dropped at: " + dropPosition);
-        }
-        else
-        {
-            Debug.LogWarning("No itemDropPrefab assigned on " + gameObject.name);
+            Vector3 dropPosition = dropPoint != null ? dropPoint.position : transform.position;
+            Instantiate(itemDropPrefab, dropPosition, Quaternion.identity);
         }
 
-        // Hủy enemy sau 2 giây
-        Destroy(gameObject, 2f);
+        Destroy(gameObject, 7f);
     }
 
 }
