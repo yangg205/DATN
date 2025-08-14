@@ -9,6 +9,7 @@ public enum QuestType
 {
     KillEnemies,
     FindNPC,
+    KillBoss,
     CollectItem
 }
 
@@ -55,6 +56,21 @@ public class QuestData : ScriptableObject
 
     [Tooltip("Icon waypoint tùy chỉnh (nếu null thì dùng mặc định).")]
     public Sprite questLocationIcon;
+
+    [Tooltip("ID của Boss mục tiêu trong nhiệm vụ KillBoss.")]
+    public int bossId;
+    public int bossMaxTime;
+    public GameObject bossPrefab;
+
+    [Header("Boss Settings")]
+    [Tooltip("Spawn boss khi người chơi bước vào khu vực.")]
+    public bool spawnBossOnEnter = false;
+
+    [Tooltip("Prefab của boss zone (nếu cần hiển thị vùng chiến đấu).")]
+    public GameObject bossZonePrefab;
+
+    [Tooltip("Kích hoạt boss zone ngay khi spawn boss.")]
+    public bool activateBossZoneOnSpawn = false;
 
     [Header("Quest Rewards")]
     public int rewardCoin;

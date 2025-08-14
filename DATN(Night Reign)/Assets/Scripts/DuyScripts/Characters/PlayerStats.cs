@@ -209,5 +209,15 @@ namespace ND
 
             Destroy(gameObject); // Xoá Player sau khi chết
         }
+        public void RespawnAt(Vector3 location)
+        {
+            currentHealth = maxHealth;
+            currentStamina = maxStamina;
+            transform.position = location;
+        }
+        public int GetPlayerCharacterId()
+        {
+            return PlayerPrefs.GetInt("PlayerCharacterId", 0);
+        }
     }
 }
