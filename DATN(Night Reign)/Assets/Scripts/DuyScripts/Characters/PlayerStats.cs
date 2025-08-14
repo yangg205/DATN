@@ -31,7 +31,6 @@ namespace ND
         public float currentFocusPoint;
 
         public int soulCount = 0;
-
         public HealthBar healthBar;
         public StaminaBar staminaBar;
         public FocusPointBar focusPointBar;
@@ -55,6 +54,7 @@ namespace ND
 
         void Start()
         {   
+            
             maxHealth = SetMaxHealthFromHealthLevel();
             currentHealth = maxHealth;
             healthBar.SetMaxHealth(maxHealth);

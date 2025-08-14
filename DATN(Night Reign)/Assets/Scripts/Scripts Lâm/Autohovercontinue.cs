@@ -75,7 +75,7 @@ public class AutoOutline : MonoBehaviour
             if (NotificationManager != null) NotificationManager.ShowNotification(result.message, 2);
             Debug.Log("Dữ liệu game đã tải thành công và được lưu trữ tạm thời.");
             Debug.Log($"HP tải về: {GameDataHolder.LoadedPlayerCharactersData.Current_hp}");
-            SceneManager.LoadScene("MapTutorial"); // Chuyển sang scene VucLavareach
+            SceneManager.LoadScene("SceneMergeDat 3"); // Chuyển sang scene VucLavareach
 
         }
         else

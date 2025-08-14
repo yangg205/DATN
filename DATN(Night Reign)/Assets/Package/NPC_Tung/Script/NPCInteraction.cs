@@ -42,7 +42,7 @@ public class NPCInteraction : MonoBehaviour
         InitializeUIElements();
         LocalizationSettings.SelectedLocaleChanged += OnLanguageChangedHandler;
         Debug.Log($"[NPCInteraction] Initialized for NPC {npcID}");
-        questManager.ResetAllQuests();//không muốn reset thì cmd nó lại
+        //questManager.ResetAllQuests();//không muốn reset thì cmd nó lại
     }
 
     private void OnDestroy()
@@ -66,8 +66,14 @@ public class NPCInteraction : MonoBehaviour
         {
             Debug.Log($"[NPCInteraction] Player pressed Q to report kill for NPC {npcID}");
             questManager.ReportKill();
+            
             SimpleInventory.Instance?.AddItem("Shadow Fangs", 5);
+            SimpleInventory.Instance?.AddItem("Snow Crystals", 5);
             questManager.CheckItemCollectionProgress();
+        }
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            questManager.OnBossDefeated(currentQuestData);
         }
     }
 
@@ -473,7 +479,7 @@ public class NPCInteraction : MonoBehaviour
                 Debug.Log($"[NPCInteraction] Registered listener for continueButton of NPC {npcID}");
             }
         }
-        if (panelPressText != null) panelPressText.gameObject.SetActive(false);
+        //if (panelPressText != null) panelPressText.gameObject.SetActive(false);
     }
 
     private void ResetActiveNPC()
@@ -486,22 +492,22 @@ public class NPCInteraction : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void OnCollisionEnter(Collision collision)
     {
-        if (other.CompareTag("Player"))
+        if (collision.gameObject.CompareTag("Player"))
         {
-            Debug.Log($"[NPCInteraction] Player entered trigger range of NPC {npcID}");
+            Debug.Log($"[NPCInteraction] Player collided with NPC {npcID}");
             isPlayerInRange = true;
             if (panelPressText != null) panelPressText.gameObject.SetActive(true);
             UpdateActiveNPC();
         }
     }
 
-    private void OnTriggerExit(Collider other)
+    private void OnCollisionExit(Collision collision)
     {
-        if (other.CompareTag("Player"))
+        if (collision.gameObject.CompareTag("Player"))
         {
-            Debug.Log($"[NPCInteraction] Player exited trigger range of NPC {npcID}");
+            Debug.Log($"[NPCInteraction] Player stopped colliding with NPC {npcID}");
             isPlayerInRange = false;
             if (panelPressText != null) panelPressText.gameObject.SetActive(false);
             HideQuestUI();
@@ -510,4 +516,5 @@ public class NPCInteraction : MonoBehaviour
             if (activeNPC == this) ResetActiveNPC();
         }
     }
+
 }

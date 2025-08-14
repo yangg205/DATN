@@ -511,12 +511,11 @@ public class QuestManager : MonoBehaviour
         if (quest == null) return;
         var status = GetQuestStatus(quest);
         if (status == null) return;
-
         // mark objective met
         status.isObjectiveMet = true;
         status.isCompleted = true;
         quest.isQuestCompleted = true;
-
+        status.currentProgress++;
         // deactivate zone
         status.bossZone?.DeactivateZone();
 

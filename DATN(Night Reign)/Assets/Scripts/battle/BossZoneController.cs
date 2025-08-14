@@ -2,18 +2,23 @@
 
 public class BossZoneController : MonoBehaviour
 {
-    [Tooltip("Các barrier (collider) để bật khi zone activate).")]
-    public GameObject[] barriers; // ví dụ tường invisible
+    private Collider col;
+
+    private void Awake()
+    {
+        col = GetComponent<Collider>();
+        col.enabled = false; // mặc định tắt rào chắn
+    }
 
     public void ActivateZone()
     {
-        foreach (var go in barriers)
-            if (go) go.SetActive(true);
+        col.enabled = true; // bật rào chắn
+        Debug.Log("Boss Zone Activated - Player không thể thoát!");
     }
 
     public void DeactivateZone()
     {
-        foreach (var go in barriers)
-            if (go) go.SetActive(false);
+        col.enabled = false; // mở rào chắn
+        Debug.Log("Boss Zone Deactivated - Player có thể thoát!");
     }
 }
