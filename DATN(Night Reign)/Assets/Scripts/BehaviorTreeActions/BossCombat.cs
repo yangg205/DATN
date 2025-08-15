@@ -1,4 +1,5 @@
 using Pathfinding;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class BossCombat : MonoBehaviour
@@ -10,15 +11,18 @@ public class BossCombat : MonoBehaviour
     }
     public void AttackNormal()
     {
-        Debug.Log("[BossCombat] Normal melee attack triggered.");
+        //Debug.Log("[BossCombat] Normal melee attack triggered.");
 
-        int animationChoice = UnityEngine.Random.Range(1, 3);
+        int animationChoice = UnityEngine.Random.Range(1, 4);
         switch (animationChoice)
         {
             case 1:
                 _blackboard.animator?.SetTrigger("Attack1");
                 break;
             case 2:
+                _blackboard.animator?.SetTrigger("JumpToPlayer");
+                break;
+            case 3:
                 _blackboard.animator?.SetTrigger("Attack2");
                 break;
 

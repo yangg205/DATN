@@ -1,17 +1,19 @@
 ﻿using UnityEngine;
 using BehaviorDesigner.Runtime;
 using BehaviorDesigner.Runtime.Tasks;
+using UnityEditor.Experimental.GraphView;
 
 public class ChasePlayer : Action
 {
     public SharedTransform playerTransform;
     private BossMovementAStar movement;
-
+    private BossBlackboard _blackboard;
     public float stopDistance = 2.5f; // chỉnh đúng khoảng tấn công
 
     public override void OnStart()
     {
         movement = GetComponent<BossMovementAStar>();
+        _blackboard = GetComponent<BossBlackboard>();
         Debug.Log("[ChasePlayer] Start chasing player.");
     }
 
