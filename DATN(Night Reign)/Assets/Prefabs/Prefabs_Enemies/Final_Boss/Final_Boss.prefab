@@ -1267,8 +1267,8 @@ GameObject:
   - component: {fileID: 6823198113458824729}
   - component: {fileID: 1528002948953830784}
   - component: {fileID: 4951896987587165810}
-  - component: {fileID: 6666696840365419281}
   - component: {fileID: 7127724147860072280}
+  - component: {fileID: 5063262228838304989}
   m_Layer: 0
   m_Name: Final_Boss
   m_TagString: Untagged
@@ -1304,11 +1304,11 @@ Animator:
   m_Avatar: {fileID: 9000000, guid: e5538df838ba55542888e21325854bb1, type: 3}
   m_Controller: {fileID: 9100000, guid: 75cd82e1103d0a641aea46bd8c22694f, type: 2}
   m_CullingMode: 0
-  m_UpdateMode: 1
+  m_UpdateMode: 0
   m_ApplyRootMotion: 1
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
-  m_AnimatePhysics: 1
+  m_AnimatePhysics: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
@@ -1355,7 +1355,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   version: 5
-  radius: 0.54
+  radius: 0.41
   height: 2.6
   canMove: 0
   maxSpeed: 3
@@ -1431,41 +1431,6 @@ MonoBehaviour:
   timeSinceLastAttack: -999
   animator: {fileID: 8868478865127377267}
   hasTarget: 0
---- !u!114 &6666696840365419281
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3257909297973677008}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b95437d4527a32408b57e22372be350, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  staminaRegenerationAmount: 10
-  staminaRegenTimer: 0
-  baseAttackSpeed: 1
-  currentAttackSpeed: 1
-  healthLevel: 10
-  maxHealth: 0
-  currentHealth: 0
-  staminaLevel: 10
-  maxStamina: 0
-  currentStamina: 0
-  playerLevel: 1
-  currentEXP: 0
-  expToNextLevel: 100
-  focusLevel: 10
-  maxFocusPoint: 0
-  currentFocusPoint: 0
-  soulCount: 0
-  healthBar: {fileID: 0}
-  staminaBar: {fileID: 0}
-  focusPointBar: {fileID: 0}
-  expBar: {fileID: 0}
-  levelText: {fileID: 0}
-  isDead: 0
 --- !u!114 &7127724147860072280
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1521,6 +1486,29 @@ MonoBehaviour:
       Version: 1.7.7
   gizmoViewMode: 2
   showBehaviorDesignerGizmo: 1
+--- !u!136 &5063262228838304989
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3257909297973677008}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.27192432
+  m_Height: 2.623961
+  m_Direction: 1
+  m_Center: {x: 0.0063272715, y: 1.2949691, z: -0.024499416}
 --- !u!1 &3301453947724469792
 GameObject:
   m_ObjectHideFlags: 0

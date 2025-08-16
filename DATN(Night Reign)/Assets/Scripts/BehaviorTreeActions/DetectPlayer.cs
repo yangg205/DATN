@@ -7,6 +7,10 @@ public class DetectPlayer : Conditional
     public float detectionRange = 15f;
     public LayerMask playerLayer;
     public SharedTransform playerTransform;
+    public override void OnStart()
+    {
+        playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+    }
 
     public override TaskStatus OnUpdate()
     {

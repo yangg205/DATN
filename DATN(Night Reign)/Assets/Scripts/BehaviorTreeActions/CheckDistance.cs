@@ -1,6 +1,7 @@
 using UnityEngine;
 using BehaviorDesigner.Runtime;
 using BehaviorDesigner.Runtime.Tasks;
+using BehaviorDesigner.Runtime.Tasks.Unity.UnityGameObject;
 
 public class CheckDistance : Conditional
 {
@@ -8,6 +9,10 @@ public class CheckDistance : Conditional
     public float minDistance = 0f;
     public float maxDistance = 100f;
 
+    public override void OnStart()
+    {
+        playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+    }
     public override TaskStatus OnUpdate()
     {
         if (playerTransform.Value == null) return TaskStatus.Failure;

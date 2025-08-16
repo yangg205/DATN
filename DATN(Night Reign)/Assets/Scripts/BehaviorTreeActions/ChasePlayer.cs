@@ -12,6 +12,7 @@ public class ChasePlayer : Action
 
     public override void OnStart()
     {
+        playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
         movement = GetComponent<BossMovementAStar>();
         _blackboard = GetComponent<BossBlackboard>();
         Debug.Log("[ChasePlayer] Start chasing player.");
