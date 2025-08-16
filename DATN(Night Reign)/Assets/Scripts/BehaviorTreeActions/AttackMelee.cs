@@ -2,12 +2,12 @@
 using BehaviorDesigner.Runtime;
 using BehaviorDesigner.Runtime.Tasks;
 using UnityEditor.Experimental.GraphView;
+using BehaviorDesigner.Runtime.Tasks.Movement;
 
 public class AttackMelee : Action
 {
     private BossCombat combat;
     private BossBlackboard blackboard;
-
     public SharedFloat cooldownTime = 2.5f;
     private bool hasAttacked = false;
     private float attackStartTime = -999f;

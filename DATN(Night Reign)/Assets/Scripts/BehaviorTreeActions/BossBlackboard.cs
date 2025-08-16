@@ -4,8 +4,8 @@ using UnityEngine;
 public class BossBlackboard : MonoBehaviour
 {
     public Transform player;
-    public float currentHP = 3000f;
-    public float maxHP = 3000f;
+    public float currentHP;
+    public float maxHP = 1000f;
     public bool isInSecondPhase;
     public bool isInThirdPhase;
     public bool canSeePlayer;
@@ -15,5 +15,12 @@ public class BossBlackboard : MonoBehaviour
     public Animator animator;
 
     public bool hasTarget = false;
+
+    void Start()
+    {
+        currentHP = maxHP;  
+    }
+
+
 
 }
