@@ -91,7 +91,7 @@ namespace ND
                 inputActions.PlayerActions.Inventory.performed += i => HandleInventoryInput();
                 inputActions.PlayerMovement.LockOnTargetRight.performed += i => right_Stick_Right_Input = true;
                 inputActions.PlayerMovement.LockOnTargetLeft.performed += i => right_Stick_Left_Input = true;
-                inputActions.PlayerActions.TwoHand.performed += i => twoHand_input = true;
+                inputActions.PlayerActions.Y.performed += i => twoHand_input = true;
                 inputActions.PlayerActions.CriticalAttack.performed += i => critical_Attack_input = true;
                 inputActions.PlayerActions.Skill.performed += i => skill_input = true;
                 inputActions.PlayerActions.BoostAttackSpeed.performed += i => attackSpeedBoost_input = true;

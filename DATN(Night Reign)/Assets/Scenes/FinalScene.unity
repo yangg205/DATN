@@ -3138,6 +3138,12 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1064520589}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &452760332 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4175121514355726629, guid: c778d3b3710df7e4ea47a85a07308037,
+    type: 3}
+  m_PrefabInstance: {fileID: 8131247054947089688}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &455802752
 GameObject:
   m_ObjectHideFlags: 0
@@ -3402,7 +3408,7 @@ Transform:
   m_GameObject: {fileID: 479497724}
   serializedVersion: 2
   m_LocalRotation: {x: 0.06957201, y: 0.6898025, z: 0.09573393, w: 0.7142599}
-  m_LocalPosition: {x: 0.0057142996, y: 0.16657579, z: 0.96553874}
+  m_LocalPosition: {x: 0.0057144165, y: 0.16657627, z: 0.96553874}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5369,7 +5375,7 @@ Transform:
   m_GameObject: {fileID: 865005017}
   serializedVersion: 2
   m_LocalRotation: {x: 0.06957201, y: 0.6898025, z: 0.09573393, w: 0.7142599}
-  m_LocalPosition: {x: 0.0057142996, y: 0.16657579, z: 0.96553874}
+  m_LocalPosition: {x: 0.0057144165, y: 0.16657627, z: 0.96553874}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5894,8 +5900,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   parentOverride: {fileID: 1870528113}
+  currentWeapon: {fileID: 0}
   isLeftHandSlot: 1
   isRightHandSlot: 0
+  isBackSlot: 0
   currentWeaponModel: {fileID: 0}
 --- !u!1 &938171921
 GameObject:
@@ -6403,9 +6411,10 @@ MonoBehaviour:
   mouseX: 0
   mouseY: 0
   b_input: 0
+  x_input: 0
+  y_input: 0
   rb_input: 0
   rt_input: 0
-  x_input: 0
   jump_input: 0
   inventory_input: 0
   lockOn_input: 0
@@ -6416,6 +6425,7 @@ MonoBehaviour:
   d_pad_Left: 0
   d_pad_Right: 0
   rollFlag: 0
+  twoHandFlag: 0
   sprintFlag: 0
   comboFlag: 0
   lockOnFlag: 0
@@ -7373,8 +7383,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   parentOverride: {fileID: 1094867899}
+  currentWeapon: {fileID: 0}
   isLeftHandSlot: 0
   isRightHandSlot: 1
+  isBackSlot: 0
   currentWeaponModel: {fileID: 0}
 --- !u!1 &1095388609
 GameObject:
@@ -8030,6 +8042,56 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.61263096, y: 0.1190942, z: 0.50815046}
     m_Extent: {x: 0.19349061, y: 0.23160386, z: 0.14344466}
   m_DirtyAABB: 0
+--- !u!1 &1220061194
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1220061195}
+  - component: {fileID: 1220061196}
+  m_Layer: 0
+  m_Name: Back Weapon Slot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1220061195
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1220061194}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.027212463, y: 0.5358084, z: 0.03282698, w: 0.8432624}
+  m_LocalPosition: {x: -0.082, y: 0.175, z: 0.076}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 452760332}
+  m_LocalEulerAnglesHint: {x: 0.614, y: 64.89, z: 4.849}
+--- !u!114 &1220061196
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1220061194}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20c2167a328da4142a9103f114617f29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parentOverride: {fileID: 1220061195}
+  currentWeapon: {fileID: 0}
+  isLeftHandSlot: 0
+  isRightHandSlot: 0
+  isBackSlot: 1
+  currentWeaponModel: {fileID: 0}
 --- !u!1 &1235012030
 GameObject:
   m_ObjectHideFlags: 0
@@ -14993,7 +15055,7 @@ Transform:
   m_GameObject: {fileID: 4540694416459854746}
   serializedVersion: 2
   m_LocalRotation: {x: 0.06957201, y: 0.6898025, z: 0.09573393, w: 0.7142599}
-  m_LocalPosition: {x: 0.0057142996, y: 0.16657579, z: 0.96553874}
+  m_LocalPosition: {x: 0.0057142973, y: 0.16657627, z: 0.96553874}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -25490,8 +25552,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   parentOverride: {fileID: 5421706482915087182}
+  currentWeapon: {fileID: 0}
   isLeftHandSlot: 0
   isRightHandSlot: 1
+  isBackSlot: 0
   currentWeaponModel: {fileID: 0}
 --- !u!114 &5427363582401223838
 MonoBehaviour:
@@ -31670,8 +31734,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   parentOverride: {fileID: 459159953}
+  currentWeapon: {fileID: 0}
   isLeftHandSlot: 1
   isRightHandSlot: 0
+  isBackSlot: 0
   currentWeaponModel: {fileID: 0}
 --- !u!1 &6723946745448526166
 GameObject:
@@ -33654,6 +33720,10 @@ PrefabInstance:
     - {fileID: 4488630478037828253, guid: c778d3b3710df7e4ea47a85a07308037, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 4175121514355726629, guid: c778d3b3710df7e4ea47a85a07308037,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1220061195}
     - targetCorrespondingSourceObject: {fileID: 3020175258712126154, guid: c778d3b3710df7e4ea47a85a07308037,
         type: 3}
       insertIndex: -1

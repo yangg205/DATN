@@ -11,6 +11,7 @@ namespace AG
         [Header("Idle Animations")]
         public string right_hand_idle;
         public string left_hand_idle;
+        public string th_idle;
 
         [Header("One Hand Attack Animation")]
         public string Oh_Light_Attack_1;
@@ -18,6 +19,12 @@ namespace AG
         public string Oh_Light_Attack_3;
         public string Oh_Heavy_Attack_1;
         public string Oh_Heavy_Attack_2;
+
+        [Header("Two Hand Attack Animation")]
+        public string Th_Light_Attack_1;
+        public string Th_Light_Attack_2;
+        public string Th_Light_Attack_3;
+        public string Th_Heavy_Attack_1;
 
         [Header("Stamina Costs")]
         public int baseStamina;
