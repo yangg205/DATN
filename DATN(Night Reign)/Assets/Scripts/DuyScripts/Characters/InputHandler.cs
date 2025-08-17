@@ -77,9 +77,9 @@ namespace ND
 
                 inputActions.PlayerMovement.Movement.performed += i => movementInput = i.ReadValue<Vector2>();
                 inputActions.PlayerMovement.Camera.performed += i => cameraInput = i.ReadValue<Vector2>();
-                inputActions.PlayerActions.LightAttack.performed += i => lightAttack_input = true;
-                inputActions.PlayerActions.HeavyAttack.performed += i => heavyAttack_input = true;
-                inputActions.PlayerActions.Interact.performed += i => interact_input = true;
+                inputActions.PlayerActions.RB.performed += i => lightAttack_input = true;
+                inputActions.PlayerActions.RT.performed += i => heavyAttack_input = true;
+                inputActions.PlayerActions.X.performed += i => interact_input = true;
                 inputActions.PlayerActions.Roll.performed += i => roll_input = true;
                 inputActions.PlayerActions.Roll.canceled += i => roll_input = false;
                 inputActions.PlayerActions.Jump.performed += i => jump_input = true;

@@ -100,17 +100,6 @@
                 },
                 {
                     "name": "",
-                    "id": "374d9863-4084-4f04-800b-21115fb6a664",
-                    "path": "<Gamepad>/leftStick",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Movement",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "02205d38-0fed-4947-8887-ccbff05f0eaf",
                     "path": "<Gamepad>/rightStick",
                     "interactions": "",
@@ -145,7 +134,7 @@
                 {
                     "name": "",
                     "id": "78221d18-43e2-4899-b6e4-749213e9d93d",
-                    "path": "<Keyboard>/9",
+                    "path": "<Keyboard>/1",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -167,7 +156,7 @@
                 {
                     "name": "",
                     "id": "7cb5d72e-c155-476f-9905-332c14616a3e",
-                    "path": "<Keyboard>/0",
+                    "path": "<Keyboard>/2",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -191,7 +180,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Light Attack",
+                    "name": "RB",
                     "type": "Button",
                     "id": "5bd32765-10f5-435c-a15b-0c8f253db68f",
                     "expectedControlType": "",
@@ -200,7 +189,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Heavy Attack",
+                    "name": "RT",
                     "type": "Button",
                     "id": "b416b9ef-3f72-423b-8772-62563e83bfab",
                     "expectedControlType": "",
@@ -209,7 +198,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Interact",
+                    "name": "X",
                     "type": "Button",
                     "id": "531aae87-f905-4b14-8e19-462abbc01bbb",
                     "expectedControlType": "",
@@ -311,6 +300,17 @@
             "bindings": [
                 {
                     "name": "",
+                    "id": "aed18f3b-7d19-42fe-a7f8-e8de16bf1035",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Roll",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "097e8944-18fa-4d40-ae77-4ef952bd37b2",
                     "path": "<Keyboard>/leftShift",
                     "interactions": "",
@@ -322,78 +322,23 @@
                 },
                 {
                     "name": "",
-                    "id": "aed18f3b-7d19-42fe-a7f8-e8de16bf1035",
-                    "path": "<XInputController>/buttonEast",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Roll",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "23ccc5fe-fc8b-41a7-8f47-a660cfed607d",
-                    "path": "<Mouse>/leftButton",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Light Attack",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "feeee9be-0294-4b8c-bb18-b7b5872367ec",
-                    "path": "<XInputController>/rightShoulder",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Light Attack",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "1996a7bc-3122-4f13-be8b-b9e60119f57d",
-                    "path": "<Mouse>/rightButton",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Heavy Attack",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "3ceb6cda-753e-4e1e-afe9-7e4fda8abe81",
-                    "path": "<XInputController>/rightTrigger",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Heavy Attack",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "d394e836-b44e-46ca-9c28-77e9cc3be3ca",
                     "path": "<Keyboard>/e",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Interact",
+                    "action": "X",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
                     "id": "c3d429ae-fe73-40c9-99a8-e76ed23d581a",
-                    "path": "<XInputController>/buttonNorth",
+                    "path": "<XInputController>/buttonWest",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Interact",
+                    "action": "X",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -537,6 +482,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "Aim",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4bf748b5-caf9-42ac-803c-e9c596c7f33b",
+                    "path": "<Keyboard>/z",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RB",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b92af8e0-c4a0-4efc-b995-ab0da03a87d1",
+                    "path": "<Keyboard>/x",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RT",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

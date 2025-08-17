@@ -15,10 +15,10 @@ public class PlayerBowHandler : MonoBehaviour
 
     void Awake()
     {
-        playerLocomotion = GetComponent<PlayerLocomotion>();
-        inputHandler = GetComponent<InputHandler>();
-        animatorHandler = GetComponentInChildren<AnimatorHandler>();
-        weaponSlotManager = GetComponentInChildren<WeaponSlotManager>();
+        playerLocomotion = GetComponentInParent<PlayerLocomotion>();
+        inputHandler = GetComponentInParent<InputHandler>();
+        animatorHandler = GetComponent<AnimatorHandler>();
+        weaponSlotManager = GetComponent<WeaponSlotManager>();
     }
 
     void Update()
