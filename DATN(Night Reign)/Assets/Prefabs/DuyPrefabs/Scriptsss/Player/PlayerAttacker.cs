@@ -13,6 +13,8 @@ namespace AG
         WeaponSlotManager weaponSlotManager;
         public string lastAttack;
 
+        LayerMask backStabLayer = 1 << 23;
+
         private void Awake()
         {
             animationHandler = GetComponent<AnimatorHandler>();
@@ -131,15 +133,25 @@ namespace AG
             {
                 inputHandler.queuedLightAttack = true;
             }
-        }
+        } 
 
         private void PerformRBMagicAction(WeaponItem weapon)
         {
+            if (playerManager.isInteracting)
+                return;
+
             if(weapon.isFaithCaster)
             {
                 if(playerInventory.currentSpell != null && playerInventory.currentSpell.isFaithSpell)
                 {
-                    playerInventory.currentSpell.AttemptToCastSpell(animationHandler, playerStats);
+                    if(playerStats.currentFocusPoints >= playerInventory.currentSpell.focusPointsCost)
+                    {
+                        playerInventory.currentSpell.AttemptToCastSpell(animationHandler, playerStats);
+                    }    
+                    else
+                    {
+                        animationHandler.PlayTargetAnimation("Shrug", true);
+                    }    
                 }    
             }    
         }    
@@ -147,7 +159,33 @@ namespace AG
         private void SuccessfullyCastSpell()
         {
             playerInventory.currentSpell.SuccessfullyCastSpell(animationHandler, playerStats);
-        }    
+        }
         #endregion
+
+        public void AttemptBackStabOrRiposte()
+        {
+            RaycastHit hit;
+
+            if(Physics.Raycast(inputHandler.criticalAttackRayCastStartPoint.position,
+                transform.TransformDirection(Vector3.forward), out hit, 0.5f, backStabLayer))
+            {
+                CharacterManager enemyCharacterManager = hit.transform.gameObject.GetComponentInParent<CharacterManager>();
+
+                if(enemyCharacterManager != null)
+                {
+                    playerManager.transform.position = enemyCharacterManager.backStabCollider.backStabberStandPoint.position;
+                    Vector3 rotationDirection = playerManager.transform.eulerAngles;
+                    rotationDirection = hit.transform.position - playerManager.transform.position;
+                    rotationDirection.y = 0;
+                    rotationDirection.Normalize();
+                    Quaternion tr = Quaternion.LookRotation(rotationDirection);
+                    Quaternion targetRotation = Quaternion.Slerp(playerManager.transform.rotation, tr, 500 * Time.deltaTime);
+                    playerManager.transform.rotation = targetRotation;
+
+                    animationHandler.PlayTargetAnimation("Back Stab", true);
+                    enemyCharacterManager.GetComponentInChildren<AnimatorManager>().PlayTargetAnimation("Back Stabbed", true);
+                }    
+            }    
+        }
     }
 }

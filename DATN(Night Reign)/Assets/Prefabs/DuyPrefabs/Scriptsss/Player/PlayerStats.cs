@@ -8,6 +8,7 @@ namespace AG
         PlayerManager playerManager;
 
         public HealthBar healthBar;
+        public FocusPointBar focusPointsBar;
         public StaminaBar staminaBar;
         AnimatorHandler animatorHandler;
 
@@ -16,8 +17,10 @@ namespace AG
         private void Awake()
         {
             playerManager = GetComponent<PlayerManager>();
+
             healthBar = FindObjectOfType<HealthBar>();
             staminaBar = FindObjectOfType<StaminaBar>();
+            focusPointsBar = FindObjectOfType<FocusPointBar>();
             animatorHandler = GetComponentInChildren<AnimatorHandler>();
         }
         void Start()
@@ -25,11 +28,17 @@ namespace AG
             maxHealth = SetMaxHealthFromHealthLevel();
             currentHealth = maxHealth;
             healthBar.SetMaxHealth(maxHealth);
+            healthBar.SetCurrentHealth(currentHealth);
 
             maxStamina = SetMaxStaminaFromStaminaLevel();
             currentStamina = maxStamina;
             staminaBar.SetMaxStamina(maxStamina);
             staminaBar.SetCurrentStamina(currentStamina);
+
+            maxFocusPoints = SetMaxFocusPointsFromFocusLevel();
+            currentFocusPoints = maxFocusPoints;
+            focusPointsBar.SetMaxFocusPoints(maxFocusPoints);
+            focusPointsBar.SetCurrentFocusPoint(currentFocusPoints);
         }
 
         private int SetMaxHealthFromHealthLevel()
@@ -37,6 +46,12 @@ namespace AG
             maxHealth = healthLevel * 10;
             return maxHealth;
         }
+
+        private float SetMaxFocusPointsFromFocusLevel()
+        {
+            maxFocusPoints = focusLevel * 10;
+            return maxFocusPoints;
+        }    
 
         private float SetMaxStaminaFromStaminaLevel()
         {
@@ -89,6 +104,30 @@ namespace AG
                 }
             }
         }
+
+        public void HealPlayer(int healAmount)
+        {
+            currentHealth = currentHealth + healAmount;
+
+            if(currentHealth > maxHealth)
+            {
+                currentHealth = maxHealth;
+            }    
+
+            healthBar.SetCurrentHealth(currentHealth);
+        }    
+
+        public void DeductFocusPoints(int focusPoints)
+        {
+            currentFocusPoints = currentFocusPoints - focusPoints;
+
+            if(currentFocusPoints < 0)
+            {
+                currentFocusPoints = 0;
+            }    
+
+            focusPointsBar.SetCurrentFocusPoint(currentFocusPoints);
+        }    
     }
 }
 

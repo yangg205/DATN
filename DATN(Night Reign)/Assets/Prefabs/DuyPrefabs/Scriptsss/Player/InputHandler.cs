@@ -15,6 +15,8 @@ namespace AG
         public bool y_input; //two hand
         public bool rb_input;//light attack
         public bool rt_input;//heavy attack
+        public bool critical_Attack_input;//critical attack
+
         public bool jump_input;//jump
         public bool inventory_input;//inventory
         public bool lockOn_input; //lockon
@@ -33,6 +35,8 @@ namespace AG
         public bool lockOnFlag;
         public bool inventoryFlag;
         public float rollInputTimer;
+
+        public Transform criticalAttackRayCastStartPoint;
 
         //xử lý input k spam
         public bool queuedLightAttack;
@@ -78,6 +82,7 @@ namespace AG
                 inputActions.PlayerMovement.LockOnTargetRight.performed += i => right_Stick_Right_input = true;
                 inputActions.PlayerMovement.LockOnTargetLeft.performed += i => right_Stick_Left_input = true;
                 inputActions.PlayerActions.Y.performed += i => y_input = true;
+                inputActions.PlayerActions.CriticalAttack.performed += i => critical_Attack_input = true;
 
 
             }
@@ -99,6 +104,7 @@ namespace AG
             HandleInventoryInput();
             HandleLockOnInput();
             HandleTwoHandInput();
+            HandleCriticalAttackInput();
         }
 
         public void HandleMoveInput(float delta)
@@ -273,6 +279,15 @@ namespace AG
                 }
             }
         }
+
+        private void HandleCriticalAttackInput()
+        {
+            if (critical_Attack_input)
+            {
+                critical_Attack_input = false;
+                playerAttacker.AttemptBackStabOrRiposte();
+            }
+        }    
     }
 }
 

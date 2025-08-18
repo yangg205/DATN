@@ -31,6 +31,7 @@ namespace AG
             enemyAnimatorManager = GetComponentInChildren<EnemyAnimatorManager>();
             enemyStats = GetComponent<EnemyStats>();
             enemyRigidBody = GetComponent<Rigidbody>();
+            backStabCollider = GetComponentInChildren<BackStabCollider>();
             navmeshAgent = GetComponentInChildren<NavMeshAgent>();
             navmeshAgent.enabled = false;
         }
