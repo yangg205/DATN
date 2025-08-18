@@ -1,4 +1,5 @@
 // ===================== BossBlackboard.cs =====================
+using UnityEditor.Localization.Plugins.XLIFF.V12;
 using UnityEngine;
 
 public class BossBlackboard : MonoBehaviour
@@ -18,9 +19,21 @@ public class BossBlackboard : MonoBehaviour
 
     void Start()
     {
-        currentHP = maxHP;  
+        currentHP = maxHP;
     }
 
+    void Update()
+    {
+        if(Input.GetKeyUp(KeyCode.T))
+        {
+            TakeDamage(500);
+        }
+    }
 
+    public void TakeDamage(int amount)
+    {
+        currentHP -= amount;
+        //animator.SetTrigger("takeHit");
+    }
 
 }

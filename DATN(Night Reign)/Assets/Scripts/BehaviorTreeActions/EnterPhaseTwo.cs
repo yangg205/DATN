@@ -2,7 +2,7 @@ using UnityEngine;
 using BehaviorDesigner.Runtime;
 using BehaviorDesigner.Runtime.Tasks;
 
-public class EnterPhaseTwo : Action
+public class EnterPhaseTwo : Conditional
 {
     private BossBlackboard blackboard;
 
@@ -13,9 +13,10 @@ public class EnterPhaseTwo : Action
 
     public override TaskStatus OnUpdate()
     {
-        if (!blackboard.isInSecondPhase && blackboard.currentHP <= blackboard.maxHP - 1000f)
+        if (!blackboard.isInSecondPhase && blackboard.currentHP <= blackboard.maxHP * 0.5f)
         {
             blackboard.isInSecondPhase = true;
+            blackboard.animator.SetTrigger("ChangePhase2");
             Debug.Log("[EnterPhaseTwo] Boss entered Phase 2!");
             return TaskStatus.Success;
         }

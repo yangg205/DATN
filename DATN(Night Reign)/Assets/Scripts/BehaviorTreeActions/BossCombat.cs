@@ -28,13 +28,27 @@ public class BossCombat : MonoBehaviour
 
     public void CastSpell()
     {
-        Debug.Log("[BossCombat] Spell cast triggered.");
-        _blackboard.animator?.SetTrigger("JumpToPlayer");
+        int animationChoice = UnityEngine.Random.Range(1, 3);
+        switch (animationChoice)
+        {
+            case 1:
+                _blackboard.animator?.SetTrigger("Attack1");
+                break;
+            case 2:
+                _blackboard.animator?.SetTrigger("JumpToPlayer");
+                break;
+        } 
     }
 
     public void Evade()
     {
         Debug.Log("[BossCombat] Evade triggered.");
         // Add dash or animation
+    }
+
+    public void Atk2()
+    {
+        Debug.Log("[BossCombat] Atk2 triggered.");
+        _blackboard.animator?.SetTrigger("AttackPhase2"); 
     }
 }
