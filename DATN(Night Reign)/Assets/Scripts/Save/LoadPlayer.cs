@@ -32,7 +32,7 @@ public class LoadPlayer : MonoBehaviour
             playerStatsComponent.currentHealth = GameDataHolder.LoadedPlayerCharactersData.Current_hp;
             playerStatsComponent.currentEXP = GameDataHolder.LoadedPlayerCharactersData.Current_exp;
             playerStatsComponent.playerLevel = GameDataHolder.LoadedPlayerCharactersData.level;
-
+            playerStatsComponent.soulCount = GameDataHolder.LoadedPlayerCharactersData.Total_coin;
             Vector3 loadedPosition = new Vector3(
                 (float)GameDataHolder.LoadedPlayerCharactersData.Position_x,
                 (float)GameDataHolder.LoadedPlayerCharactersData.Position_y,

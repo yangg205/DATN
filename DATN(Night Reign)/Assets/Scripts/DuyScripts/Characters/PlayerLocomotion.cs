@@ -41,6 +41,8 @@ namespace ND
         public float jumpForce = 250f;
         public bool jumpForceApplied;
 
+        [HideInInspector] public bool isAiming;
+
         private void FixedUpdate()
         {
             if (jumpForceApplied)
@@ -81,12 +83,14 @@ namespace ND
             playerStats.RegenerateStamina();
 
         }
-
         Vector3 normalVector;
         Vector3 targetPosition;
 
         public void HandleRotation(float delta)
         {
+            if (isAiming)
+                return;
+
             if(animatorHandler.canRotate)
             {
                 if (inputHandler.lockOnFlag)
@@ -141,7 +145,7 @@ namespace ND
         {
             animatorHandler.UpdateAnimatorValues(0f, 0f, false);
 
-            if (inputHandler.rollFlag || playerManager.isInteracting)
+            if (inputHandler.rollFlag || playerManager.isInteracting || isAiming)
                 return;
 
             moveDirection = cameraObject.forward * inputHandler.vertical;
@@ -255,13 +259,14 @@ namespace ND
                 if (!playerManager.isInAir && !playerManager.isInteracting)
                 {
                     animatorHandler.PlayTargetAnimation("Falling", true);
-                    rigidbody.linearVelocity = rigidbody.linearVelocity.normalized * (movementSpeed / 2);
+                    rigidbody.linearVelocity= rigidbody.linearVelocity.normalized * (movementSpeed / 2);
                     playerManager.isInAir = true;
                 }
             }
 
             myTransform.position = Vector3.Lerp(myTransform.position, targetPosition,
                 (playerManager.isInteracting || inputHandler.moveAmount > 0) ? Time.deltaTime / 0.1f : 1f);
+
         }
 
         public void HandleJumping()

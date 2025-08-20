@@ -43,7 +43,8 @@ public class NightMare : MonoBehaviour
 
     public int minAttackDamage = 3;
     public int maxAttackDamage = 5;
-
+    
+    public static bool IsPaused = false;
     void Start()
     {
         isDead = false;
@@ -57,16 +58,20 @@ public class NightMare : MonoBehaviour
 
     void Update()
     {
-        /*if (Input.GetKeyDown(KeyCode.E))
-        {
-            TakeDamage(15);
-        }*/
+        if (IsPaused) return;
 
         if (isDead) return;
 
         if (player == null) return;
     }
 
+
+    public void nightMareStun()
+    {
+        StartCoroutine(DamageStunCoroutine());
+        //AudioManager_Enemy.instance.Play("");
+        animator.SetTrigger("stun");
+    }
     public void TakeDamage(int damageAmount)
     {
         if (isDead) return;

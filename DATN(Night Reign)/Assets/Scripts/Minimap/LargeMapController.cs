@@ -1,72 +1,66 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
+﻿using ND;
 using System.Collections.Generic;
-using ND; // Giữ namespace của bạn nếu có
 using System.Linq;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class LargeMapController : MonoBehaviour
 {
     [Header("UI References")]
-    [Tooltip("Kéo và thả GameObject Panel chính của bản đồ lớn vào đây từ Hierarchy.")]
     public GameObject largeMapPanel;
-    [Tooltip("Kéo và thả RawImage sẽ hiển thị bản đồ từ camera vào đây từ Hierarchy.")]
     public RawImage largeMapDisplayRaw;
-    [Tooltip("Kéo và thả RectTransform của icon người chơi trên bản đồ lớn vào đây từ Hierarchy. Đảm bảo nó là con của LargeMap_Display_Raw.")]
     public RectTransform playerIconLargeMapRectTransform;
 
     [Header("World References")]
-    [Tooltip("Kéo và thả Camera sẽ render bản đồ lớn vào đây từ Hierarchy. Đảm bảo Target Texture của camera này được đặt thành một RenderTexture và RenderTexture đó được gán cho Large Map Display Raw.")]
     public Camera largeMapCamera;
-    [Tooltip("Kéo và thả Transform của người chơi chính (hoặc camera chính của người chơi) vào đây.")]
     public Transform playerMainCameraTransform;
 
     [Header("Waypoint Creation")]
-    [Tooltip("Sprite sẽ được sử dụng cho các waypoint tùy chỉnh do người chơi đặt.")]
     public Sprite customWaypointIcon;
-    private string currentCustomWaypointId = "PlayerCustomMarker"; // ID cố định cho custom marker người chơi
+    private string currentCustomWaypointId = "PlayerCustomMarker";
 
     private int terrainLayerMask;
-    private InputHandler playerInputHandler; // Nếu bạn dùng InputHandler để khóa input
-
-    // Biến để lưu trữ Bounding Box của tất cả terrains
+    private InputHandler playerInputHandler;
     private Bounds terrainsBounds;
+
+    [Header("Checkpoint Settings")]
+    public float teleportOffsetY = 1.5f;
+    public List<CheckpointData> checkpointList = new List<CheckpointData>();
+
+    private Dictionary<string, WaypointUI> checkpointUIMap = new Dictionary<string, WaypointUI>();
+
+    [Header("Debug / Options")]
+    [Tooltip("Nếu ảnh map trên RawImage bị lật theo Y khi render, bật lên.")]
+    public bool invertMapY = false;
 
     private void Start()
     {
         CheckRequiredReferences();
 
+#if UNITY_2023_2_OR_NEWER
+        playerInputHandler = UnityEngine.Object.FindFirstObjectByType<InputHandler>();
+#else
         playerInputHandler = FindObjectOfType<InputHandler>();
-        if (playerInputHandler == null)
-        {
-            Debug.LogWarning("[LargeMapController] InputHandler not found in scene. Player input lock/unlock may not work.");
-        }
+#endif
 
         int terrainLayerIndex = LayerMask.NameToLayer("Terrain");
-        if (terrainLayerIndex == -1)
-        {
-            Debug.LogError("[LargeMapController] Layer 'Terrain' not found! Please create it for map raycasting.");
-            terrainLayerMask = 0;
-        }
-        else
-        {
-            terrainLayerMask = 1 << terrainLayerIndex;
-            Debug.Log($"[LargeMapController] Terrain Layer Mask set to: {terrainLayerMask}");
-        }
+        terrainLayerMask = (terrainLayerIndex != -1) ? 1 << terrainLayerIndex : 0;
 
-        // Đảm bảo panel và camera bản đồ bị tắt ngay từ đầu
-        if (largeMapPanel != null)
-        {
-            largeMapPanel.SetActive(false);
-        }
-        if (largeMapCamera != null) // Đảm bảo camera cũng bị tắt
-        {
-            largeMapCamera.enabled = false;
-        }
+        if (largeMapPanel != null) largeMapPanel.SetActive(false);
+        if (largeMapCamera != null) largeMapCamera.enabled = false;
 
-        // Tính toán Bounding Box của tất cả terrains khi Start
+        // Ensure RawImage pivot is centered so anchoredPosition math is simpler
+        if (largeMapDisplayRaw != null)
+        {
+            var rt = largeMapDisplayRaw.rectTransform;
+            rt.pivot = new Vector2(0.5f, 0.5f);
+        }
+        ValidateAspectRatio();
         CalculateTerrainsBounds();
-        // SetupLargeMapCamera() sẽ được gọi khi bản đồ được bật lần đầu tiên
+        SetupLargeMapCamera();
+        InitializeCheckpointUIsFromInspector();
+        VerifyUIAlignment();
     }
 
     private void Update()
@@ -75,132 +69,134 @@ public class LargeMapController : MonoBehaviour
 
         if (largeMapPanel != null && largeMapPanel.activeSelf)
         {
-
             HandleWaypointCreationInput();
-            UpdatePlayerIconPositionAndRotation(); // Cập nhật vị trí icon người chơi
-            UpdateWaypointUIsOnLargeMap(); // Cập nhật Waypoint UI khi bản đồ lớn đang mở
+            UpdatePlayerIconPositionAndRotation();
+            UpdateWaypointUIsOnLargeMap();
+            UpdateCheckpointUIs();
         }
     }
 
     private void CheckRequiredReferences()
     {
-        if (largeMapPanel == null) Debug.LogError("[LargeMapController] largeMapPanel is not assigned! Please drag the main map Panel GameObject here.");
-        if (largeMapDisplayRaw == null) Debug.LogError("[LargeMapController] largeMapDisplayRaw is not assigned! Please drag the RawImage component used for map display here.");
-        if (playerIconLargeMapRectTransform == null) Debug.LogError("[LargeMapController] playerIconLargeMapRectTransform is not assigned! Please drag and drop your player icon UI element here.");
-        if (largeMapCamera == null) Debug.LogError("[LargeMapController] largeMapCamera is not assigned! Please drag and drop the large map Camera from Hierarchy. Ensure its Target Texture is set to a RenderTexture, and that RenderTexture is assigned to Large Map Display Raw.");
+        if (largeMapPanel == null) Debug.LogError("[LargeMapController] largeMapPanel is not assigned!");
+        if (largeMapDisplayRaw == null) Debug.LogError("[LargeMapController] largeMapDisplayRaw is not assigned!");
+        if (playerIconLargeMapRectTransform == null) Debug.LogError("[LargeMapController] playerIconLargeMapRectTransform is not assigned!");
+        if (largeMapCamera == null) Debug.LogError("[LargeMapController] largeMapCamera is not assigned!");
         if (playerMainCameraTransform == null) Debug.LogError("[LargeMapController] playerMainCameraTransform is not assigned!");
-        if (customWaypointIcon == null) Debug.LogWarning("[LargeMapController] customWaypointIcon is not assigned. Custom markers will not have an icon.");
+        if (customWaypointIcon == null) Debug.LogWarning("[LargeMapController] customWaypointIcon is not assigned.");
 
         if (WaypointManager.Instance == null)
         {
-            Debug.LogError("[LargeMapController] WaypointManager.Instance is NULL! Make sure it exists and runs its Awake method.");
+            Debug.LogError("[LargeMapController] WaypointManager.Instance is NULL!");
             return;
         }
         if (WaypointManager.Instance.terrains == null || WaypointManager.Instance.terrains.Count == 0 || WaypointManager.Instance.terrains.Any(t => t == null))
         {
-            Debug.LogError("[LargeMapController] WaypointManager.Instance.terrains is NULL or EMPTY or contains NULL elements! Large map features relying on terrain data may not function.");
+            Debug.LogError("[LargeMapController] WaypointManager.Instance.terrains is invalid!");
         }
 
         if (WaypointManager.Instance.playerTransform == null) Debug.LogError("[LargeMapController] WaypointManager.Instance.playerTransform is not assigned!");
-        if (WaypointManager.Instance.largeMapWaypointsParent == null) Debug.LogError("[LargeMapController] WaypointManager.Instance.largeMapWaypointsParent is not assigned! This should be the parent for all map UI icons, e.g., LargeMap_Display_Raw's RectTransform.");
 
-        // Thêm kiểm tra cho RenderTexture
         if (largeMapCamera != null && largeMapCamera.targetTexture == null)
         {
-            Debug.LogError("[LargeMapController] largeMapCamera's Target Texture is not assigned! It must be set to a RenderTexture for the map to display.");
+            Debug.LogError("[LargeMapController] largeMapCamera's Target Texture is not assigned!");
         }
         if (largeMapDisplayRaw != null && largeMapDisplayRaw.texture == null)
         {
-            Debug.LogError("[LargeMapController] largeMapDisplayRaw's Texture is not assigned! It should be the same RenderTexture as largeMapCamera's Target Texture.");
+            Debug.LogError("[LargeMapController] largeMapDisplayRaw's Texture is not assigned!");
         }
     }
 
-    // Tính toán Bounding Box bao quanh tất cả terrains
     private void CalculateTerrainsBounds()
     {
         if (WaypointManager.Instance == null || WaypointManager.Instance.terrains == null || WaypointManager.Instance.terrains.Count == 0)
         {
             terrainsBounds = new Bounds(Vector3.zero, Vector3.zero);
-            Debug.LogWarning("[LargeMapController] No terrains to calculate bounds for. Bounds will be zero.");
+            Debug.LogWarning("[LargeMapController] No terrains found, setting bounds to zero.");
             return;
         }
 
-        // Khởi tạo bounds với terrain đầu tiên
-        // Bounds cần được khởi tạo với một điểm và sau đó mở rộng
-        Vector3 firstTerrainCenter = WaypointManager.Instance.terrains[0].transform.position + WaypointManager.Instance.terrains[0].terrainData.size / 2f;
-        terrainsBounds = new Bounds(firstTerrainCenter, WaypointManager.Instance.terrains[0].terrainData.size);
+        Terrain firstTerrain = WaypointManager.Instance.terrains[0];
+        Vector3 terrainSize = firstTerrain.terrainData.size;
+        Vector3 terrainCenter = firstTerrain.transform.position + terrainSize / 2f;
 
-        for (int i = 1; i < WaypointManager.Instance.terrains.Count; i++)
+        terrainsBounds = new Bounds(terrainCenter, terrainSize);
+
+        foreach (Terrain terrain in WaypointManager.Instance.terrains)
         {
-            Terrain t = WaypointManager.Instance.terrains[i];
-            if (t != null)
-            {
-                // Thêm từng góc của terrain vào bounds để đảm bảo bao phủ đầy đủ
-                Vector3 min = t.transform.position;
-                Vector3 max = t.transform.position + t.terrainData.size;
-                terrainsBounds.Encapsulate(min);
-                terrainsBounds.Encapsulate(max);
-            }
+            if (terrain == null) continue;
+
+            Vector3 tSize = terrain.terrainData.size;
+            Vector3 tCenter = terrain.transform.position + tSize / 2f;
+
+            terrainsBounds.Encapsulate(new Bounds(tCenter, tSize));
         }
-        Debug.Log($"[LargeMapController] Calculated Terrains Bounds: Center={terrainsBounds.center}, Size={terrainsBounds.size}");
+
+        terrainsBounds.Expand(1.05f);
+        Debug.Log($"Terrain bounds: Center={terrainsBounds.center}, Size={terrainsBounds.size}");
     }
 
     private void SetupLargeMapCamera()
     {
-        if (largeMapCamera == null || WaypointManager.Instance == null || WaypointManager.Instance.terrains == null || WaypointManager.Instance.terrains.Count == 0 || terrainsBounds.size == Vector3.zero) return;
+        if (largeMapCamera == null || terrainsBounds.size == Vector3.zero) return;
 
-        // Tính toán kích thước camera dựa trên kích thước của terrainsBounds
-        float maxDimension = Mathf.Max(terrainsBounds.size.x, terrainsBounds.size.z);
-        largeMapCamera.orthographicSize = maxDimension / 2f; // Đối với orthographic camera, size là một nửa chiều cao
-        Debug.Log($"[LargeMapController] largeMapCamera.orthographicSize set to {largeMapCamera.orthographicSize} (based on terrains bounds).");
+        // Tính toán orthographic size chính xác dựa trên aspect ratio của RawImage
+        float terrainAspect = terrainsBounds.size.x / terrainsBounds.size.z;
 
-        // Đặt vị trí camera ở trung tâm của Bounding Box và nhìn thẳng xuống
+        Rect mapRect = largeMapDisplayRaw.rectTransform.rect;
+        float uiAspect = mapRect.width / mapRect.height;
+
+        float requiredSize;
+        if (terrainAspect > uiAspect)
+        {
+            // Terrain rộng hơn UI
+            requiredSize = terrainsBounds.size.x / 2f;
+        }
+        else
+        {
+            // Terrain cao hơn UI
+            requiredSize = terrainsBounds.size.z / 2f;
+        }
+
         largeMapCamera.transform.position = new Vector3(
             terrainsBounds.center.x,
-            terrainsBounds.center.y + maxDimension, // Đặt camera đủ cao để bao quát tất cả terrain
+            terrainsBounds.max.y + 100f,
             terrainsBounds.center.z
         );
-        largeMapCamera.transform.rotation = Quaternion.Euler(90f, 0f, 0f); // Nhìn thẳng xuống
-        Debug.Log($"[LargeMapController] Large Map Camera repositioned to cover terrains bounds. Position: {largeMapCamera.transform.position}");
+
+        largeMapCamera.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+        largeMapCamera.orthographic = true;
+        largeMapCamera.orthographicSize = requiredSize;
+        largeMapCamera.aspect = uiAspect; // Đảm bảo aspect ratio khớp với UI
+
+        Debug.Log($"Camera setup - Position: {largeMapCamera.transform.position}, Orthographic Size: {requiredSize}, Aspect: {uiAspect}");
     }
 
     private void HandleMapToggleInput()
     {
         if (Input.GetKeyDown(KeyCode.M))
         {
-            Debug.Log($"[LargeMapController] Before toggle: largeMapPanel.activeSelf = {largeMapPanel.activeSelf}"); // Thêm dòng này
             bool isActive = !largeMapPanel.activeSelf;
             largeMapPanel.SetActive(isActive);
-            MouseManager.Instance.ShowCursorAndDisableInput();
-            // Bật/tắt camera chỉ khi panel được bật/tắt
-            if (largeMapCamera != null)
-            {
-                largeMapCamera.enabled = isActive;
-            }
 
-            if (WaypointManager.Instance != null)
-            {
-                WaypointManager.Instance.SetLargeMapPanelActive(isActive);
-            }
+            if (largeMapCamera != null) largeMapCamera.enabled = isActive;
+            if (WaypointManager.Instance != null) WaypointManager.Instance.SetLargeMapPanelActive(isActive);
 
             if (isActive)
             {
-                // Luôn tính lại Bounds và Setup Camera mỗi khi mở map
+                MouseManager.Instance.ShowCursorAndDisableInput();
                 CalculateTerrainsBounds();
                 SetupLargeMapCamera();
                 UpdatePlayerIconPositionAndRotation();
                 UpdateWaypointUIsOnLargeMap();
-                Debug.Log("[LargeMapController] Large map toggled ON.");
-
+                UpdateCheckpointUIs();
             }
             else
             {
                 MouseManager.Instance.HideCursorAndEnableInput();
-                Debug.Log("[LargeMapController] Large map toggled OFF. WaypointManager informed.");
             }
 
             SetPlayerInputLocked(isActive);
-            Debug.Log($"[LargeMapController] After toggle: largeMapPanel.activeSelf = {largeMapPanel.activeSelf}"); // Thêm dòng này
         }
     }
 
@@ -208,49 +204,37 @@ public class LargeMapController : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            Debug.Log("[LargeMapController] Mouse Left Click detected while large map is active.");
-
-            Camera uiCam = largeMapDisplayRaw.canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : largeMapDisplayRaw.canvas.worldCamera;
-            if (uiCam == null && largeMapDisplayRaw.canvas.renderMode != RenderMode.ScreenSpaceOverlay)
-            {
-                Debug.LogError("[LargeMapController] uiCam is null but Canvas Render Mode is not Screen Space Overlay. This is an issue with Canvas setup!");
-                return;
-            }
-
+            Camera uiCam = largeMapDisplayRaw.canvas.renderMode == RenderMode.ScreenSpaceOverlay ?
+                          null : largeMapDisplayRaw.canvas.worldCamera;
             Vector2 localPoint;
+
             bool validPointOnMapUI = RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 largeMapDisplayRaw.rectTransform, Input.mousePosition, uiCam, out localPoint);
 
-            if (!validPointOnMapUI)
-            {
-                Debug.Log("[LargeMapController] Click was OUTSIDE the RectTransform of LargeMap_Display_Raw. Aborting waypoint creation.");
-                // Thêm kiểm tra EventSystem để hiểu tại sao nó không được xem là click vào map,
-                // nhưng không dùng nó để chặn logic chính.
-                if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-                {
-                    Debug.Log("[LargeMapController] However, EventSystem reports pointer is OVER another UI object.");
-                }
-                return;
-            }
+            if (!validPointOnMapUI) return;
 
-            Debug.Log($"[LargeMapController] Click was INSIDE LargeMap_Display_Raw RectTransform. Local point: {localPoint}");
+            // Tính normalized coordinates chính xác hơn
+            Rect rect = largeMapDisplayRaw.rectTransform.rect;
+            float normX = (localPoint.x / rect.width) + 0.5f;
+            float normY = (localPoint.y / rect.height) + 0.5f;
 
-            // Chuyển đổi localPoint (từ RectTransform của RawImage) về normalized Viewport coordinates của largeMapCamera
-            float normX = (localPoint.x / largeMapDisplayRaw.rectTransform.rect.width) + 0.5f;
-            float normY = (localPoint.y / largeMapDisplayRaw.rectTransform.rect.height) + 0.5f;
+            // Clamp để đảm bảo trong phạm vi hợp lệ
+            normX = Mathf.Clamp01(normX);
+            normY = Mathf.Clamp01(normY);
 
-            Debug.Log($"[LargeMapController] Normalized Viewport coordinates for raycast: ({normX}, {normY})");
+            // Xử lý flip Y
+            if (invertMapY) normY = 1f - normY;
 
-            // Tạo một tia (Ray) từ camera bản đồ lớn dựa trên vị trí click trên UI
+            // Sử dụng ViewportPointToRay (chính xác hơn cho normalized coordinates)
             Ray ray = largeMapCamera.ViewportPointToRay(new Vector3(normX, normY, 0f));
             RaycastHit hit;
-
-            Debug.DrawRay(ray.origin, ray.direction * 1000f, Color.red, 5f); // Vẽ Ray để debug trong Scene view
 
             if (Physics.Raycast(ray, out hit, 1000f, terrainLayerMask))
             {
                 Vector3 hitPoint = hit.point;
-                Debug.Log($"[LargeMapController] Raycast HIT terrain at {hitPoint}. Terrain name: {hit.collider.gameObject.name}, Layer: {LayerMask.LayerToName(hit.collider.gameObject.layer)}");
+
+                // Debug để kiểm tra
+                Debug.Log($"Click UI: {localPoint} -> Norm: ({normX:F3}, {normY:F3}) -> World: {hitPoint}");
 
                 if (WaypointManager.Instance != null)
                 {
@@ -263,135 +247,476 @@ public class LargeMapController : MonoBehaviour
                     );
 
                     WaypointManager.Instance.AddWaypoint(newWaypoint, true);
-                    Debug.Log($"[LargeMapController] Custom waypoint '{newWaypoint.id}' added/updated and set active.");
-
                     UpdateWaypointUIsOnLargeMap();
                 }
-                else
-                {
-                    Debug.LogWarning("[LargeMapController] WaypointManager Instance is NULL. Cannot create waypoint.");
-                }
-            }
-            else
-            {
-                Debug.LogWarning("[LargeMapController] Raycast from map click did not hit any terrain object on 'Terrain' layer. Ensure terrains have colliders and are on the 'Terrain' layer, and that the terrainLayerMask is correct.");
-                // Log chi tiết hơn về layer mask
-                Debug.Log($"[LargeMapController] Current terrainLayerMask: {terrainLayerMask} (Layer 'Terrain' index: {LayerMask.NameToLayer("Terrain")})");
-                // Log vị trí và hướng ray
-                Debug.Log($"[LargeMapController] Ray Origin: {ray.origin}, Direction: {ray.direction}");
             }
         }
     }
 
-    private void UpdatePlayerIconPositionAndRotation()
+
+    // Thêm method mới để chuyển đổi viewport sang world position chính xác hơn
+    private Vector3 ViewportToWorldPosition(float normX, float normY)
     {
-        if (WaypointManager.Instance == null || WaypointManager.Instance.playerTransform == null ||
-            playerIconLargeMapRectTransform == null || largeMapDisplayRaw == null ||
-            WaypointManager.Instance.terrains == null || WaypointManager.Instance.terrains.Count == 0 ||
-            playerMainCameraTransform == null || terrainsBounds.size == Vector3.zero)
+        if (largeMapCamera == null || terrainsBounds.size == Vector3.zero)
+            return Vector3.zero;
+
+        // Tính toán world position dựa trên orthographic camera
+        float worldX = Mathf.Lerp(terrainsBounds.min.x, terrainsBounds.max.x, normX);
+        float worldZ = Mathf.Lerp(terrainsBounds.min.z, terrainsBounds.max.z, normY);
+
+        // Raycast xuống để tìm terrain height
+        Vector3 rayStart = new Vector3(worldX, terrainsBounds.max.y + 50f, worldZ);
+        RaycastHit hit;
+
+        // Mở rộng layer mask để bao gồm tất cả có thể
+        int expandedLayerMask = terrainLayerMask;
+        if (expandedLayerMask == 0) expandedLayerMask = ~0; // Nếu terrain layer không được set, sử dụng tất cả layer
+
+        if (Physics.Raycast(rayStart, Vector3.down, out hit, 1000f, expandedLayerMask))
         {
-            return;
+            return hit.point;
         }
 
-        Transform playerTransform = WaypointManager.Instance.playerTransform;
+        // Fallback: sử dụng terrain height trực tiếp
+        float terrainHeight = GetTerrainHeightAtPosition(worldX, worldZ);
+        return new Vector3(worldX, terrainHeight, worldZ);
+    }
 
-        // Sử dụng terrainsBounds để tính toán vị trí normalized của người chơi trên toàn bộ khu vực terrain
-        float normalizedX = Mathf.InverseLerp(terrainsBounds.min.x, terrainsBounds.max.x, playerTransform.position.x);
-        float normalizedZ = Mathf.InverseLerp(terrainsBounds.min.z, terrainsBounds.max.z, playerTransform.position.z);
+    // Helper method để lấy terrain height
+    private float GetTerrainHeightAtPosition(float worldX, float worldZ)
+    {
+        if (WaypointManager.Instance?.terrains == null) return 0f;
 
-        RectTransform mapRectTransform = largeMapDisplayRaw.rectTransform;
-        float uiX = (normalizedX - 0.5f) * mapRectTransform.rect.width;
-        float uiY = (normalizedZ - 0.5f) * mapRectTransform.rect.height; // Z của world map tương ứng với Y của UI
+        foreach (Terrain terrain in WaypointManager.Instance.terrains)
+        {
+            if (terrain == null) continue;
 
-        playerIconLargeMapRectTransform.anchoredPosition = new Vector2(uiX, uiY);
-        // Xoay icon để phù hợp với hướng nhìn của người chơi (dựa trên playerMainCameraTransform)
-        playerIconLargeMapRectTransform.localEulerAngles = new Vector3(0, 0, -playerMainCameraTransform.eulerAngles.y);
+            Vector3 terrainPos = terrain.transform.position;
+            Vector3 terrainSize = terrain.terrainData.size;
+
+            if (worldX >= terrainPos.x && worldX <= terrainPos.x + terrainSize.x &&
+                worldZ >= terrainPos.z && worldZ <= terrainPos.z + terrainSize.z)
+            {
+                float relativeX = (worldX - terrainPos.x) / terrainSize.x;
+                float relativeZ = (worldZ - terrainPos.z) / terrainSize.z;
+
+                return terrainPos.y + terrain.terrainData.GetInterpolatedHeight(relativeX, relativeZ);
+            }
+        }
+
+        return 0f;
+    }
+
+
+    private void UpdatePlayerIconPositionAndRotation()
+    {
+        if (WaypointManager.Instance?.playerTransform == null ||
+            playerIconLargeMapRectTransform == null) return;
+
+        Vector2 uiPos = ConvertWorldToUIPosition(
+            WaypointManager.Instance.playerTransform.position,
+            playerIconLargeMapRectTransform.parent as RectTransform
+        );
+
+        playerIconLargeMapRectTransform.anchoredPosition = uiPos;
+        playerIconLargeMapRectTransform.localEulerAngles = new Vector3(0, 0,
+            -playerMainCameraTransform.eulerAngles.y);
     }
 
     private void UpdateWaypointUIsOnLargeMap()
     {
-        if (WaypointManager.Instance == null || WaypointManager.Instance.largeMapWaypointUIs == null ||
-            largeMapDisplayRaw == null || WaypointManager.Instance.terrains == null || WaypointManager.Instance.terrains.Count == 0 || terrainsBounds.size == Vector3.zero) return;
+        if (WaypointManager.Instance?.largeMapWaypointUIs == null) return;
 
         foreach (var entry in WaypointManager.Instance.largeMapWaypointUIs)
         {
             WaypointUI waypointUI = entry.Value;
-            Waypoint waypointData = entry.Value.GetWaypointData();
+            Waypoint waypointData = waypointUI.GetWaypointData();
 
-            if (waypointUI == null || waypointUI.gameObject == null)
-            {
-                Debug.LogWarning($"[LargeMapController] largeMapWaypointUI for ID '{entry.Key}' is null or its GameObject is null. Skipping.");
-                continue;
-            }
+            if (waypointUI?.gameObject == null || waypointData == null) continue;
 
-            // Chỉ cập nhật các waypoint đang hoạt động
             if (WaypointManager.Instance.activeWaypointsData.ContainsKey(waypointData.id))
             {
-                Vector2 uiPos = ConvertWorldPositionToMapUI(waypointData.worldPosition);
-                float scale = waypointUI.maxScale;
+                Vector2 uiPos = ConvertWorldToUIPosition(
+                    waypointData.worldPosition,
+                    waypointUI.transform.parent as RectTransform
+                );
 
                 if (!waypointUI.gameObject.activeSelf)
-                {
                     waypointUI.gameObject.SetActive(true);
-                }
-                waypointUI.SetMapUIPosition(uiPos, scale);
+
+                waypointUI.SetMapUIPosition(uiPos, waypointUI.maxScale);
                 waypointUI.UpdateDistanceText();
             }
             else
             {
-                // Ẩn waypoint UI nếu nó không còn hoạt động
                 if (waypointUI.gameObject.activeSelf)
-                {
                     waypointUI.gameObject.SetActive(false);
-                }
             }
         }
     }
 
+
+    /// <summary>
+    /// Convert world position to anchoredPosition relative to RawImage (center pivot).
+    /// Uses largeMapCamera.WorldToViewportPoint for accurate mapping and clamps UI coordinates.
+    /// </summary>
     private Vector2 ConvertWorldPositionToMapUI(Vector3 worldPos)
     {
-        if (WaypointManager.Instance == null || WaypointManager.Instance.terrains == null || WaypointManager.Instance.terrains.Count == 0 || largeMapDisplayRaw == null || terrainsBounds.size == Vector3.zero)
+        if (largeMapCamera == null || largeMapDisplayRaw == null || terrainsBounds.size == Vector3.zero)
         {
-            Debug.LogError("[LargeMapController] Missing WaypointManager or Terrain or largeMapDisplayRaw or Terrains Bounds for ConvertWorldPositionToMapUI!");
+            Debug.LogWarning("[LargeMapController] Cannot convert world position to UI: Missing references or zero bounds.");
             return Vector2.zero;
         }
 
-        // Sử dụng terrainsBounds đã tính toán để chuẩn hóa vị trí thế giới
-        float normalizedX = Mathf.InverseLerp(terrainsBounds.min.x, terrainsBounds.max.x, worldPos.x);
-        float normalizedZ = Mathf.InverseLerp(terrainsBounds.min.z, terrainsBounds.max.z, worldPos.z);
+        // Sử dụng inverse transform để tính toán chính xác hơn
+        Vector3 relativePos = worldPos - terrainsBounds.center;
 
-        RectTransform mapRectTransform = largeMapDisplayRaw.rectTransform;
-        float mapWidth = mapRectTransform.rect.width;
-        float mapHeight = mapRectTransform.rect.height;
+        // Normalize relative position (-0.5 to 0.5)
+        float normX = relativePos.x / terrainsBounds.size.x;
+        float normZ = relativePos.z / terrainsBounds.size.z;
 
-        // Chuyển đổi vị trí normalized thành vị trí trên UI (centered)
-        float uiX = (normalizedX - 0.5f) * mapWidth;
-        float uiY = (normalizedZ - 0.5f) * mapHeight; // Z của thế giới là Y trên UI bản đồ
+        // Clamp to valid range
+        normX = Mathf.Clamp(normX, -0.5f, 0.5f);
+        normZ = Mathf.Clamp(normZ, -0.5f, 0.5f);
+
+        // Apply Y inversion if needed
+        if (invertMapY) normZ = -normZ;
+
+        // Convert to UI coordinates
+        Rect mapRect = largeMapDisplayRaw.rectTransform.rect;
+        float uiX = normX * mapRect.width;
+        float uiY = normZ * mapRect.height;
 
         return new Vector2(uiX, uiY);
     }
+    /// <summary>
+    /// Chuyển đổi vị trí thế giới sang tọa độ UI với độ chính xác cao
+    /// </summary>
+    private Vector2 ConvertWorldToUIPosition(Vector3 worldPos, RectTransform targetParent = null)
+    {
+        if (largeMapCamera == null || largeMapDisplayRaw == null || terrainsBounds.size == Vector3.zero)
+        {
+            Debug.LogWarning("Thiếu tham chiếu để chuyển đổi tọa độ");
+            return Vector2.zero;
+        }
+
+        // Sử dụng RawImage làm parent mặc định
+        if (targetParent == null)
+            targetParent = largeMapDisplayRaw.rectTransform;
+
+        // Chuyển đổi sang viewport coordinates (0-1)
+        Vector3 viewportPos = largeMapCamera.WorldToViewportPoint(worldPos);
+
+        // Kiểm tra điểm có trong tầm nhìn camera
+        if (viewportPos.z < 0)
+        {
+            Debug.LogWarning($"Vị trí {worldPos} nằm sau camera");
+            return Vector2.zero;
+        }
+
+        // Xử lý lật Y nếu cần
+        if (invertMapY)
+            viewportPos.y = 1f - viewportPos.y;
+
+        // Chuyển đổi sang UI coordinates
+        Rect targetRect = targetParent.rect;
+        float uiX = (viewportPos.x - 0.5f) * targetRect.width;
+        float uiY = (viewportPos.y - 0.5f) * targetRect.height;
+
+        return new Vector2(uiX, uiY);
+    }
+
+
 
     private void SetPlayerInputLocked(bool locked)
     {
         if (playerInputHandler != null)
         {
             playerInputHandler.enabled = !locked;
-            Debug.Log($"[LargeMapController] Player InputHandler enabled: {!locked}");
         }
         else
         {
-            // Fallback nếu không tìm thấy InputHandler
             if (locked)
             {
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
-                Debug.Log("[LargeMapController] Cursor unlocked and visible.");
             }
             else
             {
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
-                Debug.Log("[LargeMapController] Cursor locked and hidden.");
+            }
+        }
+    }
+
+    private void InitializeCheckpointUIsFromInspector()
+    {
+        if (checkpointList == null || checkpointList.Count == 0) return;
+
+        Transform waypointsParent = (WaypointManager.Instance != null && WaypointManager.Instance.largeMapWaypointsParent != null)
+            ? WaypointManager.Instance.largeMapWaypointsParent
+            : (largeMapDisplayRaw != null ? largeMapDisplayRaw.transform : null);
+
+        if (waypointsParent == null) return;
+
+        foreach (var cp in checkpointList)
+        {
+            if (cp == null || cp.checkpointTransform == null) continue;
+
+            string id = cp.checkpointTransform.gameObject.name;
+            if (checkpointUIMap.ContainsKey(id)) continue;
+
+            GameObject iconObj = new GameObject("Checkpoint_" + id, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+            iconObj.transform.SetParent(waypointsParent, false);
+
+            RectTransform rect = iconObj.GetComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(32, 32);
+            rect.pivot = new Vector2(0.5f, 0.5f); // Đảm bảo pivot ở center
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = Vector2.zero; // Reset position
+
+            Image img = iconObj.GetComponent<Image>();
+            img.raycastTarget = true;
+            if (cp.icon != null) img.sprite = cp.icon; // Sử dụng icon từ checkpoint data
+
+            Button btn = iconObj.GetComponent<Button>();
+            btn.onClick.AddListener(() => OnCheckpointClicked(id));
+
+            var hoverTooltip = iconObj.AddComponent<CheckpointTooltip>();
+            hoverTooltip.Initialize(cp.checkpointTransform.gameObject.name);
+
+            WaypointUI wpUI = iconObj.AddComponent<WaypointUI>();
+
+            // Lấy vị trí chính xác của checkpoint
+            Vector3 checkpointWorldPos = cp.GetWorldPosition();
+
+            Waypoint wpData = new Waypoint(id, id, checkpointWorldPos, WaypointType.Checkpoint, img.sprite);
+            wpUI.SetData(wpData);
+            wpUI.maxScale = 1f; // Đảm bảo scale cố định
+
+            checkpointUIMap[id] = wpUI;
+
+            Debug.Log($"Initialized checkpoint UI: {id} at world position: {checkpointWorldPos}");
+        }
+    }
+
+
+    private void OnCheckpointClicked(string checkpointId)
+    {
+        Debug.Log($"Clicked on checkpoint: {checkpointId}");
+
+        var checkpoint = checkpointList.Find(c => c != null &&
+                                        c.checkpointTransform != null &&
+                                        c.checkpointTransform.gameObject.name == checkpointId);
+
+        if (checkpoint == null)
+        {
+            Debug.LogError($"Không tìm thấy checkpoint với ID: {checkpointId}");
+            return;
+        }
+
+        TeleportPlayerToCheckpoint(checkpoint);
+
+        if (largeMapPanel != null) largeMapPanel.SetActive(false);
+        if (largeMapCamera != null) largeMapCamera.enabled = false;
+
+        SetPlayerInputLocked(false);
+    }
+
+    private void TeleportPlayerToCheckpoint(CheckpointData checkpoint)
+    {
+        if (WaypointManager.Instance == null || WaypointManager.Instance.playerTransform == null)
+        {
+            Debug.LogError("Không thể dịch chuyển - thiếu tham chiếu player");
+            return;
+        }
+
+        Vector3 targetPosition = checkpoint.GetWorldPosition() + Vector3.up * teleportOffsetY;
+        WaypointManager.Instance.playerTransform.position = targetPosition;
+
+        Debug.Log($"Đã dịch chuyển player đến checkpoint: {checkpoint.checkpointTransform.name} tại vị trí: {targetPosition}");
+    }
+
+    private void UpdateCheckpointUIs()
+    {
+        if (checkpointUIMap == null || checkpointList == null) return;
+
+        foreach (var kvp in checkpointUIMap)
+        {
+            var checkpoint = checkpointList.Find(c => c?.checkpointTransform != null &&
+                                                c.checkpointTransform.gameObject.name == kvp.Key);
+            if (checkpoint == null) continue;
+
+            Vector3 worldPos = checkpoint.GetWorldPosition();
+            Vector2 uiPos = ConvertWorldToUIPosition(
+                worldPos,
+                kvp.Value.transform.parent as RectTransform
+            );
+
+            kvp.Value.SetMapUIPosition(uiPos, 1f);
+
+            if (!kvp.Value.gameObject.activeSelf)
+                kvp.Value.gameObject.SetActive(true);
+        }
+    }
+
+    private void VerifyUIAlignment()
+    {
+        if (playerIconLargeMapRectTransform == null || largeMapDisplayRaw == null) return;
+
+        Vector3[] testPositions = new Vector3[]
+        {
+            terrainsBounds.min,
+            terrainsBounds.max,
+            terrainsBounds.center,
+            new Vector3(terrainsBounds.min.x, 0, terrainsBounds.max.z),
+            new Vector3(terrainsBounds.max.x, 0, terrainsBounds.min.z)
+        };
+
+        foreach (Vector3 pos in testPositions)
+        {
+            Vector2 uiPos = ConvertWorldPositionToMapUI(pos);
+            Debug.Log($"Kiểm tra căn chỉnh - Thế giới: {pos} -> UI: {uiPos}");
+
+            GameObject marker = new GameObject("DebugMarker");
+            marker.transform.SetParent(largeMapDisplayRaw.transform, false);
+            RectTransform rt = marker.AddComponent<RectTransform>();
+            rt.anchoredPosition = uiPos;
+            rt.sizeDelta = new Vector2(10, 10);
+            //marker.AddComponent<Image>().color = Color.red;
+            Destroy(marker, 5f);
+        }
+    }
+    private void ValidateAspectRatio()
+    {
+        if (largeMapCamera == null || largeMapDisplayRaw == null) return;
+
+        // Kiểm tra RenderTexture
+        RenderTexture renderTex = largeMapCamera.targetTexture;
+        if (renderTex == null)
+        {
+            Debug.LogError("largeMapCamera thiếu RenderTexture!");
+            return;
+        }
+
+        // Tính aspect ratio của terrain
+        float terrainAspect = terrainsBounds.size.x / terrainsBounds.size.z;
+
+        // Tính aspect ratio hiện tại
+        float renderTexAspect = (float)renderTex.width / renderTex.height;
+        float rawImageAspect = largeMapDisplayRaw.rectTransform.rect.width /
+                              largeMapDisplayRaw.rectTransform.rect.height;
+
+        Debug.Log($"Terrain Aspect: {terrainAspect:F2}, RenderTexture Aspect: {renderTexAspect:F2}, RawImage Aspect: {rawImageAspect:F2}");
+
+        // Cảnh báo nếu không khớp
+        if (Mathf.Abs(renderTexAspect - rawImageAspect) > 0.1f)
+        {
+            Debug.LogWarning("Aspect ratio không khớp! Điều này sẽ gây lệch vị trí.");
+        }
+    }
+    [ContextMenu("Debug Map Alignment")]
+    private void DebugMapAlignment()
+    {
+        if (largeMapDisplayRaw == null || largeMapCamera == null) return;
+
+        // Xóa marker cũ
+        foreach (Transform child in largeMapDisplayRaw.transform)
+        {
+            if (child.name.Contains("DebugMarker"))
+                DestroyImmediate(child.gameObject);
+        }
+
+        Vector3[] testPositions = {
+        new Vector3(terrainsBounds.min.x, terrainsBounds.center.y, terrainsBounds.min.z), // Bottom-Left
+        new Vector3(terrainsBounds.max.x, terrainsBounds.center.y, terrainsBounds.min.z), // Bottom-Right  
+        new Vector3(terrainsBounds.min.x, terrainsBounds.center.y, terrainsBounds.max.z), // Top-Left
+        new Vector3(terrainsBounds.max.x, terrainsBounds.center.y, terrainsBounds.max.z), // Top-Right
+        terrainsBounds.center // Center
+    };
+
+        string[] labels = { "BL", "BR", "TL", "TR", "C" };
+        Color[] colors = { Color.red, Color.green, Color.blue, Color.yellow, Color.magenta };
+
+        for (int i = 0; i < testPositions.Length; i++)
+        {
+            Vector3 worldPos = testPositions[i];
+            Vector2 uiPos = ConvertWorldToUIPosition(worldPos);
+
+            // Tạo marker
+            GameObject marker = new GameObject($"DebugMarker_{labels[i]}");
+            marker.transform.SetParent(largeMapDisplayRaw.transform, false);
+
+            RectTransform rt = marker.AddComponent<RectTransform>();
+            rt.anchoredPosition = uiPos;
+            rt.sizeDelta = new Vector2(20, 20);
+
+            Image img = marker.AddComponent<Image>();
+            img.color = colors[i];
+
+            Debug.Log($"{labels[i]}: World({worldPos.x:F1}, {worldPos.z:F1}) -> UI({uiPos.x:F1}, {uiPos.y:F1})");
+        }
+    }
+
+
+    private void OnDrawGizmosSelected()
+    {
+        if (terrainsBounds.size != Vector3.zero)
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireCube(terrainsBounds.center, terrainsBounds.size);
+        }
+    }
+
+    [System.Serializable]
+    public class CheckpointData
+    {
+        public Transform checkpointTransform;
+        public Sprite icon;
+
+        public Vector3 GetWorldPosition()
+        {
+            if (checkpointTransform == null)
+            {
+                Debug.LogError("[CheckpointData] checkpointTransform chưa được gán!");
+                return Vector3.zero;
+            }
+            return checkpointTransform.position;
+        }
+    }
+
+    public class CheckpointTooltip : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+    {
+        private string checkpointName;
+        private GameObject tooltipObj;
+
+        public void Initialize(string name)
+        {
+            checkpointName = name;
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            tooltipObj = new GameObject("Tooltip_" + checkpointName);
+            tooltipObj.transform.SetParent(transform, false);
+
+            var text = tooltipObj.AddComponent<Text>();
+            text.text = checkpointName;
+            text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            text.color = Color.white;
+            text.alignment = TextAnchor.MiddleCenter;
+
+            var rect = tooltipObj.GetComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(100, 30);
+            rect.anchoredPosition = new Vector2(0, 40);
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            if (tooltipObj != null)
+            {
+                Destroy(tooltipObj);
             }
         }
     }

@@ -18,6 +18,9 @@ namespace ND
         public bool twoHand_input;
         public bool lightAttack_input;
         public bool heavyAttack_input;
+        public bool critical_Attack_input;
+        public bool aiming_input;
+        public bool shootArrow_input;
         public bool jump_input;
         public bool inventory_input;
         public bool lockOn_input;
@@ -38,6 +41,8 @@ namespace ND
         public bool lockOnFlag;
         public bool inventoryFlag;
         public float rollInputTimer;
+
+        public Transform criticalAttackRayCastStartPoint;
 
         PlayerControls inputActions;
         PlayerAttacker playerAttacker;
@@ -87,8 +92,13 @@ namespace ND
                 inputActions.PlayerMovement.LockOnTargetRight.performed += i => right_Stick_Right_Input = true;
                 inputActions.PlayerMovement.LockOnTargetLeft.performed += i => right_Stick_Left_Input = true;
                 inputActions.PlayerActions.TwoHand.performed += i => twoHand_input = true;
+                inputActions.PlayerActions.CriticalAttack.performed += i => critical_Attack_input = true;
                 inputActions.PlayerActions.Skill.performed += i => skill_input = true;
                 inputActions.PlayerActions.BoostAttackSpeed.performed += i => attackSpeedBoost_input = true;
+                inputActions.PlayerActions.Aim.performed += i => aiming_input = true;
+                inputActions.PlayerActions.Aim.canceled += i => aiming_input = false;
+
+                inputActions.PlayerActions.Shoot.performed += i => shootArrow_input = true;
             }
 
             inputActions.Enable();
@@ -277,6 +287,15 @@ namespace ND
                     weaponSlotManager.LoadWeaponOnSlot(playerInventory.leftWeapon, true);
                 }
             }
+        }
+
+        private void HandleCriticalAttackInput()
+        {
+            if(critical_Attack_input)
+            {
+                critical_Attack_input = false;
+/*                playerAttacker.A
+*/            }    
         }
         private void HandleSkillInput()
         {

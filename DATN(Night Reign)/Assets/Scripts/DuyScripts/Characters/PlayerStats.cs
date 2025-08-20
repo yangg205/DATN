@@ -31,7 +31,6 @@ namespace ND
         public float currentFocusPoint;
 
         public int soulCount = 0;
-
         public HealthBar healthBar;
         public StaminaBar staminaBar;
         public FocusPointBar focusPointBar;
@@ -55,6 +54,7 @@ namespace ND
 
         void Start()
         {   
+            
             maxHealth = SetMaxHealthFromHealthLevel();
             currentHealth = maxHealth;
             healthBar.SetMaxHealth(maxHealth);
@@ -208,6 +208,16 @@ namespace ND
             // Ví dụ: GameManager.Instance.OnPlayerDeath();
 
             Destroy(gameObject); // Xoá Player sau khi chết
+        }
+        public void RespawnAt(Vector3 location)
+        {
+            currentHealth = maxHealth;
+            currentStamina = maxStamina;
+            transform.position = location;
+        }
+        public int GetPlayerCharacterId()
+        {
+            return PlayerPrefs.GetInt("PlayerCharacterId", 0);
         }
     }
 }

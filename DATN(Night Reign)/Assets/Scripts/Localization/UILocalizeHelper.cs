@@ -63,6 +63,7 @@ public static class UILocalizeExtensions
 
     private static async Task ApplyLocalization(TextMeshProUGUI tmpText, StringTable table, string key)
     {
+        key = key.Trim();
         string localized = await LocalizationManager.Instance.GetLocalizedStringAsync(table.TableCollectionName, key);
         Debug.Log($"[UILocalizeExtensions] Applying localized text for key '{key}': '{localized}' to '{tmpText.gameObject.name}'");
         tmpText.text = localized;

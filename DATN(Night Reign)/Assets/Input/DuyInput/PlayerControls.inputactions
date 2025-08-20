@@ -281,6 +281,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Critical Attack",
+                    "type": "Button",
+                    "id": "b99f9ff3-b787-48b6-8895-4c389484054b",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Aim",
                     "type": "Button",
                     "id": "a5990f7b-5da6-47e0-818b-9945001950cb",
@@ -290,7 +299,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Fire Arrow",
+                    "name": "Shoot",
                     "type": "Button",
                     "id": "01c7d795-d45e-4261-891d-b3584a49b4a6",
                     "expectedControlType": "",
@@ -500,23 +509,34 @@
                 },
                 {
                     "name": "",
-                    "id": "816c6a7a-3666-46d4-b055-2f21ae0f7497",
-                    "path": "<Mouse>/rightButton",
-                    "interactions": "Hold,Press",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Aim",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "e69ec57e-f035-4801-a838-f669c4822a66",
                     "path": "<Mouse>/leftButton",
                     "interactions": "Press",
                     "processors": "",
                     "groups": "",
-                    "action": "Fire Arrow",
+                    "action": "Shoot",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "89b3d07f-b289-4933-a190-9c98b4cbf4fd",
+                    "path": "<Keyboard>/e",
+                    "interactions": "Hold",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Critical Attack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4c283ed5-35e7-4516-90cc-d13f1555e3e5",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "Hold",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Aim",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

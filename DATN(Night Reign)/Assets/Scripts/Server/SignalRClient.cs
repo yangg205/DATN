@@ -348,6 +348,21 @@ public class SignalRClient : MonoBehaviour
             throw;
         }
     }
+    public async Task<Battle> Battle(BattleRq battleRq)
+    {
+        try
+        {
+            var result = await _connection.InvokeAsync<Battle>("Battle", battleRq);
+            string jsonResult = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
+            return result; // Trả về kết quả trận đấu
+        }
+        catch (Exception ex)
+        {
+            Debug.Log("gui yeu cau battle that bai" + ex.Message);
+            throw;
+        }
+    }
+
 
     private async void OnDestroy()
     {
