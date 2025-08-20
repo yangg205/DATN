@@ -10,7 +10,7 @@ namespace AG
         public HealthBar healthBar;
         public FocusPointBar focusPointsBar;
         public StaminaBar staminaBar;
-        AnimatorHandler animatorHandler;
+        PlayerAnimatorManager animatorHandler;
 
         public float staminaRegenerationAmount = 1;
         public float staminaRegenTimer = 0;
@@ -21,7 +21,7 @@ namespace AG
             healthBar = FindObjectOfType<HealthBar>();
             staminaBar = FindObjectOfType<StaminaBar>();
             focusPointsBar = FindObjectOfType<FocusPointBar>();
-            animatorHandler = GetComponentInChildren<AnimatorHandler>();
+            animatorHandler = GetComponentInChildren<PlayerAnimatorManager>();
         }
         void Start()
         {
@@ -59,7 +59,17 @@ namespace AG
             return maxStamina;
         }
 
-        public void TakeDamage(int damage)
+        public void TakeDamageNoAnimation(int damage)
+        {
+            currentHealth = currentHealth - damage;
+
+            if (currentHealth <= 0)
+            {
+                currentHealth = 0;
+                isDead = true;
+            }
+        }
+        public void TakeDamage(int damage, string damageAnimation = "Damage_Hit")
         {
             if (playerManager.isInvulnerable)
                 return;
@@ -71,7 +81,7 @@ namespace AG
 
             healthBar.SetCurrentHealth(currentHealth);
 
-            animatorHandler.PlayTargetAnimation("Damage_Hit", true);
+            animatorHandler.PlayTargetAnimation(damageAnimation, true);
 
             if (currentHealth <= 0)
             {
@@ -128,6 +138,11 @@ namespace AG
 
             focusPointsBar.SetCurrentFocusPoint(currentFocusPoints);
         }    
+
+        public void AddSouls(int souls)
+        {
+            soulCount = soulCount + souls;
+        }
     }
 }
 

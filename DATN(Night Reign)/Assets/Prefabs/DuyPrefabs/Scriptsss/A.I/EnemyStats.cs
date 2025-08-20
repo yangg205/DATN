@@ -1,18 +1,23 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace AG
 {
     public class EnemyStats : CharacterStats
     {
-        Animator animator;
+        EnemyAnimatorManager enemyAnimatorManager;
+
+        public UIEnemyHealthBar enemyHealthBar;
+
+        public int soulAwardedOnDeath = 50;
         private void Awake()
         {
-            animator = GetComponentInChildren<Animator>();
+            enemyAnimatorManager = GetComponentInChildren<EnemyAnimatorManager>();
         }
         void Start()
         {
             maxHealth = SetMaxHealthFromHealthLevel();
             currentHealth = maxHealth;
+            enemyHealthBar.SetMaxHealth(maxHealth);
         }
 
         private int SetMaxHealthFromHealthLevel()
@@ -21,20 +26,44 @@ namespace AG
             return maxHealth;
         }
 
-        public void TakeDamage(int damage)
+        public void TakeDamageNoAnimation(int damage)
+        {
+            currentHealth = currentHealth - damage;
+            enemyHealthBar.SetHealth(currentHealth);
+
+            if (currentHealth <= 0)
+            {
+                currentHealth = 0;
+                isDead = true;
+            }
+        }
+
+        public void TakeDamage(int damage, string damageAnimation = "Damage_Hit")
         {
             if (isDead)
                 return;
 
             currentHealth = currentHealth - damage;
+            enemyHealthBar.SetHealth(currentHealth);
 
-            animator.Play("Damage_Hit");
+            enemyAnimatorManager.PlayTargetAnimation(damageAnimation, true);
 
             if (currentHealth <= 0)
             {
-                currentHealth = 0;
-                animator.Play("Death");
-                isDead = true;
+               HandleDeath();
+            }
+        }
+
+        private void HandleDeath()
+        {
+            currentHealth = 0;
+            enemyAnimatorManager.PlayTargetAnimation("Death", true);
+            isDead = true;
+            PlayerStats playerStats = FindObjectOfType<PlayerStats>();
+
+            if(playerStats != null)
+            {
+                playerStats.AddSouls(soulAwardedOnDeath);
             }
         }
     }

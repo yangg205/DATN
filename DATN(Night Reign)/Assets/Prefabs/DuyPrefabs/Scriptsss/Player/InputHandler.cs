@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Unity.Jobs;
+using UnityEngine;
 
 namespace AG
 {
@@ -15,6 +16,8 @@ namespace AG
         public bool y_input; //two hand
         public bool rb_input;//light attack
         public bool rt_input;//heavy attack
+        public bool lt_input; //parry
+        public bool lb_input;
         public bool critical_Attack_input;//critical attack
 
         public bool jump_input;//jump
@@ -46,9 +49,11 @@ namespace AG
         PlayerAttacker playerAttacker;
         PlayerInventory playerInventory;
         PlayerManager playerManager;
+        PlayerStats playerStats;
+        BlockingCollider blockingCollider;
         UIManager uiManager;
         CameraHandler cameraHandler;
-        AnimatorHandler animatorHandler;
+        PlayerAnimatorManager animatorHandler;
         WeaponSlotManager weaponSlotManager;
 
         Vector2 movementInput;
@@ -59,10 +64,12 @@ namespace AG
             playerAttacker = GetComponentInChildren<PlayerAttacker>();
             playerInventory = GetComponent<PlayerInventory>();
             playerManager = GetComponent<PlayerManager>();
+            playerStats = GetComponent<PlayerStats>();
             uiManager = FindObjectOfType<UIManager>();
             cameraHandler = FindObjectOfType<CameraHandler>();
             weaponSlotManager = GetComponentInChildren<WeaponSlotManager>();
-            animatorHandler = GetComponentInChildren<AnimatorHandler>();
+            animatorHandler = GetComponentInChildren<PlayerAnimatorManager>();
+            blockingCollider = GetComponentInChildren<BlockingCollider>();
         }
         public void OnEnable()
         {
@@ -73,9 +80,14 @@ namespace AG
                 inputActions.PlayerMovement.Camera.performed += i => cameraInput = i.ReadValue<Vector2>();
                 inputActions.PlayerActions.RB.performed += i => rb_input = true;
                 inputActions.PlayerActions.RT.performed += i => rt_input = true;
+                inputActions.PlayerActions.LB.canceled += i => lb_input = false;
+                inputActions.PlayerActions.LB.performed += i => lb_input = true;
+                inputActions.PlayerActions.LT.performed += i => lt_input = true;
                 inputActions.PlayerQuickSlots.DPadRight.performed += i => d_pad_Right = true;
                 inputActions.PlayerQuickSlots.DPadLeft.performed += i => d_pad_Left = true;
                 inputActions.PlayerActions.X.performed += i => x_input = true;
+                inputActions.PlayerActions.Roll.performed += i => b_input = true;
+                inputActions.PlayerActions.Roll.canceled += i => b_input = false;
                 inputActions.PlayerActions.Jump.performed += i => jump_input = true;
                 inputActions.PlayerActions.Inventory.performed += i => inventory_input = true;
                 inputActions.PlayerActions.LockOn.performed += i => lockOn_input = true;
@@ -99,7 +111,7 @@ namespace AG
         {
             HandleMoveInput(delta);
             HandleRollInput(delta);
-            HandleAttackInput(delta);
+            HandleCombatInput(delta);
             HandleQuickSlotsInput();
             HandleInventoryInput();
             HandleLockOnInput();
@@ -117,19 +129,28 @@ namespace AG
         }
 
         private void HandleRollInput(float delta)
-        {
-            b_input = inputActions.PlayerActions.Roll.phase == UnityEngine.InputSystem.InputActionPhase.Performed;
-            sprintFlag = b_input;
-
+        {       
             if (b_input)
             {
                 rollInputTimer += delta;
+
+                if(playerStats.currentStamina <= 0)
+                {
+                    b_input = false;
+                    sprintFlag = false;
+                }
+
+                if(moveAmount > 0.5f && playerStats.currentStamina > 0)
+                {
+                    sprintFlag = true;
+                }
             }
             else
             {
+                sprintFlag = false;
+
                 if (rollInputTimer > 0 && rollInputTimer < 0.5f)
                 {
-                    sprintFlag = false;
                     rollFlag = true;
                 }
 
@@ -137,7 +158,7 @@ namespace AG
             }
         }
 
-        private void HandleAttackInput(float delta)
+        private void HandleCombatInput(float delta)
         {
             if (rb_input)
             {
@@ -160,6 +181,32 @@ namespace AG
                 {
                     queuedHeavyAttack = true;
                 }
+            }
+
+            if(lt_input)
+            {
+                if(twoHandFlag)
+                {
+
+                }
+                else
+                {
+                    playerAttacker.HandleLTAction();
+                }
+            }
+
+            if (lb_input)
+            {
+                playerAttacker.HandleLBAction();
+            }
+            else
+            {
+                playerManager.isBlocking = false;
+
+                if(blockingCollider.blockingCollider.enabled)
+                {
+                    blockingCollider.DisableBlockingCollider();
+                }    
             }
 
             if (playerManager.canDoCombo)

@@ -20,13 +20,13 @@ namespace AG
         [TextArea]
         public string spellDescription;
 
-        public virtual void AttemptToCastSpell(AnimatorHandler animatorHandler, PlayerStats playerStats)
+        public virtual void AttemptToCastSpell(PlayerAnimatorManager animatorHandler, PlayerStats playerStats)
         {
             Debug.Log("You attempt to cast spell");
 
         }
 
-        public virtual void SuccessfullyCastSpell(AnimatorHandler animatorHandler, PlayerStats playerStats)
+        public virtual void SuccessfullyCastSpell(PlayerAnimatorManager animatorHandler, PlayerStats playerStats)
         {
             Debug.Log("You successfully cast spell");
             playerStats.DeductFocusPoints(focusPointsCost);

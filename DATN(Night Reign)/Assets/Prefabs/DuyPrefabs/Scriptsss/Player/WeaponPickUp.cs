@@ -18,11 +18,11 @@ namespace AG
         {
             PlayerInventory playerInventory;
             PlayerLocomotion playerLocomotion;
-            AnimatorHandler animatorHandler;
+            PlayerAnimatorManager animatorHandler;
 
             playerInventory = playerManager.GetComponent<PlayerInventory>();
             playerLocomotion = playerManager.GetComponent<PlayerLocomotion>();
-            animatorHandler = playerManager.GetComponentInChildren<AnimatorHandler>();
+            animatorHandler = playerManager.GetComponentInChildren<PlayerAnimatorManager>();
 
             playerLocomotion.rigidbody.linearVelocity = Vector3.zero; //stop player from moveving whilist pickup item
             animatorHandler.PlayTargetAnimation("Pick Up Item", true); //play animation pick up 

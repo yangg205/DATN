@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace AG
 {
@@ -9,8 +9,23 @@ namespace AG
         public EnemyAttackAction[] enemyAttacks;
         public EnemyAttackAction currentAttack;
 
+        bool willDoComboOnNextAttack = false;
+
         public override State Tick(EnemyManager enemyManager, EnemyStats enemyStats, EnemyAnimatorManager enemyAnimatorManager)
         {
+            if (enemyManager.isInteracting && enemyManager.canDoCombo == false)
+            {
+                return this;
+            }
+            else if(enemyManager.isInteracting && enemyManager.canDoCombo)
+            {
+                if (willDoComboOnNextAttack)
+                {
+                    willDoComboOnNextAttack = false;
+                    enemyAnimatorManager.PlayTargetAnimation(currentAttack.actionAnimation, true);
+                }
+            }
+
             Vector3 targetDirection = enemyManager.currentTarget.transform.position - transform.position;
             float distanceFromTarget = Vector3.Distance(enemyManager.currentTarget.transform.position, enemyManager.transform.position);
             float viewableAngle = Vector3.Angle(targetDirection, transform.forward);
@@ -18,7 +33,9 @@ namespace AG
             HandleRotateTowardsTarget(enemyManager);
 
             if (enemyManager.isPerformingAction)
+            {
                 return combatStanceState;
+            }
             
             if(currentAttack != null)
             {
@@ -37,9 +54,21 @@ namespace AG
                             enemyAnimatorManager.anim.SetFloat("Horizontal", 0, 0.1f, Time.deltaTime);
                             enemyAnimatorManager.PlayTargetAnimation(currentAttack.actionAnimation, true);
                             enemyManager.isPerformingAction = true;
-                            enemyManager.currentRecoveryTime = currentAttack.recoveryTime;
-                            currentAttack = null;
-                            return combatStanceState;
+                            RollForComboChange(enemyManager);
+
+                            if(currentAttack.canCombo && willDoComboOnNextAttack)
+                            {
+                                currentAttack = currentAttack.comboAction;
+                                willDoComboOnNextAttack = true;
+                                return this;
+                            }
+                            else
+                            {
+                                enemyManager.currentRecoveryTime = currentAttack.recoveryTime;
+                                currentAttack = null;
+                                //enemyManager.isPerformingAction = false; // ✨ dòng này rất quan trọng
+                                return combatStanceState;
+                            }
                         }    
                     }    
                 }    
@@ -127,6 +156,16 @@ namespace AG
                 enemyManager.navmeshAgent.SetDestination(enemyManager.currentTarget.transform.position);
                 enemyManager.enemyRigidBody.linearVelocity = targetVelocity;
                 enemyManager.transform.rotation = Quaternion.Slerp(enemyManager.transform.rotation, enemyManager.navmeshAgent.transform.rotation, enemyManager.rotationSpeed / Time.deltaTime);
+            }
+        }
+
+        private void RollForComboChange(EnemyManager enemyManager)
+        {
+            float comboChange = Random.Range(0, 100);
+
+            if(enemyManager.allowAIToPerformCombos && comboChange <= enemyManager.comboLikelyHood)
+            {
+                willDoComboOnNextAttack = true;
             }
         }
     }

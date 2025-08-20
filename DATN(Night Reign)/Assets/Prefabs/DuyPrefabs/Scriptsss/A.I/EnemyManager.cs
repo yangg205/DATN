@@ -1,3 +1,4 @@
+using ND;
 using UnityEngine;
 using UnityEngine.AI;
 namespace AG
@@ -18,12 +19,18 @@ namespace AG
         public float rotationSpeed = 15;
         public float maximumAttackRange = 1.5f;
 
+        [Header("Combat Flags")]
+        public bool canDoCombo;
+
         [Header("A.I Settings")]
         public float detectionRadius = 20;
         public float maximumDetectionAngle = 50;
         public float minimumDetectionAngle = -50;
-
         public float currentRecoveryTime = 0;
+
+        [Header("A.I Combat Settings")]
+        public bool allowAIToPerformCombos;
+        public float comboLikelyHood;
 
         private void Awake()
         {
@@ -31,7 +38,6 @@ namespace AG
             enemyAnimatorManager = GetComponentInChildren<EnemyAnimatorManager>();
             enemyStats = GetComponent<EnemyStats>();
             enemyRigidBody = GetComponent<Rigidbody>();
-            backStabCollider = GetComponentInChildren<BackStabCollider>();
             navmeshAgent = GetComponentInChildren<NavMeshAgent>();
             navmeshAgent.enabled = false;
         }
@@ -44,13 +50,17 @@ namespace AG
         private void Update()
         {
             HandleRecoveryTime();
+            HandleStateMachine();
 
             isInteracting = enemyAnimatorManager.anim.GetBool("isInteracting");
+            canDoCombo = enemyAnimatorManager.anim.GetBool("canDoCombo");
+            enemyAnimatorManager.anim.SetBool("isDead", enemyStats.isDead);
         }
 
-        private void FixedUpdate()
+        private void LateUpdate()
         {
-            HandleStateMachine();
+            navmeshAgent.transform.localPosition = Vector3.zero;
+            navmeshAgent.transform.localRotation = Quaternion.identity;
         }
 
         private void HandleStateMachine()

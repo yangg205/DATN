@@ -84,7 +84,7 @@ namespace ND
                 inputActions.PlayerActions.Roll.canceled += i => roll_input = false;
                 inputActions.PlayerActions.Jump.performed += i => jump_input = true;
                 inputActions.PlayerActions.LockOn.performed += i => lockOn_input = true;
-                inputActions.PlayerActions.Parry.performed += i => parry_input = true;
+                inputActions.PlayerActions.LT.performed += i => parry_input = true;
                 inputActions.PlayerQuickSlots.DPadRight.performed += i => d_Pad_Right = true;
                 inputActions.PlayerQuickSlots.DPadLeft.performed += i => d_Pad_Left = true;
 

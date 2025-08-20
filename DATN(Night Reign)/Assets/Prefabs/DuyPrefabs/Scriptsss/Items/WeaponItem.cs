@@ -8,6 +8,13 @@ namespace AG
         public GameObject modelPrefab;
         public bool isUnarmed;
 
+        [Header("Damage")]
+        public int baseDamage = 25;
+        public int criticalDamageMultiplier = 4;
+
+        [Header("Absorption")]
+        public float physicalDamageAbsorption;
+
         [Header("Idle Animations")]
         public string right_hand_idle;
         public string left_hand_idle;
@@ -26,6 +33,9 @@ namespace AG
         public string Th_Light_Attack_3;
         public string Th_Heavy_Attack_1;
 
+        [Header("Weapon Art")]
+        public string weapon_art;
+
         [Header("Stamina Costs")]
         public int baseStamina;
         public float lightAttackMultiplier;
@@ -36,6 +46,7 @@ namespace AG
         public bool isFaithCaster;
         public bool isPyroCaster;
         public bool isMeleeWeapon;
+        public bool isShieldWeapon;
     }
 }
 

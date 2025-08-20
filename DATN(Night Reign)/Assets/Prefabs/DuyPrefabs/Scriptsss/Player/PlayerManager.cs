@@ -7,10 +7,11 @@ namespace AG
 {
     public class PlayerManager : CharacterManager
     {
-        PlayerStats playerStats;
         InputHandler inputHandler;
         Animator anim;
         CameraHandler cameraHandler;
+        PlayerStats playerStats;
+        PlayerAnimatorManager playerAnimatorManager;
         PlayerLocomotion playerLocomotion;
 
         InteractableUI interactableUI;
@@ -30,12 +31,9 @@ namespace AG
         private void Awake()
         {
             cameraHandler = FindObjectOfType<CameraHandler>();
-            backStabCollider = GetComponentInChildren<BackStabCollider>();
-        }
-
-        void Start()
-        {
+            backStabCollider = GetComponentInChildren<CriticalDamageCollider>();
             inputHandler = GetComponent<InputHandler>();
+            playerAnimatorManager = GetComponentInChildren<PlayerAnimatorManager>();
             anim = GetComponentInChildren<Animator>();
             playerStats = GetComponent<PlayerStats>();
             playerLocomotion = GetComponent<PlayerLocomotion>();
@@ -51,9 +49,12 @@ namespace AG
             isUsingRightHand = anim.GetBool("isUsingRightHand");
             isUsingLeftHand = anim.GetBool("isUsingLeftHand");
             isInvulnerable = anim.GetBool("isInvulnerable");
+            anim.SetBool("isBlocking", isBlocking);
             anim.SetBool("isInAir", isInAir);
+            anim.SetBool("isDead", playerStats.isDead);
 
             inputHandler.TickInput(delta);
+            playerAnimatorManager.canRotate = anim.GetBool("canRotate");
             playerLocomotion.HandleRollingAndSprinting(delta);
             playerLocomotion.HandleJumping();
             playerStats.RegenerateStamina();
@@ -64,14 +65,17 @@ namespace AG
         private void FixedUpdate()
         {
             float delta = Time.fixedDeltaTime;
+
             playerLocomotion.HandleMovement(delta);
             playerLocomotion.HandleFalling(delta, playerLocomotion.moveDirection);
+            playerLocomotion.HandleRotation(delta);
         }
         private void LateUpdate()
         {
             inputHandler.rollFlag = false;
             inputHandler.rb_input = false;
             inputHandler.rt_input = false;
+            inputHandler.lt_input = false;
             inputHandler.d_pad_Down = false;
             inputHandler.d_pad_Up = false;
             inputHandler.d_pad_Left = false;
@@ -93,6 +97,7 @@ namespace AG
                 playerLocomotion.inAirTimer = playerLocomotion.inAirTimer + Time.deltaTime;
             }    
         }
+        #region Player Interactions
 
         public void CheckForInteractableObject()
         {
@@ -130,6 +135,15 @@ namespace AG
                 }
             }
         }
+
+        public void OpenChestInteraction(Transform playerStandsHereWhenOpenChest)
+        {
+            playerLocomotion.rigidbody.linearVelocity = Vector3.zero;
+            transform.position = playerStandsHereWhenOpenChest.transform.position;
+            playerAnimatorManager.PlayTargetAnimation("Open Chest", true);
+        }
+
+        #endregion
     }
 }
 
