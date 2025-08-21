@@ -77,21 +77,21 @@ namespace ND
 
                 inputActions.PlayerMovement.Movement.performed += i => movementInput = i.ReadValue<Vector2>();
                 inputActions.PlayerMovement.Camera.performed += i => cameraInput = i.ReadValue<Vector2>();
-                inputActions.PlayerActions.LightAttack.performed += i => lightAttack_input = true;
-                inputActions.PlayerActions.HeavyAttack.performed += i => heavyAttack_input = true;
-                inputActions.PlayerActions.Interact.performed += i => interact_input = true;
+                inputActions.PlayerActions.RB.performed += i => lightAttack_input = true;
+                inputActions.PlayerActions.RT.performed += i => heavyAttack_input = true;
+                inputActions.PlayerActions.X.performed += i => interact_input = true;
                 inputActions.PlayerActions.Roll.performed += i => roll_input = true;
                 inputActions.PlayerActions.Roll.canceled += i => roll_input = false;
                 inputActions.PlayerActions.Jump.performed += i => jump_input = true;
                 inputActions.PlayerActions.LockOn.performed += i => lockOn_input = true;
-                inputActions.PlayerActions.Parry.performed += i => parry_input = true;
+                inputActions.PlayerActions.LT.performed += i => parry_input = true;
                 inputActions.PlayerQuickSlots.DPadRight.performed += i => d_Pad_Right = true;
                 inputActions.PlayerQuickSlots.DPadLeft.performed += i => d_Pad_Left = true;
 
                 inputActions.PlayerActions.Inventory.performed += i => HandleInventoryInput();
                 inputActions.PlayerMovement.LockOnTargetRight.performed += i => right_Stick_Right_Input = true;
                 inputActions.PlayerMovement.LockOnTargetLeft.performed += i => right_Stick_Left_Input = true;
-                inputActions.PlayerActions.TwoHand.performed += i => twoHand_input = true;
+                inputActions.PlayerActions.Y.performed += i => twoHand_input = true;
                 inputActions.PlayerActions.CriticalAttack.performed += i => critical_Attack_input = true;
                 inputActions.PlayerActions.Skill.performed += i => skill_input = true;
                 inputActions.PlayerActions.BoostAttackSpeed.performed += i => attackSpeedBoost_input = true;
