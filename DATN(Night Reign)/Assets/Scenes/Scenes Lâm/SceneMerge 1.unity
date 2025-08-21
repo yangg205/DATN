@@ -5620,11 +5620,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   director: {fileID: 61895824}
-  continueButton: {fileID: 1445338401}
+  continueButton: {fileID: 0}
   blackScreen: {fileID: 1952176673}
   loadingPrefab: {fileID: 3393744194341013531, guid: 2cdda8d5bab598e47b074eaf6e380421,
     type: 3}
-  nextSceneName: SceneMergeDat 2
+  nextSceneName: SceneMergeDat 3
 --- !u!114 &719624584
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5645,7 +5645,7 @@ MonoBehaviour:
   skipDelay: 5
   skipFadeDuration: 1
   fadeDuration: 1
-  nextSceneName: SceneMergeDat 2
+  nextSceneName: SceneMergeDat 3
 --- !u!64 &721089456
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -11092,12 +11092,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -2537684194438541103, guid: 3b5da6fc17b8d9841a819242a711ee95, type: 3}
---- !u!1 &1445338401 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3139211635035308390, guid: 4bb58a1fc596ac8499aae41255387c25,
-    type: 3}
-  m_PrefabInstance: {fileID: 512927471265345136}
-  m_PrefabAsset: {fileID: 0}
 --- !u!64 &1458791611
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -24284,6 +24278,11 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 719624583}
+    - target: {fileID: 2200666159097307854, guid: 4bb58a1fc596ac8499aae41255387c25,
+        type: 3}
+      propertyPath: m_PlayOnAwake
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2200666159097307854, guid: 4bb58a1fc596ac8499aae41255387c25,
         type: 3}
       propertyPath: OutputAudioMixerGroup
