@@ -3324,6 +3324,7 @@ MonoBehaviour:
   canBeParried: 0
   isParrying: 0
   isBlocking: 0
+  isFiringSpell: 0
   pendingCriticalDamage: 0
   interactableUIGameObject: {fileID: 2106685452135700550}
   itemInteractableGameObject: {fileID: 6408732966229027033}
@@ -3347,16 +3348,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1282dd2b98778b84d8becb16ec0ac2ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentSpell: {fileID: 11400000, guid: ed29fc8e7c8f80b469276af93dec293f, type: 2}
-  rightWeapon: {fileID: 11400000, guid: 3b90f2df5b71f184b9436e4c71674deb, type: 2}
-  leftWeapon: {fileID: 11400000, guid: 99ca2565c2c9b1742b8a4c61eca57cc9, type: 2}
+  currentSpell: {fileID: 11400000, guid: a6377e1b6409dd949ada738092937134, type: 2}
+  rightWeapon: {fileID: 11400000, guid: 99ca2565c2c9b1742b8a4c61eca57cc9, type: 2}
+  leftWeapon: {fileID: 11400000, guid: 2dab977679eba2244a4d8a5415dd08ba, type: 2}
   unarmedWeapon: {fileID: 11400000, guid: 4bd8d0081c3342442abacc0ce3e742ae, type: 2}
   weaponInRightHandSlots:
-  - {fileID: 11400000, guid: 99ca2565c2c9b1742b8a4c61eca57cc9, type: 2}
-  - {fileID: 11400000, guid: 3b90f2df5b71f184b9436e4c71674deb, type: 2}
+  - {fileID: 11400000, guid: 53cbd28d8e69909458e10e749563207f, type: 2}
   - {fileID: 11400000, guid: 7d6910d3cc66fdb458c80e04754ec880, type: 2}
   weaponInLeftHandSlots:
-  - {fileID: 11400000, guid: 99ca2565c2c9b1742b8a4c61eca57cc9, type: 2}
   - {fileID: 11400000, guid: 2dab977679eba2244a4d8a5415dd08ba, type: 2}
   - {fileID: 11400000, guid: 4bd8d0081c3342442abacc0ce3e742ae, type: 2}
   currentRightWeaponIndex: 0
@@ -3647,6 +3646,7 @@ MonoBehaviour:
   canBeParried: 0
   isParrying: 0
   isBlocking: 0
+  isFiringSpell: 0
   pendingCriticalDamage: 0
   currentState: {fileID: 1444000879}
   currentTarget: {fileID: 0}
@@ -6332,7 +6332,6 @@ GameObject:
   - component: {fileID: 2001428860}
   - component: {fileID: 2001428863}
   - component: {fileID: 2001428862}
-  - component: {fileID: 2001428861}
   m_Layer: 5
   m_Name: Health Bar
   m_TagString: Untagged
@@ -6362,19 +6361,6 @@ RectTransform:
   m_AnchoredPosition: {x: -959.80676, y: -537.51}
   m_SizeDelta: {x: 1, y: 0.2}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &2001428861
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2001428859}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c5e56023d3bb36247926386e7d29d878, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  slider: {fileID: 2001428863}
 --- !u!222 &2001428862
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -25993,6 +25979,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attackingWeapon: {fileID: 0}
+  leftHandSlot: {fileID: 0}
+  rightHandSlot: {fileID: 0}
   leftHandDamageCollider: {fileID: 0}
   rightHandDamageCollider: {fileID: 0}
 --- !u!114 &7811587653783608210

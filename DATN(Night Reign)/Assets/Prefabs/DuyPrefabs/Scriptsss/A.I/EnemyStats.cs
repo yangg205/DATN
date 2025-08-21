@@ -38,7 +38,7 @@ namespace AG
             }
         }
 
-        public void TakeDamage(int damage, string damageAnimation = "Damage_Hit")
+        public override void TakeDamage(int damage, string damageAnimation = "Damage_Hit")
         {
             if (isDead)
                 return;

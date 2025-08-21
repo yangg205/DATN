@@ -31,7 +31,7 @@ namespace AG
             rightWeapon = weaponInRightHandSlots[0];
             leftWeapon = weaponInLeftHandSlots[0];
             weaponSlotManager.LoadWeaponOnSlot(rightWeapon, false);
-            weaponSlotManager.LoadWeaponOnSlot(rightWeapon, true);
+            weaponSlotManager.LoadWeaponOnSlot(leftWeapon, true);
         }
 
         public void ChangeRightWeapon()

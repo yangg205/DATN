@@ -8,6 +8,7 @@ namespace AG
     {
         public CharacterManager characterManager;
         Collider damageCollider;
+        public bool enableDamageColliderOnStartUp = false;
 
         public int currentWeaponDamage = 25;
         private void Awake()
@@ -16,6 +17,7 @@ namespace AG
             damageCollider.gameObject.SetActive(true);
             damageCollider.isTrigger = true;
             damageCollider.enabled = false;
+            damageCollider.enabled = enableDamageColliderOnStartUp;
         }
 
         public void EnableDamageCollider()

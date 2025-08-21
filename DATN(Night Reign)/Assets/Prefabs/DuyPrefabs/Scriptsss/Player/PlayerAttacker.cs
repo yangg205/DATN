@@ -5,6 +5,7 @@ namespace AG
 {
     public class PlayerAttacker : MonoBehaviour
     {
+        CameraHandler cameraHandler;
         PlayerAnimatorManager animationHandler;
         PlayerEquipmentManager playerEquipmentManager;
         PlayerManager playerManager;
@@ -19,6 +20,7 @@ namespace AG
 
         private void Awake()
         {
+            cameraHandler = FindObjectOfType<CameraHandler>();
             animationHandler = GetComponent<PlayerAnimatorManager>();
             playerEquipmentManager = GetComponent<PlayerEquipmentManager>();
             playerManager = GetComponentInParent<PlayerManager>();
@@ -172,20 +174,34 @@ namespace AG
             if (playerManager.isInteracting)
                 return;
 
-            if(weapon.isFaithCaster)
+            if (weapon.isFaithCaster)
             {
-                if(playerInventory.currentSpell != null && playerInventory.currentSpell.isFaithSpell)
+                if (playerInventory.currentSpell != null && playerInventory.currentSpell.isFaithSpell)
                 {
-                    if(playerStats.currentFocusPoints >= playerInventory.currentSpell.focusPointsCost)
+                    if (playerStats.currentFocusPoints >= playerInventory.currentSpell.focusPointsCost)
                     {
-                        playerInventory.currentSpell.AttemptToCastSpell(animationHandler, playerStats);
-                    }    
+                        playerInventory.currentSpell.AttemptToCastSpell(animationHandler, playerStats, weaponSlotManager);
+                    }
                     else
                     {
                         animationHandler.PlayTargetAnimation("Shrug", true);
-                    }    
-                }    
-            }    
+                    }
+                }
+            }
+            else if (weapon.isPyroCaster)
+            {
+                if (playerInventory.currentSpell != null && playerInventory.currentSpell.isPyroSpell)
+                {
+                    if (playerStats.currentFocusPoints >= playerInventory.currentSpell.focusPointsCost)
+                    {
+                        playerInventory.currentSpell.AttemptToCastSpell(animationHandler, playerStats, weaponSlotManager);
+                    }
+                    else
+                    {
+                        animationHandler.PlayTargetAnimation("Shrug", true);
+                    }
+                }
+            }
         }    
 
         private void PerformLTWeaponArt(bool isTwoHanding)
@@ -205,7 +221,8 @@ namespace AG
 
         private void SuccessfullyCastSpell()
         {
-            playerInventory.currentSpell.SuccessfullyCastSpell(animationHandler, playerStats);
+            playerInventory.currentSpell.SuccessfullyCastSpell(animationHandler, playerStats, cameraHandler, weaponSlotManager);
+            animationHandler.anim.SetBool("isFiringSpell", true);
         }
         #endregion
 
