@@ -113,7 +113,7 @@ namespace AG
                     enemyStats.TakeDamage(currentWeaponDamage);
                 }
             }
-            if (collision.tag == "NightMare")
+            if (collision.tag == "DragonNightMare")
             {
                 NightMare enemyStats = collision.GetComponent<NightMare>();
 
