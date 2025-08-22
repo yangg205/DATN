@@ -1,4 +1,5 @@
-﻿using ND;
+﻿using AG;
+using ND;
 using Pathfinding;
 using System.Collections;
 using UnityEngine;
@@ -16,7 +17,7 @@ public class DragonSoulEater : MonoBehaviour
     public Transform dropPoint;
 
     public int expReward = 25;
-    public PlayerStats playerStats;
+    public CharacterStats characterStats;
 
     public Transform attackPoint;
     public float attackRange = 1.5f;
@@ -48,9 +49,9 @@ public class DragonSoulEater : MonoBehaviour
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
         questManager = FindObjectOfType<QuestManager>();
-        if (player != null)
+        if (characterStats != null)
         {
-            playerStats = player.GetComponent<PlayerStats>();
+            characterStats = player.GetComponent<CharacterStats>();
         }
         animator.SetTrigger("sleep");
     }
@@ -128,10 +129,10 @@ public class DragonSoulEater : MonoBehaviour
             }
             
 
-            if (playerStats != null)
+          /*  if (characterStats != null)
             {
-                playerStats.GainEXP(expReward);
-            }
+                characterStats.GainEXP(expReward);
+            }*/
 
         }
         else
@@ -200,7 +201,7 @@ public class DragonSoulEater : MonoBehaviour
         Collider[] hitPlayers = Physics.OverlapSphere(attackPoint.position, attackRange, playerLayer);
         foreach (Collider player in hitPlayers)
         {
-            playerStats.TakeDamage((int)damage);
+            characterStats.TakeDamage((int)damage);
         }
     }
     private void OnDrawGizmosSelected()

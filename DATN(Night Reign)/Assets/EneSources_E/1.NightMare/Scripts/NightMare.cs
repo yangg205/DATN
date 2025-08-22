@@ -6,6 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using ND;
+using AG;
 
 public class NightMare : MonoBehaviour
 {
@@ -14,7 +15,7 @@ public class NightMare : MonoBehaviour
     public Animator animator;
 
     public int expReward = 25;
-    public PlayerStats playerStats;
+    public CharacterStats characterStats;
 
     public Transform attackPoint;
     public float attackRange = 1.5f;
@@ -49,9 +50,9 @@ public class NightMare : MonoBehaviour
     {
         isDead = false;
         player = GameObject.FindGameObjectWithTag("Player").transform;
-        if (player != null)
+        if (characterStats != null)
         {
-            playerStats = player.GetComponent<PlayerStats>();
+            characterStats = player.GetComponent<CharacterStats>();
         }
 
     }
@@ -126,10 +127,10 @@ public class NightMare : MonoBehaviour
                 // Reset camera
                 ND.CameraHandler.singleton.ClearLockOnTargets();
             }
-            if (playerStats != null)
+           /* if (characterStats != null)
             {
-                playerStats.GainEXP(expReward);
-            }
+                characterStats.GainEXP(expReward);
+            }*/
 
         }
         else
@@ -203,7 +204,7 @@ public class NightMare : MonoBehaviour
         foreach (Collider player in hitPlayers)
         {
             //player.GetComponent<PlayerClone>()?.TakeDamage(damage);
-            player.GetComponent<PlayerStats>()?.TakeDamage(damage); //============== thay bằng code HP player=============================***************************
+            player.GetComponent<CharacterStats>()?.TakeDamage(damage); //============== thay bằng code HP player=============================***************************
         }
     }
     private void OnDrawGizmosSelected()
