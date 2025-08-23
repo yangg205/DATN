@@ -384,12 +384,12 @@ MonoBehaviour:
   maxHP: 100
   animator: {fileID: 3994155101141055956}
   expReward: 25
-  playerStats: {fileID: 0}
+  characterStats: {fileID: 0}
   attackPoint: {fileID: 8375744910754855868}
   attackRange: 0.4
   playerLayer:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 128
   itemDropPrefab: {fileID: 0}
   dropPoint: {fileID: 865066418409152900}
   vfxDead: {fileID: 1555924519721416683}
@@ -484,6 +484,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lockOnTransform: {fileID: 8590202298514432980}
+  backStabCollider: {fileID: 0}
 --- !u!1 &1331155342561081193
 GameObject:
   m_ObjectHideFlags: 0

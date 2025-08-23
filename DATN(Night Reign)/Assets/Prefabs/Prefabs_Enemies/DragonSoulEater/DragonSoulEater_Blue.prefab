@@ -47,7 +47,7 @@ GameObject:
   - component: {fileID: 8739783472854189292}
   - component: {fileID: 1237087366057114915}
   - component: {fileID: 197621399689941129}
-  - component: {fileID: 7808348894588340680}
+  - component: {fileID: -8948596739949205629}
   m_Layer: 6
   m_Name: DragonSoulEater_Blue
   m_TagString: DragonSoulEater
@@ -165,13 +165,12 @@ MonoBehaviour:
   itemDropPrefab: {fileID: 0}
   dropPoint: {fileID: 2122478552522060171}
   expReward: 25
-  playerStats: {fileID: 0}
+  characterStats: {fileID: 0}
   attackPoint: {fileID: 7602705919481297996}
   attackRange: 0.4
   playerLayer:
     serializedVersion: 2
-    m_Bits: 1
-  soulsReward: 50
+    m_Bits: 128
   vfxDead: {fileID: 2013514250003992076}
   iceMaterial: {fileID: 2100000, guid: 9fca7ea8014af5244aa081ccdc46d112, type: 2}
   originalMaterial: {fileID: 2100000, guid: 5fcde950c31077243850f23d14ba9a5a, type: 2}
@@ -181,6 +180,7 @@ MonoBehaviour:
   isTakingDamage: 0
   minAttackDamage: 2
   maxAttackDamage: 5
+  questManager: {fileID: 0}
 --- !u!114 &1237087366057114915
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -251,7 +251,7 @@ MonoBehaviour:
   slowWhenNotFacingTarget: 1
   whenCloseToDestination: 0
   constrainInsideGraph: 0
---- !u!114 &7808348894588340680
+--- !u!114 &-8948596739949205629
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -260,10 +260,33 @@ MonoBehaviour:
   m_GameObject: {fileID: 983970137812721851}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 604dcb9ed21d1c74cb59c45003b9049b, type: 3}
+  m_Script: {fileID: 11500000, guid: 4580d997a50629d4d8be70629664dc37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   lockOnTransform: {fileID: 8469099288214012254}
+  backStabCollider: {fileID: 0}
+  riposteCollider: {fileID: 0}
+  canBeRiposted: 0
+  canBeParried: 0
+  isParrying: 0
+  isBlocking: 0
+  isFiringSpell: 0
+  pendingCriticalDamage: 0
+  currentState: {fileID: 0}
+  currentTarget: {fileID: 0}
+  navmeshAgent: {fileID: 0}
+  enemyRigidBody: {fileID: 0}
+  isPerformingAction: 0
+  isInteracting: 0
+  rotationSpeed: 15
+  maximumAttackRange: 1.5
+  canDoCombo: 0
+  detectionRadius: 20
+  maximumDetectionAngle: 50
+  minimumDetectionAngle: -50
+  currentRecoveryTime: 0
+  allowAIToPerformCombos: 0
+  comboLikelyHood: 0
 --- !u!1 &1023582689791430590
 GameObject:
   m_ObjectHideFlags: 0

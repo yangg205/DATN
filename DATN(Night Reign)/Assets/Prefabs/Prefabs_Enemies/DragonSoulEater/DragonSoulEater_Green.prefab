@@ -394,7 +394,7 @@ GameObject:
   - component: {fileID: 3139485145790890128}
   - component: {fileID: 2380192786557340144}
   - component: {fileID: 2849465924608352558}
-  - component: {fileID: 2822489204249143341}
+  - component: {fileID: 5890497703426114057}
   m_Layer: 6
   m_Name: DragonSoulEater_Green
   m_TagString: DragonSoulEater
@@ -511,12 +511,12 @@ MonoBehaviour:
   itemDropPrefab: {fileID: 0}
   dropPoint: {fileID: 3483812630738011059}
   expReward: 25
-  playerStats: {fileID: 0}
+  characterStats: {fileID: 0}
   attackPoint: {fileID: 6826880930841457318}
   attackRange: 0.4
   playerLayer:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 128
   vfxDead: {fileID: 3752278737699033439}
   iceMaterial: {fileID: 2100000, guid: 9d02d36f4103207499528d9223003d19, type: 2}
   originalMaterial: {fileID: 2100000, guid: a0c281dfd6b92bd4db117147759c5b8f, type: 2}
@@ -597,7 +597,7 @@ MonoBehaviour:
   slowWhenNotFacingTarget: 1
   whenCloseToDestination: 0
   constrainInsideGraph: 0
---- !u!114 &2822489204249143341
+--- !u!114 &5890497703426114057
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -606,10 +606,33 @@ MonoBehaviour:
   m_GameObject: {fileID: 1873686811714228870}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 604dcb9ed21d1c74cb59c45003b9049b, type: 3}
+  m_Script: {fileID: 11500000, guid: 4580d997a50629d4d8be70629664dc37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   lockOnTransform: {fileID: 1479495880374787926}
+  backStabCollider: {fileID: 0}
+  riposteCollider: {fileID: 0}
+  canBeRiposted: 0
+  canBeParried: 0
+  isParrying: 0
+  isBlocking: 0
+  isFiringSpell: 0
+  pendingCriticalDamage: 0
+  currentState: {fileID: 0}
+  currentTarget: {fileID: 0}
+  navmeshAgent: {fileID: 0}
+  enemyRigidBody: {fileID: 0}
+  isPerformingAction: 0
+  isInteracting: 0
+  rotationSpeed: 15
+  maximumAttackRange: 1.5
+  canDoCombo: 0
+  detectionRadius: 20
+  maximumDetectionAngle: 50
+  minimumDetectionAngle: -50
+  currentRecoveryTime: 0
+  allowAIToPerformCombos: 0
+  comboLikelyHood: 0
 --- !u!1 &2216047670142191355
 GameObject:
   m_ObjectHideFlags: 0

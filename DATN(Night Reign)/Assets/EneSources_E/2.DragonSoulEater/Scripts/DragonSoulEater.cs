@@ -49,9 +49,9 @@ public class DragonSoulEater : MonoBehaviour
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
         questManager = FindObjectOfType<QuestManager>();
-        if (characterStats != null)
+        if (player != null)
         {
-            characterStats = player.GetComponent<CharacterStats>();
+            characterStats = player.GetComponent<AG.PlayerStats>();
         }
         animator.SetTrigger("sleep");
     }
