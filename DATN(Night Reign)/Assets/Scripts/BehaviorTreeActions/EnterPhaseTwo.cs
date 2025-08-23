@@ -1,14 +1,17 @@
-using UnityEngine;
+﻿using UnityEngine;
 using BehaviorDesigner.Runtime;
 using BehaviorDesigner.Runtime.Tasks;
 
-public class EnterPhaseTwo : Conditional
+public class EnterPhaseTwo : Action
 {
     private BossBlackboard blackboard;
+    private BossCombat combat;
 
     public override void OnStart()
     {
         blackboard = GetComponent<BossBlackboard>();
+        combat = GetComponent<BossCombat>();
+
     }
 
     public override TaskStatus OnUpdate()

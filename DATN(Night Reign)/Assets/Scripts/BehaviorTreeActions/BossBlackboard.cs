@@ -1,4 +1,5 @@
 // ===================== BossBlackboard.cs =====================
+using UnityEditor.Experimental.GraphView;
 using UnityEditor.Localization.Plugins.XLIFF.V12;
 using UnityEngine;
 
@@ -14,8 +15,12 @@ public class BossBlackboard : MonoBehaviour
     public float attackCooldown;
     public float timeSinceLastAttack;
     public Animator animator;
+    [Header("VFX")]
+    public ParticleSystem vfxSlash;
 
     public bool hasTarget = false;
+
+    public int damageAmount;
 
     void Start()
     {
@@ -24,16 +29,20 @@ public class BossBlackboard : MonoBehaviour
 
     void Update()
     {
-        if(Input.GetKeyUp(KeyCode.T))
+        if (Input.GetKeyUp(KeyCode.T))
         {
-            TakeDamage(500);
+            TakeDamage();
         }
     }
 
-    public void TakeDamage(int amount)
+    public void TakeDamage()
     {
-        currentHP -= amount;
-        //animator.SetTrigger("takeHit");
+        currentHP -= damageAmount;
+        animator.SetTrigger("takeHit");
     }
 
+    public void PlaySlash()
+    {
+        vfxSlash.Play();
+    }
 }

@@ -24,6 +24,10 @@ public class BossCombat : MonoBehaviour
                 break;
         }
 
+        if (_blackboard.isInSecondPhase)
+        {
+            _blackboard.animator?.SetTrigger("AttackPhase2");
+        }
     }
 
     public void CastSpell()

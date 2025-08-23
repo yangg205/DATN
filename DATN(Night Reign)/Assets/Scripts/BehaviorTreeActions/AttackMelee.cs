@@ -33,6 +33,7 @@ public class AttackMelee : Action
                 return TaskStatus.Failure;
             }
             Debug.Log("[AttackMelee] Executing melee attack.");
+            LookAtPlayer();
             combat.AttackNormal();
             blackboard.timeSinceLastAttack = currentTime;
             attackStartTime = currentTime;
