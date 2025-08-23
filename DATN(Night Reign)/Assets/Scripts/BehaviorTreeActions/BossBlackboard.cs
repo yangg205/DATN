@@ -1,4 +1,5 @@
 // ===================== BossBlackboard.cs =====================
+using System.Collections;
 using TMPro;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.Localization.Plugins.XLIFF.V12;
@@ -51,14 +52,15 @@ public class BossBlackboard : MonoBehaviour
 
     void Start()
     {
-        animator.SetTrigger("Spawn");
-
+        StartCoroutine(SpawnAfterDelay(2f));
+    
         currentHP = maxHP;
     }
 
     void Update()
     {
         if (IsPaused) return;
+
 
         if (healthSlider.value != currentHP)
         {
@@ -82,6 +84,12 @@ public class BossBlackboard : MonoBehaviour
     {
         currentHP -= damageAmount;
         animator.SetTrigger("takeHit");
+    }
+
+    IEnumerator SpawnAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        animator.SetTrigger("Spawn");
     }
 
     public void PlaySlash()
