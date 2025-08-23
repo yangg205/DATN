@@ -26,8 +26,18 @@ public class BossCombat : MonoBehaviour
 
         if (_blackboard.isInSecondPhase)
         {
-            _blackboard.animator?.SetTrigger("AttackPhase2");
+            int animationChoice1 = UnityEngine.Random.Range(1, 3);
+            switch (animationChoice1)
+            {
+                case 1:
+                    _blackboard.animator?.SetTrigger("AttackPhase2");
+                    break;
+                case 2:
+                    _blackboard.animator?.SetTrigger("AttackPhase2,1");
+                    break;
+            }
         }
+       
     }
 
     public void CastSpell()
@@ -50,9 +60,5 @@ public class BossCombat : MonoBehaviour
         // Add dash or animation
     }
 
-    public void Atk2()
-    {
-        Debug.Log("[BossCombat] Atk2 triggered.");
-        _blackboard.animator?.SetTrigger("AttackPhase2"); 
-    }
+
 }

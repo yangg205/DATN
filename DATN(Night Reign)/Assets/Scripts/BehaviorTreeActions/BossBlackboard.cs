@@ -17,6 +17,7 @@ public class BossBlackboard : MonoBehaviour
     public Animator animator;
     [Header("VFX")]
     public ParticleSystem vfxSlash;
+    public ParticleSystem vfxSlash1;
 
     public bool hasTarget = false;
 
@@ -24,6 +25,8 @@ public class BossBlackboard : MonoBehaviour
 
     void Start()
     {
+        animator.SetTrigger("");
+
         currentHP = maxHP;
     }
 
@@ -44,5 +47,10 @@ public class BossBlackboard : MonoBehaviour
     public void PlaySlash()
     {
         vfxSlash.Play();
+    }
+
+    public void PlaySlash1()
+    {
+        vfxSlash1.Play();
     }
 }
