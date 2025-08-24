@@ -18,9 +18,6 @@ public class BossBlackboard : MonoBehaviour
     public float attackCooldown;
     public float timeSinceLastAttack;
     public Animator animator;
-    [Header("VFX")]
-    public ParticleSystem vfxSlash;
-    public ParticleSystem vfxSlash1;
 
     [Header("UI")]
     public Slider healthSlider;
@@ -92,13 +89,5 @@ public class BossBlackboard : MonoBehaviour
         animator.SetTrigger("Spawn");
     }
 
-    public void PlaySlash()
-    {
-        vfxSlash.Play();
-    }
-
-    public void PlaySlash1()
-    {
-        vfxSlash1.Play();
-    }
+   
 }
