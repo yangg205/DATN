@@ -269,7 +269,8 @@ GameObject:
   - component: {fileID: 1976934707003892727}
   - component: {fileID: 4389635889376720833}
   - component: {fileID: 7461519492172270965}
-  - component: {fileID: 6421639532726255238}
+  - component: {fileID: 1459962941378587323}
+  - component: {fileID: 7691604712276875716}
   m_Layer: 6
   m_Name: Dragon_Green
   m_TagString: DragonNightMare
@@ -471,7 +472,7 @@ MonoBehaviour:
   slowWhenNotFacingTarget: 1
   whenCloseToDestination: 0
   constrainInsideGraph: 0
---- !u!114 &6421639532726255238
+--- !u!114 &1459962941378587323
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -480,11 +481,47 @@ MonoBehaviour:
   m_GameObject: {fileID: 1073874745645088480}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 604dcb9ed21d1c74cb59c45003b9049b, type: 3}
+  m_Script: {fileID: 11500000, guid: 9f6cd4bc1206f9441bf87780f4feffc6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  coin: 0
+  cointext: {fileID: 0}
+--- !u!114 &7691604712276875716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1073874745645088480}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4580d997a50629d4d8be70629664dc37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   lockOnTransform: {fileID: 8590202298514432980}
   backStabCollider: {fileID: 0}
+  riposteCollider: {fileID: 0}
+  canBeRiposted: 0
+  canBeParried: 0
+  isParrying: 0
+  isBlocking: 0
+  isFiringSpell: 0
+  pendingCriticalDamage: 0
+  currentState: {fileID: 0}
+  currentTarget: {fileID: 0}
+  navmeshAgent: {fileID: 0}
+  enemyRigidBody: {fileID: 0}
+  isPerformingAction: 0
+  isInteracting: 0
+  rotationSpeed: 15
+  maximumAttackRange: 1.5
+  canDoCombo: 0
+  detectionRadius: 20
+  maximumDetectionAngle: 50
+  minimumDetectionAngle: -50
+  currentRecoveryTime: 0
+  allowAIToPerformCombos: 0
+  comboLikelyHood: 0
 --- !u!1 &1331155342561081193
 GameObject:
   m_ObjectHideFlags: 0

@@ -1070,7 +1070,8 @@ GameObject:
   - component: {fileID: 213636392838812578}
   - component: {fileID: 821984156311281670}
   - component: {fileID: 4189367421689531356}
-  - component: {fileID: 4285790694395991223}
+  - component: {fileID: -5241915839326505913}
+  - component: {fileID: 4691101764961390169}
   m_Layer: 6
   m_Name: Dragon_AIbino
   m_TagString: DragonNightMare
@@ -1272,7 +1273,7 @@ MonoBehaviour:
   slowWhenNotFacingTarget: 1
   whenCloseToDestination: 0
   constrainInsideGraph: 0
---- !u!114 &4285790694395991223
+--- !u!114 &-5241915839326505913
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1281,11 +1282,47 @@ MonoBehaviour:
   m_GameObject: {fileID: 4583136156020813420}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 604dcb9ed21d1c74cb59c45003b9049b, type: 3}
+  m_Script: {fileID: 11500000, guid: 4580d997a50629d4d8be70629664dc37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   lockOnTransform: {fileID: 6684687582738718899}
   backStabCollider: {fileID: 0}
+  riposteCollider: {fileID: 0}
+  canBeRiposted: 0
+  canBeParried: 0
+  isParrying: 0
+  isBlocking: 0
+  isFiringSpell: 0
+  pendingCriticalDamage: 0
+  currentState: {fileID: 0}
+  currentTarget: {fileID: 0}
+  navmeshAgent: {fileID: 0}
+  enemyRigidBody: {fileID: 0}
+  isPerformingAction: 0
+  isInteracting: 0
+  rotationSpeed: 15
+  maximumAttackRange: 1.5
+  canDoCombo: 0
+  detectionRadius: 20
+  maximumDetectionAngle: 50
+  minimumDetectionAngle: -50
+  currentRecoveryTime: 0
+  allowAIToPerformCombos: 0
+  comboLikelyHood: 0
+--- !u!114 &4691101764961390169
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4583136156020813420}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f6cd4bc1206f9441bf87780f4feffc6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  coin: 0
+  cointext: {fileID: 0}
 --- !u!1 &4721259902373126061
 GameObject:
   m_ObjectHideFlags: 0
