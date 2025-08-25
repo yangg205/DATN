@@ -395,6 +395,7 @@ GameObject:
   - component: {fileID: 2380192786557340144}
   - component: {fileID: 2849465924608352558}
   - component: {fileID: 5890497703426114057}
+  - component: {fileID: 7721792696915294331}
   m_Layer: 6
   m_Name: DragonSoulEater_Green
   m_TagString: DragonSoulEater
@@ -505,8 +506,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a5b93fe93fc37946aa7ec1b3209e99d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  HP: 100
-  maxHP: 100
+  HP: 50
+  maxHP: 50
   animator: {fileID: 3483141855582954558}
   itemDropPrefab: {fileID: 0}
   dropPoint: {fileID: 3483812630738011059}
@@ -633,6 +634,20 @@ MonoBehaviour:
   currentRecoveryTime: 0
   allowAIToPerformCombos: 0
   comboLikelyHood: 0
+--- !u!114 &7721792696915294331
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1873686811714228870}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f6cd4bc1206f9441bf87780f4feffc6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  coin: 0
+  cointext: {fileID: 0}
 --- !u!1 &2216047670142191355
 GameObject:
   m_ObjectHideFlags: 0

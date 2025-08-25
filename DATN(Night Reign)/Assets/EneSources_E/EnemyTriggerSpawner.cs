@@ -8,6 +8,7 @@ public class EnemyTriggerSpawner : MonoBehaviour
 
     [Header("Spawn Settings")]
     public Transform[] spawnPoints;
+    public float lifeTime = 3;
     public int enemyCount = 5;
     public bool spawnOnlyOnce = true;
 
@@ -32,7 +33,7 @@ public class EnemyTriggerSpawner : MonoBehaviour
         foreach (GameObject enemy in spawnedEnemies)
         {
             if (enemy != null)
-                Destroy(enemy, 30f);
+                Destroy(enemy, lifeTime);
         }
 
         // Xóa danh sách sau khi lên lịch hủy
