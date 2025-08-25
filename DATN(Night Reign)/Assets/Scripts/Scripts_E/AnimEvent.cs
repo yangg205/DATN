@@ -34,6 +34,10 @@ public class AnimEvent : MonoBehaviour
         sfxSwordSpawn.PlayOneShot(sfxSwordSpawn.clip);
     }
 
+    public void PlaySFXSword()
+    {
+        sfxSword1.PlayOneShot(sfxSword1.clip);
+    }
     public void PlaySFXMove()
     {
         sfxMove.PlayOneShot(sfxMove.clip);

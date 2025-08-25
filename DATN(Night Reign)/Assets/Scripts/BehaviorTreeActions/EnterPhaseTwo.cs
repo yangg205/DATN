@@ -16,7 +16,7 @@ public class EnterPhaseTwo : Action
 
     public override TaskStatus OnUpdate()
     {
-        if (!blackboard.isInSecondPhase && blackboard.currentHP <= blackboard.maxHP * 0.5f)
+        if (!blackboard.isInSecondPhase && blackboard.currentHP <= blackboard.maxHP * 0.35f)
         {
             blackboard.isInSecondPhase = true;
             blackboard.animator.SetTrigger("ChangePhase2");
