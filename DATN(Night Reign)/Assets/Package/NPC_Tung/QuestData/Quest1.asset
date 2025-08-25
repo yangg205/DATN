@@ -21,7 +21,7 @@ MonoBehaviour:
   targetItemID: 
   requiredItemCount: 1
   prerequisiteQuestName: 
-  isQuestCompleted: 1
+  isQuestCompleted: 0
   hasQuestLocation: 1
   questLocation: {x: 132.6, y: -21.27, z: 354.16}
   giverNPCTransform: {x: -103.9475, y: -33.52, z: 442.123}
@@ -35,6 +35,9 @@ MonoBehaviour:
   - 'Dialogue/Flamekeeper_Q001_CombatHint
 
 '
+  npcIdsBeforeComplete:
+  - Flamekeeper
+  - Flamekeeper
   keydialogueAfterComplete:
   - Dialogue/Flamekeeper_Q001_Completion
   - Dialogue/Player_Q001_Completed
@@ -44,8 +47,16 @@ MonoBehaviour:
 
 '
   - Dialogue/Flamekeeper_Q001_KaelLocation
+  npcIdsAfterComplete:
+  - Flamekeeper
+  - Player
+  - Flamekeeper
+  - Player
+  - Flamekeeper
   keydialogueObjectiveMet:
   - Quest_Objective/Q001_Main
+  npcIdsObjectiveMet:
+  - Flamekeeper
   voiceBeforeComplete_EN:
   - {fileID: 8300000, guid: 684113a9004ce8d49b9132a400d3d914, type: 3}
   - {fileID: 8300000, guid: ba4661c8a41cd644ea8a24113ad118b6, type: 3}

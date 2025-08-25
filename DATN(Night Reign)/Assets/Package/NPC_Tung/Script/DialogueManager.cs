@@ -13,9 +13,9 @@ public class DialogueManager : MonoBehaviour
     [Header("UI Components")]
     public GameObject dialogueUI;
     public TextMeshProUGUI dialogueText;
+    public TextMeshProUGUI npcNameText; // New field for NPC name display
     public bool IsDialogueActive => isDialogueActive;
     private bool hasInterruptedTyping = false;
-
 
     [Header("Typewriter Settings")]
     public float letterDelay = 0.03f;
@@ -26,25 +26,27 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] private AudioClip nextDialogueSound;
 
     [Header("Default Dialogue Fallback (Optional)")]
-    [SerializeField] private string[] defaultDialogueKeys; // Thêm mảng khóa hội thoại mặc định trong Inspector
+    [SerializeField] private string[] defaultDialogueKeys;
     [SerializeField] private AudioClip[] defaultVoiceClipsEN;
     [SerializeField] private AudioClip[] defaultVoiceClipsVI;
 
     private List<string> _originalDialogueKeys;
+    private List<string> _originalNPCIds; // Store NPC IDs for each dialogue line
+    private List<string> _originalNPCNames; // Store localized NPC names for each dialogue line
     private List<AudioClip> _originalVoiceClipsEN;
     private List<AudioClip> _originalVoiceClipsVI;
     private int _currentDialogueIndex = -1;
     private Queue<string> currentDialogueLines;
     private Queue<AudioClip> currentVoiceClips;
+    private Queue<string> currentNPCNames; // Queue for NPC names per line
     private bool isDialogueActive = false;
     private bool isTyping = false;
     private Coroutine typingCoroutine;
     private Action _onDialogueEndCallback;
     private string currentFullSentence;
-    public bool IsTyping => isTyping; // hoặc tương tự
+    private QuestData currentQuestData;
+    public bool IsTyping => isTyping;
 
-
-    // Getter công khai để truy cập số lượng câu thoại
     public int DialogueLinesCount => currentDialogueLines?.Count ?? 0;
 
     void Awake()
@@ -61,12 +63,16 @@ public class DialogueManager : MonoBehaviour
 
         currentDialogueLines = new Queue<string>();
         currentVoiceClips = new Queue<AudioClip>();
+        currentNPCNames = new Queue<string>(); // Initialize NPC names queue
         _originalDialogueKeys = new List<string>();
+        _originalNPCIds = new List<string>();
+        _originalNPCNames = new List<string>(); // Initialize NPC names list
         _originalVoiceClipsEN = new List<AudioClip>();
         _originalVoiceClipsVI = new List<AudioClip>();
 
         if (dialogueUI == null) Debug.LogError("[DialogueManager] Dialogue UI (Panel) is not assigned!");
         if (dialogueText == null) Debug.LogError("[DialogueManager] Dialogue Text (TextMeshProUGUI) is not assigned!");
+        if (npcNameText == null) Debug.LogError("[DialogueManager] NPC Name Text (TextMeshProUGUI) is not assigned!");
 
         if (dialogueAudioSource == null)
         {
@@ -116,9 +122,11 @@ public class DialogueManager : MonoBehaviour
         DisplayNextSentence();
     }
 
-    public async void StartQuestDialogue(QuestData quest, QuestDialogueType dialogueType, Action onDialogueEnd = null, string[] keys = null, AudioClip[] voiceClipsEN = null, AudioClip[] voiceClipsVI = null)
+    public async void StartQuestDialogue(QuestData quest, QuestDialogueType dialogueType, Action onDialogueEnd = null, string[] keys = null, AudioClip[] voiceClipsEN = null, AudioClip[] voiceClipsVI = null, string[] npcIds = null)
     {
+        currentQuestData = quest;
         string[] dialogueKeys = keys ?? (quest != null ? quest.GetDialogueKeys(dialogueType) : defaultDialogueKeys);
+        string[] dialogueNPCIds = npcIds ?? (quest != null ? quest.GetDialogueNPCIds(dialogueType) : Array.Empty<string>());
         AudioClip[] clipsEN = voiceClipsEN ?? (quest != null ? dialogueType switch
         {
             QuestDialogueType.BeforeComplete => quest.voiceBeforeComplete_EN,
@@ -140,6 +148,7 @@ public class DialogueManager : MonoBehaviour
         {
             Debug.LogWarning($"[DialogueManager] No dialogue keys provided for {dialogueType} in QuestData: {(quest != null ? quest.questName : "null")}. Using defaultDialogueKeys.");
             dialogueKeys = defaultDialogueKeys;
+            dialogueNPCIds = new string[dialogueKeys.Length]; // Use empty NPC IDs for default keys
         }
 
         if (dialogueKeys == null || dialogueKeys.Length == 0)
@@ -148,6 +157,17 @@ public class DialogueManager : MonoBehaviour
             EndDialogue();
             onDialogueEnd?.Invoke();
             return;
+        }
+
+        // Validate NPC IDs array length
+        if (dialogueNPCIds.Length > 0 && dialogueNPCIds.Length != dialogueKeys.Length)
+        {
+            Debug.LogWarning($"[DialogueManager] NPC IDs array length ({dialogueNPCIds.Length}) does not match dialogue keys length ({dialogueKeys.Length}). Using giverNPCID as fallback.");
+            dialogueNPCIds = new string[dialogueKeys.Length];
+            for (int i = 0; i < dialogueNPCIds.Length; i++)
+            {
+                dialogueNPCIds[i] = quest?.giverNPCID ?? "";
+            }
         }
 
         Debug.Log($"[DialogueManager] Starting dialogue for {dialogueType} with {dialogueKeys.Length} keys: {string.Join(", ", dialogueKeys)}");
@@ -160,11 +180,14 @@ public class DialogueManager : MonoBehaviour
         if (dialogueAudioSource != null) dialogueAudioSource.Stop();
 
         _originalDialogueKeys.Clear();
+        _originalNPCIds.Clear();
+        _originalNPCNames.Clear();
         _originalVoiceClipsEN.Clear();
         _originalVoiceClipsVI.Clear();
         _currentDialogueIndex = -1;
 
         _originalDialogueKeys.AddRange(dialogueKeys);
+        _originalNPCIds.AddRange(dialogueNPCIds);
         if (clipsEN != null) _originalVoiceClipsEN.AddRange(clipsEN);
         if (clipsVI != null) _originalVoiceClipsVI.AddRange(clipsVI);
 
@@ -172,6 +195,7 @@ public class DialogueManager : MonoBehaviour
         dialogueUI.SetActive(true);
         isDialogueActive = true;
         dialogueText.text = "";
+        npcNameText.text = ""; // Clear NPC name text
 
         var currentLocale = LocalizationManager.Instance.GetCurrentLocale();
         await RePopulateQueuesFromOriginalData(currentLocale);
@@ -186,10 +210,13 @@ public class DialogueManager : MonoBehaviour
         Debug.Log($"[DialogueManager] Dialogue queue populated with {currentDialogueLines.Count} lines. Starting first sentence.");
         DisplayNextSentence();
     }
+
     private async Task RePopulateQueuesFromOriginalData(UnityEngine.Localization.Locale targetLocale, int startIndex = 0)
     {
         currentDialogueLines.Clear();
         currentVoiceClips.Clear();
+        currentNPCNames.Clear();
+        _originalNPCNames.Clear();
 
         bool isVI = targetLocale.Identifier.Code.StartsWith("vi", StringComparison.OrdinalIgnoreCase);
         Debug.Log($"[DialogueManager] Repopulating queue for language {targetLocale.Identifier.Code}, starting from index {startIndex}, original keys: {_originalDialogueKeys.Count} ({string.Join(", ", _originalDialogueKeys)})");
@@ -212,15 +239,21 @@ public class DialogueManager : MonoBehaviour
                 Debug.LogError($"[DialogueManager] Error localizing key {key}: {ex.Message}");
             }
 
-            currentDialogueLines.Enqueue(localizedLine);
-            Debug.Log($"[DialogueManager] Enqueued line {i}: {localizedLine}");
+            // Get the NPC ID for this line, fall back to giverNPCID if not specified
+            string npcId = i < _originalNPCIds.Count && !string.IsNullOrEmpty(_originalNPCIds[i]) ? _originalNPCIds[i] : (currentQuestData?.giverNPCID ?? "");
+            string npcName = currentQuestData != null ? await currentQuestData.GetNPCNameLocalizedAsync(npcId) : "NPC";
+            _originalNPCNames.Add(npcName); // Store localized NPC name
+
+            currentDialogueLines.Enqueue(localizedLine); // Only enqueue the dialogue line, no NPC name prefix
+            currentNPCNames.Enqueue(npcName); // Enqueue NPC name separately
+            Debug.Log($"[DialogueManager] Enqueued line {i}: {localizedLine} (NPC: {npcName})");
 
             AudioClip voiceClip = GetVoiceClipForIndex(i, isVI);
             currentVoiceClips.Enqueue(voiceClip ?? null);
             Debug.Log($"[DialogueManager] Enqueued voice clip {i}: {(voiceClip != null ? voiceClip.name : "null")}");
         }
 
-        Debug.Log($"[DialogueManager] Repopulated dialogue queue with {currentDialogueLines.Count} lines, voice clips: {currentVoiceClips.Count}");
+        Debug.Log($"[DialogueManager] Repopulated dialogue queue with {currentDialogueLines.Count} lines, voice clips: {currentVoiceClips.Count}, NPC names: {currentNPCNames.Count}");
         if (currentDialogueLines.Count == 0)
         {
             Debug.LogError("[DialogueManager] No lines enqueued! Check QuestData dialogue keys or localization table 'NhiemVu'.");
@@ -233,8 +266,11 @@ public class DialogueManager : MonoBehaviour
         {
             Debug.LogError($"[DialogueManager] Mismatch in voice clips count. Dialogue lines: {currentDialogueLines.Count}, Voice clips: {currentVoiceClips.Count}");
         }
+        if (currentNPCNames.Count != currentDialogueLines.Count)
+        {
+            Debug.LogError($"[DialogueManager] Mismatch in NPC names count. Dialogue lines: {currentDialogueLines.Count}, NPC names: {currentNPCNames.Count}");
+        }
     }
-
 
     private AudioClip GetVoiceClipForIndex(int index, bool isVI)
     {
@@ -257,7 +293,7 @@ public class DialogueManager : MonoBehaviour
             dialogueText.text = currentFullSentence;
             dialogueText.ForceMeshUpdate();
             isTyping = false;
-            return; // Chờ nhấn tiếp theo để chuyển sang câu mới
+            return;
         }
 
         if (currentDialogueLines.Count == 0)
@@ -274,21 +310,20 @@ public class DialogueManager : MonoBehaviour
             dialogueAudioSource.PlayOneShot(nextDialogueSound);
 
         string lineToDisplay = currentDialogueLines.Dequeue();
+        string npcName = currentNPCNames.Dequeue(); // Dequeue NPC name
         AudioClip voiceClip = currentVoiceClips.Count > 0 ? currentVoiceClips.Dequeue() : null;
 
         currentFullSentence = lineToDisplay;
         _currentDialogueIndex++;
-        Debug.Log($"[DialogueManager] Dequeued sentence {_currentDialogueIndex}: '{lineToDisplay}' (remaining lines: {currentDialogueLines.Count}, remaining clips: {currentVoiceClips.Count})");
+        Debug.Log($"[DialogueManager] Dequeued sentence {_currentDialogueIndex}: '{lineToDisplay}' (NPC: {npcName}, remaining lines: {currentDialogueLines.Count}, remaining clips: {currentVoiceClips.Count})");
 
         dialogueText.text = "";
+        npcNameText.text = npcName; // Update NPC name text
         dialogueText.ForceMeshUpdate();
+        npcNameText.ForceMeshUpdate();
 
         typingCoroutine = StartCoroutine(TypeLine(lineToDisplay, voiceClip));
     }
-
-
-
-
 
     private IEnumerator TypeLine(string line, AudioClip voiceClip)
     {
@@ -343,11 +378,6 @@ public class DialogueManager : MonoBehaviour
         Debug.Log($"[DialogueManager] Finished typing sentence {_currentDialogueIndex}");
     }
 
-
-
-
-
-
     public void StopTypingEffect()
     {
         if (typingCoroutine != null)
@@ -365,14 +395,19 @@ public class DialogueManager : MonoBehaviour
         StopTypingEffect();
         dialogueUI?.SetActive(false);
         dialogueText.text = "";
+        npcNameText.text = ""; // Clear NPC name text
 
         currentDialogueLines.Clear();
         currentVoiceClips.Clear();
+        currentNPCNames.Clear();
         _originalDialogueKeys.Clear();
+        _originalNPCIds.Clear();
+        _originalNPCNames.Clear();
         _originalVoiceClipsEN.Clear();
         _originalVoiceClipsVI.Clear();
         _currentDialogueIndex = -1;
         isDialogueActive = false;
+        currentQuestData = null;
 
         if (dialogueAudioSource != null)
         {
@@ -387,21 +422,20 @@ public class DialogueManager : MonoBehaviour
     }
 
     public void DisplayFullCurrentSentence()
-{
-    if (typingCoroutine != null)
     {
-        StopCoroutine(typingCoroutine);
-        typingCoroutine = null;
+        if (typingCoroutine != null)
+        {
+            StopCoroutine(typingCoroutine);
+            typingCoroutine = null;
+        }
+
+        dialogueText.text = currentFullSentence;
+
+        if (dialogueAudioSource != null && dialogueAudioSource.loop && dialogueAudioSource.isPlaying)
+        {
+            dialogueAudioSource.Stop();
+        }
+
+        isTyping = false;
     }
-
-    dialogueText.text = currentFullSentence;
-
-    if (dialogueAudioSource != null && dialogueAudioSource.loop && dialogueAudioSource.isPlaying)
-    {
-        dialogueAudioSource.Stop(); // Dừng loop typewriter
-    }
-
-    isTyping = false;
-}
-
 }

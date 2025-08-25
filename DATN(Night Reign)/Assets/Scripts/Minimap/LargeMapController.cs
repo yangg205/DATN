@@ -202,53 +202,86 @@ public class LargeMapController : MonoBehaviour
 
     private void HandleWaypointCreationInput()
     {
+        Camera uiCam = largeMapDisplayRaw.canvas.renderMode == RenderMode.ScreenSpaceOverlay ?
+                       null : largeMapDisplayRaw.canvas.worldCamera;
+
+        Vector2 localPoint;
+        bool validPointOnMapUI = RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            largeMapDisplayRaw.rectTransform, Input.mousePosition, uiCam, out localPoint);
+
+        if (!validPointOnMapUI) return;
+
+        // Nếu bấm chuột trái -> tạo waypoint
         if (Input.GetMouseButtonDown(0))
         {
-            Camera uiCam = largeMapDisplayRaw.canvas.renderMode == RenderMode.ScreenSpaceOverlay ?
-                          null : largeMapDisplayRaw.canvas.worldCamera;
-            Vector2 localPoint;
+            CreateWaypointAtUIPosition(localPoint);
+        }
+        // Nếu bấm chuột phải -> xóa waypoint gần click
+        else if (Input.GetMouseButtonDown(1))
+        {
+            TryRemoveWaypointAtUIPosition(localPoint);
+        }
+    }
 
-            bool validPointOnMapUI = RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                largeMapDisplayRaw.rectTransform, Input.mousePosition, uiCam, out localPoint);
+    private void CreateWaypointAtUIPosition(Vector2 localPoint)
+    {
+        Rect rect = largeMapDisplayRaw.rectTransform.rect;
+        float normX = (localPoint.x / rect.width) + 0.5f;
+        float normY = (localPoint.y / rect.height) + 0.5f;
 
-            if (!validPointOnMapUI) return;
+        if (invertMapY) normY = 1f - normY;
 
-            // Tính normalized coordinates chính xác hơn
-            Rect rect = largeMapDisplayRaw.rectTransform.rect;
-            float normX = (localPoint.x / rect.width) + 0.5f;
-            float normY = (localPoint.y / rect.height) + 0.5f;
+        Ray ray = largeMapCamera.ViewportPointToRay(new Vector3(normX, normY, 0f));
+        if (Physics.Raycast(ray, out RaycastHit hit, 1000f, terrainLayerMask))
+        {
+            Vector3 hitPoint = hit.point;
 
-            // Clamp để đảm bảo trong phạm vi hợp lệ
-            normX = Mathf.Clamp01(normX);
-            normY = Mathf.Clamp01(normY);
+            Waypoint newWaypoint = new Waypoint(
+                currentCustomWaypointId,
+                "Điểm đánh dấu tùy chỉnh",
+                hitPoint,
+                WaypointType.CustomMarker,
+                customWaypointIcon
+            );
 
-            // Xử lý flip Y
-            if (invertMapY) normY = 1f - normY;
+            WaypointManager.Instance.AddWaypoint(newWaypoint, true);
+            UpdateWaypointUIsOnLargeMap();
+        }
+    }
 
-            // Sử dụng ViewportPointToRay (chính xác hơn cho normalized coordinates)
-            Ray ray = largeMapCamera.ViewportPointToRay(new Vector3(normX, normY, 0f));
-            RaycastHit hit;
+    private void TryRemoveWaypointAtUIPosition(Vector2 localPoint)
+    {
+        // Tính world position từ UI click
+        Rect rect = largeMapDisplayRaw.rectTransform.rect;
+        float normX = (localPoint.x / rect.width) + 0.5f;
+        float normY = (localPoint.y / rect.height) + 0.5f;
 
-            if (Physics.Raycast(ray, out hit, 1000f, terrainLayerMask))
+        if (invertMapY) normY = 1f - normY;
+
+        Ray ray = largeMapCamera.ViewportPointToRay(new Vector3(normX, normY, 0f));
+        if (Physics.Raycast(ray, out RaycastHit hit, 1000f, terrainLayerMask))
+        {
+            Vector3 hitPoint = hit.point;
+
+            // Tìm waypoint gần nhất trong danh sách
+            float minDist = 10f; // khoảng cách tối đa để cho phép xóa
+            string targetId = null;
+
+            foreach (var wp in WaypointManager.Instance.activeWaypointsData.Values)
             {
-                Vector3 hitPoint = hit.point;
-
-                // Debug để kiểm tra
-                Debug.Log($"Click UI: {localPoint} -> Norm: ({normX:F3}, {normY:F3}) -> World: {hitPoint}");
-
-                if (WaypointManager.Instance != null)
+                float dist = Vector3.Distance(hitPoint, wp.worldPosition);
+                if (dist < minDist)
                 {
-                    Waypoint newWaypoint = new Waypoint(
-                        currentCustomWaypointId,
-                        "Điểm đánh dấu tùy chỉnh",
-                        hitPoint,
-                        WaypointType.CustomMarker,
-                        customWaypointIcon
-                    );
-
-                    WaypointManager.Instance.AddWaypoint(newWaypoint, true);
-                    UpdateWaypointUIsOnLargeMap();
+                    minDist = dist;
+                    targetId = wp.id;
                 }
+            }
+
+            if (!string.IsNullOrEmpty(targetId))
+            {
+                WaypointManager.Instance.RemoveWaypoint(targetId);
+                UpdateWaypointUIsOnLargeMap();
+                Debug.Log($"Đã xóa waypoint: {targetId}");
             }
         }
     }

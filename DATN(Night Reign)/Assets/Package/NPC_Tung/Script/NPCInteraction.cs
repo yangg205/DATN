@@ -17,6 +17,7 @@ public class NPCInteraction : MonoBehaviour
     [SerializeField] private Button claimRewardButton;
     [SerializeField] private Button continueButton;
     [SerializeField] private TextMeshProUGUI panelPressText;
+    [SerializeField] private TextMeshProUGUI npcNameText; // New field for NPC name display
 
     [Header("References")]
     [SerializeField] private QuestManager questManager;
@@ -35,14 +36,14 @@ public class NPCInteraction : MonoBehaviour
     private QuestData currentQuestData;
     private QuestDialogueType currentDialogueType;
     private static NPCInteraction activeNPC;
+
     private void Start()
     {
-
         InitializeUIButtons();
         InitializeUIElements();
         LocalizationSettings.SelectedLocaleChanged += OnLanguageChangedHandler;
         Debug.Log($"[NPCInteraction] Initialized for NPC {npcID}");
-        questManager.ResetAllQuests();//không muốn reset thì cmd nó lại
+        questManager.ResetAllQuests(); // Không muốn reset thì comment lại
     }
 
     private void OnDestroy()
@@ -66,14 +67,9 @@ public class NPCInteraction : MonoBehaviour
         {
             Debug.Log($"[NPCInteraction] Player pressed Q to report kill for NPC {npcID}");
             questManager.ReportKill();
-            
             SimpleInventory.Instance?.AddItem("Shadow Fangs", 5);
             SimpleInventory.Instance?.AddItem("Snow Crystals", 5);
             questManager.CheckItemCollectionProgress();
-        }
-        if (Input.GetKeyDown(KeyCode.X))
-        {
-            questManager.OnBossDefeated(currentQuestData);
         }
     }
 
@@ -98,6 +94,9 @@ public class NPCInteraction : MonoBehaviour
 
         if (panelPressText != null) panelPressText.gameObject.SetActive(false);
         else Debug.LogWarning($"[NPCInteraction] panelPressText not assigned for NPC {npcID}");
+
+        if (npcNameText == null) Debug.LogWarning($"[NPCInteraction] npcNameText not assigned for NPC {npcID}");
+        else npcNameText.text = ""; // Initialize NPC name text as empty
 
         HideAllActionButtons();
     }
@@ -148,7 +147,6 @@ public class NPCInteraction : MonoBehaviour
         {
             ShowNoRelevantQuestDialogue();
         }
-
     }
 
     private List<QuestData> GetRelatedQuests()
@@ -163,7 +161,6 @@ public class NPCInteraction : MonoBehaviour
         Debug.Log($"[NPCInteraction] Completing FindNPC quest {quest.questName} for target NPC {npcID}");
         questManager?.OnInteractWithNPC(npcID);
 
-        // Check if the NPC is also a giver for new quests
         var relatedQuests = GetRelatedQuests();
         if (relatedQuests.Any())
         {
@@ -257,6 +254,11 @@ public class NPCInteraction : MonoBehaviour
         var keys = defaultGreetingDialogueKeys?.Length > 0 ? defaultGreetingDialogueKeys : noRelevantQuestDialogueKeys ?? Array.Empty<string>();
         var clipsEN = defaultGreetingVoiceClipsEN?.Length > 0 ? defaultGreetingVoiceClipsEN : noRelevantQuestVoiceClipsEN ?? Array.Empty<AudioClip>();
         var clipsVI = defaultGreetingVoiceClipsVI?.Length > 0 ? defaultGreetingVoiceClipsVI : noRelevantQuestVoiceClipsVI ?? Array.Empty<AudioClip>();
+        var npcIds = new string[keys.Length]; // Create NPC ID array for default dialogues
+        for (int i = 0; i < npcIds.Length; i++)
+        {
+            npcIds[i] = npcID; // Use this NPC's ID for default dialogues
+        }
 
         if (keys.Length == 0)
         {
@@ -268,7 +270,7 @@ public class NPCInteraction : MonoBehaviour
         }
 
         Debug.Log($"[NPCInteraction] Starting default dialogue with {keys.Length} lines: {string.Join(", ", keys)}");
-        dialogueManager?.StartQuestDialogue(null, QuestDialogueType.BeforeComplete, OnDialogueCompleted, keys, clipsEN, clipsVI);
+        dialogueManager?.StartQuestDialogue(null, QuestDialogueType.BeforeComplete, OnDialogueCompleted, keys, clipsEN, clipsVI, npcIds);
     }
 
     private void OnLanguageChangedHandler(Locale newLocale)
@@ -290,6 +292,7 @@ public class NPCInteraction : MonoBehaviour
     private void StartQuestDialogue(QuestData quest, QuestDialogueType dialogueType, Action onDialogueCompleted = null)
     {
         var keys = quest != null ? quest.GetDialogueKeys(dialogueType) : Array.Empty<string>();
+        var npcIds = quest != null ? quest.GetDialogueNPCIds(dialogueType) : Array.Empty<string>(); // Get NPC IDs
         var clipsEN = quest != null ? dialogueType switch
         {
             QuestDialogueType.BeforeComplete => quest.voiceBeforeComplete_EN ?? Array.Empty<AudioClip>(),
@@ -316,7 +319,7 @@ public class NPCInteraction : MonoBehaviour
         }
 
         Debug.Log($"[NPCInteraction] Starting QuestDialogue for {dialogueType} with {keys.Length} lines: {string.Join(", ", keys)} for NPC {npcID}");
-        dialogueManager?.StartQuestDialogue(quest, dialogueType, onDialogueCompleted, keys, clipsEN, clipsVI);
+        dialogueManager?.StartQuestDialogue(quest, dialogueType, onDialogueCompleted, keys, clipsEN, clipsVI, npcIds);
     }
 
     private void OnAcceptButtonPressed()
@@ -457,6 +460,7 @@ public class NPCInteraction : MonoBehaviour
         {
             questUI.SetActive(false);
             SetButtonActive(continueButton, false);
+            npcNameText.text = ""; // Clear NPC name text when hiding UI
             MouseManager.Instance?.HideCursorAndEnableInput();
             Debug.Log("[NPCInteraction] Hiding Quest UI");
         }
@@ -479,7 +483,6 @@ public class NPCInteraction : MonoBehaviour
                 Debug.Log($"[NPCInteraction] Registered listener for continueButton of NPC {npcID}");
             }
         }
-        //if (panelPressText != null) panelPressText.gameObject.SetActive(false);
     }
 
     private void ResetActiveNPC()
@@ -516,5 +519,4 @@ public class NPCInteraction : MonoBehaviour
             if (activeNPC == this) ResetActiveNPC();
         }
     }
-
 }

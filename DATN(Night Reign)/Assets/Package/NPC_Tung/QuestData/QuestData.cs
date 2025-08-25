@@ -2,14 +2,13 @@
 using UnityEngine.Localization.Settings;
 using UnityEngine.Localization.Tables;
 using System;
-using System.Threading.Tasks; // Cho Task
-using System.Collections.Generic; // Thêm để dùng List
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 public enum QuestType
 {
     KillEnemies,
     FindNPC,
-    KillBoss,
     CollectItem
 }
 
@@ -26,7 +25,7 @@ public class QuestData : ScriptableObject
 {
     [Header("Quest Info")]
     public string questName; // Localization Key cho tên nhiệm vụ
-    [Tooltip("ID của NPC giao nhiệm vụ (dùng để hiển thị tên).")]
+    [Tooltip("ID của NPC giao nhiệm vụ (dùng làm mặc định nếu không chỉ định NPC cụ thể cho lời thoại).")]
     public string giverNPCID;
 
     [TextArea(3, 5)]
@@ -57,40 +56,29 @@ public class QuestData : ScriptableObject
     [Tooltip("Icon waypoint tùy chỉnh (nếu null thì dùng mặc định).")]
     public Sprite questLocationIcon;
 
-    [Tooltip("ID của Boss mục tiêu trong nhiệm vụ KillBoss.")]
-    public int bossId;
-    public int bossMaxTime;
-    public GameObject bossPrefab;
-
-    [Header("Boss Settings")]
-    [Tooltip("Spawn boss khi người chơi bước vào khu vực.")]
-    public bool spawnBossOnEnter = false;
-
-    [Tooltip("Prefab của boss zone (nếu cần hiển thị vùng chiến đấu).")]
-    public GameObject bossZonePrefab;
-
-    [Tooltip("Kích hoạt boss zone ngay khi spawn boss.")]
-    public bool activateBossZoneOnSpawn = false;
-
     [Header("Quest Rewards")]
     public int rewardCoin;
     public int rewardExp;
-    // --- THÊM CÁC TRƯỜNG VẬT PHẨM THƯỞNG MỚI ---
     [Tooltip("ID của vật phẩm thưởng. Có thể để trống nếu không có vật phẩm.")]
     public string rewardItemID;
     [Tooltip("Số lượng vật phẩm thưởng.")]
     public int rewardItemCount = 1;
-    // ------------------------------------------
 
     [Header("Dialogues - Keys")]
     [Tooltip("Keys cho lời thoại trước khi nhận nhiệm vụ.")]
     [TextArea(3, 5)] public string[] keydialogueBeforeComplete;
+    [Tooltip("ID của NPC nói lời thoại trước khi nhận nhiệm vụ (độ dài phải khớp với keydialogueBeforeComplete).")]
+    public string[] npcIdsBeforeComplete; // New field for NPC IDs
 
     [Tooltip("Keys cho lời thoại sau khi hoàn thành.")]
     [TextArea(3, 5)] public string[] keydialogueAfterComplete;
+    [Tooltip("ID của NPC nói lời thoại sau khi hoàn thành (độ dài phải khớp với keydialogueAfterComplete).")]
+    public string[] npcIdsAfterComplete; // New field for NPC IDs
 
     [Tooltip("Keys cho lời thoại khi mục tiêu đã đạt được.")]
     [TextArea(3, 5)] public string[] keydialogueObjectiveMet;
+    [Tooltip("ID của NPC nói lời thoại khi mục tiêu đã đạt được (độ dài phải khớp với keydialogueObjectiveMet).")]
+    public string[] npcIdsObjectiveMet; // New field for NPC IDs
 
     [Header("Voice Clips (English)")]
     public AudioClip[] voiceBeforeComplete_EN;
@@ -111,6 +99,17 @@ public class QuestData : ScriptableObject
             QuestDialogueType.BeforeComplete => keydialogueBeforeComplete,
             QuestDialogueType.AfterComplete => keydialogueAfterComplete,
             QuestDialogueType.ObjectiveMet => keydialogueObjectiveMet,
+            _ => Array.Empty<string>(),
+        };
+    }
+
+    public string[] GetDialogueNPCIds(QuestDialogueType dialogueType)
+    {
+        return dialogueType switch
+        {
+            QuestDialogueType.BeforeComplete => npcIdsBeforeComplete,
+            QuestDialogueType.AfterComplete => npcIdsAfterComplete,
+            QuestDialogueType.ObjectiveMet => npcIdsObjectiveMet,
             _ => Array.Empty<string>(),
         };
     }
@@ -168,4 +167,11 @@ public class QuestData : ScriptableObject
         return LocalizationManager.Instance.GetLocalizedStringAsync("Item_Names", rewardItemID);
     }
 
+    public async Task<string> GetNPCNameLocalizedAsync(string npcId)
+    {
+        if (string.IsNullOrEmpty(npcId))
+            return "NPC"; // Fallback if no NPC ID is provided
+        string localizedName = await LocalizationManager.Instance.GetLocalizedStringAsync("NPC_Names", npcId);
+        return string.IsNullOrEmpty(localizedName) ? "NPC" : localizedName;
+    }
 }

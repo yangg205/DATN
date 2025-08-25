@@ -15,7 +15,7 @@ MonoBehaviour:
   questName: Quest_Title/Q007_DefeatUmbra
   giverNPCID: Grusk
   description: Quest_Objective/Q007_Main
-  questType: 2
+  questType: 0
   requiredKills: 1
   targetNPCID: 
   targetItemID: 
@@ -26,27 +26,22 @@ MonoBehaviour:
   questLocation: {x: -122.96, y: -12.82, z: 183.19}
   giverNPCTransform: {x: -135.723, y: -5.05, z: 149.979}
   questLocationIcon: {fileID: 21300000, guid: 34a32c830edc1e447b2e44cc600cbfe8, type: 3}
-  bossId: 0
-  bossMaxTime: 0
-  bossPrefab: {fileID: 3411521049897045768, guid: b3213048ed943be47821420cb5809fb2,
-    type: 3}
-  spawnBossOnEnter: 1
-  bossZonePrefab: {fileID: 7574097468532464647, guid: 4494b0df8b3d6df419bc94add11fce3d,
-    type: 3}
-  activateBossZoneOnSpawn: 1
   rewardCoin: 0
   rewardExp: 100
   rewardItemID: 
   rewardItemCount: 1
   keydialogueBeforeComplete:
   - Dialogue/Grusk_Q007_Intro
+  npcIdsBeforeComplete: []
   keydialogueAfterComplete:
   - Dialogue/Flamekeeper_Ch3_NextShardHint
+  npcIdsAfterComplete: []
   keydialogueObjectiveMet:
   - 'Quest_Objective/Q007_Main
 
 
 '
+  npcIdsObjectiveMet: []
   voiceBeforeComplete_EN: []
   voiceAfterComplete_EN: []
   voiceObjectiveMet_EN: []

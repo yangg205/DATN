@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using UnityEngine.SocialPlatforms;
+//using AG;
 using ND;
 
 public class QuestManager : MonoBehaviour
@@ -12,13 +13,9 @@ public class QuestManager : MonoBehaviour
 
     [Header("References")]
     public QuestDatabase questDatabase;
-    public PlayerStats playerStats;
+    public PlayerStats playerStats;//thêm exp và coin ở playerStats mới
     public UIManager uiManager;
     public WaypointManager waypointManager;
-
-    [Header("Boss helpers (scene-wide)")]
-    // Optional: a fallback BossZone prefab or a common BossZone controller if you want
-    public BossZoneController commonBossZoneController;
 
     [Header("UI References")]
     public GameObject questUI;
@@ -38,11 +35,6 @@ public class QuestManager : MonoBehaviour
         public bool isCompleted;
         public string waypointId;
 
-        // Boss related
-        public GameObject bossInstance;
-        public BossZoneController bossZone;
-        public int bossDeathCount; // số lần player chết trong boss fight (cộng dồn)
-
         public CurrentQuestStatus(QuestData data)
         {
             questData = data;
@@ -50,9 +42,6 @@ public class QuestManager : MonoBehaviour
             isObjectiveMet = false;
             isCompleted = false;
             waypointId = null;
-            bossInstance = null;
-            bossZone = null;
-            bossDeathCount = 0;
         }
 
         public int GetRequiredProgress()
@@ -61,16 +50,12 @@ public class QuestManager : MonoBehaviour
             {
                 QuestType.KillEnemies => questData.requiredKills,
                 QuestType.CollectItem => questData.requiredItemCount,
-                // treat KillBoss as 1
                 QuestType.FindNPC => 1,
-                // if you added KillBoss enum, handle it:
-                // QuestType.KillBoss => 1,
                 _ => 0,
             };
         }
     }
 
-    #region Unity lifecycle & init (giữ nguyên, chỉ thêm load boss death count)
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -134,9 +119,7 @@ public class QuestManager : MonoBehaviour
             }
         }
     }
-    #endregion
 
-    #region Save / Load (thêm bossDeathCount)
     private void LoadQuestCompletionStatus()
     {
         foreach (var quest in questDatabase.quests)
@@ -174,13 +157,12 @@ public class QuestManager : MonoBehaviour
                     status.isObjectiveMet = PlayerPrefs.GetInt($"QuestObjectiveMet_{questName}", 0) == 1;
                     status.isCompleted = PlayerPrefs.GetInt($"QuestCompletedStatus_{questName}", 0) == 1;
                     status.waypointId = PlayerPrefs.GetString($"QuestWaypointId_{questName}", null);
-                    status.bossDeathCount = PlayerPrefs.GetInt($"QuestBossDeathCount_{questName}", 0);
                     activeQuests.Add(quest, status);
                     if (!string.IsNullOrEmpty(status.waypointId) && waypointManager != null)
                     {
                         StartCoroutine(AddWaypointCoroutine(quest, status));
                     }
-                    Debug.Log($"[QuestManager] Loaded quest {questName}: Progress={status.currentProgress}, ObjectiveMet={status.isObjectiveMet}, Completed={status.isCompleted}, WaypointId={status.waypointId}, BossDeaths={status.bossDeathCount}");
+                    Debug.Log($"[QuestManager] Loaded quest {questName}: Progress={status.currentProgress}, ObjectiveMet={status.isObjectiveMet}, Completed={status.isCompleted}, WaypointId={status.waypointId}");
                 }
             }
         }
@@ -189,7 +171,7 @@ public class QuestManager : MonoBehaviour
 
     private IEnumerator AddWaypointCoroutine(QuestData quest, CurrentQuestStatus questStatus)
     {
-        string questName = quest.questName;
+        string questName = quest.questName; // Giả sử questName không cần localize
         if (waypointManager != null)
         {
             waypointManager.AddWaypoint(new Waypoint(
@@ -218,7 +200,6 @@ public class QuestManager : MonoBehaviour
             PlayerPrefs.SetInt($"QuestObjectiveMet_{quest.questName}", status.isObjectiveMet ? 1 : 0);
             PlayerPrefs.SetInt($"QuestCompletedStatus_{quest.questName}", status.isCompleted ? 1 : 0);
             PlayerPrefs.SetString($"QuestWaypointId_{quest.questName}", status.waypointId ?? "");
-            PlayerPrefs.SetInt($"QuestBossDeathCount_{quest.questName}", status.bossDeathCount);
         }
         PlayerPrefs.SetString("ActiveQuests", questNames);
         PlayerPrefs.Save();
@@ -237,9 +218,7 @@ public class QuestManager : MonoBehaviour
         PlayerPrefs.Save();
         Debug.Log($"[QuestManager] Saved currentQuestIndex: {currentQuestIndex}");
     }
-    #endregion
 
-    #region Quest accept / UI (giữ nguyên)
     public void ResetAllQuests()
     {
         foreach (var quest in questDatabase.quests)
@@ -251,7 +230,6 @@ public class QuestManager : MonoBehaviour
             PlayerPrefs.DeleteKey($"QuestObjectiveMet_{quest.questName}");
             PlayerPrefs.DeleteKey($"QuestCompletedStatus_{quest.questName}");
             PlayerPrefs.DeleteKey($"QuestWaypointId_{quest.questName}");
-            PlayerPrefs.DeleteKey($"QuestBossDeathCount_{quest.questName}");
             Debug.Log($"[QuestManager] Reset quest {quest.questName}");
         }
         activeQuests.Clear();
@@ -342,18 +320,6 @@ public class QuestManager : MonoBehaviour
         }
 
         StartCoroutine(AcceptQuestCoroutine(quest));
-
-        // Nếu đây là KillBoss và spawnBossOnEnter == false (spawn khi accept), spawn ngay
-        if (quest.questType == QuestType.KillEnemies || quest.questType.ToString() == "KillBoss")
-        {
-            // if you use separate enum value KillBoss, prefer: if (quest.questType == QuestType.KillBoss)
-            // spawn on accept if configured (backwards-compatible)
-            if (quest.spawnBossOnEnter == false && quest.bossPrefab != null)
-            {
-                // Spawn immediately at questLocation
-                SpawnBossForQuest(quest);
-            }
-        }
     }
 
     private IEnumerator AcceptQuestCoroutine(QuestData quest)
@@ -390,17 +356,12 @@ public class QuestManager : MonoBehaviour
         uiManager.UpdateCurrentQuestObjective(quest.description);
         var status = GetQuestStatus(quest);
         int totalProgress = quest.questType == QuestType.FindNPC ? 1 : (quest.questType == QuestType.CollectItem ? quest.requiredItemCount : quest.requiredKills);
-        // If KillBoss (if you added enum), make totalProgress = 1
-        if (quest.questType.ToString() == "KillBoss") totalProgress = 1;
-
         uiManager.UpdateQuestProgress(status?.currentProgress ?? 0, totalProgress);
         uiManager.SetQuestAccepted(activeQuests.ContainsKey(quest));
         yield return StartCoroutine(uiManager.RefreshCombinedQuestInfoUICoroutine());
         Debug.Log($"[QuestManager] Updated UI for quest {quest.questName}: _currentQuestTitleKey={quest.questName}, _currentObjectiveKey={quest.description}, _currentProgressCount={uiManager?._currentProgressCount}/{uiManager?._totalProgressCount}, _isQuestAccepted={uiManager?._isQuestAccepted}");
     }
-    #endregion
 
-    #region Kill logic (giữ ReportKill, thêm boss flow)
     public void ReportKill()
     {
         var quest = GetCurrentQuest();
@@ -421,184 +382,6 @@ public class QuestManager : MonoBehaviour
         Debug.Log($"[QuestManager] Reported kill for quest {quest.questName}. Progress: {status.currentProgress}/{status.GetRequiredProgress()}, _currentProgressCount={uiManager?._currentProgressCount}/{uiManager?._totalProgressCount}");
     }
 
-    // NEW: gọi khi player đi vào quest location (trigger)
-    public void OnPlayerEnterQuestLocation(QuestData quest)
-    {
-        if (quest == null) return;
-
-        // nếu quest chưa accept thì auto accept (tùy game design)
-        if (!IsQuestAccepted(quest))
-        {
-            AcceptQuest(quest);
-        }
-
-        // Nếu quest có boss và cấu hình spawn khi vào zone
-        if (quest.bossPrefab != null && quest.spawnBossOnEnter)
-        {
-            SpawnBossForQuest(quest);
-        }
-        else
-        {
-            // (còn nếu là KillEnemies bạn có thể spawn wave quái ở đây nếu cần)
-            // bạn có thể gắn QuestEnemySpawner lên khu vực map để xử lý spawn triệu quái riêng.
-            Debug.Log($"[QuestManager] Player entered quest location for {quest.questName}, no boss spawn config or bossPrefab null");
-        }
-    }
-
-    // Tạo/ spawn boss cho quest -> attach BossController và BossZone nếu có
-    private void SpawnBossForQuest(QuestData quest)
-    {
-        if (quest == null) return;
-        var status = GetQuestStatus(quest);
-        if (status == null)
-        {
-            // nếu chưa accept, accept trước
-            AcceptQuest(quest);
-            status = GetQuestStatus(quest);
-            if (status == null) return;
-        }
-
-        // Nếu boss đã tồn tại thì không spawn thêm
-        if (status.bossInstance != null)
-        {
-            Debug.Log($"[QuestManager] Boss already spawned for quest {quest.questName}");
-            return;
-        }
-
-        if (quest.bossPrefab == null)
-        {
-            Debug.LogWarning($"[QuestManager] No bossPrefab assigned for quest {quest.questName}");
-            return;
-        }
-
-        // Instantiate boss at quest.questLocation
-        Vector3 spawnPos = quest.questLocation;
-        var bossGO = Instantiate(quest.bossPrefab, spawnPos, Quaternion.identity);
-        status.bossInstance = bossGO;
-
-
-        // Spawn/activate zone if provided
-        if (quest.bossZonePrefab != null)
-        {
-            var zoneGO = Instantiate(quest.bossZonePrefab, spawnPos, Quaternion.identity);
-            var zoneController = zoneGO.GetComponent<BossZoneController>();
-            if (zoneController == null) zoneController = zoneGO.AddComponent<BossZoneController>();
-            status.bossZone = zoneController;
-            if (quest.activateBossZoneOnSpawn) zoneController.ActivateZone();
-        }
-        else if (quest.activateBossZoneOnSpawn && commonBossZoneController != null)
-        {
-            // fallback: enable common zone
-            status.bossZone = commonBossZoneController;
-            commonBossZoneController.ActivateZone();
-        }
-
-        // Start the Fight UI / timer via BattleBoss (find in scene)
-        var battleBoss = FindObjectOfType<BattleBoss>();
-        if (battleBoss != null)
-        {
-            // Pass initial death count from saved status
-            battleBoss.StartFight(playerStats?.GetPlayerCharacterId() ?? 0, quest.bossId, quest.bossMaxTime, status.bossDeathCount);
-        }
-
-        SaveQuestProgress();
-        Debug.Log($"[QuestManager] Spawned boss for quest {quest.questName} at {spawnPos}. BossId={quest.bossId}");
-    }
-
-    // Khi boss báo chết (BossController gọi)
-    public void OnBossDefeated(QuestData quest)
-    {
-        if (quest == null) return;
-        var status = GetQuestStatus(quest);
-        if (status == null) return;
-        // mark objective met
-        status.isObjectiveMet = true;
-        status.isCompleted = true;
-        quest.isQuestCompleted = true;
-        status.currentProgress++;
-        // deactivate zone
-        status.bossZone?.DeactivateZone();
-
-        // remove boss instance
-        if (status.bossInstance != null)
-        {
-            Destroy(status.bossInstance);
-            status.bossInstance = null;
-        }
-
-        SaveQuestCompletionStatus(quest);
-        SaveQuestProgress();
-
-        // give rewards / UI
-        playerStats.currentEXP += quest.rewardExp;
-        if (!string.IsNullOrEmpty(quest.rewardItemID))
-            SimpleInventory.Instance?.AddItem(quest.rewardItemID, quest.rewardItemCount);
-
-        uiManager?.ShowRewardPopup(quest.rewardCoin, quest.rewardExp);
-        uiManager?.ShowNotice("Quest_Completed_Notice_Key", 2.5f);
-        uiManager?.SetReturnToNPCInfo("", false);
-        uiManager?.SetQuestAccepted(false);
-
-        // Remove waypoint etc
-        if (!string.IsNullOrEmpty(status.waypointId))
-            waypointManager?.RemoveWaypoint(status.waypointId);
-
-        // remove from activeQuests and update index
-        activeQuests.Remove(quest);
-        SaveQuestProgress();
-        UpdateQuestIndex();
-        MouseManager.Instance?.HideCursorAndEnableInput();
-
-        Debug.Log($"[QuestManager] Boss quest {quest.questName} defeated and completed. Deaths during fight: {status.bossDeathCount}");
-    }
-
-    // Gọi khi player chết trong boss fight: tăng death count, respawn player, respawn boss, reset timer
-    // (BattleBoss.OnPlayerDeath nên gọi QuestManager.Instance.OnPlayerDeathDuringBossFight();)
-    public void OnPlayerDeathDuringBossFight()
-    {
-        var quest = GetActiveQuest();
-        if (quest == null) return;
-        var status = GetQuestStatus(quest);
-        if (status == null) return;
-
-        // Only care if this is a boss quest
-        if (quest.bossPrefab == null) return;
-
-        status.bossDeathCount++;
-        SaveQuestProgress();
-        Debug.Log($"[QuestManager] Player died in boss fight for {quest.questName}. Deaths now: {status.bossDeathCount}");
-
-        // Respawn player to quest location
-        var player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
-        {
-            player.transform.position = quest.questLocation;
-            playerStats.RespawnAt(quest.questLocation);
-        }
-
-        // Reset boss: destroy old instance and spawn new one, and reset timer
-        if (status.bossInstance != null)
-        {
-            Destroy(status.bossInstance);
-            status.bossInstance = null;
-        }
-
-        // If zone exists, ensure it is active (block exit)
-        status.bossZone?.ActivateZone();
-
-        // respawn boss
-        SpawnBossForQuest(quest);
-
-        // ensure BattleBoss UI restarts with reset timer but deathCount maintained
-        var battleBoss = FindObjectOfType<BattleBoss>();
-        if (battleBoss != null)
-        {
-            battleBoss.StartFight(playerStats?.GetPlayerCharacterId() ?? 0, quest.bossId, quest.bossMaxTime, status.bossDeathCount);
-        }
-    }
-    #endregion
-
-    #region item / find npc / waypoint (giữ nguyên)
     public void CheckItemCollectionProgress()
     {
         var quest = GetCurrentQuest();
@@ -651,9 +434,6 @@ public class QuestManager : MonoBehaviour
 
         SaveQuestProgress();
     }
-    #endregion
-
-    #region FindNPC flow (giữ nguyên)
     public void OnInteractWithNPC(string npcId)
     {
         var quest = GetCurrentQuest();
@@ -717,9 +497,7 @@ public class QuestManager : MonoBehaviour
         // Cung cấp nhiệm vụ mới từ NPC mục tiêu nếu có
         yield return StartCoroutine(OfferNextQuestIfGiverCoroutine(npcId));
     }
-    #endregion
 
-    #region Offer next quest & unlock (giữ nguyên)
     private IEnumerator OfferNextQuestIfGiverCoroutine(string npcId)
     {
         var nextQuest = GetCurrentQuest();
@@ -784,9 +562,7 @@ public class QuestManager : MonoBehaviour
             MouseManager.Instance?.HideCursorAndEnableInput();
         }
     }
-    #endregion
 
-    #region Helpers, complete, claim reward, decline (giữ nguyên, có handle boss case)
     public bool IsQuestUnlocked(QuestData quest)
     {
         if (questDatabase == null || questDatabase.quests == null)
@@ -910,17 +686,6 @@ public class QuestManager : MonoBehaviour
         if (status != null && !string.IsNullOrEmpty(status.waypointId))
             waypointManager?.RemoveWaypoint(status.waypointId);
 
-        // if a boss was spawned, remove it and deactivate zone
-        if (status != null)
-        {
-            if (status.bossInstance != null)
-            {
-                Destroy(status.bossInstance);
-                status.bossInstance = null;
-            }
-            status.bossZone?.DeactivateZone();
-        }
-
         activeQuests.Remove(quest);
         SaveQuestProgress();
         if (uiManager != null)
@@ -932,9 +697,7 @@ public class QuestManager : MonoBehaviour
         MouseManager.Instance?.HideCursorAndEnableInput();
         Debug.Log($"[QuestManager] Declined quest {quest.questName}, _isQuestAccepted={uiManager?._isQuestAccepted}, _currentQuestTitleKey={uiManager?._currentQuestTitleKey}");
     }
-    #endregion
 
-    #region Utility getters + UI show/hide (giữ nguyên)
     public CurrentQuestStatus GetQuestStatus(QuestData quest)
     {
         activeQuests.TryGetValue(quest, out var status);
@@ -1005,5 +768,4 @@ public class QuestManager : MonoBehaviour
         Debug.Log("[QuestManager] GetActiveQuest: No active quest found");
         return null;
     }
-    #endregion
 }
