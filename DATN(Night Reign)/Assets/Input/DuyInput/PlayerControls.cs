@@ -193,18 +193,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             ""id"": ""b6601042-8624-4320-8086-8a01d519419b"",
             ""actions"": [
                 {
-                    ""name"": ""Roll"",
+                    ""name"": ""Inventory"",
                     ""type"": ""Button"",
-                    ""id"": ""33cf29e8-3dd3-4c20-99dc-53bd1e540c68"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""X"",
-                    ""type"": ""Button"",
-                    ""id"": ""531aae87-f905-4b14-8e19-462abbc01bbb"",
+                    ""id"": ""3d9dc9c0-9906-4ff7-bb72-2b2cea2cf577"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -214,6 +205,33 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""name"": ""Y"",
                     ""type"": ""Button"",
                     ""id"": ""d94224f9-8c5b-40ba-9ad4-e1036bd2231f"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""A"",
+                    ""type"": ""Button"",
+                    ""id"": ""531aae87-f905-4b14-8e19-462abbc01bbb"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""X"",
+                    ""type"": ""Button"",
+                    ""id"": ""c713b92d-ac3e-4b8b-9fc2-e137fc5b7b14"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Jump"",
+                    ""type"": ""Button"",
+                    ""id"": ""79b31c23-832f-45d8-bf67-545c4d79aaa0"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -256,24 +274,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Jump"",
-                    ""type"": ""Button"",
-                    ""id"": ""79b31c23-832f-45d8-bf67-545c4d79aaa0"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""Inventory"",
-                    ""type"": ""Button"",
-                    ""id"": ""3d9dc9c0-9906-4ff7-bb72-2b2cea2cf577"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""Critical Attack"",
                     ""type"": ""Button"",
                     ""id"": ""b99f9ff3-b787-48b6-8895-4c389484054b"",
@@ -286,6 +286,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""name"": ""LockOn"",
                     ""type"": ""Button"",
                     ""id"": ""ffe1bd23-a2e3-402a-b69d-db5bb99dad4e"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Roll"",
+                    ""type"": ""Button"",
+                    ""id"": ""33cf29e8-3dd3-4c20-99dc-53bd1e540c68"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -358,7 +367,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""X"",
+                    ""action"": ""A"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -369,7 +378,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""X"",
+                    ""action"": ""A"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -548,6 +557,17 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""LB"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""22bc5bf3-49fe-4346-88b3-19aa2258f49c"",
+                    ""path"": ""<Keyboard>/x"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""X"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -694,17 +714,18 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_PlayerMovement_LockOnTargetRight = m_PlayerMovement.FindAction("Lock On Target Right", throwIfNotFound: true);
         // Player Actions
         m_PlayerActions = asset.FindActionMap("Player Actions", throwIfNotFound: true);
-        m_PlayerActions_Roll = m_PlayerActions.FindAction("Roll", throwIfNotFound: true);
-        m_PlayerActions_X = m_PlayerActions.FindAction("X", throwIfNotFound: true);
+        m_PlayerActions_Inventory = m_PlayerActions.FindAction("Inventory", throwIfNotFound: true);
         m_PlayerActions_Y = m_PlayerActions.FindAction("Y", throwIfNotFound: true);
+        m_PlayerActions_A = m_PlayerActions.FindAction("A", throwIfNotFound: true);
+        m_PlayerActions_X = m_PlayerActions.FindAction("X", throwIfNotFound: true);
+        m_PlayerActions_Jump = m_PlayerActions.FindAction("Jump", throwIfNotFound: true);
         m_PlayerActions_LT = m_PlayerActions.FindAction("LT", throwIfNotFound: true);
         m_PlayerActions_LB = m_PlayerActions.FindAction("LB", throwIfNotFound: true);
         m_PlayerActions_RB = m_PlayerActions.FindAction("RB", throwIfNotFound: true);
         m_PlayerActions_RT = m_PlayerActions.FindAction("RT", throwIfNotFound: true);
-        m_PlayerActions_Jump = m_PlayerActions.FindAction("Jump", throwIfNotFound: true);
-        m_PlayerActions_Inventory = m_PlayerActions.FindAction("Inventory", throwIfNotFound: true);
         m_PlayerActions_CriticalAttack = m_PlayerActions.FindAction("Critical Attack", throwIfNotFound: true);
         m_PlayerActions_LockOn = m_PlayerActions.FindAction("LockOn", throwIfNotFound: true);
+        m_PlayerActions_Roll = m_PlayerActions.FindAction("Roll", throwIfNotFound: true);
         m_PlayerActions_Skill = m_PlayerActions.FindAction("Skill", throwIfNotFound: true);
         m_PlayerActions_BoostAttackSpeed = m_PlayerActions.FindAction("BoostAttackSpeed", throwIfNotFound: true);
         m_PlayerActions_Aim = m_PlayerActions.FindAction("Aim", throwIfNotFound: true);
@@ -853,17 +874,18 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     // Player Actions
     private readonly InputActionMap m_PlayerActions;
     private List<IPlayerActionsActions> m_PlayerActionsActionsCallbackInterfaces = new List<IPlayerActionsActions>();
-    private readonly InputAction m_PlayerActions_Roll;
-    private readonly InputAction m_PlayerActions_X;
+    private readonly InputAction m_PlayerActions_Inventory;
     private readonly InputAction m_PlayerActions_Y;
+    private readonly InputAction m_PlayerActions_A;
+    private readonly InputAction m_PlayerActions_X;
+    private readonly InputAction m_PlayerActions_Jump;
     private readonly InputAction m_PlayerActions_LT;
     private readonly InputAction m_PlayerActions_LB;
     private readonly InputAction m_PlayerActions_RB;
     private readonly InputAction m_PlayerActions_RT;
-    private readonly InputAction m_PlayerActions_Jump;
-    private readonly InputAction m_PlayerActions_Inventory;
     private readonly InputAction m_PlayerActions_CriticalAttack;
     private readonly InputAction m_PlayerActions_LockOn;
+    private readonly InputAction m_PlayerActions_Roll;
     private readonly InputAction m_PlayerActions_Skill;
     private readonly InputAction m_PlayerActions_BoostAttackSpeed;
     private readonly InputAction m_PlayerActions_Aim;
@@ -872,17 +894,18 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     {
         private @PlayerControls m_Wrapper;
         public PlayerActionsActions(@PlayerControls wrapper) { m_Wrapper = wrapper; }
-        public InputAction @Roll => m_Wrapper.m_PlayerActions_Roll;
-        public InputAction @X => m_Wrapper.m_PlayerActions_X;
+        public InputAction @Inventory => m_Wrapper.m_PlayerActions_Inventory;
         public InputAction @Y => m_Wrapper.m_PlayerActions_Y;
+        public InputAction @A => m_Wrapper.m_PlayerActions_A;
+        public InputAction @X => m_Wrapper.m_PlayerActions_X;
+        public InputAction @Jump => m_Wrapper.m_PlayerActions_Jump;
         public InputAction @LT => m_Wrapper.m_PlayerActions_LT;
         public InputAction @LB => m_Wrapper.m_PlayerActions_LB;
         public InputAction @RB => m_Wrapper.m_PlayerActions_RB;
         public InputAction @RT => m_Wrapper.m_PlayerActions_RT;
-        public InputAction @Jump => m_Wrapper.m_PlayerActions_Jump;
-        public InputAction @Inventory => m_Wrapper.m_PlayerActions_Inventory;
         public InputAction @CriticalAttack => m_Wrapper.m_PlayerActions_CriticalAttack;
         public InputAction @LockOn => m_Wrapper.m_PlayerActions_LockOn;
+        public InputAction @Roll => m_Wrapper.m_PlayerActions_Roll;
         public InputAction @Skill => m_Wrapper.m_PlayerActions_Skill;
         public InputAction @BoostAttackSpeed => m_Wrapper.m_PlayerActions_BoostAttackSpeed;
         public InputAction @Aim => m_Wrapper.m_PlayerActions_Aim;
@@ -896,15 +919,21 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         {
             if (instance == null || m_Wrapper.m_PlayerActionsActionsCallbackInterfaces.Contains(instance)) return;
             m_Wrapper.m_PlayerActionsActionsCallbackInterfaces.Add(instance);
-            @Roll.started += instance.OnRoll;
-            @Roll.performed += instance.OnRoll;
-            @Roll.canceled += instance.OnRoll;
-            @X.started += instance.OnX;
-            @X.performed += instance.OnX;
-            @X.canceled += instance.OnX;
+            @Inventory.started += instance.OnInventory;
+            @Inventory.performed += instance.OnInventory;
+            @Inventory.canceled += instance.OnInventory;
             @Y.started += instance.OnY;
             @Y.performed += instance.OnY;
             @Y.canceled += instance.OnY;
+            @A.started += instance.OnA;
+            @A.performed += instance.OnA;
+            @A.canceled += instance.OnA;
+            @X.started += instance.OnX;
+            @X.performed += instance.OnX;
+            @X.canceled += instance.OnX;
+            @Jump.started += instance.OnJump;
+            @Jump.performed += instance.OnJump;
+            @Jump.canceled += instance.OnJump;
             @LT.started += instance.OnLT;
             @LT.performed += instance.OnLT;
             @LT.canceled += instance.OnLT;
@@ -917,18 +946,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @RT.started += instance.OnRT;
             @RT.performed += instance.OnRT;
             @RT.canceled += instance.OnRT;
-            @Jump.started += instance.OnJump;
-            @Jump.performed += instance.OnJump;
-            @Jump.canceled += instance.OnJump;
-            @Inventory.started += instance.OnInventory;
-            @Inventory.performed += instance.OnInventory;
-            @Inventory.canceled += instance.OnInventory;
             @CriticalAttack.started += instance.OnCriticalAttack;
             @CriticalAttack.performed += instance.OnCriticalAttack;
             @CriticalAttack.canceled += instance.OnCriticalAttack;
             @LockOn.started += instance.OnLockOn;
             @LockOn.performed += instance.OnLockOn;
             @LockOn.canceled += instance.OnLockOn;
+            @Roll.started += instance.OnRoll;
+            @Roll.performed += instance.OnRoll;
+            @Roll.canceled += instance.OnRoll;
             @Skill.started += instance.OnSkill;
             @Skill.performed += instance.OnSkill;
             @Skill.canceled += instance.OnSkill;
@@ -945,15 +971,21 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
 
         private void UnregisterCallbacks(IPlayerActionsActions instance)
         {
-            @Roll.started -= instance.OnRoll;
-            @Roll.performed -= instance.OnRoll;
-            @Roll.canceled -= instance.OnRoll;
-            @X.started -= instance.OnX;
-            @X.performed -= instance.OnX;
-            @X.canceled -= instance.OnX;
+            @Inventory.started -= instance.OnInventory;
+            @Inventory.performed -= instance.OnInventory;
+            @Inventory.canceled -= instance.OnInventory;
             @Y.started -= instance.OnY;
             @Y.performed -= instance.OnY;
             @Y.canceled -= instance.OnY;
+            @A.started -= instance.OnA;
+            @A.performed -= instance.OnA;
+            @A.canceled -= instance.OnA;
+            @X.started -= instance.OnX;
+            @X.performed -= instance.OnX;
+            @X.canceled -= instance.OnX;
+            @Jump.started -= instance.OnJump;
+            @Jump.performed -= instance.OnJump;
+            @Jump.canceled -= instance.OnJump;
             @LT.started -= instance.OnLT;
             @LT.performed -= instance.OnLT;
             @LT.canceled -= instance.OnLT;
@@ -966,18 +998,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @RT.started -= instance.OnRT;
             @RT.performed -= instance.OnRT;
             @RT.canceled -= instance.OnRT;
-            @Jump.started -= instance.OnJump;
-            @Jump.performed -= instance.OnJump;
-            @Jump.canceled -= instance.OnJump;
-            @Inventory.started -= instance.OnInventory;
-            @Inventory.performed -= instance.OnInventory;
-            @Inventory.canceled -= instance.OnInventory;
             @CriticalAttack.started -= instance.OnCriticalAttack;
             @CriticalAttack.performed -= instance.OnCriticalAttack;
             @CriticalAttack.canceled -= instance.OnCriticalAttack;
             @LockOn.started -= instance.OnLockOn;
             @LockOn.performed -= instance.OnLockOn;
             @LockOn.canceled -= instance.OnLockOn;
+            @Roll.started -= instance.OnRoll;
+            @Roll.performed -= instance.OnRoll;
+            @Roll.canceled -= instance.OnRoll;
             @Skill.started -= instance.OnSkill;
             @Skill.performed -= instance.OnSkill;
             @Skill.canceled -= instance.OnSkill;
@@ -1086,17 +1115,18 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     }
     public interface IPlayerActionsActions
     {
-        void OnRoll(InputAction.CallbackContext context);
-        void OnX(InputAction.CallbackContext context);
+        void OnInventory(InputAction.CallbackContext context);
         void OnY(InputAction.CallbackContext context);
+        void OnA(InputAction.CallbackContext context);
+        void OnX(InputAction.CallbackContext context);
+        void OnJump(InputAction.CallbackContext context);
         void OnLT(InputAction.CallbackContext context);
         void OnLB(InputAction.CallbackContext context);
         void OnRB(InputAction.CallbackContext context);
         void OnRT(InputAction.CallbackContext context);
-        void OnJump(InputAction.CallbackContext context);
-        void OnInventory(InputAction.CallbackContext context);
         void OnCriticalAttack(InputAction.CallbackContext context);
         void OnLockOn(InputAction.CallbackContext context);
+        void OnRoll(InputAction.CallbackContext context);
         void OnSkill(InputAction.CallbackContext context);
         void OnBoostAttackSpeed(InputAction.CallbackContext context);
         void OnAim(InputAction.CallbackContext context);

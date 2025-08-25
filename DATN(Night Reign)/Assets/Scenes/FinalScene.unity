@@ -350,6 +350,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &417478525 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 744504361247113635, guid: 516d33401037b87479511c25b4e4d314,
+    type: 3}
+  m_PrefabInstance: {fileID: 7079124694358665336}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &417478526
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 417478525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 482ffb9dbb51e39498a6b2cf55f0c591, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentParticleFX: {fileID: 0}
+  instantiatedFXModel: {fileID: 0}
+  amountToBeHealed: 0
 --- !u!1 &611705562
 GameObject:
   m_ObjectHideFlags: 0
@@ -1272,10 +1293,60 @@ PrefabInstance:
       propertyPath: healthBar
       value: 
       objectReference: {fileID: 8988472439013529488}
+    - target: {fileID: 8419248015046362984, guid: 516d33401037b87479511c25b4e4d314,
+        type: 3}
+      propertyPath: currentConsumable
+      value: 
+      objectReference: {fileID: 11400000, guid: a68c75c48c4da804396506c5bb93f2f5,
+        type: 2}
+    - target: {fileID: 8419248015046362984, guid: 516d33401037b87479511c25b4e4d314,
+        type: 3}
+      propertyPath: weaponInLeftHandSlots.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8419248015046362984, guid: 516d33401037b87479511c25b4e4d314,
+        type: 3}
+      propertyPath: weaponInRightHandSlots.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8419248015046362984, guid: 516d33401037b87479511c25b4e4d314,
+        type: 3}
+      propertyPath: 'weaponInLeftHandSlots.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 2dab977679eba2244a4d8a5415dd08ba,
+        type: 2}
+    - target: {fileID: 8419248015046362984, guid: 516d33401037b87479511c25b4e4d314,
+        type: 3}
+      propertyPath: 'weaponInLeftHandSlots.Array.data[1]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 7d6910d3cc66fdb458c80e04754ec880,
+        type: 2}
+    - target: {fileID: 8419248015046362984, guid: 516d33401037b87479511c25b4e4d314,
+        type: 3}
+      propertyPath: 'weaponInRightHandSlots.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 53cbd28d8e69909458e10e749563207f,
+        type: 2}
+    - target: {fileID: 8419248015046362984, guid: 516d33401037b87479511c25b4e4d314,
+        type: 3}
+      propertyPath: 'weaponInRightHandSlots.Array.data[1]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 7d6910d3cc66fdb458c80e04754ec880,
+        type: 2}
+    - target: {fileID: 8419248015046362984, guid: 516d33401037b87479511c25b4e4d314,
+        type: 3}
+      propertyPath: 'weaponInRightHandSlots.Array.data[2]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 4bd8d0081c3342442abacc0ce3e742ae,
+        type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 744504361247113635, guid: 516d33401037b87479511c25b4e4d314,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 417478526}
   m_SourcePrefab: {fileID: 100100000, guid: 516d33401037b87479511c25b4e4d314, type: 3}
 --- !u!1001 &7534381102261683020
 PrefabInstance:

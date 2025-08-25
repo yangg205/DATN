@@ -1,3 +1,4 @@
+using server.model;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,6 +11,7 @@ namespace AG
         public SpellItem currentSpell;
         public WeaponItem rightWeapon;
         public WeaponItem leftWeapon;
+        public ConsumableItem currentConsumable;
 
         public WeaponItem unarmedWeapon;
 

@@ -81,7 +81,7 @@ namespace AG
             inputHandler.d_pad_Up = false;
             inputHandler.d_pad_Left = false;
             inputHandler.d_pad_Right = false;
-            inputHandler.x_input = false;
+            inputHandler.a_input = false;
             inputHandler.jump_input = false;
             inputHandler.inventory_input = false;
 
@@ -116,7 +116,7 @@ namespace AG
                         interactableUI.interactableText.text = interactableText;
                         interactableUIGameObject.SetActive(true);
 
-                        if (inputHandler.x_input)
+                        if (inputHandler.a_input)
                         {
                             hit.collider.GetComponent<Interactable>().Interact(this);
                         }
@@ -130,7 +130,7 @@ namespace AG
                     interactableUIGameObject.SetActive(false);
                 }
 
-                if (itemInteractableGameObject != null && inputHandler.x_input)
+                if (itemInteractableGameObject != null && inputHandler.a_input)
                 {
                     itemInteractableGameObject.SetActive(false);
                 }

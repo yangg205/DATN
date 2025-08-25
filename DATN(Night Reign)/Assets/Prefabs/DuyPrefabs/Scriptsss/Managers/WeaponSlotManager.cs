@@ -1,4 +1,4 @@
-using ND;
+﻿using ND;
 using UnityEngine;
 
 namespace AG
@@ -49,6 +49,12 @@ namespace AG
                 }
             }
         }
+
+        public void LoadBothWeaponOnSlots()
+        {
+            LoadWeaponOnSlot(playerInventory.rightWeapon, false);
+            LoadWeaponOnSlot(playerInventory.leftWeapon, true);
+        }    
 
         public void LoadWeaponOnSlot(WeaponItem weaponItem, bool isLeft)
         {
