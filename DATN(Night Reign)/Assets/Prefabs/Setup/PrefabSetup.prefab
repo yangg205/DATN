@@ -87,6 +87,59 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1950728137359883545}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2104528550398475732
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8509140666708688020}
+  - component: {fileID: 311678025699820739}
+  m_Layer: 0
+  m_Name: setupbutton_game
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8509140666708688020
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2104528550398475732}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 843.6959, y: 511.59818, z: 85.71678}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7926866521531049664}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &311678025699820739
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2104528550398475732}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca0f8eb4aa84a234eba5df2728a6c861, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ButtonSetups:
+  - GameObject: {fileID: 2432725301631033124}
+    Key: btn_next
+  - GameObject: {fileID: 1049280382011215841}
+    Key: btn_decline
+  - GameObject: {fileID: 6328918304678769227}
+    Key: btn_claim
+  - GameObject: {fileID: 2661836233175096632}
+    Key: btn_accept
 --- !u!1 &3251756966464244416
 GameObject:
   m_ObjectHideFlags: 0
@@ -879,6 +932,7 @@ Transform:
   - {fileID: 3466268683966176133}
   - {fileID: 1950728137359883545}
   - {fileID: 4553985650902665198}
+  - {fileID: 8509140666708688020}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &2881863995662972719
@@ -1024,6 +1078,7 @@ MonoBehaviour:
   claimRewardButton: {fileID: 2830881011234773079}
   continueButton: {fileID: 3472392636329374027}
   panelPressText: {fileID: 4666426496685858118}
+  npcNameText: {fileID: 0}
   questManager: {fileID: 5240744282178843162}
   dialogueManager: {fileID: 952034196913773309}
   npcID: Kael
@@ -1441,6 +1496,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a392ae346a106974b992fb5c856c88b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1049280382011215841 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3873192938692670013, guid: 90ac2451d4e6b644392d141d1d2903d6,
+    type: 3}
+  m_PrefabInstance: {fileID: 4273795677211033052}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1494229872706462195 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3455106032117832751, guid: 90ac2451d4e6b644392d141d1d2903d6,
@@ -1485,6 +1546,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   objectToRotate: {fileID: 1494229872706462195}
   detectionRange: 10
+--- !u!1 &2432725301631033124 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1913278065875739384, guid: 90ac2451d4e6b644392d141d1d2903d6,
+    type: 3}
+  m_PrefabInstance: {fileID: 4273795677211033052}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &2661836233175096632 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2287599315929604324, guid: 90ac2451d4e6b644392d141d1d2903d6,
+    type: 3}
+  m_PrefabInstance: {fileID: 4273795677211033052}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &2830881011234773079 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2019545306786391435, guid: 90ac2451d4e6b644392d141d1d2903d6,
@@ -1590,6 +1663,7 @@ MonoBehaviour:
   claimRewardButton: {fileID: 2830881011234773079}
   continueButton: {fileID: 3472392636329374027}
   panelPressText: {fileID: 8443120338063887195}
+  npcNameText: {fileID: 0}
   questManager: {fileID: 5240744282178843162}
   dialogueManager: {fileID: 952034196913773309}
   npcID: Flamekeeper
@@ -1613,6 +1687,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a903e8bdd2740548b5b0e1020f9632a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &6328918304678769227 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7825927035483262871, guid: 90ac2451d4e6b644392d141d1d2903d6,
+    type: 3}
+  m_PrefabInstance: {fileID: 4273795677211033052}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &6840253487909458849 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7323667491815370365, guid: 90ac2451d4e6b644392d141d1d2903d6,
@@ -3922,6 +4002,7 @@ MonoBehaviour:
   claimRewardButton: {fileID: 2830881011234773079}
   continueButton: {fileID: 3472392636329374027}
   panelPressText: {fileID: 8443120338063887195}
+  npcNameText: {fileID: 0}
   questManager: {fileID: 5240744282178843162}
   dialogueManager: {fileID: 952034196913773309}
   npcID: Kael

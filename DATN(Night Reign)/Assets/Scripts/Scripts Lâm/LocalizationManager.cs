@@ -13,11 +13,12 @@ public class LocalizationManager : MonoBehaviour
     [SerializeField] private TMP_Dropdown languageDropdown;
 
     private bool isInitialized = false;
-    private bool isChangingLanguage = false; // Cờ để ngăn chặn lặp vô hạn
-    private float lastChangeTime = -1f; // Thời gian cuối cùng thay đổi ngôn ngữ
-    private const float debounceTime = 1f; // Thời gian debounce (1 giây)
+    private bool isChangingLanguage = false;
+    private float lastChangeTime = -1f;
+    private const float debounceTime = 1f;
+
     public static LocalizationManager Instance { get; private set; }
-    public static event Action OnLanguageChanged; // Sự kiện tùy chỉnh
+    public static event Action OnLanguageChanged;
 
     private Dictionary<string, StringTable> _tableCache = new Dictionary<string, StringTable>();
 
@@ -28,11 +29,22 @@ public class LocalizationManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
             Debug.Log("✅ LocalizationManager Instance đã sẵn sàng.");
+
+            // Lắng nghe sự kiện của Unity khi locale đổi xong
+            LocalizationSettings.SelectedLocaleChanged += OnUnityLocaleChanged;
         }
         else
         {
             Destroy(gameObject);
             Debug.LogWarning("⚠️ Có nhiều hơn 1 LocalizationManager trong scene, đã hủy bản sao.");
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            LocalizationSettings.SelectedLocaleChanged -= OnUnityLocaleChanged;
         }
     }
 
@@ -90,15 +102,13 @@ public class LocalizationManager : MonoBehaviour
         LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.Locales[savedLangIndex];
 
         Debug.Log($"[LocalizationManager] Đã tải ngôn ngữ lưu trữ: {LocalizationSettings.SelectedLocale.Identifier.Code}");
-        OnLanguageChanged?.Invoke();
-        RefreshAllLocalizedUI();
     }
 
     public async void ChangeLanguageImmediate(int index)
     {
         if (!isInitialized || isChangingLanguage || Time.time - lastChangeTime < debounceTime)
         {
-            Debug.LogWarning($"⚠️ LocalizationManager chưa được khởi tạo, đang thay đổi, hoặc debounce chưa hết! (index: {index}, isInitialized: {isInitialized}, isChangingLanguage: {isChangingLanguage}, TimeSinceLastChange: {Time.time - lastChangeTime})");
+            Debug.LogWarning($"⚠️ Không thể đổi ngôn ngữ ngay bây giờ! (index: {index}, isInitialized: {isInitialized}, isChangingLanguage: {isChangingLanguage})");
             return;
         }
 
@@ -114,21 +124,24 @@ public class LocalizationManager : MonoBehaviour
         {
             await LocalizationSettings.InitializationOperation.Task;
             LocalizationSettings.SelectedLocale = locale;
-            _tableCache.Clear();
-            UILocalizeExtensions.ClearCache(); // Xóa cache của UILocalizeExtensions
-            Debug.Log($"[LocalizationManager] Đã thay đổi ngôn ngữ thành: {locale.Identifier.Code}");
 
-            isChangingLanguage = true;
-            languageDropdown.value = index;
-            isChangingLanguage = false;
-
-            OnLanguageChanged?.Invoke();
-            RefreshAllLocalizedUI();
+            // Lưu ý: KHÔNG gọi OnLanguageChanged ở đây nữa, chỉ chờ OnUnityLocaleChanged
         }
 
         isChangingLanguage = false;
-        Debug.Log($"[LocalizationManager] Hoàn tất thay đổi ngôn ngữ với index: {index}");
     }
+
+    private void OnUnityLocaleChanged(UnityEngine.Localization.Locale newLocale)
+    {
+        Debug.Log($"[LocalizationManager] Locale thực sự đã đổi sang: {newLocale.Identifier.Code}");
+        _tableCache.Clear();
+        UILocalizeExtensions.ClearCache();
+
+        // Bắn sự kiện custom khi đổi xong
+        OnLanguageChanged?.Invoke();
+        RefreshAllLocalizedUI();
+    }
+
     private void RefreshAllLocalizedUI()
     {
         foreach (var locStr in FindObjectsOfType<LocalizeStringEvent>(true))
@@ -158,7 +171,7 @@ public class LocalizationManager : MonoBehaviour
             table = tableHandle.Result;
             if (table == null)
             {
-                Debug.LogError($"[LocalizationManager] Không tìm thấy bảng: {tableName} cho locale: {LocalizationSettings.SelectedLocale.Identifier.Code}. Kiểm tra Localization Settings!");
+                Debug.LogError($"[LocalizationManager] Không tìm thấy bảng: {tableName} cho locale: {LocalizationSettings.SelectedLocale.Identifier.Code}");
                 return $"[MISSING_TABLE:{tableName}]";
             }
             _tableCache[tableName] = table;
@@ -169,7 +182,7 @@ public class LocalizationManager : MonoBehaviour
         if (entry == null)
         {
             Debug.LogWarning($"[LocalizationManager] Key '{key}' không tìm thấy trong bảng '{tableName}' cho locale: {LocalizationSettings.SelectedLocale.Identifier.Code}");
-            return key; // Trả về key để kiểm tra
+            return key;
         }
 
         try

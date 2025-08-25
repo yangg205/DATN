@@ -9,7 +9,6 @@ public class SetupButton : MonoBehaviour
 
     private async void Start()
     {
-        // Đảm bảo LocalizationSettings đã khởi tạo
         if (!LocalizationSettings.InitializationOperation.IsDone)
         {
             Debug.Log("Đang chờ khởi tạo LocalizationSettings...");
@@ -17,7 +16,6 @@ public class SetupButton : MonoBehaviour
         }
 
         Debug.Log($"Current locale: {LocalizationSettings.SelectedLocale?.Identifier.Code ?? "None"}");
-        // Áp dụng localization cho tất cả các nút
         await UpdateAllButtons();
     }
 
@@ -49,20 +47,17 @@ public class SetupButton : MonoBehaviour
 
     private void OnEnable()
     {
-        // Đăng ký sự kiện khi ngôn ngữ thay đổi
         LocalizationManager.OnLanguageChanged += OnLanguageChangedHandler;
     }
 
     private void OnDisable()
     {
-        // Hủy đăng ký sự kiện
         LocalizationManager.OnLanguageChanged -= OnLanguageChangedHandler;
     }
 
     private async void OnLanguageChangedHandler()
     {
         Debug.Log("Ngôn ngữ đã thay đổi, đang làm mới các nút...");
-        // Làm mới localization khi ngôn ngữ thay đổi
         await UpdateAllButtons();
     }
 
