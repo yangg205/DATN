@@ -95,23 +95,33 @@ public class QuestManager : MonoBehaviour
         StartCoroutine(InitializeQuestUICoroutine());
     }
 
+
+
+
     private IEnumerator InitializeQuestUICoroutine()
     {
         yield return new WaitForEndOfFrame();
         var currentQuest = GetCurrentQuest();
         if (currentQuest != null && IsQuestUnlocked(currentQuest))
         {
+            // Auto-accept FindNPC quests during initialization
+            if (currentQuest.questType == QuestType.FindNPC && !IsQuestAccepted(currentQuest) && !currentQuest.isQuestCompleted)
+            {
+                Debug.Log($"[QuestManager] Auto-accepting FindNPC quest {currentQuest.questName} during initialization");
+                AcceptQuest(currentQuest);
+            }
+
             yield return StartCoroutine(UpdateQuestUICoroutine(currentQuest));
             if (uiManager != null)
             {
                 uiManager.SetQuestAccepted(activeQuests.ContainsKey(currentQuest));
                 yield return StartCoroutine(uiManager.RefreshCombinedQuestInfoUICoroutine());
+                Debug.Log($"[QuestManager] UI updated for quest {currentQuest.questName}, isAccepted={activeQuests.ContainsKey(currentQuest)}");
             }
-            Debug.Log($"[QuestManager] UI updated for quest {currentQuest.questName}, isAccepted={activeQuests.ContainsKey(currentQuest)}");
         }
         else
         {
-            Debug.Log("[QuestManager] No valid quest to initialize UI.");
+            Debug.Log($"[QuestManager] No valid quest to initialize UI. CurrentQuest: {(currentQuest != null ? currentQuest.questName : "null")}, IsUnlocked: {(currentQuest != null ? IsQuestUnlocked(currentQuest) : false)}");
             if (uiManager != null)
             {
                 uiManager.HideQuestProgress();
@@ -124,25 +134,27 @@ public class QuestManager : MonoBehaviour
     {
         foreach (var quest in questDatabase.quests)
         {
-            string key = $"QuestCompleted_{quest.questName}";
+            string key = GetPlayerPrefKey($"QuestCompleted_{quest.questName}");
             quest.isQuestCompleted = PlayerPrefs.GetInt(key, 0) == 1;
             Debug.Log($"[QuestManager] Loaded quest {quest.questName} completed status: {quest.isQuestCompleted}");
         }
     }
 
+
     private void SaveQuestCompletionStatus(QuestData quest)
     {
         if (quest == null) return;
-        string key = $"QuestCompleted_{quest.questName}";
+        string key = GetPlayerPrefKey($"QuestCompleted_{quest.questName}");
         PlayerPrefs.SetInt(key, quest.isQuestCompleted ? 1 : 0);
         PlayerPrefs.Save();
         Debug.Log($"[QuestManager] Saved completion status for quest {quest.questName}: {quest.isQuestCompleted}");
     }
 
+
     private void LoadQuestProgress()
     {
         activeQuests.Clear();
-        string activeQuestNames = PlayerPrefs.GetString("ActiveQuests", "");
+        string activeQuestNames = PlayerPrefs.GetString(GetPlayerPrefKey("ActiveQuests"), "");
         if (!string.IsNullOrEmpty(activeQuestNames))
         {
             var questNames = activeQuestNames.Split(';');
@@ -153,21 +165,21 @@ public class QuestManager : MonoBehaviour
                 if (quest != null && !quest.isQuestCompleted && IsQuestUnlocked(quest))
                 {
                     var status = new CurrentQuestStatus(quest);
-                    status.currentProgress = PlayerPrefs.GetInt($"QuestProgress_{questName}", 0);
-                    status.isObjectiveMet = PlayerPrefs.GetInt($"QuestObjectiveMet_{questName}", 0) == 1;
-                    status.isCompleted = PlayerPrefs.GetInt($"QuestCompletedStatus_{questName}", 0) == 1;
-                    status.waypointId = PlayerPrefs.GetString($"QuestWaypointId_{questName}", null);
+                    status.currentProgress = PlayerPrefs.GetInt(GetPlayerPrefKey($"QuestProgress_{questName}"), 0);
+                    status.isObjectiveMet = PlayerPrefs.GetInt(GetPlayerPrefKey($"QuestObjectiveMet_{questName}"), 0) == 1;
+                    status.isCompleted = PlayerPrefs.GetInt(GetPlayerPrefKey($"QuestCompletedStatus_{questName}"), 0) == 1;
+                    status.waypointId = PlayerPrefs.GetString(GetPlayerPrefKey($"QuestWaypointId_{questName}"), null);
                     activeQuests.Add(quest, status);
                     if (!string.IsNullOrEmpty(status.waypointId) && waypointManager != null)
                     {
                         StartCoroutine(AddWaypointCoroutine(quest, status));
                     }
-                    Debug.Log($"[QuestManager] Loaded quest {questName}: Progress={status.currentProgress}, ObjectiveMet={status.isObjectiveMet}, Completed={status.isCompleted}, WaypointId={status.waypointId}");
                 }
             }
         }
         SaveQuestProgress();
     }
+
 
     private IEnumerator AddWaypointCoroutine(QuestData quest, CurrentQuestStatus questStatus)
     {
@@ -196,45 +208,45 @@ public class QuestManager : MonoBehaviour
         foreach (var quest in activeQuests.Keys)
         {
             var status = activeQuests[quest];
-            PlayerPrefs.SetInt($"QuestProgress_{quest.questName}", status.currentProgress);
-            PlayerPrefs.SetInt($"QuestObjectiveMet_{quest.questName}", status.isObjectiveMet ? 1 : 0);
-            PlayerPrefs.SetInt($"QuestCompletedStatus_{quest.questName}", status.isCompleted ? 1 : 0);
-            PlayerPrefs.SetString($"QuestWaypointId_{quest.questName}", status.waypointId ?? "");
+            PlayerPrefs.SetInt(GetPlayerPrefKey($"QuestProgress_{quest.questName}"), status.currentProgress);
+            PlayerPrefs.SetInt(GetPlayerPrefKey($"QuestObjectiveMet_{quest.questName}"), status.isObjectiveMet ? 1 : 0);
+            PlayerPrefs.SetInt(GetPlayerPrefKey($"QuestCompletedStatus_{quest.questName}"), status.isCompleted ? 1 : 0);
+            PlayerPrefs.SetString(GetPlayerPrefKey($"QuestWaypointId_{quest.questName}"), status.waypointId ?? "");
         }
-        PlayerPrefs.SetString("ActiveQuests", questNames);
+        PlayerPrefs.SetString(GetPlayerPrefKey("ActiveQuests"), questNames);
         PlayerPrefs.Save();
         Debug.Log($"[QuestManager] Saved active quests: {questNames}");
     }
 
-    private void LoadCurrentQuestIndex()
-    {
-        currentQuestIndex = PlayerPrefs.GetInt("CurrentQuestIndex", 0);
-        Debug.Log($"[QuestManager] Loaded currentQuestIndex: {currentQuestIndex}");
-    }
 
     private void SaveCurrentQuestIndex()
     {
-        PlayerPrefs.SetInt("CurrentQuestIndex", currentQuestIndex);
+        PlayerPrefs.SetInt(GetPlayerPrefKey("CurrentQuestIndex"), currentQuestIndex);
         PlayerPrefs.Save();
         Debug.Log($"[QuestManager] Saved currentQuestIndex: {currentQuestIndex}");
     }
+
+    private void LoadCurrentQuestIndex()
+    {
+        currentQuestIndex = PlayerPrefs.GetInt(GetPlayerPrefKey("CurrentQuestIndex"), 0);
+        Debug.Log($"[QuestManager] Loaded currentQuestIndex: {currentQuestIndex}");
+    }
+
 
     public void ResetAllQuests()
     {
         foreach (var quest in questDatabase.quests)
         {
             quest.isQuestCompleted = false;
-            string key = $"QuestCompleted_{quest.questName}";
-            PlayerPrefs.DeleteKey(key);
-            PlayerPrefs.DeleteKey($"QuestProgress_{quest.questName}");
-            PlayerPrefs.DeleteKey($"QuestObjectiveMet_{quest.questName}");
-            PlayerPrefs.DeleteKey($"QuestCompletedStatus_{quest.questName}");
-            PlayerPrefs.DeleteKey($"QuestWaypointId_{quest.questName}");
-            Debug.Log($"[QuestManager] Reset quest {quest.questName}");
+            PlayerPrefs.DeleteKey(GetPlayerPrefKey($"QuestCompleted_{quest.questName}"));
+            PlayerPrefs.DeleteKey(GetPlayerPrefKey($"QuestProgress_{quest.questName}"));
+            PlayerPrefs.DeleteKey(GetPlayerPrefKey($"QuestObjectiveMet_{quest.questName}"));
+            PlayerPrefs.DeleteKey(GetPlayerPrefKey($"QuestCompletedStatus_{quest.questName}"));
+            PlayerPrefs.DeleteKey(GetPlayerPrefKey($"QuestWaypointId_{quest.questName}"));
         }
         activeQuests.Clear();
-        PlayerPrefs.DeleteKey("ActiveQuests");
-        PlayerPrefs.DeleteKey("CurrentQuestIndex");
+        PlayerPrefs.DeleteKey(GetPlayerPrefKey("ActiveQuests"));
+        PlayerPrefs.DeleteKey(GetPlayerPrefKey("CurrentQuestIndex"));
         PlayerPrefs.Save();
         currentQuestIndex = 0;
         if (uiManager != null)
@@ -244,8 +256,8 @@ public class QuestManager : MonoBehaviour
             uiManager.ShowNotice("Quest_Reset_All", 2.5f);
         }
         MouseManager.Instance?.HideCursorAndEnableInput();
-        Debug.Log("[QuestManager] All quests reset, activeQuests cleared, currentQuestIndex set to 0");
     }
+
 
     private void UpdateQuestIndex()
     {
@@ -503,7 +515,7 @@ public class QuestManager : MonoBehaviour
         var nextQuest = GetCurrentQuest();
         if (nextQuest == null || !IsQuestUnlocked(nextQuest) || nextQuest.isQuestCompleted)
         {
-            Debug.Log($"[QuestManager] No valid next quest for NPC {npcId}, hiding UI");
+            Debug.Log($"[QuestManager] No valid next quest for NPC {npcId}. NextQuest: {(nextQuest != null ? nextQuest.questName : "null")}, IsUnlocked: {(nextQuest != null ? IsQuestUnlocked(nextQuest) : false)}, IsCompleted: {(nextQuest != null ? nextQuest.isQuestCompleted : false)}");
             if (uiManager != null)
             {
                 uiManager.HideQuestProgress();
@@ -514,41 +526,51 @@ public class QuestManager : MonoBehaviour
             yield break;
         }
 
-        Debug.Log($"[QuestManager] Offering next quest {nextQuest.questName} for NPC {npcId}, giverNPCID={nextQuest.giverNPCID}");
+        Debug.Log($"[QuestManager] Offering next quest {nextQuest.questName} for NPC {npcId}, giverNPCID={nextQuest.giverNPCID}, QuestType={nextQuest.questType}, IsAccepted={IsQuestAccepted(nextQuest)}");
         yield return StartCoroutine(UpdateQuestUICoroutine(nextQuest));
-        if (uiManager != null)
-        {
-            uiManager.SetQuestAccepted(false);
-            yield return StartCoroutine(uiManager.RefreshCombinedQuestInfoUICoroutine());
-        }
 
-        if (nextQuest.giverNPCID == npcId)
+        if (nextQuest.questType == QuestType.FindNPC && !IsQuestAccepted(nextQuest) && !nextQuest.isQuestCompleted)
+        {
+            Debug.Log($"[QuestManager] Auto-accepting FindNPC quest {nextQuest.questName}. ActiveQuests.Contains={activeQuests.ContainsKey(nextQuest)}, IsCompleted={nextQuest.isQuestCompleted}");
+            AcceptQuest(nextQuest);
+
+            yield return StartCoroutine(UpdateQuestUICoroutine(nextQuest));
+            if (uiManager != null)
+            {
+                uiManager.SetQuestAccepted(true);
+                yield return StartCoroutine(uiManager.RefreshCombinedQuestInfoUICoroutine());
+                Debug.Log($"[QuestManager] UI updated after auto-accept: _isQuestAccepted={uiManager._isQuestAccepted}, _currentQuestTitleKey={uiManager._currentQuestTitleKey}");
+            }
+
+            if (acceptButton != null) acceptButton.SetActive(false);
+            if (declineButton != null) declineButton.SetActive(false);
+            if (claimRewardButton != null) claimRewardButton.SetActive(false);
+        }
+        else if (nextQuest.giverNPCID == npcId)
         {
             var beforeCompleteKeys = nextQuest.GetDialogueKeys(QuestDialogueType.BeforeComplete);
             if (beforeCompleteKeys == null || beforeCompleteKeys.Length == 0)
             {
                 Debug.Log($"[QuestManager] No BeforeComplete dialogue for {nextQuest.questName}, auto-accepting");
                 AcceptQuest(nextQuest);
+
                 yield return StartCoroutine(UpdateQuestUICoroutine(nextQuest));
                 if (uiManager != null)
                 {
+                    uiManager.SetQuestAccepted(true);
                     yield return StartCoroutine(uiManager.RefreshCombinedQuestInfoUICoroutine());
                 }
             }
             else
             {
-                Debug.Log($"[QuestManager] Starting BeforeComplete dialogue for {nextQuest.questName} with {beforeCompleteKeys.Length} lines: {string.Join(", ", beforeCompleteKeys)}");
+                Debug.Log($"[QuestManager] Starting BeforeComplete dialogue for {nextQuest.questName}");
                 DialogueManager.Instance?.StartQuestDialogue(nextQuest, QuestDialogueType.BeforeComplete, () =>
                 {
                     HideQuestUI();
                     MouseManager.Instance?.HideCursorAndEnableInput();
                     Debug.Log($"[QuestManager] Completed BeforeComplete dialogue for quest {nextQuest.questName}");
-                    if (nextQuest.questType == QuestType.FindNPC)
-                    {
-                        AcceptQuest(nextQuest); // Tự động nhận quest FindNPC sau khi hoàn thành dialogue
-                        StartCoroutine(UpdateQuestUICoroutine(nextQuest));
-                    }
                 }, beforeCompleteKeys, nextQuest.voiceBeforeComplete_EN, nextQuest.voiceBeforeComplete_VI);
+
                 ShowQuestUI();
                 acceptButton?.SetActive(true);
                 declineButton?.SetActive(true);
@@ -562,6 +584,8 @@ public class QuestManager : MonoBehaviour
             MouseManager.Instance?.HideCursorAndEnableInput();
         }
     }
+
+
 
     public bool IsQuestUnlocked(QuestData quest)
     {
@@ -768,4 +792,10 @@ public class QuestManager : MonoBehaviour
         Debug.Log("[QuestManager] GetActiveQuest: No active quest found");
         return null;
     }
+    private string GetPlayerPrefKey(string baseKey)
+    {
+        int playercharacterId = PlayerPrefs.GetInt("PlayerCharacterId", 0);
+        return $"Player_{playercharacterId}_{baseKey}";
+    }
+
 }
