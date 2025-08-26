@@ -13,7 +13,7 @@ public class QuestManager : MonoBehaviour
 
     [Header("References")]
     public QuestDatabase questDatabase;
-    public PlayerStats playerStats;//thêm exp và coin ở playerStats mới
+    public PlayerStats playerStats; //thêm exp và coin ở playerStats mới
     public UIManager uiManager;
     public WaypointManager waypointManager;
 
@@ -66,9 +66,9 @@ public class QuestManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        if (questDatabase == null || questDatabase.quests == null)
+        if (questDatabase == null || questDatabase.quests == null || questDatabase.quests.Length == 0)
         {
-            Debug.LogError("[QuestManager] QuestDatabase or quests not assigned!");
+            Debug.LogError("[QuestManager] QuestDatabase or quests not assigned or empty!");
             return;
         }
 
@@ -95,8 +95,42 @@ public class QuestManager : MonoBehaviour
         StartCoroutine(InitializeQuestUICoroutine());
     }
 
+    public bool AreAllQuestsCompleted()
+    {
+        if (questDatabase == null)
+        {
+            Debug.LogError("[QuestManager] QuestDatabase is null!");
+            return false;
+        }
 
+        if (questDatabase.quests == null || questDatabase.quests.Length == 0)
+        {
+            Debug.LogWarning("[QuestManager] QuestDatabase quests array is null or empty!");
+            return true; // No quests to complete, so technically "all" are completed
+        }
 
+        bool allCompleted = true;
+        foreach (var quest in questDatabase.quests)
+        {
+            if (quest == null)
+            {
+                Debug.LogWarning("[QuestManager] Found null quest in QuestDatabase!");
+                continue;
+            }
+            if (!quest.isQuestCompleted)
+            {
+                allCompleted = false;
+                Debug.Log($"[QuestManager] Quest {quest.questName} is not completed.");
+            }
+            else
+            {
+                Debug.Log($"[QuestManager] Quest {quest.questName} is completed.");
+            }
+        }
+
+        Debug.Log($"[QuestManager] AreAllQuestsCompleted: {allCompleted} (Total quests: {questDatabase.quests.Length})");
+        return allCompleted;
+    }
 
     private IEnumerator InitializeQuestUICoroutine()
     {
@@ -104,7 +138,6 @@ public class QuestManager : MonoBehaviour
         var currentQuest = GetCurrentQuest();
         if (currentQuest != null && IsQuestUnlocked(currentQuest))
         {
-            // Auto-accept FindNPC quests during initialization
             if (currentQuest.questType == QuestType.FindNPC && !IsQuestAccepted(currentQuest) && !currentQuest.isQuestCompleted)
             {
                 Debug.Log($"[QuestManager] Auto-accepting FindNPC quest {currentQuest.questName} during initialization");
@@ -134,12 +167,12 @@ public class QuestManager : MonoBehaviour
     {
         foreach (var quest in questDatabase.quests)
         {
+            if (quest == null) continue;
             string key = GetPlayerPrefKey($"QuestCompleted_{quest.questName}");
             quest.isQuestCompleted = PlayerPrefs.GetInt(key, 0) == 1;
             Debug.Log($"[QuestManager] Loaded quest {quest.questName} completed status: {quest.isQuestCompleted}");
         }
     }
-
 
     private void SaveQuestCompletionStatus(QuestData quest)
     {
@@ -149,7 +182,6 @@ public class QuestManager : MonoBehaviour
         PlayerPrefs.Save();
         Debug.Log($"[QuestManager] Saved completion status for quest {quest.questName}: {quest.isQuestCompleted}");
     }
-
 
     private void LoadQuestProgress()
     {
@@ -180,10 +212,9 @@ public class QuestManager : MonoBehaviour
         SaveQuestProgress();
     }
 
-
     private IEnumerator AddWaypointCoroutine(QuestData quest, CurrentQuestStatus questStatus)
     {
-        string questName = quest.questName; // Giả sử questName không cần localize
+        string questName = quest.questName;
         if (waypointManager != null)
         {
             waypointManager.AddWaypoint(new Waypoint(
@@ -218,7 +249,6 @@ public class QuestManager : MonoBehaviour
         Debug.Log($"[QuestManager] Saved active quests: {questNames}");
     }
 
-
     private void SaveCurrentQuestIndex()
     {
         PlayerPrefs.SetInt(GetPlayerPrefKey("CurrentQuestIndex"), currentQuestIndex);
@@ -232,11 +262,11 @@ public class QuestManager : MonoBehaviour
         Debug.Log($"[QuestManager] Loaded currentQuestIndex: {currentQuestIndex}");
     }
 
-
     public void ResetAllQuests()
     {
         foreach (var quest in questDatabase.quests)
         {
+            if (quest == null) continue;
             quest.isQuestCompleted = false;
             PlayerPrefs.DeleteKey(GetPlayerPrefKey($"QuestCompleted_{quest.questName}"));
             PlayerPrefs.DeleteKey(GetPlayerPrefKey($"QuestProgress_{quest.questName}"));
@@ -258,12 +288,12 @@ public class QuestManager : MonoBehaviour
         MouseManager.Instance?.HideCursorAndEnableInput();
     }
 
-
     private void UpdateQuestIndex()
     {
         for (int i = 0; i < questDatabase.quests.Length; i++)
         {
             var quest = questDatabase.quests[i];
+            if (quest == null) continue;
             if (!quest.isQuestCompleted && IsQuestUnlocked(quest))
             {
                 currentQuestIndex = i;
@@ -386,7 +416,6 @@ public class QuestManager : MonoBehaviour
         {
             status.isObjectiveMet = true;
             uiManager?.SetReturnToNPCInfo(quest.giverNPCID, true);
-            // Update waypoint to point to giverNPCTransform
             UpdateWaypointToGiverNPC(quest, status);
         }
         uiManager?.UpdateQuestProgress(status.currentProgress, status.GetRequiredProgress());
@@ -407,25 +436,23 @@ public class QuestManager : MonoBehaviour
         {
             status.isObjectiveMet = true;
             uiManager?.SetReturnToNPCInfo(quest.giverNPCID, true);
-            // Update waypoint to point to giverNPCTransform
             UpdateWaypointToGiverNPC(quest, status);
         }
         uiManager?.UpdateQuestProgress(count, quest.requiredItemCount);
         SaveQuestProgress();
         Debug.Log($"[QuestManager] Checked item collection for quest {quest.questName}. Progress: {count}/{quest.requiredItemCount}, _currentProgressCount={uiManager?._currentProgressCount}/{uiManager?._totalProgressCount}");
     }
+
     private void UpdateWaypointToGiverNPC(QuestData quest, CurrentQuestStatus questStatus)
     {
         if (quest == null || questStatus == null || waypointManager == null) return;
 
-        // Remove existing waypoint if it exists
         if (!string.IsNullOrEmpty(questStatus.waypointId))
         {
             waypointManager.RemoveWaypoint(questStatus.waypointId);
             Debug.Log($"[QuestManager] Removed previous waypoint {questStatus.waypointId} for quest {quest.questName}");
         }
 
-        // Set new waypoint to giverNPCTransform
         if (quest.hasQuestLocation)
         {
             string waypointId = $"QuestWaypoint_Return_{quest.questName}_{System.Guid.NewGuid()}";
@@ -433,7 +460,7 @@ public class QuestManager : MonoBehaviour
             waypointManager.AddWaypoint(new Waypoint(
                 waypointId,
                 quest.questName,
-                quest.giverNPCTransform, // Use giverNPCTransform for return location
+                quest.giverNPCTransform,
                 WaypointType.QuestLocation,
                 quest.questLocationIcon
             ), true);
@@ -446,6 +473,7 @@ public class QuestManager : MonoBehaviour
 
         SaveQuestProgress();
     }
+
     public void OnInteractWithNPC(string npcId)
     {
         var quest = GetCurrentQuest();
@@ -489,7 +517,7 @@ public class QuestManager : MonoBehaviour
 
         activeQuests.Remove(quest);
         SaveQuestProgress();
-        UpdateQuestIndex(); // Cập nhật currentQuestIndex để lấy nhiệm vụ mới
+        UpdateQuestIndex();
 
         playerStats.currentEXP += quest.rewardExp;
         if (!string.IsNullOrEmpty(quest.rewardItemID))
@@ -499,14 +527,12 @@ public class QuestManager : MonoBehaviour
 
         Debug.Log($"[QuestManager] Completed FindNPC quest {quest.questName}. _isQuestAccepted={uiManager?._isQuestAccepted}, _currentQuestTitleKey={uiManager?._currentQuestTitleKey}, _currentProgressCount={uiManager?._currentProgressCount}/{uiManager?._totalProgressCount}");
 
-        // Thông báo cho NPC giao nhiệm vụ rằng nhiệm vụ đã hoàn thành
         if (quest.giverNPCID != npcId)
         {
             Debug.Log($"[QuestManager] Notifying giver NPC {quest.giverNPCID} that quest {quest.questName} is completed");
             yield return StartCoroutine(OfferNextQuestIfGiverCoroutine(quest.giverNPCID));
         }
 
-        // Cung cấp nhiệm vụ mới từ NPC mục tiêu nếu có
         yield return StartCoroutine(OfferNextQuestIfGiverCoroutine(npcId));
     }
 
@@ -584,8 +610,6 @@ public class QuestManager : MonoBehaviour
             MouseManager.Instance?.HideCursorAndEnableInput();
         }
     }
-
-
 
     public bool IsQuestUnlocked(QuestData quest)
     {
@@ -792,10 +816,10 @@ public class QuestManager : MonoBehaviour
         Debug.Log("[QuestManager] GetActiveQuest: No active quest found");
         return null;
     }
+
     private string GetPlayerPrefKey(string baseKey)
     {
-        int playercharacterId = PlayerPrefs.GetInt("PlayerCharacterId", 0);
-        return $"Player_{playercharacterId}_{baseKey}";
+        int playerCharacterId = PlayerPrefs.GetInt("PlayerCharacterId", 0);
+        return $"Player_{playerCharacterId}_{baseKey}";
     }
-
 }
