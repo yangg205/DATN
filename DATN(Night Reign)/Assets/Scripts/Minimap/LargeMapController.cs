@@ -7,6 +7,14 @@ using UnityEngine.UI;
 
 public class LargeMapController : MonoBehaviour
 {
+
+    [Header("UI Confirm Panel")]
+    public GameObject confirmTeleportPanel;
+    public Button yesButton;
+    public Button noButton;
+
+    private string pendingCheckpointId = null;
+
     [Header("UI References")]
     public GameObject largeMapPanel;
     public RawImage largeMapDisplayRaw;
@@ -202,6 +210,10 @@ public class LargeMapController : MonoBehaviour
 
     private void HandleWaypointCreationInput()
     {
+        // Nếu chuột đang trỏ vào UI (button checkpoint, panel, v.v...) thì bỏ qua
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            return;
+
         Camera uiCam = largeMapDisplayRaw.canvas.renderMode == RenderMode.ScreenSpaceOverlay ?
                        null : largeMapDisplayRaw.canvas.worldCamera;
 
@@ -211,12 +223,10 @@ public class LargeMapController : MonoBehaviour
 
         if (!validPointOnMapUI) return;
 
-        // Nếu bấm chuột trái -> tạo waypoint
         if (Input.GetMouseButtonDown(0))
         {
             CreateWaypointAtUIPosition(localPoint);
         }
-        // Nếu bấm chuột phải -> xóa waypoint gần click
         else if (Input.GetMouseButtonDown(1))
         {
             TryRemoveWaypointAtUIPosition(localPoint);
@@ -486,51 +496,49 @@ public class LargeMapController : MonoBehaviour
     {
         if (checkpointList == null || checkpointList.Count == 0) return;
 
-        Transform waypointsParent = (WaypointManager.Instance != null && WaypointManager.Instance.largeMapWaypointsParent != null)
-            ? WaypointManager.Instance.largeMapWaypointsParent
-            : (largeMapDisplayRaw != null ? largeMapDisplayRaw.transform : null);
-
-        if (waypointsParent == null) return;
-
         foreach (var cp in checkpointList)
         {
-            if (cp == null || cp.checkpointTransform == null) continue;
+            if (cp == null || cp.checkpointTransform == null || cp.iconPrefab == null) continue;
 
             string id = cp.checkpointTransform.gameObject.name;
             if (checkpointUIMap.ContainsKey(id)) continue;
 
-            GameObject iconObj = new GameObject("Checkpoint_" + id, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-            iconObj.transform.SetParent(waypointsParent, false);
+            // 👉 Tạo icon từ prefab và đặt vào LargeMapPanel
+            Button btn = Instantiate(cp.iconPrefab, largeMapPanel.transform);
+            cp.runtimeIcon = btn;
 
-            RectTransform rect = iconObj.GetComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(32, 32);
-            rect.pivot = new Vector2(0.5f, 0.5f); // Đảm bảo pivot ở center
-            rect.anchorMin = new Vector2(0.5f, 0.5f);
-            rect.anchorMax = new Vector2(0.5f, 0.5f);
-            rect.anchoredPosition = Vector2.zero; // Reset position
-
-            Image img = iconObj.GetComponent<Image>();
-            img.raycastTarget = true;
-            if (cp.icon != null) img.sprite = cp.icon; // Sử dụng icon từ checkpoint data
-
-            Button btn = iconObj.GetComponent<Button>();
+            // Setup sự kiện click
+            btn.onClick.RemoveAllListeners();
             btn.onClick.AddListener(() => OnCheckpointClicked(id));
 
-            var hoverTooltip = iconObj.AddComponent<CheckpointTooltip>();
-            hoverTooltip.Initialize(cp.checkpointTransform.gameObject.name);
+            RectTransform rect = btn.GetComponent<RectTransform>();
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
 
-            WaypointUI wpUI = iconObj.AddComponent<WaypointUI>();
+            // Tooltip
+            var hoverTooltip = btn.gameObject.GetComponent<CheckpointTooltip>();
+            if (hoverTooltip == null) hoverTooltip = btn.gameObject.AddComponent<CheckpointTooltip>();
+            hoverTooltip.Initialize(id);
 
-            // Lấy vị trí chính xác của checkpoint
-            Vector3 checkpointWorldPos = cp.GetWorldPosition();
+            // Waypoint UI
+            var wpUI = btn.gameObject.GetComponent<WaypointUI>();
+            if (wpUI == null) wpUI = btn.gameObject.AddComponent<WaypointUI>();
 
-            Waypoint wpData = new Waypoint(id, id, checkpointWorldPos, WaypointType.Checkpoint, img.sprite);
+            Waypoint wpData = new Waypoint(
+                id,
+                id,
+                cp.checkpointTransform.position,
+                WaypointType.Checkpoint,
+                btn.image != null ? btn.image.sprite : null
+            );
+
             wpUI.SetData(wpData);
-            wpUI.maxScale = 1f; // Đảm bảo scale cố định
+            wpUI.maxScale = 1f;
 
             checkpointUIMap[id] = wpUI;
 
-            Debug.Log($"Initialized checkpoint UI: {id} at world position: {checkpointWorldPos}");
+            Debug.Log($"✅ Initialized checkpoint UI from prefab: {id}");
         }
     }
 
@@ -540,8 +548,8 @@ public class LargeMapController : MonoBehaviour
         Debug.Log($"Clicked on checkpoint: {checkpointId}");
 
         var checkpoint = checkpointList.Find(c => c != null &&
-                                        c.checkpointTransform != null &&
-                                        c.checkpointTransform.gameObject.name == checkpointId);
+                                            c.checkpointTransform != null &&
+                                            c.checkpointTransform.gameObject.name == checkpointId);
 
         if (checkpoint == null)
         {
@@ -549,11 +557,38 @@ public class LargeMapController : MonoBehaviour
             return;
         }
 
-        TeleportPlayerToCheckpoint(checkpoint);
+        // Lưu checkpoint ID để xử lý sau
+        pendingCheckpointId = checkpointId;
+
+        // Hiện panel xác nhận
+        if (confirmTeleportPanel != null)
+            confirmTeleportPanel.SetActive(true);
+
+        // Gán sự kiện Yes/No
+        yesButton.onClick.RemoveAllListeners();
+        noButton.onClick.RemoveAllListeners();
+
+        yesButton.onClick.AddListener(() =>
+        {
+            TeleportPlayerToCheckpoint(checkpoint);
+            CloseConfirmPanel();
+        });
+
+        noButton.onClick.AddListener(() =>
+        {
+            CloseConfirmPanel();
+        });
+    }
+
+    private void CloseConfirmPanel()
+    {
+        if (confirmTeleportPanel != null)
+            confirmTeleportPanel.SetActive(false);
+
+        pendingCheckpointId = null;
 
         if (largeMapPanel != null) largeMapPanel.SetActive(false);
         if (largeMapCamera != null) largeMapCamera.enabled = false;
-
         SetPlayerInputLocked(false);
     }
 
@@ -706,7 +741,8 @@ public class LargeMapController : MonoBehaviour
     public class CheckpointData
     {
         public Transform checkpointTransform;
-        public Sprite icon;
+        public Button iconPrefab; // prefab gốc (kéo từ Project vào)
+        [HideInInspector] public Button runtimeIcon; // instance khi game chạy
 
         public Vector3 GetWorldPosition()
         {
