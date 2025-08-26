@@ -3,6 +3,7 @@ using BehaviorDesigner.Runtime;
 using BehaviorDesigner.Runtime.Tasks;
 using UnityEditor.Experimental.GraphView;
 using BehaviorDesigner.Runtime.Tasks.Movement;
+using ND;
 
 public class AttackMelee : Action
 {
@@ -22,6 +23,21 @@ public class AttackMelee : Action
     public override TaskStatus OnUpdate()
     {
         if (blackboard == null) return TaskStatus.Failure;
+
+        if (blackboard.isDead) return TaskStatus.Failure;
+
+        // Nếu không có player thì không attack
+        if (blackboard.player == null) return TaskStatus.Failure;
+
+        // Lấy PlayerStats để kiểm tra sống/chết
+        var playerStats = blackboard.player.GetComponent<PlayerStats>();
+        if (playerStats != null && playerStats.isDead)
+        {
+            Debug.Log("[AttackMelee] Player is dead, stop attacking.");
+            return TaskStatus.Failure;
+        }
+
+
 
         float currentTime = Time.time;
 

@@ -1,4 +1,4 @@
-// ===================== BossBlackboard.cs =====================
+﻿// ===================== BossBlackboard.cs =====================
 using System.Collections;
 using TMPro;
 using UnityEditor.Experimental.GraphView;
@@ -23,34 +23,40 @@ public class BossBlackboard : MonoBehaviour
     public Slider healthSlider;
     public Slider easeHealthSlider;
     public TextMeshProUGUI hpText;
+    public Canvas canvas;
     private float lerpSpeed = 0.05f;
 
     public bool hasTarget = false;
+
+    public bool isDead;
 
     public int damageAmount;
 
     public static bool IsPaused = false;
 
+    private BossMovementAStar movement;
 
     void Awake()
     {
-        GameObject healthSliderObj = GameObject.Find("HealthBarFinal");
-        if (healthSliderObj != null)
-            healthSlider = healthSliderObj.GetComponent<Slider>();
+        //GameObject healthSliderObj = GameObject.Find("HealthBarFinal");
+        //if (healthSliderObj != null)
+        //    healthSlider = healthSliderObj.GetComponent<Slider>();
 
-        GameObject easeSliderObj = GameObject.Find("EaseHealthBarFinal");
-        if (easeSliderObj != null)
-            easeHealthSlider = easeSliderObj.GetComponent<Slider>();
+        //GameObject easeSliderObj = GameObject.Find("EaseHealthBarFinal");
+        //if (easeSliderObj != null)
+        //    easeHealthSlider = easeSliderObj.GetComponent<Slider>();
 
-        GameObject hpTextObj = GameObject.Find("HPTextFinal");
-        if (hpTextObj != null)
-            hpText = hpTextObj.GetComponent<TextMeshProUGUI>();
+        //GameObject hpTextObj = GameObject.Find("HPTextFinal");
+        //if (hpTextObj != null)
+        //    hpText = hpTextObj.GetComponent<TextMeshProUGUI>();
     }
 
     void Start()
     {
+        movement = GetComponent<BossMovementAStar>();
+
         StartCoroutine(SpawnAfterDelay(2f));
-    
+
         currentHP = maxHP;
     }
 
@@ -71,16 +77,28 @@ public class BossBlackboard : MonoBehaviour
 
         hpText.text = $"{currentHP}";
 
+        #if UNITY_EDITOR
         if (Input.GetKeyUp(KeyCode.T))
         {
-            TakeDamage();
+            TakeDamage(damageAmount); // test damage
         }
+        #endif
     }
 
-    public void TakeDamage()
+    public void TakeDamage(int damageAmount)
     {
+        if (isDead) return;
+
         currentHP -= damageAmount;
+        currentHP = Mathf.Clamp(currentHP, 0, maxHP);
+
         animator.SetTrigger("takeHit");
+
+        if(currentHP <= 0)
+        {
+            die();
+        }
+
     }
 
     IEnumerator SpawnAfterDelay(float delay)
@@ -89,5 +107,24 @@ public class BossBlackboard : MonoBehaviour
         animator.SetTrigger("Spawn");
     }
 
-   
+   public void die()
+   {
+        if (isDead) return;
+
+        isDead = true;
+        animator.SetTrigger("death");
+        movement?.StopMoving();
+        StartCoroutine(DestroyAfterDelay(10f));
+   }
+
+    private IEnumerator DestroyAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+
+        if (canvas != null)
+            Destroy(canvas.gameObject);
+
+        Destroy(gameObject);
+    }
 }

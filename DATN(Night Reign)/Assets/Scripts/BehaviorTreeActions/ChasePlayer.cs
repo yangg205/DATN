@@ -67,6 +67,8 @@ public class ChasePlayer : Action
 
     public override TaskStatus OnUpdate()
     {
+        if (_blackboard.isDead) return TaskStatus.Failure;
+
         if (playerTransform.Value == null)
             return TaskStatus.Failure;
 

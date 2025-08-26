@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using BehaviorDesigner.Runtime;
 using BehaviorDesigner.Runtime.Tasks;
+using UnityEditor.Experimental.GraphView;
 
 public class Patrol : Action
 {
@@ -29,6 +30,7 @@ public class Patrol : Action
 
     public override TaskStatus OnUpdate()
     {
+        if(blackboard.isDead) return TaskStatus.Failure;
 
         timer += Time.deltaTime;
 

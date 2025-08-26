@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using BehaviorDesigner.Runtime;
 using BehaviorDesigner.Runtime.Tasks;
+using ND;
 
 public class AttackRanged : Action
 {
@@ -38,6 +39,18 @@ public class AttackRanged : Action
     {
         if (blackboard == null) return TaskStatus.Failure;
 
+        if (blackboard.isDead) return TaskStatus.Failure;
+
+        if (blackboard.player == null) return TaskStatus.Failure;
+
+        var playerStats = blackboard.player.GetComponent<PlayerStats>();
+        if (playerStats != null && playerStats.isDead)
+        {
+            Debug.Log("[AttackRanged] Player is dead, stop attacking.");
+            return TaskStatus.Failure;
+        }
+
+
         float currentTime = Time.time;
 
         if (!hasAttacked)
@@ -48,7 +61,7 @@ public class AttackRanged : Action
                 return TaskStatus.Failure;
             }
             Debug.Log("[AttackMelee] Executing melee attack.");
-            //LookAtPlayer();
+            LookAtPlayer();
             combat.CastSpell();
             blackboard.timeSinceLastAttack = currentTime;
             attackStartTime = currentTime;
