@@ -1,14 +1,17 @@
 ﻿using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using System.Collections;
 
 public class CutsceneEndHandler : MonoBehaviour
 {
     [Header("References")]
     public PlayableDirector director;     // Timeline cần skip
-    public GameObject continueButton;     // Button "Continue" trong Inspector
+    public GameObject continueButton;     // Button "Continue"
     public Image blackScreen;             // UI ảnh đen toàn màn hình (Image)
+    public GameObject loadingPrefab;      // Prefab Loading UI
+    public string nextSceneName;          // Tên scene cần load
 
     private bool isCutsceneEnded = false;
 
@@ -18,6 +21,9 @@ public class CutsceneEndHandler : MonoBehaviour
         continueButton.SetActive(false);
         blackScreen.gameObject.SetActive(true);
         blackScreen.color = new Color(0, 0, 0, 0);
+
+        if (loadingPrefab != null)
+            loadingPrefab.SetActive(false); // Ẩn loading ban đầu
 
         // Bắt sự kiện khi timeline kết thúc
         director.stopped += OnCutsceneEnd;
@@ -58,8 +64,28 @@ public class CutsceneEndHandler : MonoBehaviour
             yield return null;
         }
 
-        // TODO: Tại đây bạn có thể load scene mới hoặc bật gameplay
-        // Ví dụ:
-        // SceneManager.LoadScene("NextSceneName");
+        // Sau khi fade xong → hiện Loading UI
+        if (loadingPrefab != null)
+            loadingPrefab.SetActive(true);
+
+        // Load scene Async để tránh đứng hình
+        yield return StartCoroutine(LoadNextSceneAsync());
+    }
+
+    private IEnumerator LoadNextSceneAsync()
+    {
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(nextSceneName);
+        asyncLoad.allowSceneActivation = false;
+
+        // Chờ load xong 90% rồi mới vào scene
+        while (!asyncLoad.isDone)
+        {
+            if (asyncLoad.progress >= 0.9f)
+            {
+                yield return new WaitForSeconds(1f); // Giữ loading 1s cho đẹp
+                asyncLoad.allowSceneActivation = true;
+            }
+            yield return null;
+        }
     }
 }
