@@ -5,8 +5,6 @@ using UnityEngine;
 
 public class EnemyDesQuest : MonoBehaviour
 {
-    [SerializeField] private int coin;
-    [SerializeField] private TextMeshProUGUI cointext;
     private QuestManager quest;
 
     void Start()
