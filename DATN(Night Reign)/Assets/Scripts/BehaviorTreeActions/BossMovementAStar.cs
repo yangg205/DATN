@@ -20,7 +20,7 @@ public class BossMovementAStar : MonoBehaviour
         {
             _aiPath.destination = position;
             _aiPath.canMove = true;
-            _blackboard.animator?.SetFloat("Speed", 1f); // Set walking animation
+            _blackboard.animator?.SetFloat("Speed", 0.5f); // Set walking animation
         }
     }
 

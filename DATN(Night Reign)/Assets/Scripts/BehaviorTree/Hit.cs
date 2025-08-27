@@ -5,6 +5,7 @@ using UnityEngine;
 public class Hit : MonoBehaviour
 {
     public PlayerStats playerStats;
+    public int damageAmount;
 
     private void Start()
     {
@@ -17,7 +18,7 @@ public class Hit : MonoBehaviour
             PlayerStats targetStats = other.GetComponent<PlayerStats>();
             if (targetStats != null)
             {
-                targetStats.TakeDamage(9);
+                targetStats.TakeDamage(damageAmount);
                 Debug.Log("đang gây damage cho player");
             }
             else

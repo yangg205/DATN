@@ -7,6 +7,10 @@ public class DetectPlayer : Conditional
     public float detectionRange = 15f;
     public LayerMask playerLayer;
     public SharedTransform playerTransform;
+    public override void OnStart()
+    {
+        playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+    }
 
     public override TaskStatus OnUpdate()
     {
@@ -14,6 +18,11 @@ public class DetectPlayer : Conditional
         if (hits.Length > 0)
         {
             playerTransform.Value = hits[0].transform;
+
+            var blackboard = GetComponent<BossBlackboard>();
+            blackboard.player = hits[0].transform;
+            blackboard.hasTarget = true;
+
             Debug.Log("[DetectPlayer] Player detected.");
             return TaskStatus.Success;
         }
