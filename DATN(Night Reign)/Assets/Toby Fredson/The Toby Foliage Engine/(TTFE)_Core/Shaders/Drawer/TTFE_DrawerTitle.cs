@@ -1,34 +1,34 @@
-﻿using UnityEngine;
+﻿#if UNITY_EDITOR
+using UnityEngine;
 using UnityEditor;
 using System;
 
 namespace TobyFredson.Drawers
 {
-	public class TTFE_DrawerTitle : MaterialPropertyDrawer
-	{
-		public override void OnGUI(Rect position, MaterialProperty prop, string label, MaterialEditor editor)
-		{
-			// Adjust position for the title
-			position.width -= 24; // Match previous drawers' alignment
-			position.height = EditorGUIUtility.singleLineHeight + 4; // Slightly taller for big text
-			position.x += 12; // Offset to center within inspector width
+    public class TTFE_DrawerTitle : MaterialPropertyDrawer
+    {
+        public override void OnGUI(Rect position, MaterialProperty prop, string label, MaterialEditor editor)
+        {
+            position.width -= 24;
+            position.height = EditorGUIUtility.singleLineHeight + 4;
+            position.x += 12;
 
-			// Create style for the title
-			GUIStyle titleStyle = new GUIStyle(EditorStyles.label);
-			titleStyle.fontStyle = FontStyle.Bold; // Bold text
-			titleStyle.fontSize = 14; // Big text (14pt)
-			titleStyle.normal.textColor = Color.white; // White text for contrast
-			titleStyle.alignment = TextAnchor.MiddleCenter; // Center horizontally and vertically
-			titleStyle.margin = new RectOffset(0, 0, 5, 10); // Margin for spacing
+            GUIStyle titleStyle = new GUIStyle(EditorStyles.label)
+            {
+                fontStyle = FontStyle.Bold,
+                fontSize = 14,
+                normal = { textColor = Color.white },
+                alignment = TextAnchor.MiddleCenter,
+                margin = new RectOffset(0, 0, 5, 10)
+            };
 
-			// Draw the label in all caps, centered
-			EditorGUI.LabelField(position, label.ToUpper(), titleStyle);
-		}
+            EditorGUI.LabelField(position, label.ToUpper(), titleStyle);
+        }
 
-		// Set the height for the drawer
-		public override float GetPropertyHeight(MaterialProperty prop, string label, MaterialEditor editor)
-		{
-			return EditorGUIUtility.singleLineHeight + 4; // Height for big text
-		}
-	}
+        public override float GetPropertyHeight(MaterialProperty prop, string label, MaterialEditor editor)
+        {
+            return EditorGUIUtility.singleLineHeight + 4;
+        }
+    }
 }
+#endif

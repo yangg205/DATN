@@ -1,6 +1,4 @@
-﻿using Pathfinding;
-using UnityEditor.Experimental.GraphView;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class BossCombat : MonoBehaviour
 {

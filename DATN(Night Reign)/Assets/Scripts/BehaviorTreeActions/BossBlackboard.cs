@@ -1,8 +1,6 @@
 ﻿// ===================== BossBlackboard.cs =====================
 using System.Collections;
 using TMPro;
-using UnityEditor.Experimental.GraphView;
-using UnityEditor.Localization.Plugins.XLIFF.V12;
 using UnityEngine;
 using UnityEngine.UI;
 
