@@ -47,6 +47,10 @@ namespace AG
         public bool isPyroCaster;
         public bool isMeleeWeapon;
         public bool isShieldWeapon;
+
+        [Header("Audio Clips")]
+        public AudioClip lightAttackClip;
+        public AudioClip heavyAttackClip;
     }
 }
 

@@ -16,6 +16,9 @@ namespace AG
         public bool isMagicSpell;
         public bool isPyroSpell;
 
+        [Header("Audio Clips")]
+        public AudioClip castClip;
+
         [Header("Spell Description")]
         [TextArea]
         public string spellDescription;

@@ -17,6 +17,9 @@ MonoBehaviour:
   modelPrefab: {fileID: 8790723218505038704, guid: 4245edcdef131cb4ea41bf07f54496b3,
     type: 3}
   isUnarmed: 0
+  baseDamage: 25
+  criticalDamageMultiplier: 4
+  physicalDamageAbsorption: 0
   right_hand_idle: Right_Arm_Idle
   left_hand_idle: Left_Arm_Idle
   th_idle: TwoHand_Idle
@@ -29,6 +32,7 @@ MonoBehaviour:
   Th_Light_Attack_2: TwoHand_LightAttack_02
   Th_Light_Attack_3: TwoHand_LightAttack_03
   Th_Heavy_Attack_1: TwoHand_HeavyAttack_01
+  weapon_art: 
   baseStamina: 20
   lightAttackMultiplier: 1
   heavyAttackMultiplier: 2
@@ -36,3 +40,6 @@ MonoBehaviour:
   isFaithCaster: 0
   isPyroCaster: 0
   isMeleeWeapon: 1
+  isShieldWeapon: 0
+  lightAttackClip: {fileID: 8300000, guid: 2167126e2cfc93741aaf7e357333f84a, type: 3}
+  heavyAttackClip: {fileID: 8300000, guid: 2167126e2cfc93741aaf7e357333f84a, type: 3}
