@@ -6,52 +6,79 @@ using System.Collections;
 
 public class CutsceneEndHandler : MonoBehaviour
 {
-    [Header("References")]
-    public PlayableDirector director;     // Timeline thoại
-    public GameObject continueButton;     // Button "Continue"
-    public GameObject loadingPanel;       // Panel Loading UI
-    public Image blackScreen;             // UI ảnh đen toàn màn hình
-    public string nextSceneName;          // Tên scene cần load
+    [Header("Tham Chiếu")]
+    [SerializeField] private PlayableDirector director;     // Timeline thoại
+    [SerializeField] private GameObject continueButton;     // Nút "Tiếp tục"
+    [SerializeField] private GameObject loadingPanel;       // Panel giao diện Loading
+    [SerializeField] private Image blackScreen;            // Hình ảnh đen toàn màn hình
+    [SerializeField] private string nextSceneName;         // Tên scene cần chuyển đến
+    [SerializeField] private AudioSource audioSource;      // Âm thanh nền hoặc thoại
+
+    [Header("Cài Đặt")]
+    [SerializeField] private float fadeDuration = 2f;      // Thời gian fade
+
+    private bool isTransitioning = false;                   // Ngăn bấm nút nhiều lần
 
     private void Start()
     {
-        continueButton.SetActive(false);  // Ẩn nút ngay từ đầu
+        // Kiểm tra các tham chiếu
+        if (!ValidateReferences()) return;
+
+        continueButton.SetActive(false);  // Ẩn nút từ đầu
         blackScreen.gameObject.SetActive(true);
         blackScreen.color = new Color(0, 0, 0, 0);
 
         if (loadingPanel != null)
             loadingPanel.SetActive(false);
 
-        // Khi timeline kết thúc thì gọi OnCutsceneEnd
+        // Đăng ký sự kiện khi timeline kết thúc
         director.stopped += OnCutsceneEnd;
+    }
+
+    private bool ValidateReferences()
+    {
+        bool isValid = true;
+        if (director == null) { Debug.LogError("PlayableDirector chưa được gán!", this); isValid = false; }
+        if (continueButton == null) { Debug.LogError("Nút Continue chưa được gán!", this); isValid = false; }
+        if (blackScreen == null) { Debug.LogError("BlackScreen chưa được gán!", this); isValid = false; }
+        if (string.IsNullOrEmpty(nextSceneName)) { Debug.LogError("Tên scene tiếp theo bị trống!", this); isValid = false; }
+        if (audioSource == null) { Debug.LogWarning("AudioSource chưa được gán, âm thanh sẽ không được điều khiển.", this); }
+        return isValid;
     }
 
     private void OnCutsceneEnd(PlayableDirector obj)
     {
-        // Khi cutscene thoại kết thúc → bắt đầu fade đen
         StartCoroutine(FadeToBlackThenShowContinue());
     }
 
     private IEnumerator FadeToBlackThenShowContinue()
     {
-        float duration = 2f;
+        // Tắt âm thanh và thoại
+        if (audioSource != null && audioSource.isPlaying)
+            audioSource.Stop();
+
+        // Đảm bảo timeline dừng hoàn toàn
+        if (director != null)
+            director.Stop();
+
         float elapsed = 0f;
 
-        while (elapsed < duration)
+        while (elapsed < fadeDuration)
         {
             elapsed += Time.deltaTime;
-            float alpha = Mathf.Clamp01(elapsed / duration);
+            float alpha = Mathf.Clamp01(elapsed / fadeDuration);
             blackScreen.color = new Color(0, 0, 0, alpha);
             yield return null;
         }
 
-        // Sau khi fade đen xong thì mới hiện nút Continue
         continueButton.SetActive(true);
     }
 
-    // Khi người chơi bấm nút Continue
     public void OnContinuePressed()
     {
+        if (isTransitioning) return; // Ngăn bấm nút nhiều lần
+        isTransitioning = true;
+
         continueButton.SetActive(false);
         StartCoroutine(ShowLoadingAndChangeScene());
     }
@@ -60,11 +87,20 @@ public class CutsceneEndHandler : MonoBehaviour
     {
         if (loadingPanel != null)
             loadingPanel.SetActive(true);
+        else
+            Debug.LogWarning("Panel Loading chưa được gán, tiếp tục mà không có giao diện loading.", this);
 
-        // Giữ màn hình loading trong 2 giây
+        // Đợi 2 giây để hiển thị màn hình loading
         yield return new WaitForSeconds(2f);
 
-        // Load scene Async
+        // Kiểm tra tên scene hợp lệ
+        if (!SceneExists(nextSceneName))
+        {
+            Debug.LogError($"Scene '{nextSceneName}' không tồn tại trong Build Settings!", this);
+            isTransitioning = false;
+            yield break;
+        }
+
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(nextSceneName);
         asyncLoad.allowSceneActivation = false;
 
@@ -76,5 +112,25 @@ public class CutsceneEndHandler : MonoBehaviour
             }
             yield return null;
         }
+
+        isTransitioning = false;
+    }
+
+    private bool SceneExists(string sceneName)
+    {
+        for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
+        {
+            string scenePath = SceneUtility.GetScenePathByBuildIndex(i);
+            string scene = System.IO.Path.GetFileNameWithoutExtension(scenePath);
+            if (scene == sceneName) return true;
+        }
+        return false;
+    }
+
+    private void OnDestroy()
+    {
+        // Hủy đăng ký sự kiện để tránh rò rỉ bộ nhớ
+        if (director != null)
+            director.stopped -= OnCutsceneEnd;
     }
 }

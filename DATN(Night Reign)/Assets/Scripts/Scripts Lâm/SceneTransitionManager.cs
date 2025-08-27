@@ -6,6 +6,7 @@ public class SceneTransitionManager : MonoBehaviour
     public void LoadWithLoadingScene(string targetSceneName)
     {
         PlayerPrefs.SetString("SceneToLoad", targetSceneName);
-        SceneManager.LoadScene("Name Scene");
+        SceneManager.LoadScene("Loading Scene"); // Scene loading riêng
     }
+
 }
