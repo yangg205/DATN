@@ -37,7 +37,7 @@ public class QuestData : ScriptableObject
     public string targetNPCID;    // Với FindNPC
     public string targetItemID;   // Với CollectItem
     public int requiredItemCount = 1;
-
+    public bool isfinalboss;
     [Header("Quest Unlock Dependencies")]
     [Tooltip("Quest này chỉ mở khóa khi quest này hoàn thành.")]
     public string prerequisiteQuestName; // Tên (hoặc ID) của quest phải hoàn thành trước

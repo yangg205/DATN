@@ -111,7 +111,7 @@ public class SaveManager : MonoBehaviour
             return;
         }
         Vector3 playerPosition = player.transform.localPosition;
-        Debug.Log($"Saving player position: ({playerPosition.x}, {playerPosition.y}, {playerPosition.z})");
+        Debug.LogWarning($"Saving player position: ({playerPosition.x}, {playerPosition.y}, {playerPosition.z})");
 
         var playerCharacters = new Player_Characters
         {
@@ -121,14 +121,16 @@ public class SaveManager : MonoBehaviour
             Ownershipdate = DateTime.Now,
             Current_hp = playerStats.currentHealth,
             Total_point = 0,
-            Total_coin = 0,
+            Total_coin = playerStats.soulCount,
             Skill_Point = 0,
             Position_x = playerPosition.x,
             Position_y = playerPosition.y,
             Position_z = playerPosition.z,
             Datesave = DateTime.Now,
         };
-
+        Debug.LogWarning($"playercha: {playerCharacters.Player_Character_id}");
+        Debug.LogWarning($"player: {playerCharacters.Player_id}");
+        Debug.LogWarning($"cha: {playerCharacters.Characters_id}");
         var result = await SignalRClient.SaveGame(playerCharacters);
         if (result.status)
         {

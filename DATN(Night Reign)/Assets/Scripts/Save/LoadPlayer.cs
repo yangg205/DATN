@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
-using ND; 
+using AG; 
 
 public class LoadPlayer : MonoBehaviour
 {
     [SerializeField] GameObject playerObject;
 
-    private PlayerStats playerStatsComponent; 
+   public AG.PlayerStats playerStatsComponent; 
     void Start()
     {
         if (playerObject == null)
@@ -18,7 +18,8 @@ public class LoadPlayer : MonoBehaviour
             }
         }
 
-        playerStatsComponent = playerObject.GetComponent<PlayerStats>();
+        playerStatsComponent = playerObject.GetComponent<AG.PlayerStats>();
+
         if (playerStatsComponent == null)
         {
             Debug.LogError("LoadPlayer: GameObject 'Player' không có component PlayerStats. Không thể tải dữ liệu chỉ số.");
@@ -40,8 +41,8 @@ public class LoadPlayer : MonoBehaviour
             );
             playerObject.transform.localPosition = loadedPosition;
 
-            Debug.Log($"LoadPlayer: Đã áp dụng HP: {playerStatsComponent.currentHealth}, EXP: {playerStatsComponent.currentEXP}, Level: {playerStatsComponent.playerLevel}");
-            Debug.Log($"LoadPlayer: Đã đặt Player tại vị trí: ({loadedPosition.x}, {loadedPosition.y}, {loadedPosition.z})");
+            Debug.LogWarning($"LoadPlayer: Đã áp dụng HP: {playerStatsComponent.currentHealth}, EXP: {playerStatsComponent.currentEXP}, Level: {playerStatsComponent.playerLevel}");
+            Debug.LogWarning($"LoadPlayer: Đã đặt Player tại vị trí: ({loadedPosition.x}, {loadedPosition.y}, {loadedPosition.z})");
 
             GameDataHolder.ClearLoadedData();
         }
