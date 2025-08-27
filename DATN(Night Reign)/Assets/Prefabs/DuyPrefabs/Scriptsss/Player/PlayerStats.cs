@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 namespace AG
@@ -6,6 +7,7 @@ namespace AG
     {
         PlayerManager playerManager;
 
+        public ExpBar expBar;
         public HealthBar healthBar;
         public FocusPointBar focusPointsBar;
         public StaminaBar staminaBar;
@@ -20,6 +22,7 @@ namespace AG
             healthBar = FindObjectOfType<HealthBar>();
             staminaBar = FindObjectOfType<StaminaBar>();
             focusPointsBar = FindObjectOfType<FocusPointBar>();
+            expBar = FindObjectOfType<ExpBar>();
             animatorHandler = GetComponentInChildren<PlayerAnimatorManager>();
         }
         void Start()
@@ -38,6 +41,9 @@ namespace AG
             currentFocusPoints = maxFocusPoints;
             focusPointsBar.SetMaxFocusPoints(maxFocusPoints);
             focusPointsBar.SetCurrentFocusPoint(currentFocusPoints);
+
+            expBar.SetMaxEXP(expToNextLevel);
+            UpdateLevelText();
         }
 
         private int SetMaxHealthFromHealthLevel()
@@ -141,6 +147,39 @@ namespace AG
         public void AddSouls(int souls)
         {
             soulCount = soulCount + souls;
+        }
+
+        public void GainEXP(int amount)
+        {
+            currentEXP += amount;
+            CheckLevelUp();
+            expBar.SetCurrentEXP(currentEXP);
+        }
+
+        private void CheckLevelUp()
+        {
+            while (currentEXP >= expToNextLevel)
+            {
+                currentEXP -= expToNextLevel;
+                LevelUp();
+            }
+        }
+
+        private void LevelUp()
+        {
+            playerLevel++;
+            expToNextLevel = Mathf.RoundToInt(expToNextLevel * 1.25f);
+            expBar.SetMaxEXP(expToNextLevel);
+            expBar.SetCurrentEXP(currentEXP);
+            UpdateLevelText();
+        }
+
+        private void UpdateLevelText()
+        {
+            if (levelText != null)
+            {
+                levelText.text = "Level: " + playerLevel;
+            }
         }
     }
 }

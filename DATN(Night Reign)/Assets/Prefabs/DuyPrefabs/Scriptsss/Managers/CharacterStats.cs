@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 namespace AG
@@ -15,6 +16,11 @@ namespace AG
         public int focusLevel = 10;
         public float maxFocusPoints;
         public float currentFocusPoints;
+
+        public TextMeshProUGUI levelText;
+        public int playerLevel = 1;
+        public int currentEXP = 0;
+        public int expToNextLevel = 100;
 
         public int soulCount = 0;
 
