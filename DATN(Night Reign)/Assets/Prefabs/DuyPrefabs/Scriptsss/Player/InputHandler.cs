@@ -115,6 +115,12 @@ namespace AG
 
         public void TickInput(float delta)
         {
+            if (MouseManager.Instance != null && MouseManager.Instance.isInputLocked)
+            {
+                // 🚫 Không xử lý input khi đang bị khóa
+                return;
+            }
+
             HandleMoveInput(delta);
             HandleRollInput(delta);
             HandleCombatInput(delta);
@@ -125,6 +131,7 @@ namespace AG
             HandleCriticalAttackInput();
             HandleUseConsumableInput();
         }
+
 
         public void HandleMoveInput(float delta)
         {

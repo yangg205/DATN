@@ -5,17 +5,24 @@ public class MouseManager : MonoBehaviour
 {
     public static MouseManager Instance;
 
+    public bool isInputLocked { get; private set; } = false; // 🔑 cờ kiểm tra input có bị khóa hay không
+
     private void Awake()
     {
         if (Instance == null)
+        {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
         else
-            DontDestroyOnLoad(gameObject); // Nếu muốn giữ lại giữa các scene
+        {
+            Destroy(gameObject);
+        }
     }
 
     private void Start()
     {
-        LockCursor(); // <-- Gọi khi bắt đầu game
+        LockCursor();
     }
 
     public void LockCursor()
@@ -33,10 +40,12 @@ public class MouseManager : MonoBehaviour
     public void ShowCursorAndDisableInput()
     {
         UnlockCursor();
+        isInputLocked = true; // 🔥 khóa input
     }
 
     public void HideCursorAndEnableInput()
     {
         LockCursor();
+        isInputLocked = false; // 🔥 mở input
     }
 }

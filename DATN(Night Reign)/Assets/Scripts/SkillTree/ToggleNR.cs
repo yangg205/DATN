@@ -41,18 +41,23 @@ public class ToggleNR : MonoBehaviour
     {
         if (GO != null)
         {
-            GO.SetActive(!GO.activeSelf);
-            MouseManager.Instance.ShowCursorAndDisableInput();
-            // Đảm bảo Canvas được cập nhật khi bật
-            if (GO.activeSelf)
+            bool isActive = !GO.activeSelf;
+            GO.SetActive(isActive);
+
+            if (isActive)
             {
+                // Khi mở UI
                 Canvas canvas = GO.GetComponent<Canvas>();
-                if (canvas != null)
-                {
-                    MouseManager.Instance.ShowCursorAndDisableInput();
-                    canvas.enabled = true;
-                }
+                if (canvas != null) canvas.enabled = true;
+
+                MouseManager.Instance.ShowCursorAndDisableInput();
+            }
+            else
+            {
+                // Khi tắt UI
+                MouseManager.Instance.HideCursorAndEnableInput();
             }
         }
     }
+
 }
