@@ -5,6 +5,9 @@ namespace AG
 {
     public class PlayerAttacker : MonoBehaviour
     {
+        [Header("Audio")]
+        public AudioSource audioSource;
+
         CameraHandler cameraHandler;
         PlayerAnimatorManager animationHandler;
         PlayerEquipmentManager playerEquipmentManager;
@@ -28,6 +31,17 @@ namespace AG
             playerInventory = GetComponentInParent<PlayerInventory>();
             inputHandler = GetComponentInParent<InputHandler>();
             weaponSlotManager = GetComponent<WeaponSlotManager>();
+
+            if (audioSource == null)
+                audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        private void PlaySound(AudioClip clip)
+        {
+            if (clip != null && audioSource != null)
+            {
+                audioSource.PlayOneShot(clip);
+            }
         }
         public void HandleWeaponCombo(WeaponItem weapon)
         {
@@ -43,11 +57,13 @@ namespace AG
                 {
                     animationHandler.PlayTargetAnimation(weapon.Oh_Light_Attack_2, true);
                     lastAttack = weapon.Oh_Light_Attack_2;
+                    PlaySound(weapon.lightAttackClip);
                 }
                 else if (lastAttack == weapon.Oh_Light_Attack_2)
                 {
                     animationHandler.PlayTargetAnimation(weapon.Oh_Light_Attack_3, true);
                     lastAttack = weapon.Oh_Light_Attack_3;
+                    PlaySound(weapon.lightAttackClip);
                 }
 
                 //One Hand (Heavy Attack)
@@ -55,6 +71,7 @@ namespace AG
                 {
                     animationHandler.PlayTargetAnimation(weapon.Oh_Heavy_Attack_2, true);
                     lastAttack = weapon.Oh_Heavy_Attack_2;
+                    PlaySound(weapon.heavyAttackClip);
                 }
 
                 //Two Hand (Light Attack)
@@ -62,11 +79,13 @@ namespace AG
                 {
                     animationHandler.PlayTargetAnimation(weapon.Th_Light_Attack_2, true);
                     lastAttack = weapon.Th_Light_Attack_2;
+                    PlaySound(weapon.lightAttackClip);
                 }
                 else if (lastAttack == weapon.Th_Light_Attack_2)
                 {
                     animationHandler.PlayTargetAnimation(weapon.Th_Light_Attack_3, true);
                     lastAttack = weapon.Th_Light_Attack_3;
+                    PlaySound(weapon.lightAttackClip);
                 }
                 // nếu sau này có heavy attack 2 tay thì bổ sung ở đây
                 // else if (lastAttack == weapon.Th_Heavy_Attack_1) { ... }
@@ -89,6 +108,7 @@ namespace AG
                 animationHandler.PlayTargetAnimation(weapon.Oh_Light_Attack_1, true);
                 lastAttack = weapon.Oh_Light_Attack_1;
             }
+            PlaySound(weapon.lightAttackClip);
         }
 
         public void HandleHeavyAttack(WeaponItem weapon)
@@ -111,6 +131,9 @@ namespace AG
                 animationHandler.PlayTargetAnimation(weapon.Oh_Heavy_Attack_1, true);
                 lastAttack = weapon.Oh_Heavy_Attack_1;
             }
+
+            PlaySound(weapon.heavyAttackClip);
+
         }
 
         #region Input Actions
@@ -174,6 +197,9 @@ namespace AG
             if (playerManager.isInteracting)
                 return;
 
+            SpellItem spell = playerInventory.currentSpell;
+            if (spell == null) return;
+
             if (weapon.isFaithCaster)
             {
                 if (playerInventory.currentSpell != null && playerInventory.currentSpell.isFaithSpell)
@@ -181,6 +207,7 @@ namespace AG
                     if (playerStats.currentFocusPoints >= playerInventory.currentSpell.focusPointsCost)
                     {
                         playerInventory.currentSpell.AttemptToCastSpell(animationHandler, playerStats, weaponSlotManager);
+                        PlaySound(spell.castClip);
                     }
                     else
                     {
@@ -195,6 +222,7 @@ namespace AG
                     if (playerStats.currentFocusPoints >= playerInventory.currentSpell.focusPointsCost)
                     {
                         playerInventory.currentSpell.AttemptToCastSpell(animationHandler, playerStats, weaponSlotManager);
+                        PlaySound(spell.castClip);
                     }
                     else
                     {
