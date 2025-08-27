@@ -36,6 +36,8 @@ namespace AG
                 DragonUsurper dragonUsurper = other.transform.GetComponent<DragonUsurper>();
                 NightMare nightmare = other.transform.GetComponent<NightMare>();
                 desertBoss desertBoss = other.transform.GetComponent<desertBoss>();
+                EnemyAIByYang enemyAIByYang = other.transform.GetComponent<EnemyAIByYang>();    
+                BossBlackboard bossBlackboard = other.transform.GetComponent<BossBlackboard>();
 
                 if (spellTarget != null)
                 {
@@ -57,6 +59,14 @@ namespace AG
                 {
                     desertBoss.TakeDamage(currentWeaponDamage);
                 }
+                else if(enemyAIByYang != null)
+                {
+                    enemyAIByYang.TakeDamage(currentWeaponDamage);
+                }    
+                else if(bossBlackboard != null)
+                {
+                    bossBlackboard.TakeDamage(currentWeaponDamage);
+                }    
 
                 hasCollided = true;
                 impactParticles = Instantiate(impactParticles, transform.position, Quaternion.FromToRotation(Vector3.up, impactNormal));

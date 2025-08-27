@@ -122,6 +122,17 @@ namespace AG
                     enemyStats.TakeDamage(currentWeaponDamage);
                 }
             }
+
+            if(collision.tag == "DragonUsurper")
+            {
+                DragonUsurper dragonUsurper = collision.GetComponentInParent<DragonUsurper>();
+
+                if(dragonUsurper != null)
+                {
+                    dragonUsurper.TakeDamage(currentWeaponDamage);
+                } 
+                    
+            }    
             if(collision.tag == "BossSaMac")
             {
                 desertBoss boss = collision.GetComponentInParent<desertBoss>();
@@ -130,6 +141,22 @@ namespace AG
                     boss.TakeDamage(currentWeaponDamage);
                     Debug.Log("Boss hit! " + boss.name);
                 }
+            } 
+            if(collision.tag == "BossTutorial")
+            {
+                EnemyAIByYang enemyAIByYang = collision.GetComponent<EnemyAIByYang>();
+                if(enemyAIByYang != null)
+                {
+                    enemyAIByYang.TakeDamage(currentWeaponDamage);
+                }    
+            }    
+            if(collision.tag == "FinalBoss")
+            {
+                BossBlackboard bossBlackboard = collision.GetComponent<BossBlackboard>();
+                if(bossBlackboard != null)
+                {
+                    bossBlackboard.TakeDamage(currentWeaponDamage);
+                }    
             }    
         }
     }
