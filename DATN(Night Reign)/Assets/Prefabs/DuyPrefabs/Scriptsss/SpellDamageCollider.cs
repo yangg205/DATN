@@ -35,6 +35,7 @@ namespace AG
                 DragonSoulEater dragonSoulEater = other.transform.GetComponent<DragonSoulEater>();
                 DragonUsurper dragonUsurper = other.transform.GetComponent<DragonUsurper>();
                 NightMare nightmare = other.transform.GetComponent<NightMare>();
+                desertBoss desertBoss = other.transform.GetComponent<desertBoss>();
 
                 if (spellTarget != null)
                 {
@@ -51,6 +52,10 @@ namespace AG
                 else if (nightmare != null)
                 {
                     nightmare.TakeDamage(currentWeaponDamage);
+                }
+                else if(desertBoss != null)
+                {
+                    desertBoss.TakeDamage(currentWeaponDamage);
                 }
 
                 hasCollided = true;

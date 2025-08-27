@@ -122,6 +122,15 @@ namespace AG
                     enemyStats.TakeDamage(currentWeaponDamage);
                 }
             }
+            if(collision.tag == "BossSaMac")
+            {
+                desertBoss boss = collision.GetComponentInParent<desertBoss>();
+                if (boss != null)
+                {
+                    boss.TakeDamage(currentWeaponDamage);
+                    Debug.Log("Boss hit! " + boss.name);
+                }
+            }    
         }
     }
 }
