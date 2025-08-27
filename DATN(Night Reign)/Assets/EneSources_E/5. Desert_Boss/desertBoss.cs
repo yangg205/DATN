@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using AG;
 
 public class desertBoss : MonoBehaviour
 {
@@ -98,7 +99,7 @@ public class desertBoss : MonoBehaviour
 
     private void Update()
     {
-        if(IsPaused) return;
+        if (IsPaused) return;
 
         if (healthSlider.value != currentHP)
         {
@@ -114,13 +115,13 @@ public class desertBoss : MonoBehaviour
 
         if (!isDead && !isAttacking && !isShouting)
         {
-            LookAtPlayer(); 
+            LookAtPlayer();
         }
-
-        //if(Input.GetKeyDown(KeyCode.E))
-        //{
-        //    TakeDamage(450);
-        //}
+        /*
+                if (Input.GetKeyDown(KeyCode.E))
+                {
+                    TakeDamage(450);
+                }*/
     }
 
     private IEnumerator AIBehavior()

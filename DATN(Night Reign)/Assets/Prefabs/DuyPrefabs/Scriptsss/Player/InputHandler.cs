@@ -12,7 +12,8 @@ namespace AG
         public float mouseY;
 
         public bool b_input; //roll
-        public bool x_input; //interact
+        public bool a_input; //interact
+        public bool x_input; 
         public bool y_input; //two hand
         public bool rb_input;//light attack
         public bool rt_input;//heavy attack
@@ -49,6 +50,8 @@ namespace AG
         PlayerAttacker playerAttacker;
         PlayerInventory playerInventory;
         PlayerManager playerManager;
+        PlayerAnimatorManager playerAnimatorManager;
+        PlayerEffectManager playerEffectManager;
         PlayerStats playerStats;
         BlockingCollider blockingCollider;
         UIManager uiManager;
@@ -64,6 +67,8 @@ namespace AG
             playerAttacker = GetComponentInChildren<PlayerAttacker>();
             playerInventory = GetComponent<PlayerInventory>();
             playerManager = GetComponent<PlayerManager>();
+            playerAnimatorManager = GetComponentInChildren<PlayerAnimatorManager>();
+            playerEffectManager = GetComponentInChildren<PlayerEffectManager>();
             playerStats = GetComponent<PlayerStats>();
             uiManager = FindObjectOfType<UIManager>();
             cameraHandler = FindObjectOfType<CameraHandler>();
@@ -85,6 +90,7 @@ namespace AG
                 inputActions.PlayerActions.LT.performed += i => lt_input = true;
                 inputActions.PlayerQuickSlots.DPadRight.performed += i => d_pad_Right = true;
                 inputActions.PlayerQuickSlots.DPadLeft.performed += i => d_pad_Left = true;
+                inputActions.PlayerActions.A.performed += i => a_input = true;
                 inputActions.PlayerActions.X.performed += i => x_input = true;
                 inputActions.PlayerActions.Roll.performed += i => b_input = true;
                 inputActions.PlayerActions.Roll.canceled += i => b_input = false;
@@ -117,6 +123,7 @@ namespace AG
             HandleLockOnInput();
             HandleTwoHandInput();
             HandleCriticalAttackInput();
+            HandleUseConsumableInput();
         }
 
         public void HandleMoveInput(float delta)
@@ -334,6 +341,15 @@ namespace AG
                 critical_Attack_input = false;
                 playerAttacker.AttemptBackStabOrRiposte();
             }
+        }    
+
+        private void HandleUseConsumableInput()
+        {
+            if(x_input)
+            {
+                x_input = false;
+                playerInventory.currentConsumable.AttempToConsumeItem(playerAnimatorManager, weaponSlotManager, playerEffectManager);
+            }    
         }    
     }
 }

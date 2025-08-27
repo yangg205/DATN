@@ -5195,7 +5195,7 @@ GameObject:
   - component: {fileID: 4777337127078355603}
   m_Layer: 0
   m_Name: CATRigRArmIKTarget
-  m_TagString: Enemy
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -10152,7 +10152,7 @@ GameObject:
   - component: {fileID: 1362353166820377439}
   m_Layer: 0
   m_Name: CATRigSpine1
-  m_TagString: Enemy
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -10187,7 +10187,7 @@ GameObject:
   - component: {fileID: 164197142581580940}
   m_Layer: 0
   m_Name: bossSaMac
-  m_TagString: Enemy
+  m_TagString: BossSaMac
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -10209,6 +10209,7 @@ Transform:
   - {fileID: 1100483910207551945}
   - {fileID: 6615059168882715706}
   - {fileID: 1046278537514855071}
+  - {fileID: 7209187774183027157}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4396253710548013628
@@ -10289,7 +10290,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!1 &2244285431351746879
 GameObject:
@@ -10386,6 +10387,37 @@ Transform:
   - {fileID: 8924277802868344859}
   m_Father: {fileID: 6964882573078901923}
   m_LocalEulerAnglesHint: {x: -9.486009, y: 2.4046226, z: -46.39501}
+--- !u!1 &2509215359027257748
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7209187774183027157}
+  m_Layer: 0
+  m_Name: Lock On Transform
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7209187774183027157
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2509215359027257748}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2600470248488485042}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3009937255369092236
 GameObject:
   m_ObjectHideFlags: 0
@@ -10430,7 +10462,7 @@ GameObject:
   - component: {fileID: 6636542047221278427}
   m_Layer: 0
   m_Name: CATRigSpine
-  m_TagString: Enemy
+  m_TagString: BossSaMac
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -10466,7 +10498,7 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
@@ -10614,7 +10646,7 @@ GameObject:
   - component: {fileID: 176276340985591362}
   m_Layer: 0
   m_Name: CATRigRLegPlatform
-  m_TagString: Enemy
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -10806,7 +10838,7 @@ GameObject:
   - component: {fileID: 8930017169856957435}
   m_Layer: 0
   m_Name: CATRigRLeg1
-  m_TagString: Enemy
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -11163,7 +11195,7 @@ GameObject:
   - component: {fileID: 7132750582271147055}
   m_Layer: 0
   m_Name: CATRigLLeg1
-  m_TagString: Enemy
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -11228,7 +11260,7 @@ GameObject:
   - component: {fileID: 4782588415923232899}
   m_Layer: 0
   m_Name: Body_mesh
-  m_TagString: Enemy
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -11381,7 +11413,7 @@ GameObject:
   - component: {fileID: 7987623128911365311}
   m_Layer: 0
   m_Name: CATRigLArmIKTarget
-  m_TagString: Enemy
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -11878,7 +11910,7 @@ GameObject:
   - component: {fileID: 1923744381123625499}
   m_Layer: 0
   m_Name: model
-  m_TagString: Enemy
+  m_TagString: BossSaMac
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -17075,7 +17107,7 @@ GameObject:
   - component: {fileID: 4327485995640896407}
   m_Layer: 0
   m_Name: CATRigLLegPlatform
-  m_TagString: Enemy
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -17138,7 +17170,7 @@ GameObject:
   - component: {fileID: 7828088819283215585}
   m_Layer: 0
   m_Name: CATRigHub001
-  m_TagString: Enemy
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
