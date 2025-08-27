@@ -23,25 +23,32 @@ public class CutsceneEndHandler : MonoBehaviour
         if (loadingPanel != null)
             loadingPanel.SetActive(false);
 
-        // Gắn sự kiện khi Timeline kết thúc
+        // Khi timeline kết thúc thì gọi OnCutsceneEnd
         if (director != null)
             director.stopped += OnCutsceneEnd;
     }
 
     /// <summary>
-    /// Khi timeline chạy hết toàn bộ thoại
+    /// Khi timeline chạy hết thoại → chỉ hiện nút Continue (không fade)
     /// </summary>
     private void OnCutsceneEnd(PlayableDirector obj)
     {
-        StartCoroutine(FadeToBlackThenShowContinue());
+        continueButton.SetActive(true);
     }
 
     /// <summary>
-    /// Fade màn hình đen rồi mới hiện nút Continue
+    /// Khi người chơi bấm nút Continue → fade đen + loading + chuyển scene
     /// </summary>
-    private IEnumerator FadeToBlackThenShowContinue()
+    public void OnContinuePressed()
     {
-        float duration = 2f; // thời gian fade
+        continueButton.SetActive(false);
+        StartCoroutine(FadeToBlackAndLoad());
+    }
+
+    private IEnumerator FadeToBlackAndLoad()
+    {
+        // Bước 1: Fade đen
+        float duration = 2f;
         float elapsed = 0f;
 
         while (elapsed < duration)
@@ -52,31 +59,14 @@ public class CutsceneEndHandler : MonoBehaviour
             yield return null;
         }
 
-        // Fade xong mới hiện nút Continue
-        continueButton.SetActive(true);
-    }
-
-    /// <summary>
-    /// Khi người chơi bấm nút Continue
-    /// </summary>
-    public void OnContinuePressed()
-    {
-        continueButton.SetActive(false);
-        StartCoroutine(ShowLoadingAndChangeScene());
-    }
-
-    /// <summary>
-    /// Hiện panel loading rồi chuyển scene
-    /// </summary>
-    private IEnumerator ShowLoadingAndChangeScene()
-    {
+        // Bước 2: Hiện panel loading
         if (loadingPanel != null)
             loadingPanel.SetActive(true);
 
-        // Giữ panel loading trong 2 giây
+        // Giữ loading trong 2 giây
         yield return new WaitForSeconds(2f);
 
-        // Load scene bất đồng bộ
+        // Bước 3: Load scene bất đồng bộ
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(nextSceneName);
         asyncLoad.allowSceneActivation = false;
 
