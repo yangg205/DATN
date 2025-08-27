@@ -4004,7 +4004,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &670951004
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4044,7 +4044,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 7d98db00a649cf44192845e7304c5097, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 6f6d80112739d8c49939f794103512d2, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -4240,7 +4240,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -625.71, y: -52}
+  m_AnchoredPosition: {x: -625.71, y: -35}
   m_SizeDelta: {x: 160, y: 34.8096}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &708796602
@@ -4299,6 +4299,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: AutoOutline, Assembly-CSharp
+        m_MethodName: 
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &708796603
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4344,7 +4356,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 708796600}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 762dbf81943c8054f853909b46717c15, type: 3}
   m_Name: 
@@ -8975,11 +8987,12 @@ AudioSource:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1161411841}
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 13b1d9c2b5503304b88effe7d238cd50, type: 3}
-  m_Resource: {fileID: 8300000, guid: 13b1d9c2b5503304b88effe7d238cd50, type: 3}
+  OutputAudioMixerGroup: {fileID: 4091587732523478350, guid: acabd92de83264e40ad1852fd767ea08,
+    type: 2}
+  m_audioClip: {fileID: 8300000, guid: 025789bffb626a445b2d0f889ae9fdc4, type: 3}
+  m_Resource: {fileID: 8300000, guid: 025789bffb626a445b2d0f889ae9fdc4, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
@@ -9650,7 +9663,8 @@ AudioSource:
   m_GameObject: {fileID: 1178991239}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 7550344781253902043, guid: acabd92de83264e40ad1852fd767ea08,
+    type: 2}
   m_audioClip: {fileID: 8300000, guid: eacd6c14418b88043b130b20f0f82f9e, type: 3}
   m_Resource: {fileID: 8300000, guid: eacd6c14418b88043b130b20f0f82f9e, type: 3}
   m_PlayOnAwake: 1
@@ -10458,7 +10472,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1264601201
 RectTransform:
   m_ObjectHideFlags: 0
@@ -12781,7 +12795,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1499680112
 RectTransform:
   m_ObjectHideFlags: 0
@@ -12821,7 +12835,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 7d98db00a649cf44192845e7304c5097, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e2b86c22f3e2c6543b39cba8bbbd4649, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -16983,6 +16997,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Back
+      objectReference: {fileID: 0}
+    - target: {fileID: 5081486268621016209, guid: dccdc8f15e05e214da9fb61fec3774f8,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5480143493972406873, guid: dccdc8f15e05e214da9fb61fec3774f8,
         type: 3}
