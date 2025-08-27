@@ -22,7 +22,7 @@ public class BattleBoss : MonoBehaviour
     private SignalRClient signalRClient;
 
     private float currentTime = 0f;
-    private bool isFighting = false;
+    public bool isFighting = false;
     private int deathCount = 0;
 
     // Các tham số cho API
@@ -181,18 +181,18 @@ public class BattleBoss : MonoBehaviour
             currentTime += Time.deltaTime;
             UpdateTimerText();
         }
-        if (Input.GetKeyDown(KeyCode.B))
-        {
-            StartFight(44, 6, 300);
-        }
-        if (Input.GetKeyDown(KeyCode.N))
-        {
-            OnBossDeath();
-        }
-        if (Input.GetKeyDown(KeyCode.V))
-        {
-            OnPlayerDeath();
-        }
+        //if (Input.GetKeyDown(KeyCode.B))
+        //{
+        //    StartFight(44, 6, 300);
+        //}
+        //if (Input.GetKeyDown(KeyCode.N))
+        //{
+        //    OnBossDeath();
+        //}
+        //if (Input.GetKeyDown(KeyCode.V))
+        //{
+        //    OnPlayerDeath();
+        //}
     }
 
     private void UpdateTimerText()
