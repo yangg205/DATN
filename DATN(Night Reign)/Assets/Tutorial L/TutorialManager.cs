@@ -21,6 +21,9 @@ public class TutorialManager : MonoBehaviour
     [Header("Icons")]
     public Transform buttonIconsContainer;
 
+    [Header("Canvas Reference")]
+    public Canvas tutorialCanvas; // Thêm tham chiếu đến Canvas chứa popup
+
     private bool isShowing = false;
     private TutorialTrigger currentTrigger;
 
@@ -28,6 +31,19 @@ public class TutorialManager : MonoBehaviour
     {
         Instance = this;
         HidePopupImmediate();
+    }
+
+    void Update()
+    {
+        if (isShowing)
+        {
+            // Hỗ trợ đóng bằng Escape hoặc Space
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                Debug.Log("Phím Escape hoặc Space được nhấn: Đóng popup.");
+                CloseCurrentPopup();
+            }
+        }
     }
 
     public void ShowMessage(TutorialData data, TutorialTrigger trigger)
@@ -59,28 +75,44 @@ public class TutorialManager : MonoBehaviour
         // Icon UI thủ công (GameObject trong Scene)
         ShowManualIcons(data.manualIconObjects);
 
-        // Hiển thị UI
+        // Hiển thị UI và đảm bảo tương tác
         popupCanvas.alpha = 1f;
         popupCanvas.interactable = true;
         popupCanvas.blocksRaycasts = true;
 
+        // Đẩy Canvas lên layer cao nhất
+        if (tutorialCanvas != null)
+        {
+            tutorialCanvas.sortingOrder = 1000; // Đặt giá trị cao để vượt qua các UI khác
+            Debug.Log("Canvas sorting order được đặt thành: " + tutorialCanvas.sortingOrder);
+        }
+
         isShowing = true;
         currentTrigger = trigger;
 
-        // ✨ Pause game và vô hiệu hóa camera xoay
+        // Pause game và unlock chuột
         Time.timeScale = 0f;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
         if (CameraHandler.singleton != null)
             CameraHandler.singleton.canRotate = false;
+
+        Debug.Log("Popup hiển thị: Kiểm tra tương tác.");
     }
 
     public void CloseCurrentPopup()
     {
+        Debug.Log("CloseCurrentPopup được gọi! (từ click hoặc phím)");
         popupCanvas.alpha = 0f;
         popupCanvas.interactable = false;
         popupCanvas.blocksRaycasts = false;
+
+        // Khôi phục sorting order về mặc định (nếu cần)
+        if (tutorialCanvas != null)
+        {
+            tutorialCanvas.sortingOrder = 0; // Hoặc giá trị mặc định ban đầu
+        }
 
         isShowing = false;
 
@@ -97,14 +129,11 @@ public class TutorialManager : MonoBehaviour
             currentTrigger = null;
         }
 
-        // ✅ Resume game
+        // Resume game
         Time.timeScale = 1f;
-
-        // ✅ Khóa chuột & ẩn
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        // ✅ Bật xoay camera
         if (CameraHandler.singleton != null)
             CameraHandler.singleton.canRotate = true;
     }
@@ -136,6 +165,12 @@ public class TutorialManager : MonoBehaviour
         popupCanvas.blocksRaycasts = false;
         tutorialVideoDisplay.gameObject.SetActive(false);
         isShowing = false;
+
+        // Khôi phục sorting order về mặc định khi ẩn
+        if (tutorialCanvas != null)
+        {
+            tutorialCanvas.sortingOrder = 0;
+        }
     }
 
     private string ParseTextWithInlineIcons(string rawText, List<TutorialData.TextIconMapping> iconMappings)

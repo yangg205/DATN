@@ -7,51 +7,32 @@ using System.Collections;
 public class CutsceneEndHandler : MonoBehaviour
 {
     [Header("References")]
-    public PlayableDirector director;     // Timeline cần skip
+    public PlayableDirector director;     // Timeline thoại
     public GameObject continueButton;     // Button "Continue"
-    public Image blackScreen;             // UI ảnh đen toàn màn hình (Image)
-    public GameObject loadingPrefab;      // Prefab Loading UI
+    public GameObject loadingPanel;       // Panel Loading UI
+    public Image blackScreen;             // UI ảnh đen toàn màn hình
     public string nextSceneName;          // Tên scene cần load
-
-    private bool isCutsceneEnded = false;
 
     private void Start()
     {
-        // Ẩn nút khi bắt đầu, đặt màn hình đen trong suốt
-        continueButton.SetActive(false);
+        continueButton.SetActive(false);  // Ẩn nút ngay từ đầu
         blackScreen.gameObject.SetActive(true);
         blackScreen.color = new Color(0, 0, 0, 0);
 
-        if (loadingPrefab != null)
-            loadingPrefab.SetActive(false); // Ẩn loading ban đầu
+        if (loadingPanel != null)
+            loadingPanel.SetActive(false);
 
-        // Bắt sự kiện khi timeline kết thúc
+        // Khi timeline kết thúc thì gọi OnCutsceneEnd
         director.stopped += OnCutsceneEnd;
     }
 
     private void OnCutsceneEnd(PlayableDirector obj)
     {
-        isCutsceneEnded = true;
-        continueButton.SetActive(true); // Hiện nút sau khi timeline tự chạy hết
+        // Khi cutscene thoại kết thúc → bắt đầu fade đen
+        StartCoroutine(FadeToBlackThenShowContinue());
     }
 
-    // Gọi khi bấm nút "Continue"
-    public void OnContinuePressed()
-    {
-        // Nếu timeline chưa kết thúc, skip luôn về cuối
-        if (!isCutsceneEnded && director != null)
-        {
-            director.time = director.duration;
-            director.Evaluate();
-            director.Stop();
-        }
-
-        continueButton.SetActive(false);
-        StartCoroutine(FadeToBlack());
-    }
-
-    // Hiệu ứng fade màn hình đen
-    private IEnumerator FadeToBlack()
+    private IEnumerator FadeToBlackThenShowContinue()
     {
         float duration = 2f;
         float elapsed = 0f;
@@ -64,25 +45,33 @@ public class CutsceneEndHandler : MonoBehaviour
             yield return null;
         }
 
-        // Sau khi fade xong → hiện Loading UI
-        if (loadingPrefab != null)
-            loadingPrefab.SetActive(true);
-
-        // Load scene Async để tránh đứng hình
-        yield return StartCoroutine(LoadNextSceneAsync());
+        // Sau khi fade đen xong thì mới hiện nút Continue
+        continueButton.SetActive(true);
     }
 
-    private IEnumerator LoadNextSceneAsync()
+    // Khi người chơi bấm nút Continue
+    public void OnContinuePressed()
     {
+        continueButton.SetActive(false);
+        StartCoroutine(ShowLoadingAndChangeScene());
+    }
+
+    private IEnumerator ShowLoadingAndChangeScene()
+    {
+        if (loadingPanel != null)
+            loadingPanel.SetActive(true);
+
+        // Giữ màn hình loading trong 2 giây
+        yield return new WaitForSeconds(2f);
+
+        // Load scene Async
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(nextSceneName);
         asyncLoad.allowSceneActivation = false;
 
-        // Chờ load xong 90% rồi mới vào scene
         while (!asyncLoad.isDone)
         {
             if (asyncLoad.progress >= 0.9f)
             {
-                yield return new WaitForSeconds(1f); // Giữ loading 1s cho đẹp
                 asyncLoad.allowSceneActivation = true;
             }
             yield return null;
