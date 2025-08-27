@@ -3,6 +3,8 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+
 
 public class BossBlackboard : MonoBehaviour
 {
@@ -27,8 +29,6 @@ public class BossBlackboard : MonoBehaviour
     public bool hasTarget = false;
 
     public bool isDead;
-
-    public int damageAmount;
 
     public static bool IsPaused = false;
 
@@ -75,12 +75,11 @@ public class BossBlackboard : MonoBehaviour
 
         hpText.text = $"{currentHP}";
 
-        #if UNITY_EDITOR
-        if (Input.GetKeyUp(KeyCode.T))
+        if(Input.GetKeyDown(KeyCode.M))
         {
-            TakeDamage(damageAmount); // test damage
+            TakeDamage(400);
         }
-        #endif
+
     }
 
     public void TakeDamage(int damageAmount)
@@ -113,7 +112,9 @@ public class BossBlackboard : MonoBehaviour
         animator.SetTrigger("death");
         movement?.StopMoving();
         StartCoroutine(DestroyAfterDelay(10f));
-   }
+        StartCoroutine(LoadSceneAfterDelay(8f)); // chờ animation xong rồi chuyển scene
+
+    }
 
     private IEnumerator DestroyAfterDelay(float delay)
     {
@@ -125,4 +126,17 @@ public class BossBlackboard : MonoBehaviour
 
         Destroy(gameObject);
     }
+
+
+    private IEnumerator LoadSceneAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        if (canvas != null)
+            Destroy(canvas.gameObject);
+
+        // Ví dụ chuyển về MainMenu
+        SceneManager.LoadScene("SceneMergeDat 3");
+    }
+
 }
