@@ -72,6 +72,15 @@ namespace AG
             Physics.IgnoreCollision(characterCollider, characterCollisionBlockerCollider, true);
         }
 
+        void FixedUpdate()
+        {
+            if (!playerManager.isGrounded)
+            {
+                // multiplier > 1 => rơi nhanh hơn
+                rigidbody.AddForce(Physics.gravity * 10f, ForceMode.Acceleration);
+            }
+        }
+
         #region Movement
         Vector3 normalVector;
         Vector3 targetPosition;
@@ -225,20 +234,9 @@ namespace AG
             Vector3 origin = myTransform.position;
             origin.y += groundDetectionRayStartPoint;
 
-            if (Physics.Raycast(origin, myTransform.forward, out hit, 0.4f))
-            {
-                moveDirection = Vector3.zero;
-            }
-
-            if (playerManager.isInAir)
-            {
-                rigidbody.AddForce(-Vector3.up * fallingSpeed);
-                rigidbody.AddForce(moveDirection * fallingSpeed / 10f);
-            }
-
             Vector3 dir = moveDirection;
             dir.Normalize();
-            origin = origin +  dir * groundDirectionRayDistance;
+            origin = origin + dir * groundDirectionRayDistance;
 
             targetPosition = myTransform.position;
 
@@ -249,66 +247,16 @@ namespace AG
                 playerManager.isGrounded = true;
                 targetPosition.y = tp.y;
 
-                if (playerManager.isInAir)
-                {
-                    if(inAirTimer > 0.5f)
-                    {
-                        animatorHandler.PlayTargetAnimation("Landing", true);
-                        inAirTimer = 0;
-                    }
-                    else
-                    {
-                        animatorHandler.PlayTargetAnimation("Empty", false);
-                        inAirTimer = 0;
-                    }
-
-                    playerManager.isInAir = false;
-                }
-
+                playerManager.isInAir = false;
+                inAirTimer = 0;
             }
             else
             {
-                if (playerManager.isGrounded)
-                {
-                    playerManager.isGrounded = false;
-                }
-                if (playerManager.isInAir == false)
-                {
-                    if (playerManager.isInteracting == false)
-                    {
-                        animatorHandler.PlayTargetAnimation("Falling", true);
-                    }
-
-                    Vector3 vel = rigidbody.linearVelocity;
-                    vel.Normalize();
-                    rigidbody.linearVelocity = vel * (movementSpeed / 2);
-                    playerManager.isInAir = true;
-                }
-
+                playerManager.isGrounded = false;
+                playerManager.isInAir = true;
             }
-            if (playerManager.isGrounded)
-            {
-                if (playerManager.isInteracting || inputHandler.moveAmount > 0)
-                {
-                    myTransform.position = Vector3.Lerp(myTransform.position, targetPosition, Time.deltaTime);
-                }
-                else
-                {
-                    myTransform.position = targetPosition;
-                }
-            }
-
-            if(playerManager.isInteracting || inputHandler.moveAmount > 0)
-            {
-                myTransform.position = Vector3.Lerp(myTransform.position, targetPosition, Time.deltaTime / 0.1f);
-            }    
-            else
-            {
-                myTransform.position = targetPosition;
-            }    
-
         }
-         public void HandleJumping()
+        public void HandleJumping()
         {
             if (playerManager.isInteracting)
                 return;
@@ -331,7 +279,6 @@ namespace AG
         }
         #endregion
 
-       
     }
 }
 

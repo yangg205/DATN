@@ -1,21 +1,14 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace AG
 {
     public class DestroyAfterCastingSpell : MonoBehaviour
     {
-        CharacterManager characterCastingSpell;
-        private void Awake()
-        {
-            characterCastingSpell = GetComponentInParent<CharacterManager>();
-        }
+        public float lifeTime = 3f; // tồn tại 5 giây
 
-        private void Update()
+        private void Start()
         {
-            if(characterCastingSpell.isFiringSpell)
-            {
-                Destroy(gameObject);
-            }
+            Destroy(gameObject, lifeTime);
         }
     }
 }

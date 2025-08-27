@@ -31,6 +31,7 @@ namespace AG
         {
             if (!hasCollided)
             {
+
                 CharacterStats spellTarget = other.transform.GetComponent<CharacterStats>();
                 DragonSoulEater dragonSoulEater = other.transform.GetComponent<DragonSoulEater>();
                 DragonUsurper dragonUsurper = other.transform.GetComponent<DragonUsurper>();

@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 
 namespace AG
@@ -13,6 +13,9 @@ namespace AG
         public StaminaBar staminaBar;
         PlayerAnimatorManager animatorHandler;
 
+        // 👉 THÊM DÒNG NÀY
+        public SoulCountBar soulCountBar;
+
         public float staminaRegenerationAmount = 1;
         public float staminaRegenTimer = 0;
         private void Awake()
@@ -24,9 +27,13 @@ namespace AG
             focusPointsBar = FindObjectOfType<FocusPointBar>();
             expBar = FindObjectOfType<ExpBar>();
             animatorHandler = GetComponentInChildren<PlayerAnimatorManager>();
+
+            soulCountBar = FindObjectOfType<SoulCountBar>();
         }
         void Start()
         {
+            UpdateSoulUI();
+
             maxHealth = SetMaxHealthFromHealthLevel();
             currentHealth = maxHealth;
             healthBar.SetMaxHealth(maxHealth);
@@ -147,6 +154,7 @@ namespace AG
         public void AddSouls(int souls)
         {
             soulCount = soulCount + souls;
+            UpdateSoulUI();
         }
 
         public void GainEXP(int amount)
@@ -181,6 +189,13 @@ namespace AG
                 levelText.text = "Level: " + playerLevel;
             }
         }
+
+        private void UpdateSoulUI()
+        {
+            if (soulCountBar != null)
+                soulCountBar.SetSoulCountText(soulCount);
+        }
+
     }
 }
 
