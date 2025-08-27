@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
 using System;
-using ND;
+using AG;
 using server.model;
 
 public class SaveManager : MonoBehaviour
@@ -120,8 +120,6 @@ public class SaveManager : MonoBehaviour
             Characters_id = PlayerPrefs.GetInt("Character", 0),
             Ownershipdate = DateTime.Now,
             Current_hp = playerStats.currentHealth,
-            Current_exp = playerStats.currentEXP,
-            level = playerStats.playerLevel,
             Total_point = 0,
             Total_coin = 0,
             Skill_Point = 0,
