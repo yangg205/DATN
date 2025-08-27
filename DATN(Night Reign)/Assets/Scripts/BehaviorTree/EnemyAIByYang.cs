@@ -56,6 +56,7 @@ public class EnemyAIByYang : MonoBehaviour
     private Seeker _seeker;
     private CharacterController _characterController;
 
+    public bool isDead;
     private float delayBeforeStart = 10f;
     private float spawnTime;
     private bool isAIActivated = false;
@@ -148,10 +149,10 @@ public class EnemyAIByYang : MonoBehaviour
 
         Tick();
 
-       /* if (Input.GetKeyDown(KeyCode.T))
+        if (Input.GetKeyDown(KeyCode.T))
         {
-            TakeDamage(100);
-        }*/
+            Die();
+        }
     }
 
     public void Tick()
@@ -215,6 +216,8 @@ public class EnemyAIByYang : MonoBehaviour
 
     public void TakeDamage(float damageAmount)
     {
+        if (isDead) return;
+
         currentHealth -= damageAmount;
 
         if (vfxHitEffect != null)
@@ -240,18 +243,23 @@ public class EnemyAIByYang : MonoBehaviour
 
     private void Die()
     {
+        if (isDead) return;
+
         _animator?.SetTrigger("Die");
         _aiPath.isStopped = true;
         enabled = false;
 
         StartCoroutine(DeathCoroutine());
-        Debug.Log("spider drop item");
+        Destroy(gameObject, 7f);
+
 
         if (EnemyAIManager.Instance != null)
         {
             EnemyAIManager.Instance.UnregisterEnemy(this);
             Debug.Log("spider die");
         }
+
+
     }
 
     private void TransitionToPhase(BossPhase newPhase)
