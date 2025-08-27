@@ -2,14 +2,18 @@
 
 public class BossTriggerZone : MonoBehaviour
 {
-    public AudioClip bossMusic; // Kéo file nhạc vào đây trong Inspector
+    public AudioClip bossMusic;
+    private bool triggered = false;
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player")) // chỉ Player mới kích hoạt
+        if (!triggered && other.CompareTag("Player"))
         {
-            MusicManager.Instance.PlayMusic(bossMusic, true);
-            Debug.Log("Boss music started!");
+            triggered = true;
+            if (MusicManager.Instance != null && bossMusic != null)
+            {
+                MusicManager.Instance.PlayMusic(bossMusic, true);
+            }
         }
     }
 }

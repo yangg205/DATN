@@ -1,11 +1,12 @@
-using BehaviorDesigner.Runtime.Tasks.Unity.UnityGameObject;
-using System.Collections.Generic;
-using TMPro;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class EnemyDesQuest : MonoBehaviour
 {
     private QuestManager quest;
+
+    [Header("Boss Settings")]
+    public bool isBoss = false;
+    public AudioClip bossMusic;
 
     void Start()
     {
@@ -16,6 +17,7 @@ public class EnemyDesQuest : MonoBehaviour
             return;
         }
     }
+
     private void OnDestroy()
     {
         if (quest != null)
@@ -23,5 +25,13 @@ public class EnemyDesQuest : MonoBehaviour
             quest.ReportKill();
         }
 
+        // Nếu là boss thì fade out nhạc boss
+        if (isBoss && MusicManager.Instance != null)
+        {
+            if (bossMusic == null || MusicManager.Instance.CurrentClip == bossMusic)
+            {
+                MusicManager.Instance.FadeOutMusic(2f);
+            }
+        }
     }
 }
