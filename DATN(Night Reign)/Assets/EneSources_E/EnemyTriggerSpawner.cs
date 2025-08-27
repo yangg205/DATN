@@ -29,16 +29,21 @@ public class EnemyTriggerSpawner : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
 
-        // Hủy từng enemy sau 30 giây
         foreach (GameObject enemy in spawnedEnemies)
         {
             if (enemy != null)
+            {
+                // đánh dấu là despawn
+                var des = enemy.GetComponent<EnemyDesQuest>();
+                if (des != null) des.isDespawned = true;
+
                 Destroy(enemy, lifeTime);
+            }
         }
 
-        // Xóa danh sách sau khi lên lịch hủy
         spawnedEnemies.Clear();
     }
+
 
     void SpawnEnemies()
     {
