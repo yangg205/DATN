@@ -21,7 +21,7 @@ MonoBehaviour:
   targetItemID: 
   requiredItemCount: 1
   prerequisiteQuestName: Quest_Title/Q007_DefeatUmbra
-  isQuestCompleted: 1
+  isQuestCompleted: 0
   hasQuestLocation: 1
   questLocation: {x: 112.77, y: -30.16, z: 419.91}
   giverNPCTransform: {x: 167.96, y: -30.48, z: 409.9}
@@ -46,9 +46,17 @@ MonoBehaviour:
   - Quest_Objective/Q008_Main
   npcIdsObjectiveMet:
   - Zahin
-  voiceBeforeComplete_EN: []
-  voiceAfterComplete_EN: []
+  voiceBeforeComplete_EN:
+  - {fileID: 8300000, guid: 288c3cce09d948d4d8ea5c0d45d44b54, type: 3}
+  voiceAfterComplete_EN:
+  - {fileID: 8300000, guid: 93862b93ee366e8449c04928cedcee9b, type: 3}
+  - {fileID: 8300000, guid: c2aac372bc87f214aa6eaf6e02703e9d, type: 3}
+  - {fileID: 8300000, guid: 0905c267e69e8ee4a99e5a0d406d29d9, type: 3}
   voiceObjectiveMet_EN: []
-  voiceBeforeComplete_VI: []
-  voiceAfterComplete_VI: []
+  voiceBeforeComplete_VI:
+  - {fileID: 8300000, guid: c8cde56d90a3c7b4db549eb58df6a3ef, type: 3}
+  voiceAfterComplete_VI:
+  - {fileID: 8300000, guid: 89b8d624cda4f124fb7c4bdd09c0bfd5, type: 3}
+  - {fileID: 8300000, guid: 7c3ce1fc74f306d439bd08463dad2c93, type: 3}
+  - {fileID: 8300000, guid: 1d565f26e1e52f24e85667d3343ec8b2, type: 3}
   voiceObjectiveMet_VI: []
