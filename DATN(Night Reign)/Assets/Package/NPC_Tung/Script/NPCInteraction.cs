@@ -18,6 +18,7 @@ public class NPCInteraction : MonoBehaviour
     [SerializeField] private Button continueButton;
     [SerializeField] private TextMeshProUGUI panelPressText;
     [SerializeField] private TextMeshProUGUI npcNameText; // New field for NPC name display
+    [SerializeField] private GameObject name_npc;
 
     [Header("References")]
     [SerializeField] private QuestManager questManager;
@@ -43,7 +44,7 @@ public class NPCInteraction : MonoBehaviour
         InitializeUIElements();
         LocalizationSettings.SelectedLocaleChanged += OnLanguageChangedHandler;
         Debug.Log($"[NPCInteraction] Initialized for NPC {npcID}");
-        questManager.ResetAllQuests(); // Không muốn reset thì comment lại
+        //questManager.ResetAllQuests(); // Không muốn reset thì comment lại
     }
 
     private void OnDestroy()
@@ -392,6 +393,7 @@ public class NPCInteraction : MonoBehaviour
         {
             Debug.Log($"[NPCInteraction] Ending dialogue for NPC {npcID}");
             dialogueManager?.EndDialogue();
+            name_npc.SetActive(false);
             HideQuestUI();
             ResetActiveNPC();
         }
