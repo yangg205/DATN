@@ -37803,6 +37803,7 @@ GameObject:
   - component: {fileID: 8943876601395247232}
   - component: {fileID: 4704133780764507601}
   - component: {fileID: 8943876601395247234}
+  - component: {fileID: 8943876601395247235}
   m_Layer: 0
   m_Name: Final_Boss
   m_TagString: FinalBoss
@@ -104575,8 +104576,8 @@ MonoBehaviour:
         byteData: 
         byteDataArray: 
       Version: 1.7.7
-  gizmoViewMode: 2
-  showBehaviorDesignerGizmo: 1
+  gizmoViewMode: 0
+  showBehaviorDesignerGizmo: 0
 --- !u!114 &8943876601395247233
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -104621,6 +104622,20 @@ MonoBehaviour:
   sfxSword1: {fileID: 1928244461}
   sfxHit: {fileID: 1524922701}
   swordHitBox: {fileID: 999600452}
+--- !u!114 &8943876601395247235
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3042825679176776412}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f6cd4bc1206f9441bf87780f4feffc6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isBoss: 1
+  bossMusic: {fileID: 8300000, guid: 11376817eaabe274db9ab5260f08b6fc, type: 3}
 --- !u!114 &8956320229375238426
 MonoBehaviour:
   m_ObjectHideFlags: 0
