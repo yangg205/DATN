@@ -7,14 +7,18 @@ public class ItemDrop : MonoBehaviour
     [SerializeField] private string itemName; // Tên item
     [SerializeField] private GameObject itempanel;
     [SerializeField] private TextMeshProUGUI itemnametext;
+    [SerializeField] private QuestManager questManager; // Tham chiếu đến QuestManager
     void Start()
     {
+        questManager = FindObjectOfType<QuestManager>(); // Tìm QuestManager trong scene
         if (itempanel != null)
         {
             itempanel.SetActive(false); // Ẩn panel khi bắt đầu
             itemnametext.text = itemName; // Hiện tên item trên panel
 
         }
+        SimpleInventory.Instance.RemoveItem($"{itemName}", 200);
+
     }
 
     void Update()
@@ -52,6 +56,7 @@ public class ItemDrop : MonoBehaviour
         itempanel.SetActive(false); // Ẩn panel khi nhặt item
         Destroy(gameObject);
         SimpleInventory.Instance?.AddItem($"{itemName}", 1);
+        questManager.CheckItemCollectionProgress();
 
     }
 }

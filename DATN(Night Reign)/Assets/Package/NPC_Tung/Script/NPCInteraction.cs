@@ -67,11 +67,11 @@ public class NPCInteraction : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Q) && questManager != null)
         {
             Debug.Log($"[NPCInteraction] Player pressed Q to report kill for NPC {npcID}");
-            questManager.ReportKill();
-            SimpleInventory.Instance?.AddItem("Shadow Fangs", 5);
-            SimpleInventory.Instance?.AddItem("Snow Crystals", 5);
-            SimpleInventory.Instance?.AddItem("Rotten Seeds", 5);
-            questManager.CheckItemCollectionProgress();
+            //questManager.ReportKill();
+            //SimpleInventory.Instance?.AddItem("Shadow Fangs", 5);
+            //SimpleInventory.Instance?.AddItem("Snow Crystals", 5);
+            //SimpleInventory.Instance?.AddItem("Rotten Seeds", 5);
+            //questManager.CheckItemCollectionProgress();
         }
     }
 
