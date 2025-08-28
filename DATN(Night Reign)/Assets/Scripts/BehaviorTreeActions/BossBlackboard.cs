@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using yang;
 
 
 public class BossBlackboard : MonoBehaviour
@@ -104,39 +105,36 @@ public class BossBlackboard : MonoBehaviour
         animator.SetTrigger("Spawn");
     }
 
-   public void die()
-   {
+    public void die()
+    {
         if (isDead) return;
 
         isDead = true;
         animator.SetTrigger("death");
         movement?.StopMoving();
-        StartCoroutine(DestroyAfterDelay(10f));
-        StartCoroutine(LoadSceneAfterDelay(8f)); // chờ animation xong rồi chuyển scene
 
+        // Bắt đầu coroutine
+        StartCoroutine(DieAndLoadScene());
     }
 
-    private IEnumerator DestroyAfterDelay(float delay)
+    private IEnumerator DieAndLoadScene()
     {
-        yield return new WaitForSeconds(delay);
+        // Chờ animation chết
+        yield return new WaitForSeconds(5f);
 
-
+        // Destroy canvas/boss
         if (canvas != null)
             Destroy(canvas.gameObject);
 
         Destroy(gameObject);
+
+        // Tạo một object tạm để load scene sau 10s
+        GameObject loader = new GameObject("SceneLoader");
+        DontDestroyOnLoad(loader);
+        loader.AddComponent<yang.SceneLoader>().LoadAfterDelay("SceneMergeDat 3", 10f);
     }
 
 
-    private IEnumerator LoadSceneAfterDelay(float delay)
-    {
-        yield return new WaitForSeconds(delay);
 
-        if (canvas != null)
-            Destroy(canvas.gameObject);
-
-        // Ví dụ chuyển về MainMenu
-        SceneManager.LoadScene("SceneMergeDat 3");
-    }
 
 }

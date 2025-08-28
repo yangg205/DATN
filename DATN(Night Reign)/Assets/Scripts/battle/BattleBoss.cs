@@ -56,7 +56,7 @@ public class BattleBoss : MonoBehaviour
         if (signalRClient == null)
             Debug.LogError("SignalRClient not found in scene!");
 
-        if (timerText != null)
+        if (timerText != null&&isFighting==false)
             timerText.gameObject.SetActive(false);
 
         if (closeButton != null)
@@ -75,7 +75,7 @@ public class BattleBoss : MonoBehaviour
         currentTime = 0f;
         isFighting = true;
 
-        if (timerText != null)
+        if (isFighting)
         {
             timerText.gameObject.SetActive(true);
             UpdateTimerText();
@@ -115,36 +115,47 @@ public class BattleBoss : MonoBehaviour
             return;
         }
 
-        if (pointText != null)
-            pointText.text = battleResult.point.ToString();
+        // Cập nhật thông tin
+        if (pointText != null) pointText.text = battleResult.point.ToString();
+        if (rankText != null) rankText.text = battleResult.text;
 
-        if (rankText != null)
-            rankText.text = battleResult.text;
-
+        // Hiển thị cursor và vô hiệu hóa input game
         MouseManager.Instance.ShowCursorAndDisableInput();
 
         // Đưa panel lên trên cùng
         panelCanvas.overrideSorting = true;
         panelCanvas.sortingOrder = 900;
 
-        // Fade in
-        resultCanvasGroup.DOFade(1f, fadeDuration).SetEase(Ease.OutCubic);
-        resultCanvasGroup.blocksRaycasts = true;
-        resultCanvasGroup.interactable = true;
+        // Reset alpha và tương tác
+        resultCanvasGroup.alpha = 0f;
+        resultCanvasGroup.interactable = false;
+        resultCanvasGroup.blocksRaycasts = false;
+
+        // Fade in mượt
+        resultCanvasGroup.DOFade(1f, fadeDuration).SetEase(Ease.OutCubic).OnComplete(() =>
+        {
+            // Bật tương tác sau khi fade xong
+            resultCanvasGroup.interactable = true;
+            resultCanvasGroup.blocksRaycasts = true;
+        });
     }
 
     public void ClosePanel()
     {
         Debug.Log("Close button clicked!");
 
-        resultCanvasGroup.DOFade(0f, fadeDuration).OnComplete(() =>
+        // Ngay lập tức vô hiệu hóa tương tác để tránh click lặp
+        resultCanvasGroup.interactable = false;
+        resultCanvasGroup.blocksRaycasts = false;
+
+        // Fade out
+        resultCanvasGroup.DOFade(0f, fadeDuration).SetEase(Ease.InCubic).OnComplete(() =>
         {
             panelCanvas.sortingOrder = 0;
-            resultCanvasGroup.blocksRaycasts = false;
-            resultCanvasGroup.interactable = false;
             MouseManager.Instance.HideCursorAndEnableInput();
         });
     }
+
 
     private async void StartBattle(int playerId, int bossId, int death, double maxTime, double realTime)
     {
@@ -180,6 +191,10 @@ public class BattleBoss : MonoBehaviour
         {
             currentTime += Time.deltaTime;
             UpdateTimerText();
+        }
+        if (isFighting == false && Input.GetKeyDown(KeyCode.Space))
+        {
+            ClosePanel();
         }
         //if (Input.GetKeyDown(KeyCode.B))
         //{
